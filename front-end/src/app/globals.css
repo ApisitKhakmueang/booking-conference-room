@@ -4,3 +4,11 @@
   --color-light-purple: #f6f4ff;
   --color-dark-purple: #8370ff;
 }
+
+.transition-duration-300 {
+  @apply transition-all duration-300;
+}
+
+.text-slate {
+  @apply text-slate-500
+}
