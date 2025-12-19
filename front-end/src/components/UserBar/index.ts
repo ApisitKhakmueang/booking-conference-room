@@ -1,1 +1,1 @@
-export { default } from "./UserIcon";
+export { default } from "./UserBar";

@@ -21,10 +21,12 @@ export default function SidebarLayout({
           setIsOpen={setIsOpen} 
           isMobile={isMobile}/>
 
-        <UserBar />
+        <UserBar 
+          isOpen={isOpen} 
+          isMobile={isMobile}/>
 
         <main
-          className={`flex-1 transition-all duration-300 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
+          className={`flex-1 transition-duration-300 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
         `}>
           {children}
         </main>
