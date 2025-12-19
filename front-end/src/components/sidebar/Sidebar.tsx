@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -9,7 +8,6 @@ import {
   Cuboid,
   Calendar,
   List,
-  House
 } from "lucide-react";
 import SidebarToggle from "./SidebarToggle";
 
@@ -23,9 +21,10 @@ const SIDEBAR_ITEMS = [
 type Props = {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobile: boolean;
 };
 
-export default function Sidebar({ isOpen, setIsOpen }: Props) {
+export default function Sidebar({ isOpen, setIsOpen, isMobile }: Props) {
   const pathname = usePathname();
 
   return (
@@ -33,16 +32,24 @@ export default function Sidebar({ isOpen, setIsOpen }: Props) {
       className={`
         h-screen fixed
         bg-light-purple
-        transition-all duration-300
-        ${isOpen ? "w-70" : "w-23"}
+        transition-all duration-300 z-10
+        ${isMobile
+            ? isOpen
+              ? "translate-x-0 w-64"
+              : "-translate-x-full w-64"
+            : isOpen
+              ? "w-70"
+              : "w-23"}
       `}
     >
-      <SidebarToggle
-        isOpen={isOpen}
-        toggle={() => setIsOpen(v => !v)}
-      />
 
       <nav className="p-5 relative">
+        <SidebarToggle
+          isOpen={isOpen}
+          toggle={() => setIsOpen(v => !v)}
+          isMobile={isMobile}
+        />
+
         <ul className="space-y-2 font-semibold">
           {/* Logo */}
           <li className="flex justify-center mb-6">
