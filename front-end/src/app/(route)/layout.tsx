@@ -10,7 +10,7 @@ export default function SidebarLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 1024px)");
   const [isOpen, setIsOpen] = useState(true);
 
   return (

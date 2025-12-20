@@ -3,17 +3,17 @@ import { useRef } from "react";
 type Props = {
   isOpen: boolean;
   isMobile: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function DropBackground({ isOpen, isMobile }: Props) {
-  const backgroundRef = useRef<HTMLDivElement>(null);
-
+export default function DropBackground({ isOpen, isMobile, setIsOpen }: Props) {
   return (
     <div>
       {isOpen && isMobile && (
         <div 
-          ref={backgroundRef}
-          className="fixed inset-0 bg-black opacity-50 z-10"></div>
+          className="fixed inset-0 bg-black opacity-50 z-10"
+          onClick={() => setIsOpen(false)}>
+        </div>
       )}
     </div>
   )

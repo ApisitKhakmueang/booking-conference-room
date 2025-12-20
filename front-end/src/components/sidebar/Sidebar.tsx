@@ -78,12 +78,13 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: Props) {
                     href={item.href}
                     className={`
                       flex items-center gap-3
-                      p-4 rounded-full
+                      p-3 lg:p-4 rounded-full
                       transition-colors
                       ${isActive
                         ? "bg-dark-purple text-white"
                         : "hover:bg-dark-purple hover:text-white"}
                     `}
+                    onClick={() => isMobile && setIsOpen(false)}
                   >
                     
                     <Icon size={20} />
@@ -96,7 +97,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: Props) {
         </nav>
       </aside>
 
-      <BackgroundDrop isOpen={isOpen} isMobile={isMobile} />
+      <BackgroundDrop isOpen={isOpen} isMobile={isMobile} setIsOpen={setIsOpen} />
     </>
   );
 }
