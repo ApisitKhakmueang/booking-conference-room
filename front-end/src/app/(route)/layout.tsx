@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/src/components/Sidebar";
-import UserBar from "@/src/components/UserBar";
+import Sidebar from "@/src/components/layout/Sidebar";
+import UserBar from "@/src/components/layout/UserBar";
 import useMediaQuery from "@/src/hooks/ui/useMediaQuery";
 
 export default function SidebarLayout({
