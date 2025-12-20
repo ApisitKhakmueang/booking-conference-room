@@ -20,7 +20,7 @@ const SIDEBAR_ITEMS = [
   { name: "Rooms", href: "/rooms", icon: Cuboid },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Booking", href: "/booking", icon: List },
-];
+] as const;
 
 type Props = {
   isOpen: boolean;
