@@ -1,3 +1,4 @@
+import CodeDisplay from "./CodeDisplay";
 import NotificationComp from "./Notification";
 import UserIcon from "./UserIcon";
 import Welcomeback from "./Welcomeback";
@@ -25,6 +26,10 @@ export default function UserBar({ isOpen, isMobile }: Props) {
         {!isMobile && <Welcomeback isOpen={isOpen} MOCK_USER={MOCK_USER}></Welcomeback>}
 
         <div className="flex items-center gap-2">
+          <div>
+            <CodeDisplay />
+          </div>
+
           <div>
             <NotificationComp />
           </div>
