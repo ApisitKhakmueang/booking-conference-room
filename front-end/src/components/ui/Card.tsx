@@ -2,7 +2,7 @@
 import clsx from 'clsx'
 import { ButtonHTMLAttributes } from 'react'
 
-type CardVariant = 'green' | 'white' 
+type CardVariant = 'dark-purple' | 'purple'
 
 interface CardProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: CardVariant
@@ -12,26 +12,26 @@ interface CardProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export default function Card({
-  variant = 'green',
+  variant = 'dark-purple',
   loading = false,
   className,
   children
 }: CardProps) {
   return (
-    <button
+    <div
       className={clsx(
-        'rounded-full transition font-medium cursor-pointer',
+        'rounded-2xl transition font-medium',
         variantStyles[variant],
         (loading) && 'opacity-50 cursor-not-allowed',
         className
       )}
     >
       {loading ? 'Loading...' : children}
-    </button>
+    </div>
   )
 }
 
 const variantStyles = {
-  green: 'bg-green-400 text-white border border-slate-200',
-  white: 'bg-white text-black border border-slate-200',
+  'dark-purple': 'bg-dark-purple text-white',
+  purple: 'bg-light-purple text-violet-900',
 }
