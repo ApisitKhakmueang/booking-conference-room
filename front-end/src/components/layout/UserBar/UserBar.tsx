@@ -17,7 +17,7 @@ const MOCK_USER = {
 export default function UserBar({ isOpen, isMobile }: Props) {
   return (
     <div className={`fixed w-full transition-duration-300`}>
-      <nav className={`w-full bg-slate-50 flex ${!isMobile
+      <nav className={`w-full bg-white flex ${!isMobile
       ? isOpen
         ? "pl-70 justify-between"
         : "pl-23 justify-between"
