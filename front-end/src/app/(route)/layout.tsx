@@ -5,6 +5,8 @@ import Sidebar from "@/src/components/layout/Sidebar";
 import UserBar from "@/src/components/layout/UserBar";
 import useMediaQuery from "@/src/hooks/ui/useMediaQuery";
 
+import { SidebarLayoutProvider } from "@/src/context/SidebarLayoutContext";
+
 export default function SidebarLayout({
   children,
 }: Readonly<{
@@ -14,7 +16,7 @@ export default function SidebarLayout({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <>
+    <SidebarLayoutProvider value={{ isOpen, setIsOpen, isMobile }}>
       <div className="flex">
         <Sidebar 
           isOpen={isOpen} 
@@ -26,11 +28,11 @@ export default function SidebarLayout({
           isMobile={isMobile}/>
 
         <main
-          className={`flex-1 transition-duration-300 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
+          className={`flex-1 transition-duration-300 mt-25 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
         `}>
           {children}
         </main>
       </div>
-    </>
+    </SidebarLayoutProvider>
   )
 }
