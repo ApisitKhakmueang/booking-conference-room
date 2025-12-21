@@ -51,5 +51,5 @@ const sizeStyles = {
   md: 'px-4 py-2',
   lg: 'px-6 py-3 text-lg',
   circle: 'p-3',
-  userIcon: 'p-1 pr-5',
+  userIcon: 'p-1',
 }

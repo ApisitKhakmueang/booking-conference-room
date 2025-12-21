@@ -13,7 +13,7 @@ export default function RoomStatus() {
       {ROOM_STATUS.map((item) => (
         <Card key={item.name} variant={item.variant} loading={false}>
           <li className='flex flex-col gap-5 xl:p-6 p-3'>
-            <h1 className={`text-start font-semibold xl:text-3xl text-2xl`}>
+            <h1 className={`text-start font-semibold xl:text-3xl sm:text-2xl text-lg`}>
               {item.name}
             </h1>
 
@@ -21,7 +21,7 @@ export default function RoomStatus() {
               {item.amount}
             </p>
 
-            <p className="text-end text-2xl">Rooms</p>
+            <p className="text-end sm:text-2xl text-lg">Rooms</p>
           </li>
         </Card>
       ))}

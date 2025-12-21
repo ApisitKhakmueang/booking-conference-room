@@ -17,24 +17,24 @@ type RoomStatus = "available" | "occupied" | "maintenance";
 
 const STATUS_CONFIG: Record<
   RoomStatus,
-  React.ElementType
+  { icon: React.ElementType, textColor: string }
 > = {
-  available: MonitorCheck,
-  occupied: MonitorX,
-  maintenance: ToolCase,
+  available: { icon: MonitorCheck, textColor: "text-green-400" },
+  occupied: { icon: MonitorX, textColor: "text-red-400" },
+  maintenance: { icon: ToolCase, textColor: "text-yellow-400" },
 };
 
 export default function RoomsGrid() {
   return (
-    <ul className="grid grid-cols-5 rounded-4xl overflow-hidden border border-dark-purple bg-light-purple text-violet-900">
+    <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border border-dark-purple text-violet-900">
       {MOCK_ROOMS.map((room) => {
-        const StatusIcon = STATUS_CONFIG[room.status];
+        const StatusIcon = STATUS_CONFIG[room.status].icon;
         
         return (<li key={room.id} className="p-7 hover:bg-dark-purple hover:text-white transition-duration-300 cursor-pointer group/icons">
           <h2 className="text-xl font-semibold">{room.name}</h2>
 
           <div className='flex justify-center py-10'>
-            <StatusIcon size={100} />
+            <StatusIcon size={80} />
           </div>
 
           <div className='flex xl:flex-row flex-col xl:items-center xl:justify-between gap-2 text-xl font-semibold'>
@@ -43,7 +43,7 @@ export default function RoomsGrid() {
               <UserRound></UserRound>
             </p>
 
-            <p className="text-lg capitalize">
+            <p className={`${STATUS_CONFIG[room.status].textColor} text-lg capitalize group-hover/icons:text-white transition-duration-300`}>
               {room.status}
             </p>
           </div>
