@@ -16,16 +16,16 @@ const MOCK_USER = {
 
 export default function UserBar({ isOpen, isMobile }: Props) {
   return (
-    <div className={`fixed w-full transition-duration-300`}>
+    <div className={`fixed w-full`}>
       <nav className={`w-full bg-white flex ${!isMobile
       ? isOpen
         ? "pl-70 justify-between"
         : "pl-23 justify-between"
-      : 'justify-end'} p-5`}>
+      : 'justify-end'} p-5  transition-duration-300`}>
 
         {!isMobile && <Welcomeback isOpen={isOpen} MOCK_USER={MOCK_USER}></Welcomeback>}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center sm:gap-2 gap-1">
           <div>
             <CodeDisplay />
           </div>
@@ -35,7 +35,7 @@ export default function UserBar({ isOpen, isMobile }: Props) {
           </div>
 
           <div>
-            <UserIcon MOCK_USER={MOCK_USER} />
+            <UserIcon MOCK_USER={MOCK_USER} isMobile={isMobile} />
           </div>
         </div>
       </nav>
