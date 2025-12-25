@@ -2,8 +2,8 @@
 import clsx from 'clsx'
 import { ButtonHTMLAttributes } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'dark-purple' | 'slate' | 'userIconColor'
-type ButtonSize = 'sm' | 'md' | 'lg' | 'circle' | 'userIcon'
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'dark-purple' | 'slate'
+type ButtonSize = 'sm' | 'md' | 'lg' | 'circle'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -43,7 +43,6 @@ const variantStyles = {
   danger: 'bg-red-600 text-white hover:bg-red-700',
   'dark-purple' : 'bg-dark-purple text-white hover:bg-violet-500',
   slate: 'bg-slate-50 text-black hover:bg-slate-200 border-1 border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300',
-  userIconColor: 'border border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300',
 }
 
 const sizeStyles = {
@@ -51,5 +50,4 @@ const sizeStyles = {
   md: 'px-4 py-2',
   lg: 'px-6 py-3 text-lg',
   circle: 'p-3',
-  userIcon: 'p-1',
 }
