@@ -28,7 +28,7 @@ export async function proxy(request: NextRequest) {
   const isRootPage = pathname === '/' // เพิ่มเงื่อนไขสำหรับหน้า root
 
   // ❌ ถ้าไม่มี session → redirect ไป /login
-  if (!session && !isAuthPage) {
+  if (!session && !isAuthPage && !isVerifyPage) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
