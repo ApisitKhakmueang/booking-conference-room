@@ -4,6 +4,7 @@ import { useState } from "react";
 import Sidebar from "@/src/components/Sidebar";
 import UserBar from "@/src/components/UserBar";
 import useMediaQuery from "@/src/hooks/ui/useMediaQuery";
+import { useAuth } from "@/src/hooks/auth/useAuth";
 
 import { SidebarLayoutProvider } from "@/src/context/SidebarLayoutContext";
 
@@ -12,6 +13,8 @@ export default function SidebarLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useAuth()
+
   const isMobile = useMediaQuery("(max-width: 1024px)");
   const [isOpen, setIsOpen] = useState(true);
 

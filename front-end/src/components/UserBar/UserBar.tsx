@@ -1,20 +1,14 @@
+import { useAuthStore } from '@/src/stores/auth.store'
+import { UserBarProps } from '@/src/lib/interface/interface';
+
 import CodeDisplay from "./CodeDisplay";
 import NotificationComp from "./Notification";
 import UserIcon from "./UserIcon";
 import Welcomeback from "./Welcomeback";
 
-type Props = {
-  isOpen: boolean;
-  isMobile: boolean;
-}
+export default function UserBar({ isOpen, isMobile }: UserBarProps) {
+  const user = useAuthStore((s) => s.user)
 
-const MOCK_USER = {
-  name: "Guyae",
-  avatarUrl: "/userIcon/user_icon.jpg",
-  email: 'guyae@example.com'
-};
-
-export default function UserBar({ isOpen, isMobile }: Props) {
   return (
     <div className={`fixed w-full`}>
       <nav className={`w-full bg-white flex ${!isMobile
@@ -23,7 +17,7 @@ export default function UserBar({ isOpen, isMobile }: Props) {
         : "pl-23 justify-between"
       : 'justify-end'} p-5  transition-duration-300`}>
 
-        {!isMobile && <Welcomeback isOpen={isOpen} MOCK_USER={MOCK_USER}></Welcomeback>}
+        {!isMobile && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
 
         <div className="flex items-center sm:gap-2 gap-1">
           <div>
@@ -35,7 +29,7 @@ export default function UserBar({ isOpen, isMobile }: Props) {
           </div>
 
           <div>
-            <UserIcon MOCK_USER={MOCK_USER} isMobile={isMobile} />
+            <UserIcon user={user} isMobile={isMobile} />
           </div>
         </div>
       </nav>

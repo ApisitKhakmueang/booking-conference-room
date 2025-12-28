@@ -1,35 +1,12 @@
 'use client'
 
-import { supabase } from '@/src/lib/supabase/client'
+import { useHandleAuth } from '@/src/hooks/auth/useHandleAuth'
 import { useState } from 'react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
-  const signUp = async () => {
-    await supabase.auth.signUp({
-      email,
-      password,
-    })
-    alert('Check your email to verify your account')
-  }
-
-  const signIn = async () => {
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-  }
-
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    })
-  }
+  const { handleSignIn, handleSignUp, handleSignInWithGoogle } = useHandleAuth()
 
   return (
     <div>
@@ -48,12 +25,12 @@ export default function LoginPage() {
         onChange={e => setPassword(e.target.value)}
       />
 
-      <button onClick={signIn}>Login</button>
-      <button onClick={signUp}>Sign up</button>
+      <button onClick={() => handleSignIn(email, password)}>Login</button>
+      <button onClick={() => handleSignUp(email, password)}>Sign up</button>
 
       <hr />
 
-      <button onClick={signInWithGoogle}>
+      <button onClick={handleSignInWithGoogle}>
         Login with Google
       </button>
     </div>
