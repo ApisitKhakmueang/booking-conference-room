@@ -1,16 +1,9 @@
 import { useState } from "react";
 import UserDetail from "./UserDetail";
+import Image from "next/image";
+import { UserIconProps } from "@/src/lib/interface/interface";
 
-type Props = {
-  MOCK_USER: {
-    name: string;
-    avatarUrl: string;
-    email: string;
-  };
-  isMobile?: boolean;
-}
-
-export default function UserIcon({ MOCK_USER, isMobile }: Props) {
+export default function UserIcon({ isMobile, user }: UserIconProps) {
   const [ isOpen, setIsOpen ] = useState(false)
   
   return (
@@ -20,11 +13,16 @@ export default function UserIcon({ MOCK_USER, isMobile }: Props) {
         onClick={() => setIsOpen(v => !v)}
         >
         <div className={`flex items-center gap-2 relative ${!isMobile ? 'pr-5' : 'p-1.5'}`}>
-          <img src={MOCK_USER.avatarUrl} alt={MOCK_USER.name} className="w-10 h-10 rounded-full object-cover" />
+          <Image 
+            src={user?.avatar || '/userIcon/blank-profile.jpg'}
+            alt={user?.email || 'User avatar'}
+            height={40}
+            width={40}
+            className="rounded-full object-cover" />
 
           <div className="lg:flex lg:flex-col lg:items-start hidden font-bold">
-            {MOCK_USER.name}
-            <span className="text-sm text-slate font-semibold">{MOCK_USER.email}</span>
+            {user?.name}
+            <span className="text-sm text-slate font-semibold">{user?.email}</span>
           </div>
 
           {isOpen && (

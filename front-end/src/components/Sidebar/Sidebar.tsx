@@ -10,6 +10,7 @@ import {
   Calendar,
   List,
 } from "lucide-react";
+import { SidebarProps } from "@/src/lib/interface/interface";
 
 // Components
 import SidebarToggle from "./SidebarToggle";
@@ -22,13 +23,7 @@ const SIDEBAR_ITEMS = [
   { name: "Booking", href: "/booking", icon: List },
 ] as const;
 
-type Props = {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isMobile: boolean;
-};
-
-export default function Sidebar({ isOpen, setIsOpen, isMobile }: Props) {
+export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
   const pathname = usePathname();
 
   return (

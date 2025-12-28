@@ -1,18 +1,13 @@
 'use client'
 
 import { useSidebarLayout } from "@/src/context/SidebarLayoutContext";
-
-type Props = {
-  pageName: string;
-  children: React.ReactNode;
-  className?: string;
-}
+import { LayoutPageProps } from "@/src/lib/interface/interface";
 
 export default function LayoutPage({
   pageName,
   children,
   className
-}: Props) {
+}: LayoutPageProps) {
   const { isOpen } = useSidebarLayout()
 
   return (

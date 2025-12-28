@@ -1,12 +1,6 @@
-import { useRef } from "react";
+import { DropBgProps } from "@/src/lib/interface/interface"
 
-type Props = {
-  isOpen: boolean;
-  isMobile: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export default function DropBackground({ isOpen, isMobile, setIsOpen }: Props) {
+export default function DropBackground({ isOpen, isMobile, setIsOpen }: DropBgProps) {
   return (
     <div>
       {isOpen && isMobile && (

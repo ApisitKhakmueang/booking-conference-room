@@ -1,13 +1,8 @@
 // components/sidebar/SidebarToggle.tsx
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { SidebarToggleProps } from "@/src/lib/interface/interface";
 
-type Props = {
-  isOpen: boolean;
-  toggle: () => void;
-  isMobile: boolean;
-};
-
-export default function SidebarToggle({ isOpen, toggle, isMobile }: Props) {
+export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggleProps) {
   return (
     <>
       {isMobile ? (

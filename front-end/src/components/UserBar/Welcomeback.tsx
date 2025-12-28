@@ -1,17 +1,9 @@
-type Props = {
-  isOpen: boolean;
-  MOCK_USER: {
-    name: string;
-    avatarUrl: string;
-    email: string;
-  };
-}
+import { WelcombackProps } from "@/src/lib/interface/interface";
 
-
-export default function Welcomeback({ isOpen, MOCK_USER }: Props) {
+export default function Welcomeback({ isOpen, user }: WelcombackProps) {
   return (
     <div className={`flex flex-col font-semibold text-3xl ${isOpen ? "pl-5" : "pl-12"}`}>
-      Welcome back, {MOCK_USER.name}!
+      Welcome back, {user?.name}!
       <span className="font-normal text-base text-slate">This is conference room booking system</span>
     </div>
   )
