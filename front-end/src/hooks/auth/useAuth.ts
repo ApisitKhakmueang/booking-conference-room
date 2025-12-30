@@ -62,7 +62,8 @@ export function useAuth() {
         id: user.id,
         email: user.email!,
         name: profile?.full_name,
-        avatar: profile?.avatar_url,
+        // avatar: profile?.avatar_url,
+        avatar: `${profile?.avatar_url}?v=${Date.now()}`,
         role: profile?.role,
       }
 

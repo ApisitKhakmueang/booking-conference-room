@@ -1,46 +1,46 @@
-export type LayoutPageProps = {
+export interface LayoutPageProps {
   pageName: string;
   children: React.ReactNode;
   className?: string;
 }
 
-export type OpenMobileProps = {
+export interface OpenMobileProps {
   isOpen: boolean
   isMobile: boolean
 }
 
 // Group the same interface
-export type DropBgProps = OpenMobileProps & {
+export interface DropBgProps extends OpenMobileProps {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export type SidebarProps = OpenMobileProps & {
+export interface SidebarProps extends OpenMobileProps  {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export type SidebarToggleProps = OpenMobileProps & {
+export interface SidebarToggleProps extends OpenMobileProps {
   toggle: () => void;
 };
 
 export type UserBarProps = OpenMobileProps;
 
-export type UserIconProps = {
+export interface UserIconProps {
   isMobile?: boolean;
   user: UserProfile | null
 }
 
-export type WelcombackProps = {
+export interface WelcombackProps {
   isOpen?: boolean;
   user: UserProfile | null
 }
 
-export type SidebarLayoutContextType = {
+export interface SidebarLayoutContextType {
   isOpen: boolean;
   isMobile: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type UserProfile = {
+interface UserProfile {
   id: string
   email: string
   name?: string
@@ -48,7 +48,22 @@ type UserProfile = {
   role: string
 }
 
-export type AuthState = {
+export interface AuthState {
   user: UserProfile | null
   setUser: (user: UserProfile | null) => void
+}
+
+export interface UseProfileImageReturn {
+  profileFile: File | null
+  previewProfile: string
+  error: string | null
+  changeProfile: (e: React.ChangeEvent<HTMLInputElement>) => void
+  setPreviewProfile: (url: string) => void
+  cancelImage: () => void
+}
+
+export interface UseUsernameProps {
+  username: string
+  changeUsername: (username: string) => void
+  cancelUsername: () => void
 }
