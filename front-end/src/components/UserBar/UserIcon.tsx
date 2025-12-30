@@ -13,12 +13,13 @@ export default function UserIcon({ isMobile, user }: UserIconProps) {
         onClick={() => setIsOpen(v => !v)}
         >
         <div className={`flex items-center gap-2 relative ${!isMobile ? 'pr-5' : 'p-1.5'}`}>
-          <Image 
-            src={user?.avatar || '/userIcon/blank-profile.jpg'}
-            alt={user?.email || 'User avatar'}
-            height={40}
-            width={40}
-            className="rounded-full object-cover" />
+          <div className="w-10 h-10 relative flex">
+            <Image 
+              src={user?.avatar || '/userIcon/blank-profile.jpg'}
+              alt={user?.email || 'User avatar'}
+              fill
+              className="rounded-full object-cover" />
+          </div>
 
           <div className="lg:flex lg:flex-col lg:items-start hidden font-bold">
             {user?.name}
