@@ -1,5 +1,5 @@
-// src/hooks/auth/useAuthActions.ts
-import { supabase } from '@/src/lib/supabase/client'
+// hooks/auth/useAuthActions.ts
+import { supabase } from '@/lib/supabase/client'
 
 export function useAuthActions() {
   const signUp = async (email: string, password: string) => {
@@ -16,11 +16,22 @@ export function useAuthActions() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
     return { error }
   }
 
-  return { signUp, signIn, signInWithGoogle }
+  const forgotPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: `${window.location.origin}/auth/reset-pass`,
+      }
+    )
+
+    return { error }
+  }
+
+  return { signUp, signIn, signInWithGoogle, forgotPassword }
 }

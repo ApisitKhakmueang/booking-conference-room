@@ -1,12 +1,12 @@
 'use client'
 
-import { useHandleAuth } from '@/src/hooks/auth/useHandleAuth'
+import { useHandleAuth } from '@/hooks/auth/useHandleAuth'
 import { useState } from 'react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { handleSignIn, handleSignUp, handleSignInWithGoogle } = useHandleAuth()
+  const { handleSignIn, handleSignUp, handleSignInWithGoogle, handleForgotPassword } = useHandleAuth()
 
   return (
     <div>
@@ -27,6 +27,7 @@ export default function LoginPage() {
 
       <button onClick={() => handleSignIn(email, password)}>Login</button>
       <button onClick={() => handleSignUp(email, password)}>Sign up</button>
+      <button onClick={() => handleForgotPassword(email)}>Forgot Password</button>
 
       <hr />
 

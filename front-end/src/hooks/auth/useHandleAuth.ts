@@ -1,9 +1,9 @@
 import { useRouter } from 'next/navigation'
-import { useAuthActions } from '@/src/hooks/auth/useAuthAction'
+import { useAuthActions } from '@/hooks/auth/useAuthAction'
 
 export function useHandleAuth() {
   const router = useRouter()
-  const { signUp, signIn, signInWithGoogle } = useAuthActions()
+  const { signUp, signIn, signInWithGoogle, forgotPassword } = useAuthActions()
 
   const handleSignUp = async (email: string, password: string) => {
     const { error } = await signUp(email, password)
@@ -11,7 +11,7 @@ export function useHandleAuth() {
       alert(error.message)
       return
     }
-    router.push('/verify-email')
+    router.push(`/verify-email?email=${encodeURIComponent(email)}`)
   }
 
   const handleSignIn = async (email: string, password: string) => {
@@ -30,5 +30,12 @@ export function useHandleAuth() {
     }
   }
 
-  return { handleSignUp, handleSignIn, handleSignInWithGoogle }
+  const handleForgotPassword = async (email: string) => {
+    const { error } = await forgotPassword(email)
+    if (error) {
+      alert(error.message)
+    }
+  }
+
+  return { handleSignUp, handleSignIn, handleSignInWithGoogle, handleForgotPassword }
 }
