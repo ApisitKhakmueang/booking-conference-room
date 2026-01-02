@@ -1,7 +1,7 @@
 'use client'
 
-import { useSidebarLayout } from "@/src/context/SidebarLayoutContext";
-import { LayoutPageProps } from "@/src/lib/interface/interface";
+import { useSidebarLayout } from "@/context/SidebarLayoutContext";
+import { LayoutPageProps } from "@/lib/interface/interface";
 
 export default function LayoutPage({
   pageName,

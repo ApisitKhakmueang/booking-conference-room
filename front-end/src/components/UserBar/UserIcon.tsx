@@ -1,7 +1,7 @@
 import { useState } from "react";
 import UserDetail from "./UserDetail";
 import Image from "next/image";
-import { UserIconProps } from "@/src/lib/interface/interface";
+import { UserIconProps } from "@/lib/interface/interface";
 
 export default function UserIcon({ isMobile, user }: UserIconProps) {
   const [ isOpen, setIsOpen ] = useState(false)

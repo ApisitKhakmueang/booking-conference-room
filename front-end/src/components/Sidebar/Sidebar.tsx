@@ -10,7 +10,7 @@ import {
   Calendar,
   List,
 } from "lucide-react";
-import { SidebarProps } from "@/src/lib/interface/interface";
+import { SidebarProps } from "@/lib/interface/interface";
 
 // Components
 import SidebarToggle from "./SidebarToggle";

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/src/components/Sidebar";
-import UserBar from "@/src/components/UserBar";
-import useMediaQuery from "@/src/hooks/ui/useMediaQuery";
-import { useAuth } from "@/src/hooks/auth/useAuth";
+import Sidebar from "@/components/Sidebar";
+import UserBar from "@/components/UserBar";
+import useMediaQuery from "@/hooks/ui/useMediaQuery";
+import { useAuth } from "@/hooks/auth/useAuth";
 
-import { SidebarLayoutProvider } from "@/src/context/SidebarLayoutContext";
+import { SidebarLayoutProvider } from "@/context/SidebarLayoutContext";
 
 export default function SidebarLayout({
   children,

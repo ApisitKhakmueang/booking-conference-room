@@ -1,4 +1,4 @@
-import Card from "@/src/components/ui/Card"
+import Card from "@/components/ui/Card"
 
 const ROOM_STATUS = [
   { name: 'Total', amount: 10, variant: 'dark-purple' },

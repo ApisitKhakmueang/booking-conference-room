@@ -1,6 +1,6 @@
-import { useSignout } from "@/src/hooks/ui/useSignout"
+import { useSignout } from "@/hooks/ui/useSignout"
 import Button from "../ui/Button/Button"
-import { useAuthStore } from "@/src/stores/auth.store"
+import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 

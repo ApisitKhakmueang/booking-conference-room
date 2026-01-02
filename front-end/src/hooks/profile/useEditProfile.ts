@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { supabase } from '@/src/lib/supabase/client'
-import { useAuthStore } from '@/src/stores/auth.store'
+import { supabase } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores/auth.store'
 
 interface UseEditProfileProps {
   username: string

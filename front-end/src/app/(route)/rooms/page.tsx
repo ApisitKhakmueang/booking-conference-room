@@ -1,5 +1,5 @@
-import LayoutPage from "@/src/components/Layout/LayoutPage"
-import { RoomStatus, RoomsGrid } from "@/src/components/Rooms"
+import LayoutPage from "@/components/Layout/LayoutPage"
+import { RoomStatus, RoomsGrid } from "@/components/Rooms"
 
 export default function RoomsPage() {
   return (

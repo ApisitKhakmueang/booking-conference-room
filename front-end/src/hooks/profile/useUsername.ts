@@ -1,4 +1,4 @@
-import { UseUsernameProps } from "@/src/lib/interface/interface"
+import { UseUsernameProps } from "@/lib/interface/interface"
 import { useEffect, useState } from "react"
 
 export function useUsername(initialUsername?: string): UseUsernameProps {

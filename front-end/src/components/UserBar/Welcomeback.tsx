@@ -1,4 +1,4 @@
-import { WelcombackProps } from "@/src/lib/interface/interface";
+import { WelcombackProps } from "@/lib/interface/interface";
 
 export default function Welcomeback({ isOpen, user }: WelcombackProps) {
   return (

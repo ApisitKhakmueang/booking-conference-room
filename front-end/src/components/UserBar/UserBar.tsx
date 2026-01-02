@@ -1,5 +1,5 @@
-import { useAuthStore } from '@/src/stores/auth.store'
-import { UserBarProps } from '@/src/lib/interface/interface';
+import { useAuthStore } from '@/stores/auth.store'
+import { UserBarProps } from '@/lib/interface/interface';
 
 import CodeDisplay from "./CodeDisplay";
 import NotificationComp from "./Notification";

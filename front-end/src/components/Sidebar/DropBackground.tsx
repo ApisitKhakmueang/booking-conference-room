@@ -1,4 +1,4 @@
-import { DropBgProps } from "@/src/lib/interface/interface"
+import { DropBgProps } from "@/lib/interface/interface"
 
 export default function DropBackground({ isOpen, isMobile, setIsOpen }: DropBgProps) {
   return (

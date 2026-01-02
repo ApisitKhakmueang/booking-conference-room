@@ -1,7 +1,7 @@
 // components/LoginButton.tsx
 'use client'
 
-import { supabase } from '@/src/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 
 export default function LoginButton() {
   const loginWithGoogle = async () => {
