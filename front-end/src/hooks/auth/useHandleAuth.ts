@@ -11,7 +11,7 @@ export function useHandleAuth() {
       alert(error.message)
       return
     }
-    router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+    router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
   }
 
   const handleSignIn = async (email: string, password: string) => {

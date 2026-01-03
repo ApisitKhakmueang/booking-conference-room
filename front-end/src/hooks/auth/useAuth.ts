@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function useAuth() {
+  const supabase = createClient()
   const setUser = useAuthStore((s) => s.setUser)
 
   useEffect(() => {

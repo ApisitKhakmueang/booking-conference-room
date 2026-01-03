@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
 
 interface UseEditProfileProps {
@@ -10,6 +10,7 @@ interface UseEditProfileProps {
 }
 
 export const useEditProfile = () => {
+  const supabase = createClient()
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
   const [isLoading, setIsLoading] = useState(false)
