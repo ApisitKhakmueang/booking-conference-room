@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/components/Sidebar";
-import UserBar from "@/components/UserBar";
+import Sidebar from "@/components/layout/sidebar";
+import UserBar from "@/components/layout/user-bar";
 import useMediaQuery from "@/hooks/ui/useMediaQuery";
 import { useAuth } from "@/hooks/auth/useAuth";
 
