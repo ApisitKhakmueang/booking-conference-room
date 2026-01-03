@@ -1,18 +1,13 @@
-import LayoutPage from "@/components/Layout/LayoutPage"
-import { RoomStatus, RoomsGrid } from "@/components/Rooms"
+import LayoutEachPage from "@/components/layout/layout-each-page"
+import { RoomStatus, RoomsGrid } from "@/components/route/rooms"
 
-export default function RoomsPage() {
+export default function Page() {
   return (
     <>
-      <LayoutPage pageName="Rooms" className="flex flex-col gap-7">
-        <div>
-          <RoomStatus />
-        </div>
-
-        <div>
-          <RoomsGrid />
-        </div>
-      </LayoutPage>
+      <LayoutEachPage pageName="Rooms" className="flex flex-col gap-7">
+        <RoomStatus />
+        <RoomsGrid />
+      </LayoutEachPage>
     </>
   )
 }
