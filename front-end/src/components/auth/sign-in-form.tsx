@@ -7,7 +7,7 @@ import { useState } from 'react'
 export default function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { handleSignIn, handleSignUp, handleSignInWithGoogle } = useHandleAuth()
+  const { handleSignIn, handleSignInWithGoogle } = useHandleAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,10 +33,10 @@ export default function SignInForm() {
           onChange={e => setPassword(e.target.value)}
         />
 
-        <button type='submit'>Login</button>
+        <button type='submit'>Sign in</button>
       </form>
-      
-      <button onClick={() => handleSignUp(email, password)}>Sign up</button>
+
+      <button onClick={() => router.push('/auth/sign-up')}>Sign up</button>
       <button onClick={() => router.push('/auth/forgot-password')}>Forgot Password</button>
 
       <hr />

@@ -35,5 +35,13 @@ export function useAuthActions() {
     return { error }
   }
 
-  return { signUp, signIn, signInWithGoogle, forgotPassword }
+  const updatePassword = async (newPassword: string) => {
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+    return { error }
+  }
+
+  return { signUp, signIn, signInWithGoogle, forgotPassword, updatePassword }
 }
