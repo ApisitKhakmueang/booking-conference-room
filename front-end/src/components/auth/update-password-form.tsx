@@ -4,7 +4,7 @@ import { useResetPass } from "@/hooks/auth/useResetPass"
 import { useState } from "react"
 
 
-export default function ResetPasswordForm() {
+export default function UpdatePasswordForm() {
   const [ password, setPassword ] = useState('')
   const resetPassword = useResetPass(password)
 
