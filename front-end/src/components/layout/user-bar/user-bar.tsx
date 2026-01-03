@@ -1,10 +1,10 @@
 import { useAuthStore } from '@/stores/auth.store'
 import { UserBarProps } from '@/lib/interface/interface';
 
-import CodeDisplay from "./CodeDisplay";
-import NotificationComp from "./Notification";
-import UserIcon from "./UserIcon";
-import Welcomeback from "./Welcomeback";
+import CodeDisplay from "./code-display";
+import NotificationComp from "./notification";
+import UserIcon from "./user-icon";
+import Welcomeback from "./welcome";
 
 export default function UserBar({ isOpen, isMobile }: UserBarProps) {
   const user = useAuthStore((s) => s.user)

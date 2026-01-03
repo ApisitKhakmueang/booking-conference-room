@@ -1,1 +1,1 @@
-export { default } from "./UserBar";
+export { default } from "./user-bar";

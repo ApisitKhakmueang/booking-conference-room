@@ -13,8 +13,8 @@ import {
 import { SidebarProps } from "@/lib/interface/interface";
 
 // Components
-import SidebarToggle from "./SidebarToggle";
-import BackgroundDrop from "./DropBackground";
+import SidebarToggle from "./sidebar-toggle";
+import BackgroundDrop from "./drop-background";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

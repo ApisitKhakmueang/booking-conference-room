@@ -1,5 +1,5 @@
 import { useState } from "react";
-import UserDetail from "./UserDetail";
+import UserDetail from "./user-detail";
 import Image from "next/image";
 import { UserIconProps } from "@/lib/interface/interface";
 
