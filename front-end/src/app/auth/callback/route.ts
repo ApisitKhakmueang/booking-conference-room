@@ -22,5 +22,5 @@ export async function GET(request: Request) {
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/login`)
+  return NextResponse.redirect(`${origin}/auth/error?error=Can't to sign in with Google`)
 }
