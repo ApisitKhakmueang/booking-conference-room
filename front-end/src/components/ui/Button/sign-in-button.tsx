@@ -1,9 +1,13 @@
 // components/LoginButton.tsx
-'use client'
+// 'use client'
 
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from "@/lib/supabase/server"
 
-export default function LoginButton() {
+// import { supabase } from '@/lib/supabase/client'
+
+export default async function LoginButton() {
+  const supabase = await createClient()
+
   const loginWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

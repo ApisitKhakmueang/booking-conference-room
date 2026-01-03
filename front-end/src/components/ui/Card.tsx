@@ -1,5 +1,4 @@
-'use client'
-import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import { ButtonHTMLAttributes } from 'react'
 
 type CardVariant = 'dark-purple' | 'purple'
@@ -19,7 +18,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={clsx(
+      className={cn(
         'rounded-2xl transition font-medium',
         variantStyles[variant],
         (loading) && 'opacity-50 cursor-not-allowed',

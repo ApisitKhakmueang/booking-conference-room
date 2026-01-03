@@ -1,5 +1,5 @@
 'use client'
-import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 import { ButtonHTMLAttributes } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'slate'
@@ -23,7 +23,7 @@ export default function Button({
   return (
     <button
       disabled={disabled || loading}
-      className={clsx(
+      className={cn(
         'rounded-full transition font-medium cursor-pointer',
         variantStyles[variant],
         sizeStyles[size],
