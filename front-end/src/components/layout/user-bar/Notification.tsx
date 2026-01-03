@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react';
-import Button from '../../ui/Button/Button';
+import Button from '../../ui/button/button';
 
 export default function NotificationComp() {
   return (
