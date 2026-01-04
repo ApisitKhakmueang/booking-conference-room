@@ -20,17 +20,11 @@ export default function UserBar({ isOpen, isMobile }: UserBarProps) {
         {!isMobile && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
 
         <div className="flex items-center sm:gap-2 gap-1">
-          <div>
-            <CodeDisplay />
-          </div>
+          <CodeDisplay />
 
-          <div>
-            <NotificationComp />
-          </div>
-
-          <div>
-            <UserIcon user={user} isMobile={isMobile} />
-          </div>
+          <NotificationComp />
+          
+          <UserIcon user={user} isMobile={isMobile} />
         </div>
       </nav>
     </div>
