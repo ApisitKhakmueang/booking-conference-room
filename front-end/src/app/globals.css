@@ -1,8 +1,31 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  /* Normal theme */
   --color-light-purple: #f6f4ff;
   --color-dark-purple: #8370ff;
+
+  /* Dark theme */
+  /* Background */
+  --color-main-background: #121212;
+  --color-sidebar: #171717;
+  --color-card: #212121;
+  --color-hover: #313131;
+
+  /* Primary */
+  --color-primary: #212121;
+
+  /* Status */
+  --color-success: #41cd8b;
+  --color-danger: #FF6B6B;
+  --color-warning: #e76d56;
+
+  /* Text */
+  --color-main: #ffffff;
+  --color-secondary: #666666;
+  --color-muted: #8B8FC7;
 }
 
 .transition-duration-300 {
@@ -10,5 +33,5 @@
 }
 
 .text-slate {
-  @apply text-slate-500
+  @apply text-slate-500 dark:text-secondary
 }

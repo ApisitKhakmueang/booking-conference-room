@@ -8,7 +8,7 @@ export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggl
       {isMobile ? (
         <button
           onClick={toggle}
-          className={`absolute top-5 ${isOpen ? "translate-x-48 top-9" : "translate-x-62 bg-dark-purple p-[15px] text-white rounded-full"} transition-duration-300 cursor-pointer`}
+          className={`absolute top-5 ${isOpen ? "translate-x-48 top-9 dark:hover:text-main" : "translate-x-62 dark:bg-hover dark:text-secondary dark:hover:text-main bg-dark-purple p-[15px] text-white rounded-full"} transition-duration-300 cursor-pointer`}
         >
           <Menu />
         </button>
@@ -19,7 +19,7 @@ export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggl
             absolute ${isOpen ? "top-18 right-4" : "top-10 -right-4"}
             h-8 w-8
             flex items-center justify-center
-            rounded-full
+            rounded-full dark:bg-hover dark:text-secondary dark:hover:text-main
             bg-dark-purple text-white
             shadow-md
             hover:scale-105

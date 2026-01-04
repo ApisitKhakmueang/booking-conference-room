@@ -25,23 +25,25 @@ export default function LayoutNavigation({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <SidebarLayoutProvider value={{ isOpen, setIsOpen, isMobile }}>
-      <div className="flex">
-        <Sidebar 
-          isOpen={isOpen} 
-          setIsOpen={setIsOpen} 
-          isMobile={isMobile}/>
+    <div className="dark">
+      <SidebarLayoutProvider value={{ isOpen, setIsOpen, isMobile }}>
+        <div className="flex dark:bg-main-background bg-white dark:text-secondary text-black">
+          <Sidebar 
+            isOpen={isOpen} 
+            setIsOpen={setIsOpen} 
+            isMobile={isMobile}/>
 
-        <UserBar 
-          isOpen={isOpen} 
-          isMobile={isMobile}/>
+          <UserBar 
+            isOpen={isOpen} 
+            isMobile={isMobile}/>
 
-        <main
-          className={`flex-1 transition-duration-300 mt-25 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
-        `}>
-          {children}
-        </main>
-      </div>
-    </SidebarLayoutProvider>
+          <main
+            className={`flex-1 transition-duration-300 mt-25 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
+          `}>
+            {children}
+          </main>
+        </div>
+      </SidebarLayoutProvider>
+    </div>
   )
 }

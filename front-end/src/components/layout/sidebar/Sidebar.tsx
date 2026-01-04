@@ -30,7 +30,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
     <>
       <aside
         className={`
-          h-screen fixed
+          h-screen fixed dark:bg-sidebar
           bg-light-purple
           transition-duration-300 z-20
           ${isMobile
@@ -76,8 +76,8 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                       p-3 lg:p-4 rounded-full
                       transition-colors
                       ${isActive
-                        ? "bg-dark-purple text-white"
-                        : "hover:bg-dark-purple hover:text-white"}
+                        ? "bg-dark-purple text-white dark:bg-hover dark:text-main"
+                        : "hover:bg-dark-purple hover:text-white dark:hover:bg-hover dark:hover:text-main"}
                     `}
                     onClick={() => isMobile && setIsOpen(false)}
                   >

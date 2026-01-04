@@ -11,7 +11,7 @@ export default function UserBar({ isOpen, isMobile }: UserBarProps) {
 
   return (
     <div className={`fixed w-full`}>
-      <nav className={`w-full bg-white flex ${!isMobile
+      <nav className={`w-full dark:bg-main-background bg-white flex ${!isMobile
       ? isOpen
         ? "pl-70 justify-between"
         : "pl-23 justify-between"

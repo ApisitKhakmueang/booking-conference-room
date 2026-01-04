@@ -10,7 +10,7 @@ export default function UserIcon({ isMobile, user }: UserIconProps) {
   return (
     <>
       <div 
-        className={`border border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300 rounded-full cursor-pointer  select-none ${!isMobile ? 'p-1' : ''}`}
+        className={`border dark:border-none dark:bg-sidebar dark:hover:bg-hover border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300 rounded-full cursor-pointer  select-none ${!isMobile ? 'p-1' : ''}`}
         onClick={() => setIsOpen(v => !v)}
         >
         <div className={`flex items-center gap-2 relative ${!isMobile ? 'pr-5' : 'p-[7px]'}`}>
@@ -22,7 +22,7 @@ export default function UserIcon({ isMobile, user }: UserIconProps) {
               className="rounded-full object-cover" />
           </div>
 
-          <div className="lg:flex lg:flex-col lg:items-start hidden font-bold">
+          <div className="lg:flex lg:flex-col lg:items-start hidden font-bold dark:text-main text-black">
             {user?.name}
             <span className="text-sm text-slate font-semibold">{user?.email}</span>
           </div>
