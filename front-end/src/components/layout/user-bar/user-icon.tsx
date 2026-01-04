@@ -1,6 +1,8 @@
 import { useState } from "react";
 import UserDetail from "./user-detail";
 import { UserIconProps } from "@/lib/interface/interface";
+import Image from "next/image";
+import { profile } from "@/lib/utils";
 
 export default function UserIcon({ isMobile, user }: UserIconProps) {
   const [ isOpen, setIsOpen ] = useState(false)
@@ -13,9 +15,10 @@ export default function UserIcon({ isMobile, user }: UserIconProps) {
         >
         <div className={`flex items-center gap-2 relative ${!isMobile ? 'pr-5' : 'p-1.5'}`}>
           <div className="w-10 h-10 relative flex">
-            <img 
-              src={user?.avatar || '/user-icon/blank-profile.jpg'}
-              alt={user?.email || 'User avatar'}
+            <Image 
+              src={user?.avatar || profile}
+              alt={'User avatar'}
+              fill
               className="rounded-full object-cover" />
           </div>
 
