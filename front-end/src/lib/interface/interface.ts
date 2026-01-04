@@ -53,6 +53,14 @@ export interface AuthState {
   setUser: (user: UserProfile | null) => void
 }
 
+type Theme = 'dark' | 'light'
+
+export interface ThemeState {
+  theme: Theme
+  toggle: () => void
+}
+
+
 export interface UseProfileImageReturn {
   profileFile: File | null
   previewProfile: string

@@ -9,12 +9,17 @@ import {
   Cuboid,
   Calendar,
   List,
+  Moon,
+  Sun
 } from "lucide-react";
 import { SidebarProps } from "@/lib/interface/interface";
 
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
+
+// Store
+import { useThemeStore } from "@/stores/theme.store";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -24,6 +29,7 @@ const SIDEBAR_ITEMS = [
 ] as const;
 
 export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
+  const { theme, toggle } = useThemeStore()
   const pathname = usePathname();
 
   return (
@@ -43,7 +49,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
         `}
       >
 
-        <nav className="p-5 relative">
+        <nav className="p-5 relative flex flex-col justify-between h-full">
           <SidebarToggle
             isOpen={isOpen}
             toggle={() => setIsOpen(v => !v)}
@@ -89,6 +95,20 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
               );
             })}
           </ul>
+
+          <button type="button" className="p-5 cursor-pointer flex justify-center" onClick={toggle}>
+            {theme === 'dark' ? (
+              <div className="flex gap-2 bg-card hover:bg-hover hover:text-main transition-colors p-3 rounded-full shadow-xl">
+                <Moon />
+                Dark
+              </div>
+            ) : (
+              <div className="flex gap-2 border border-gray-400 hover:border-none hover:bg-dark-purple hover:text-white transition-colors p-3 rounded-full shadow-xl">
+                <Sun />
+                Light
+              </div>
+            )}
+          </button>
         </nav>
       </aside>
 
