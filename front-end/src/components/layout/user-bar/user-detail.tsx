@@ -10,7 +10,7 @@ export default function UserDetail() {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 bg-white shadow-lg">
+    <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-white shadow-lg">
       <div className="w-full flex justify-center">
         <div className="w-30 h-30 relative flex">
           <Image
@@ -25,7 +25,7 @@ export default function UserDetail() {
       <p>{user?.email}</p>
 
       <div className="flex flex-col gap-2 my-2">
-        <Button variant="primary" onClick={() => router.push('/user/edit-profile')}>
+        <Button variant="primary" onClick={() => router.push('/user/edit-profile')} className="dark:bg-card dark:hover:bg-hover">
           Edit Profile
         </Button>
 

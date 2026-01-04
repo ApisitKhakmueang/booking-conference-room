@@ -29,7 +29,7 @@ export default function UserIcon({ isMobile, user }: UserIconProps) {
 
           {isOpen && (
             <div 
-              className="absolute top-15">
+              className="absolute top-15 right-0">
               <UserDetail />
             </div>
           )}
