@@ -24,7 +24,9 @@ export default function SignUpForm() {
       return
     }
     try {
-      await handleSignUp(email, password)
+      const error = await handleSignUp(email, password)
+      if (error) throw error
+      router.replace(`/auth/sign-up-success`)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

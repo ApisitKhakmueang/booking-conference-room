@@ -16,7 +16,8 @@ export default function ForgotPasswordForm() {
     setError(null);
 
     try {
-      await handleForgotPassword(email)
+      const error = await handleForgotPassword(email)
+      if (error) throw error;
       setSuccess(true);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")

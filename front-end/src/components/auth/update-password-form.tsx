@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthActions } from "@/hooks/auth/useAuthAction"
+import { useRouter } from "next/navigation";
 import { useState } from "react"
 
 export default function UpdatePasswordForm() {
@@ -9,18 +10,22 @@ export default function UpdatePasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { updatePassword } = useAuthActions()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true);
     setError(null);
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return
+    }
+
     try {
       const { error } = await updatePassword(password)
-      if (error) {
-        alert(error.message)
-        return
-      }
+      if (error) throw error
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
