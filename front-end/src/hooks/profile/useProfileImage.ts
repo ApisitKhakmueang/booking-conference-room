@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { UseProfileImageReturn } from '@/lib/interface/interface'
+import { profile } from '@/lib/utils'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export function useProfileImage(initialAvatar?: string): UseProfileImageReturn {
   const [profileFile, setProfileFile] = useState<File | null>(null)
-  const [previewProfile, setPreviewProfile] = useState<string>(
-    initialAvatar || '/userIcon/blank-profile.jpg'
+  const [previewProfile, setPreviewProfile] = useState<any>(
+    initialAvatar || profile
   )
   const [prevBlobUrl, setPrevBlobUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -37,17 +38,12 @@ export function useProfileImage(initialAvatar?: string): UseProfileImageReturn {
     setProfileFile(file)
     const previewUrl = URL.createObjectURL(file)
 
-    // Cleanup old blob URL
-    if (prevBlobUrl) {
-      URL.revokeObjectURL(prevBlobUrl)
-    }
-
     setPrevBlobUrl(previewUrl)
     setPreviewProfile(previewUrl)
   }
 
   const cancelImage = () => {
-    const previewUrl = initialAvatar || '/userIcon/blank-profile.jpg'
+    const previewUrl = initialAvatar || profile
     setPreviewProfile(previewUrl)
     setProfileFile(null)
   }
