@@ -1,4 +1,4 @@
-import { useSignout } from "@/hooks/ui/useSignout"
+import { useAuthActions } from "@/hooks/auth/useAuthAction"
 import Button from "../../ui/button/button"
 import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
@@ -8,6 +8,12 @@ import { profile } from "@/lib/utils"
 export default function UserDetail() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
+  const { signOut } = useAuthActions()
+
+  const handleSignout = () => {
+    signOut()
+    router.push('/auth/sign-in')
+  }
 
   return (
     <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-white shadow-lg">
@@ -29,7 +35,7 @@ export default function UserDetail() {
           Edit Profile
         </Button>
 
-        <Button variant='danger' onClick={useSignout}>
+        <Button variant='danger' onClick={handleSignout}>
           Sign out
         </Button>
       </div>

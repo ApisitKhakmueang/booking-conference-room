@@ -7,20 +7,12 @@ export function useHandleAuth() {
 
   const handleSignUp = async (email: string, password: string) => {
     const { error } = await signUp(email, password)
-    if (error) {
-      alert(error.message)
-      return
-    }
-    router.push(`/auth/sign-up-success`)
+    return error
   }
 
   const handleSignIn = async (email: string, password: string) => {
     const { error } = await signIn(email, password)
-    if (error) {
-      alert(error.message)
-      return
-    }
-    router.push('/dashboard')
+    return error
   }
 
   const handleSignInWithGoogle = async () => {
@@ -32,9 +24,7 @@ export function useHandleAuth() {
 
   const handleForgotPassword = async (email: string) => {
     const { error } = await forgotPassword(email)
-    if (error) {
-      alert(error.message)
-    }
+    return error
   }
 
   return { handleSignUp, handleSignIn, handleSignInWithGoogle, handleForgotPassword }

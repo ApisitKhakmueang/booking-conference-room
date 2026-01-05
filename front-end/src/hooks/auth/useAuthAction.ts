@@ -24,6 +24,10 @@ export function useAuthActions() {
     return { error }
   }
 
+  const signOut = async () => {
+    await supabase.auth.signOut()
+  }
+
   const forgotPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email,
@@ -43,5 +47,5 @@ export function useAuthActions() {
     return { error }
   }
 
-  return { signUp, signIn, signInWithGoogle, forgotPassword, updatePassword }
+  return { signUp, signIn, signInWithGoogle, signOut, forgotPassword, updatePassword }
 }
