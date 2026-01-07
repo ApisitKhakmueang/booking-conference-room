@@ -10,8 +10,8 @@ export default function UserDetail() {
   const user = useAuthStore((s) => s.user)
   const { signOut } = useAuthActions()
 
-  const handleSignout = () => {
-    signOut()
+  const handleSignout = async () => {
+    await signOut()
     router.push('/auth/sign-in')
   }
 
