@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/auth.store"
 import { useProfileImage } from "@/hooks/profile/useProfileImage"
 import { useEditProfile } from "@/hooks/profile/useEditProfile"
 import Image from "next/image"
-import Button from "@/components/ui/button/button"
+import Button from "@/components/ui/button"
 import { useUsername } from "@/hooks/profile/useUsername"
 import { profile } from "@/lib/utils"
 

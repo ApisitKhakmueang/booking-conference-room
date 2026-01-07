@@ -1,4 +1,4 @@
-import Button from "../../ui/button/button"
+import Button from "../../ui/button"
 import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
