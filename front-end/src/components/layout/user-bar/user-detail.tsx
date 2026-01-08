@@ -2,7 +2,6 @@ import Button from "../../ui/button"
 import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { profile } from "@/lib/utils"
 import { useSignout } from "@/hooks/auth/useSignout"
 
 export default function UserDetail() {
@@ -14,7 +13,7 @@ export default function UserDetail() {
       <div className="w-full flex justify-center">
         <div className="w-30 h-30 relative flex">
           <Image
-            src={user?.avatar || profile}
+            src={user?.avatar || '/user/profile.jpg'}
             alt={user?.email || 'User avatar'}
             fill
             className="rounded-full object-cover"

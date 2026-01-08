@@ -6,7 +6,6 @@ import { useEditProfile } from "@/hooks/profile/useEditProfile"
 import Image from "next/image"
 import Button from "@/components/ui/button"
 import { useUsername } from "@/hooks/profile/useUsername"
-import { profile } from "@/lib/utils"
 
 export default function EditProfileForm() {
   const user = useAuthStore((s) => s.user)
@@ -37,7 +36,7 @@ export default function EditProfileForm() {
 
       <label htmlFor="profile" className="relative w-35 h-35 flex">
         <Image 
-          src={previewProfile || profile}
+          src={previewProfile || '/user/profile.jpg'}
           alt='preview profile'
           fill
           className="rounded-full cursor-pointer object-cover"/>

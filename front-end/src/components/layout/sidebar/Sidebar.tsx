@@ -17,7 +17,6 @@ import { SidebarProps } from "@/lib/interface/interface";
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
-import { logoColor } from "@/lib/utils";
 
 // Store
 import { useThemeStore } from "@/stores/theme.store";
@@ -63,7 +62,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
               {/* {isOpen && (
               )} */}
               <Image
-                src={logoColor}
+                src='/logo/logoEE-color.png'
                 alt="logo"
                 width={140}
                 height={40}

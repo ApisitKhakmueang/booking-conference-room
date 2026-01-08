@@ -7,5 +7,7 @@ export async function proxy(request: NextRequest) {
 
 // matcher: จะทำงานกับทุกหน้า ยกเว้น _next, favicon, auth/callback, auth/confirm
 export const config = {
-  matcher: ['/((?!_next|favicon.ico|auth/callback|auth/confirm|auth/reset-pass).*)'],
-}
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|logo|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$|auth/callback|auth/confirm|auth/reset-pass).*)',
+  ],
+};
