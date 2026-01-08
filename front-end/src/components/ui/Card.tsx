@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils'
-import { ButtonHTMLAttributes } from 'react'
+import { HTMLAttributes } from 'react'
 
 type CardVariant = 'dark-purple' | 'purple'
 
-interface CardProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant
   loading?: boolean
   className?: string
