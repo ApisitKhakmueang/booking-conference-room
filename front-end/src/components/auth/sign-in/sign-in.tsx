@@ -4,6 +4,7 @@ import { useState } from "react";
 import SignInGoogle from "./sign-in-google";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import Button from "@/components/ui/button";
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -32,7 +33,7 @@ export default function SignIn() {
 
   return (
     <div className='flex justify-center w-full h-full inset-0 -mt-30 text-lg'>
-      <div className='flex flex-col items-center justify-center w-5/9'>
+      <div className='flex flex-col items-center justify-center md:w-5/9 w-full'>
         <div className="p-10 rounded-xl w-full">
           <form 
             className='flex flex-col items-center w-full gap-5'
@@ -87,9 +88,10 @@ export default function SignIn() {
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <button type="submit" disabled={isLoading} className='cursor-pointer bg-light-hover text-white p-3 rounded-full hover:bg-light-sidebar hover:text-light-hover hover:border hover:border-light-hover transition-duration-300'>
+
+              <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3'>
                 {isLoading ? "Signing in..." : "Sign in"}
-              </button>
+              </Button>
 
               <div className='relative'>
                 <div className='absolute inset-0 flex items-center'>
