@@ -95,7 +95,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
             })}
           </ul>
 
-          <ThemeButton theme={theme} toggle={toggle} />
+          <ThemeButton theme={theme} toggle={toggle} isOpen={isOpen} />
         </nav>
       </aside>
 
