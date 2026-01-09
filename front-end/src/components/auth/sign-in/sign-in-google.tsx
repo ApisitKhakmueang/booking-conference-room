@@ -10,12 +10,12 @@ export default function SignInGoogle({ handleSignInWithGoogle }: SignInGooglePro
 
   return (
     <div className='flex flex-col mt-5'>
-      <Button type='button' variant="slate" onClick={handleSignInWithGoogle} className='flex items-center justify-center gap-2 p-3 border border-slate-300 hover:border-none'>
+      <Button type='button' variant="slate" onClick={handleSignInWithGoogle} className='flex items-center justify-center gap-2 p-3 bg-light-google hover:bg-light-card text-white dark:bg-card dark:border-none dark:text-main dark:hover:bg-hover'>
         <img src='/logo/google-logo.svg' alt="google-logo" className='w-5'/>
         Sign in with Google
       </Button>
 
-      <p className='flex gap-2 justify-center mt-4 sm:text-base text-[15px]'>
+      <p className='flex gap-2 justify-center mt-4 sm:text-base text-[15px] dark:text-main'>
         Don&apos;t have an account? 
         <span  
           className='cursor-pointer font-semibold'

@@ -32,19 +32,19 @@ export default function SignIn() {
   }
 
   return (
-    <div className='flex justify-center w-full h-full inset-0 -mt-30 text-lg'>
-      <div className='flex flex-col items-center justify-center md:w-5/9 w-full'>
+    <div className='absolute inset-0 flex justify-center w-full h-full text-lg'>
+      <div className='flex flex-col items-center justify-center xl:w-5/9 lg:w-7/9 sm:w-5/7 w-full h-full'>
         <div className="p-10 rounded-xl w-full">
           <form 
             className='flex flex-col items-center w-full gap-5'
             onSubmit={handleSubmit}
             >
-            <div className='flex flex-col justify-start w-full'>
+            <div className='flex flex-col justify-start w-full dark:text-main'>
               <h1 className='text-3xl font-semibold'>Welcome back !</h1>
               <h1 className="text-slate">Sign in to your account</h1>
             </div>
 
-            <div className='flex flex-col w-full gap-5'>
+            <div className='flex flex-col w-full gap-5 dark:text-main'>
               <label htmlFor="email">Email</label>
               <Input
                 id='email'
@@ -77,7 +77,10 @@ export default function SignIn() {
                 />
 
                 <div className="absolute flex items-center inset-y-0 right-3">
-                  <button type="button" onClick={() => setIsShowPassword(v => !v)}>
+                  <button
+                    className="cursor-pointer" 
+                    type="button" 
+                    onClick={() => setIsShowPassword(v => !v)}>
                     {isShowPassword ? (
                       <EyeOff />
                     ) : (
@@ -99,7 +102,7 @@ export default function SignIn() {
                 </div>
 
                 <div className='relative flex justify-center'>
-                  <span className='bg-white px-2'>or</span>
+                  <span className='bg-light-sidebar dark:bg-sidebar px-2'>or</span>
                 </div>
               </div>
             </div>
