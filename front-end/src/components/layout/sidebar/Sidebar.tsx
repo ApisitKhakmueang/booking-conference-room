@@ -9,14 +9,13 @@ import {
   Cuboid,
   Calendar,
   List,
-  Moon,
-  Sun
 } from "lucide-react";
 import { SidebarProps } from "@/lib/interface/interface";
 
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
+import ThemeButton from "./theme-button";
 
 // Store
 import { useThemeStore } from "@/stores/theme.store";
@@ -37,7 +36,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
       <aside
         className={`
           h-screen fixed dark:bg-sidebar
-          bg-light-purple
+          bg-light-sidebar
           transition-duration-300 z-20
           ${isMobile
               ? isOpen
@@ -82,8 +81,8 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                       p-3 lg:p-4 rounded-full
                       transition-colors
                       ${isActive
-                        ? "bg-dark-purple text-white dark:bg-hover dark:text-main"
-                        : "hover:bg-dark-purple hover:text-white dark:hover:bg-hover dark:hover:text-main"}
+                        ? "bg-light-hover text-white dark:bg-hover dark:text-main"
+                        : "hover:bg-light-hover hover:text-white dark:hover:bg-hover dark:hover:text-main"}
                     `}
                     onClick={() => isMobile && setIsOpen(false)}
                   >
@@ -96,19 +95,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
             })}
           </ul>
 
-          <button type="button" className="p-5 cursor-pointer flex justify-center" onClick={toggle}>
-            {theme === 'dark' ? (
-              <div className="flex gap-2 bg-card hover:bg-hover hover:text-main transition-colors p-3 rounded-full shadow-xl">
-                <Moon />
-                Dark
-              </div>
-            ) : (
-              <div className="flex gap-2 border border-gray-400 hover:border-none hover:bg-dark-purple hover:text-white transition-colors p-3 rounded-full shadow-xl">
-                <Sun />
-                Light
-              </div>
-            )}
-          </button>
+          <ThemeButton theme={theme} toggle={toggle} />
         </nav>
       </aside>
 
