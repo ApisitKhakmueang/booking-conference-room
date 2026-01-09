@@ -2,10 +2,13 @@ import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SignInGoogle from "./sign-in-google";
+import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isShowPassword, setIsShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { handleSignIn, handleSignInWithGoogle } = useHandleAuth()
@@ -28,61 +31,80 @@ export default function SignIn() {
   }
 
   return (
-    <div className='flex justify-center w-full h-full inset-0 -mt-40'>
-      <div className='flex flex-col items-center justify-center'>
-        <form 
-          className='flex flex-col items-center w-full gap-5'
-          onSubmit={handleSubmit}
-          >
-          <div className='flex flex-col justify-start w-full'>
-            <h1 className='text-3xl font-semibold'>Welcome back !</h1>
-            <h1>Sign in to your account</h1>
-          </div>
-
-          <div className='flex flex-col w-full gap-2'>
-            <label htmlFor="email">Email</label>
-            <input
-              id='email'
-              type='email'
-              placeholder="you@example.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-
-            <div className='flex justify-between'>
-              <label htmlFor="password">Password</label>
-              <p 
-                className='hover:cursor-pointer'
-                onClick={() => router.push('/auth/forgot-password')}>
-                  Forgot password?
-              </p>
+    <div className='flex justify-center w-full h-full inset-0 -mt-30 text-lg'>
+      <div className='flex flex-col items-center justify-center w-5/9'>
+        <div className="p-10 rounded-xl w-full">
+          <form 
+            className='flex flex-col items-center w-full gap-5'
+            onSubmit={handleSubmit}
+            >
+            <div className='flex flex-col justify-start w-full'>
+              <h1 className='text-3xl font-semibold'>Welcome back !</h1>
+              <h1 className="text-slate">Sign in to your account</h1>
             </div>
-            <input
-              id='password'
-              type="password"
-              placeholder="********"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={isLoading} className='cursor-pointer'>
-              {isLoading ? "Signing in..." : "Sign in"}
-            </button>
+            <div className='flex flex-col w-full gap-5'>
+              <label htmlFor="email">Email</label>
+              <Input
+                id='email'
+                type='email'
+                placeholder="you@example.com"
+                value={email}
+                required
+                className="border border-gray-300 rouded-lg p-2"
+                onChange={e => setEmail(e.target.value)}
+              />
 
-            <div className='relative'>
-              <div className='absolute inset-0 flex items-center'>
-                <div className='w-full border-t border-strong'></div>
+              <div className='flex justify-between'>
+                <label htmlFor="password">Password</label>
+                <p 
+                  className='hover:cursor-pointer'
+                  onClick={() => router.push('/auth/forgot-password')}>
+                    Forgot password?
+                </p>
               </div>
 
-              <div className='relative flex justify-center'>
-                <span className='bg-white px-2'>or</span>
+              <div className="relative">
+                <Input
+                  id='password'
+                  type={isShowPassword ? 'text' : 'password'}
+                  placeholder="********"
+                  value={password}
+                  className="w-full"
+                  required
+                  onChange={e => setPassword(e.target.value)}
+                />
+
+                <div className="absolute flex items-center inset-y-0 right-3">
+                  <button type="button" onClick={() => setIsShowPassword(v => !v)}>
+                    {isShowPassword ? (
+                      <EyeOff />
+                    ) : (
+                      <Eye />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <button type="submit" disabled={isLoading} className='cursor-pointer bg-dark-purple text-white p-3 rounded-full hover:bg-light-purple hover:text-dark-purple hover:border hover:border-dark-purple transition-duration-300'>
+                {isLoading ? "Signing in..." : "Sign in"}
+              </button>
+
+              <div className='relative'>
+                <div className='absolute inset-0 flex items-center'>
+                  <div className='w-full border-t border-strong'></div>
+                </div>
+
+                <div className='relative flex justify-center'>
+                  <span className='bg-light-purple px-2'>or</span>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
 
-        <SignInGoogle handleSignInWithGoogle={handleSignInWithGoogle}/>
+          <SignInGoogle handleSignInWithGoogle={handleSignInWithGoogle}/>
+        </div>
       </div>
     </div>
   )

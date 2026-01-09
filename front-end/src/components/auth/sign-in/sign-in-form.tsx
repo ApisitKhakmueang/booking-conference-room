@@ -5,7 +5,7 @@ import SignIn from './sign-in'
 
 export default function SignInForm() {
   return (
-    <main className='flex h-screen'>
+    <main className='flex h-screen bg-light-purple'>
       <div className='flex flex-col lg:w-3/5 w-full h-full'>
         <div className='p-5'>
           <Image 
