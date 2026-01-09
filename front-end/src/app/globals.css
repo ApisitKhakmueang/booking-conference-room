@@ -3,9 +3,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Normal theme */
+  /* Light theme */
   --color-light-purple: #f6f4ff;
   --color-dark-purple: #8370ff;
+
+  /* Background */
+  --color-light-main-background: #ffffff;
+  --color-light-sidebar: #f6f4ff;
+  --color-light-card: #a293ff;
+  --color-light-hover: #8370ff;
+
+  /* Text */
+  --color-light-main: #000000;
+  --color-light-secondary: #666666;
+  --color-light-muted: #8B8FC7;
 
   /* Dark theme */
   /* Background */
@@ -13,9 +24,6 @@
   --color-sidebar: #171717;
   --color-card: #212121;
   --color-hover: #313131;
-
-  /* Primary */
-  --color-primary: #212121;
 
   /* Status */
   --color-success: #41cd8b;

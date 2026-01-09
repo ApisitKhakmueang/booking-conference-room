@@ -9,7 +9,7 @@ export default function UserDetail() {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-white shadow-lg">
+    <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-light-main-background shadow-lg">
       <div className="w-full flex justify-center">
         <div className="w-30 h-30 relative flex">
           <Image

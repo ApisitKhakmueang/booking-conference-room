@@ -31,6 +31,6 @@ export default function Card({
 }
 
 const variantStyles = {
-  'dark-purple': 'bg-dark-purple text-white dark:bg-card',
-  purple: 'bg-light-purple text-violet-900 dark:text-white dark:bg-sidebar',
+  'dark-purple': 'bg-light-hover text-white dark:bg-card',
+  purple: 'bg-light-sidebar text-violet-900 dark:text-white dark:bg-sidebar',
 }

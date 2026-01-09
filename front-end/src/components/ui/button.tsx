@@ -41,7 +41,7 @@ const variantStyles = {
   primary: 'bg-blue-500 text-white hover:bg-blue-600',
   secondary: 'bg-gray-200 text-black hover:bg-gray-300',
   danger: 'bg-red-500 text-white hover:bg-red-600',
-  'dark-purple' : 'bg-dark-purple text-white hover:bg-violet-500',
+  'dark-purple' : 'bg-light-hover text-white hover:bg-violet-500',
   slate: 'bg-slate-50 text-black hover:bg-slate-200 border-1 border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300',
 }
 

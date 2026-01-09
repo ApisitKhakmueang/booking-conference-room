@@ -27,11 +27,11 @@ const STATUS_CONFIG: Record<
 export default function RoomsGrid() {
   return (
     <>
-      <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card dark:text-secondary border-dark-purple text-violet-900">
+      <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card dark:text-secondary border-light-hover text-violet-900">
         {MOCK_ROOMS.map((room) => {
           const StatusIcon = STATUS_CONFIG[room.status].icon;
           
-          return (<li key={room.id} className="p-7 dark:hover:bg-hover hover:bg-dark-purple hover:text-white transition-duration-300 cursor-pointer group/icons">
+          return (<li key={room.id} className="p-7 dark:hover:bg-hover hover:bg-light-hover hover:text-white transition-duration-300 cursor-pointer group/icons">
             <h2 className="text-xl font-semibold">{room.name}</h2>
 
             <div className='flex justify-center py-10'>

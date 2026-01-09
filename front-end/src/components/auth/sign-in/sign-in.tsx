@@ -87,7 +87,7 @@ export default function SignIn() {
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <button type="submit" disabled={isLoading} className='cursor-pointer bg-dark-purple text-white p-3 rounded-full hover:bg-light-purple hover:text-dark-purple hover:border hover:border-dark-purple transition-duration-300'>
+              <button type="submit" disabled={isLoading} className='cursor-pointer bg-light-hover text-white p-3 rounded-full hover:bg-light-sidebar hover:text-light-hover hover:border hover:border-light-hover transition-duration-300'>
                 {isLoading ? "Signing in..." : "Sign in"}
               </button>
 
@@ -97,7 +97,7 @@ export default function SignIn() {
                 </div>
 
                 <div className='relative flex justify-center'>
-                  <span className='bg-light-purple px-2'>or</span>
+                  <span className='bg-white px-2'>or</span>
                 </div>
               </div>
             </div>

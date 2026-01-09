@@ -31,7 +31,7 @@ export default function LayoutNavigation({
   return (
     <div className={theme}>
       <SidebarLayoutProvider value={{ isOpen, setIsOpen, isMobile }}>
-        <div className="flex dark:bg-main-background bg-white dark:text-secondary text-black">
+        <div className="flex dark:bg-main-background bg-light-main-background dark:text-secondary text-black">
           <Sidebar 
             isOpen={isOpen} 
             setIsOpen={setIsOpen} 
