@@ -3,6 +3,7 @@
 import { useHandleAuth } from '@/hooks/auth/useHandleAuth'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Button from '../ui/button'
 
 export default function SignUpForm() {
   const [email, setEmail] = useState('')
@@ -59,9 +60,9 @@ export default function SignUpForm() {
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <button type='submit' disabled={isLoading}>
+        <Button type='submit' disabled={isLoading}>
           {isLoading ? "Creating an account..." : "Sign up"}
-        </button>
+        </Button>
       </form>
     </>
   )

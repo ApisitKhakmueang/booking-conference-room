@@ -2,6 +2,7 @@
 
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useState } from "react"
+import Button from "../ui/button";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -47,9 +48,9 @@ export default function ForgotPasswordForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)} />
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? "Sending..." : "Send reset email"}
-            </button>
+            </Button>
           </form>
         </>
       )}

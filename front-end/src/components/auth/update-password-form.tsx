@@ -3,6 +3,7 @@
 import { useAuthActions } from "@/hooks/auth/useAuthAction"
 import { useRouter } from "next/navigation";
 import { useState } from "react"
+import Button from "../ui/button";
 
 export default function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -54,9 +55,9 @@ export default function UpdatePasswordForm() {
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <button type='submit' disabled={isLoading}>
+        <Button type='submit' disabled={isLoading}>
           {isLoading ? "Saving..." : "Save new password"}
-        </button>
+        </Button>
       </form>
     </>
   )

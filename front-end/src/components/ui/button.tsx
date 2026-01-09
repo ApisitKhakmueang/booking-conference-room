@@ -2,7 +2,7 @@
 import { cn } from '@/lib/utils'
 import { ButtonHTMLAttributes } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'slate'
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'slate' | 'dark-purple'
 type ButtonSize = 'sm' | 'md' | 'lg' | 'circle'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,7 +24,7 @@ export default function Button({
     <button
       disabled={disabled || loading}
       className={cn(
-        'rounded-full transition font-medium cursor-pointer',
+        'rounded-full transition-duration-300 font-base cursor-pointer',
         variantStyles[variant],
         sizeStyles[size],
         (disabled || loading) && 'opacity-50 cursor-not-allowed',
@@ -41,8 +41,8 @@ const variantStyles = {
   primary: 'bg-blue-500 text-white hover:bg-blue-600',
   secondary: 'bg-gray-200 text-black hover:bg-gray-300',
   danger: 'bg-red-500 text-white hover:bg-red-600',
-  'dark-purple' : 'bg-light-hover text-white hover:bg-violet-500',
-  slate: 'bg-slate-50 text-black hover:bg-slate-200 border-1 border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300',
+  'dark-purple' : 'bg-light-card text-white hover:bg-light-hover',
+  slate: 'bg-slate-50 text-black hover:bg-slate-300',
 }
 
 const sizeStyles = {
