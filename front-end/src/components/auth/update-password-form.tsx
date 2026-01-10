@@ -27,6 +27,7 @@ export default function UpdatePasswordForm() {
     try {
       const { error } = await updatePassword(password)
       if (error) throw error
+      router.replace('/dashboard')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
