@@ -15,7 +15,7 @@ import { SidebarProps } from "@/lib/interface/interface";
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
-import ThemeButton from "./theme-button";
+import ThemeButton from "../../utils/theme-button";
 
 // Store
 import { useThemeStore } from "@/stores/theme.store";
