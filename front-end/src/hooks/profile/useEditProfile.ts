@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
-
-interface UseEditProfileProps {
-  username: string
-  profileFile: File | null
-  originalUsername?: string
-  originalAvatar?: string
-}
+import { UseEditProfileProps } from '@/lib/interface/interface'
 
 export const useEditProfile = () => {
   const supabase = createClient()

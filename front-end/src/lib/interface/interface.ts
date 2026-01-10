@@ -75,3 +75,21 @@ export interface UseUsernameProps {
   changeUsername: (username: string) => void
   cancelUsername: () => void
 }
+
+export interface UseEditProfileProps {
+  username: string
+  profileFile: File | null
+  originalUsername?: string
+  originalAvatar?: string
+}
+
+export interface SignInGoogleProps {
+  handleSignInWithGoogle: () => Promise<void>;
+  isSignIn: boolean
+}
+
+export interface SignIn_SignUpProps {
+  isSignIn: boolean
+  title: string
+  subTitle: string
+}
