@@ -1,21 +1,24 @@
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import SignInGoogle from "./sign-in-google";
+import Google from "./signin-signup-google";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import Button from "@/components/ui/button";
+import { SignIn_SignUpProps } from "@/lib/interface/interface";
 
-export default function SignIn() {
+export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_SignUpProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isShowPassword, setIsShowPassword] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false)
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { handleSignIn, handleSignInWithGoogle } = useHandleAuth()
+  const { handleSignIn, handleSignInWithGoogle, handleSignUp } = useHandleAuth()
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true);
     setError(null);
@@ -31,17 +34,39 @@ export default function SignIn() {
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true);
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return
+    }
+    try {
+      const error = await handleSignUp(email, password)
+      if (error) throw error
+      router.replace(`/auth/sign-up-success`)
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+
   return (
     <div className='absolute inset-0 flex justify-center w-full h-full text-lg'>
       <div className='flex flex-col items-center justify-center xl:w-5/9 lg:w-7/9 sm:w-5/7 w-full h-full'>
         <div className="p-10 rounded-xl w-full">
           <form 
             className='flex flex-col items-center w-full gap-5'
-            onSubmit={handleSubmit}
+            onSubmit={isSignIn ? handleSubmitSignIn : handleSubmit}
             >
             <div className='flex flex-col justify-start w-full dark:text-main'>
-              <h1 className='text-3xl font-semibold'>Welcome back !</h1>
-              <h1 className="text-slate">Sign in to your account</h1>
+              <h1 className='text-3xl font-semibold'>{title}</h1>
+              <h1 className="text-slate">{subTitle}</h1>
             </div>
 
             <div className='flex flex-col w-full gap-5 dark:text-main'>
@@ -58,11 +83,13 @@ export default function SignIn() {
 
               <div className='flex justify-between'>
                 <label htmlFor="password">Password</label>
-                <p 
-                  className='hover:cursor-pointer'
-                  onClick={() => router.push('/auth/forgot-password')}>
-                    Forgot password?
-                </p>
+                {isSignIn && (
+                  <p 
+                    className='hover:cursor-pointer'
+                    onClick={() => router.push('/auth/forgot-password')}>
+                      Forgot password?
+                  </p>
+                )}
               </div>
 
               <div className="relative">
@@ -90,10 +117,40 @@ export default function SignIn() {
                 </div>
               </div>
 
+              {!isSignIn && (
+                <>
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <div className="relative">
+                    <Input
+                      id='confirmPassword'
+                      type={isShowConfirmPassword ? 'text' : 'password'}
+                      placeholder="********"
+                      value={confirmPassword}
+                      className="w-full"
+                      required
+                      onChange={e => setConfirmPassword(e.target.value)}
+                    />
+
+                    <div className="absolute flex items-center inset-y-0 right-3">
+                      <button
+                        className="cursor-pointer" 
+                        type="button" 
+                        onClick={() => setIsShowConfirmPassword(v => !v)}>
+                        {isShowConfirmPassword ? (
+                          <EyeOff />
+                        ) : (
+                          <Eye />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {error && <p className="text-sm text-red-500">{error}</p>}
 
               <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3'>
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isSignIn ? (isLoading ? "Signing in..." : "Sign in") : (isLoading ? "Creating account..." : "Create account")}
               </Button>
 
               <div className='relative'>
@@ -108,7 +165,10 @@ export default function SignIn() {
             </div>
           </form>
 
-          <SignInGoogle handleSignInWithGoogle={handleSignInWithGoogle}/>
+          <Google 
+            handleSignInWithGoogle={handleSignInWithGoogle}
+            isSignIn={isSignIn}
+            />
         </div>
       </div>
     </div>

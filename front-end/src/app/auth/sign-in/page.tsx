@@ -1,9 +1,9 @@
-import SignInForm from "@/components/auth/sign-in/sign-in-form"
+import SignIn_SignupForm from "@/components/auth/signin-signup"
 
 export default function Page() {
   return (
     <>
-      <SignInForm />
+      <SignIn_SignupForm />
     </>
   )
 }

@@ -1,12 +1,21 @@
 'use client'
 
 import Image from 'next/image'
-import SignIn from './sign-in'
-import ThemeButton from '@/components/layout/sidebar/theme-button'
+import SignIn_SignUp from './signin-signup'
+import ThemeButton from '@/components/utils/theme-button'
 import { useThemeStore } from '@/stores/theme.store'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-export default function SignInForm() {
+export default function SignIn_SignupForm() {
   const { theme, toggle } = useThemeStore()
+  const pathname = usePathname()
+  const isSignIn = pathname.includes('sign-in')
+  const [titleDetail, setTitleDetail] = useState({title: 'Welcome back !', subTitle: 'Sign in to your account'})
+
+  useEffect(() => {
+    setTitleDetail(isSignIn ? {title: 'Welcome back !', subTitle: 'Sign in to your account'} : {title: 'Get started', subTitle: 'Create your account'})
+  }, [pathname])
 
   return (
     <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary ${theme}`}>
@@ -24,7 +33,7 @@ export default function SignInForm() {
           </div>
         </div>
 
-        <SignIn />
+        <SignIn_SignUp isSignIn={isSignIn} title={titleDetail.title} subTitle={titleDetail.subTitle} />
       </div>
 
       <div className='lg:flex hidden w-full'>

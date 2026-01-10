@@ -1,11 +1,8 @@
 import Button from "@/components/ui/button";
 import { useRouter } from "next/navigation"
+import { SignInGoogleProps } from "@/lib/interface/interface";
 
-interface SignInGoogleProps {
-  handleSignInWithGoogle: () => Promise<void>;
-}
-
-export default function SignInGoogle({ handleSignInWithGoogle }: SignInGoogleProps) {
+export default function Google({ handleSignInWithGoogle, isSignIn }: SignInGoogleProps) {
   const router = useRouter();
 
   return (
@@ -15,14 +12,16 @@ export default function SignInGoogle({ handleSignInWithGoogle }: SignInGooglePro
         Sign in with Google
       </Button>
 
-      <p className='flex gap-2 justify-center mt-4 sm:text-base text-[15px] dark:text-main'>
-        Don&apos;t have an account? 
-        <span  
-          className='cursor-pointer font-semibold'
-          onClick={() => router.push('/auth/sign-up')}>
-          Sign Up
-        </span>
-      </p>
+      {isSignIn && (
+        <p className='flex gap-2 justify-center mt-4 sm:text-base text-[15px] dark:text-main'>
+          Don&apos;t have an account? 
+          <span  
+            className='cursor-pointer font-semibold'
+            onClick={() => router.push('/auth/sign-up')}>
+            Sign Up
+          </span>
+        </p>
+      )}
     </div>
   )
 }
