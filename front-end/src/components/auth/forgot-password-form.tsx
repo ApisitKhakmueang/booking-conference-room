@@ -3,6 +3,8 @@
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useState } from "react"
 import Button from "../ui/button";
+import AuthLayout from "./auth-layout";
+import { Input } from "../ui/input";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -28,32 +30,41 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <>
+    <AuthLayout>
       {success ? (
         <>
-          <p>Check Your Email</p>
-          <p>Password reset instructions sent</p>
-          <p>If you registered using your email and password, you will receive a password reset email.</p>
+          <p className="text-3xl font-semibold">Check your email</p>
+          <p className="text-slate">Password reset instructions sent</p>
+          <p>If you registered using your email and password, <br />
+            you will receive a password reset email.</p>
         </>
       ) : (
-        <>
-          <p>Reset Your Password</p>
-          <p>Type in your email and we&apos;ll send you a link to reset your password</p>
+        <div className="flex flex-col gap-10">
+          <div>
+            <p className="text-3xl font-semibold">Reset your password</p>
+            <p className="text-slate">Enter your email and we&apos;ll send you a link to reset your password</p>
+          </div>
 
-          <form onSubmit={handleSubmit}>
-            <input 
+          <form 
+            className="flex flex-col justify-between gap-10"
+            onSubmit={handleSubmit}>
+            <Input 
+              className="w-full"
               type="email" 
-              placeholder="email" 
+              placeholder="you@example.com" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)} />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send reset email"}
-            </Button>
+
+            <div className="flex flex-col gap-3">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button variant="dark-purple" type="submit" disabled={isLoading} className="whitespace-nowrap">
+                {isLoading ? "Sending..." : "Send reset email"}
+              </Button>
+            </div>
           </form>
-        </>
+        </div>
       )}
-    </>
+    </AuthLayout>
   )
 }
