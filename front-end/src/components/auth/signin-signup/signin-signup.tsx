@@ -60,14 +60,15 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
     <div className='absolute inset-0 flex justify-center w-full h-full text-lg'>
       <div className='flex flex-col items-center justify-center xl:w-5/9 lg:w-7/9 sm:w-5/7 w-full h-full'>
         <div className="p-10 rounded-xl w-full">
+          <div className='flex flex-col justify-start w-full dark:text-main mb-5'>
+            <h1 className='text-3xl font-semibold'>{title}</h1>
+            <h1 className="text-slate">{subTitle}</h1>
+          </div>
+
           <form 
             className='flex flex-col items-center w-full gap-5'
             onSubmit={isSignIn ? handleSubmitSignIn : handleSubmit}
             >
-            <div className='flex flex-col justify-start w-full dark:text-main'>
-              <h1 className='text-3xl font-semibold'>{title}</h1>
-              <h1 className="text-slate">{subTitle}</h1>
-            </div>
 
             <div className='flex flex-col w-full gap-5 dark:text-main'>
               <label htmlFor="email">Email</label>
@@ -147,11 +148,13 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
                 </>
               )}
 
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              <div className="flex flex-col gap-2">
+                {error && <p className="text-sm text-red-500">{error}</p>}
 
-              <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3'>
-                {isSignIn ? (isLoading ? "Signing in..." : "Sign in") : (isLoading ? "Creating account..." : "Create account")}
-              </Button>
+                <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3'>
+                  {isSignIn ? (isLoading ? "Signing in..." : "Sign in") : (isLoading ? "Creating account..." : "Create account")}
+                </Button>
+              </div>
 
               <div className='relative'>
                 <div className='absolute inset-0 flex items-center'>

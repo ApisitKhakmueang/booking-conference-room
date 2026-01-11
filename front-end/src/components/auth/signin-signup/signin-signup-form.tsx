@@ -3,12 +3,10 @@
 import Image from 'next/image'
 import SignIn_SignUp from './signin-signup'
 import ThemeButton from '@/components/utils/theme-button'
-import { useThemeStore } from '@/stores/theme.store'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function SignIn_SignupForm() {
-  const { theme, toggle } = useThemeStore()
   const pathname = usePathname()
   const isSignIn = pathname.includes('sign-in')
   const [titleDetail, setTitleDetail] = useState({title: 'Welcome back !', subTitle: 'Sign in to your account'})
@@ -18,7 +16,7 @@ export default function SignIn_SignupForm() {
   }, [pathname])
 
   return (
-    <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary ${theme}`}>
+    <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary`}>
       <div className='relative flex flex-col xl:w-3/5 w-full h-screen'>
         <div className='flex justify-between items-center p-5'>
           <Image 
@@ -29,7 +27,7 @@ export default function SignIn_SignupForm() {
           />
 
           <div className='relative z-10'>
-            <ThemeButton isOpen={true} theme={theme} toggle={toggle} className='p-0' />
+            <ThemeButton isOpen={true} className='p-0' />
           </div>
         </div>
 
@@ -38,7 +36,7 @@ export default function SignIn_SignupForm() {
 
       <div className='lg:flex hidden w-full'>
         <img 
-          className='object-cover'
+          className='object-cover flex flex-1'
           src="/background/background.gif" 
           alt="background" />
       </div>

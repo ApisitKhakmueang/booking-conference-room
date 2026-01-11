@@ -17,9 +17,6 @@ import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
 import ThemeButton from "../../utils/theme-button";
 
-// Store
-import { useThemeStore } from "@/stores/theme.store";
-
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Rooms", href: "/rooms", icon: Cuboid },
@@ -28,7 +25,6 @@ const SIDEBAR_ITEMS = [
 ] as const;
 
 export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
-  const { theme, toggle } = useThemeStore()
   const pathname = usePathname();
 
   return (
@@ -95,7 +91,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
             })}
           </ul>
 
-          <ThemeButton theme={theme} toggle={toggle} isOpen={isOpen} />
+          <ThemeButton isOpen={isOpen} />
         </nav>
       </aside>
 

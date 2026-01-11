@@ -11,6 +11,12 @@ export const useThemeStore = create<ThemeState>()(
           theme: state.theme === 'dark' ? 'light' : 'dark',
         })
       ),
+      setTheme: (theme) => {
+        document.cookie = `theme=${theme}; path=/; max-age=31536000`
+        document.documentElement.classList.remove('light', 'dark')
+        document.documentElement.classList.add(theme)
+        set({ theme })
+      }
     }),
     {
       name: 'theme-storage', // 👈 localStorage key

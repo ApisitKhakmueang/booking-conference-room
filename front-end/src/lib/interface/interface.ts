@@ -57,7 +57,7 @@ type Theme = 'dark' | 'light'
 
 export interface ThemeState {
   theme: Theme
-  toggle: () => void
+  setTheme: (theme: Theme) => void
 }
 
 
