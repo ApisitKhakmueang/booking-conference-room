@@ -4,7 +4,7 @@ import { useAuthActions } from "@/hooks/auth/useAuthAction"
 import { useRouter } from "next/navigation";
 import { useState } from "react"
 import Button from "../ui/button";
-import AuthLayout from "./auth-layout";
+import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
 import ShowPassword from "../utils/show-password";
 
@@ -41,7 +41,7 @@ export default function UpdatePasswordForm() {
   }
 
   return (
-    <AuthLayout>
+    <CardLayout>
       <p className="text-3xl font-semibold">Reset Your Password</p>
       <p className="text-slate">Please enter your new password below.</p>
 
@@ -81,6 +81,6 @@ export default function UpdatePasswordForm() {
           {isLoading ? "Saving..." : "Save new password"}
         </Button>
       </form>
-    </AuthLayout>
+    </CardLayout>
   )
 }

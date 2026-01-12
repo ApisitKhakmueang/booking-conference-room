@@ -14,7 +14,7 @@ import Sidebar from "./sidebar";
 // Context
 import { SidebarLayoutProvider } from "@/context/SidebarLayoutContext";
 
-export default function LayoutNavigation({
+export default function NavigationLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

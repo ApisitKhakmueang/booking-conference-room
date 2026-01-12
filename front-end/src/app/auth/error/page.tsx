@@ -1,4 +1,4 @@
-import AuthLayout from "@/components/auth/auth-layout";
+import CardLayout from "@/components/layout/card-layout";
 import { Suspense } from "react";
 
 async function ErrorContent({
@@ -29,13 +29,13 @@ export default function Page({
   searchParams: Promise<{ error: string }>;
 }) {
   return (
-    <AuthLayout>
+    <CardLayout>
       <div>
         <p className="text-3xl font-semibold">Error</p>
         <Suspense>
           <ErrorContent searchParams={searchParams} />
         </Suspense>
       </div>
-    </AuthLayout>
+    </CardLayout>
   )
 }

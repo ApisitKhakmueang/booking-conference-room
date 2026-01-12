@@ -1,4 +1,4 @@
-export interface LayoutEachPageProps {
+export interface EachPageLayoutProps {
   pageName: string;
   children: React.ReactNode;
   className?: string;

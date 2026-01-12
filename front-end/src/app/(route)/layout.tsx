@@ -1,4 +1,4 @@
-import LayoutNavigation from "@/components/layout/layout-navigation";
+import NavigationLayout from "@/components/layout/navigation-layout";
 
 export default function SidebarLayout({
   children,
@@ -6,8 +6,8 @@ export default function SidebarLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <LayoutNavigation>
+    <NavigationLayout>
       {children}  
-    </LayoutNavigation>
+    </NavigationLayout>
   )
 }

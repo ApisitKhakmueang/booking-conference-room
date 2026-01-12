@@ -3,7 +3,7 @@
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useState } from "react"
 import Button from "../ui/button";
-import AuthLayout from "./auth-layout";
+import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
 
 export default function ForgotPasswordForm() {
@@ -30,7 +30,7 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <AuthLayout>
+    <CardLayout>
       {success ? (
         <>
           <p className="text-3xl font-semibold">Check your email</p>
@@ -65,6 +65,6 @@ export default function ForgotPasswordForm() {
           </form>
         </div>
       )}
-    </AuthLayout>
+    </CardLayout>
   )
 }
