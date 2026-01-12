@@ -3,11 +3,35 @@ import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSignout } from "@/hooks/auth/useSignout"
+import button from "../../ui/button"
+
+interface UserButtonProps {
+  name: string
+  onClick: () => void
+  variant: 'dark-purple' | 'danger'
+}
 
 export default function UserDetail() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
 
+  const UserButton: UserButtonProps[] = [
+    {
+      name: 'Edit Profile',
+      onClick: () => router.push('/user/edit-profile'),
+      variant: 'dark-purple'
+    },
+    {
+      name: 'Update Password',
+      onClick: () => router.push('/user/update-password'),
+      variant: 'dark-purple'
+    },
+    {
+      name: 'Sign out',
+      onClick: useSignout,
+      variant: 'danger'
+    }
+  ]
   return (
     <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-light-main-background shadow-lg">
       <div className="w-full flex justify-center">
@@ -23,14 +47,15 @@ export default function UserDetail() {
       <p>{user?.name}</p>
       <p>{user?.email}</p>
 
-      <div className="flex flex-col gap-2 my-2">
-        <Button variant="primary" onClick={() => router.push('/user/edit-profile')} className="dark:bg-card dark:hover:bg-hover">
-          Edit Profile
-        </Button>
-
-        <Button variant='danger' onClick={useSignout}>
-          Sign out
-        </Button>
+      <div className="flex flex-col gap-3 my-2">
+        {UserButton.map((button, index) => (
+          <Button 
+            key={index}
+            variant={button.variant} 
+            onClick={button.onClick}>
+            {button.name}
+          </Button>
+        ))}
       </div>
     </div>
   )
