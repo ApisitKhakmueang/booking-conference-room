@@ -1,8 +1,6 @@
-import { useRouter } from 'next/navigation'
 import { useAuthActions } from '@/hooks/auth/useAuthAction'
 
 export function useHandleAuth() {
-  const router = useRouter()
   const { signUp, signIn, signInWithGoogle, forgotPassword } = useAuthActions()
 
   const handleSignUp = async (email: string, password: string) => {
