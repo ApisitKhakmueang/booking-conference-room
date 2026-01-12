@@ -52,7 +52,8 @@ export default function UserDetail() {
           <Button 
             key={index}
             variant={button.variant} 
-            onClick={button.onClick}>
+            onClick={button.onClick}
+            className="whitespace-nowrap">
             {button.name}
           </Button>
         ))}

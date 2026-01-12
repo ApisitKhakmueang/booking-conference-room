@@ -83,8 +83,7 @@ export interface UseEditProfileProps {
   originalAvatar?: string
 }
 
-export interface SignInGoogleProps {
-  handleSignInWithGoogle: () => Promise<void>;
+export interface SignInProps {
   isSignIn: boolean
 }
 
