@@ -5,7 +5,7 @@ import Google from "./signin-signup-google";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { SignIn_SignUpProps } from "@/lib/interface/interface";
-import ShowPassword from "./show-password";
+import ShowPassword from "../../utils/show-password";
 
 export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_SignUpProps) {
   const [email, setEmail] = useState('')
@@ -34,7 +34,7 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true);
     setError(null);
@@ -67,7 +67,7 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
 
           <form 
             className='flex flex-col items-center w-full gap-5'
-            onSubmit={isSignIn ? handleSubmitSignIn : handleSubmit}
+            onSubmit={isSignIn ? handleSubmitSignIn : handleSubmitSignUp}
             >
 
             <div className='flex flex-col w-full gap-5 dark:text-main'>
