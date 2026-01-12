@@ -3,9 +3,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Google from "./signin-signup-google";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff } from "lucide-react";
 import Button from "@/components/ui/button";
 import { SignIn_SignUpProps } from "@/lib/interface/interface";
+import ShowPassword from "./show-password";
 
 export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_SignUpProps) {
   const [email, setEmail] = useState('')
@@ -104,18 +104,7 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
                   onChange={e => setPassword(e.target.value)}
                 />
 
-                <div className="absolute flex items-center inset-y-0 right-3">
-                  <button
-                    className="cursor-pointer" 
-                    type="button" 
-                    onClick={() => setIsShowPassword(v => !v)}>
-                    {isShowPassword ? (
-                      <EyeOff />
-                    ) : (
-                      <Eye />
-                    )}
-                  </button>
-                </div>
+                <ShowPassword isShowPassword={isShowPassword} setIsShowPassword={setIsShowPassword} />
               </div>
 
               {!isSignIn && (
@@ -132,18 +121,7 @@ export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_Sig
                       onChange={e => setConfirmPassword(e.target.value)}
                     />
 
-                    <div className="absolute flex items-center inset-y-0 right-3">
-                      <button
-                        className="cursor-pointer" 
-                        type="button" 
-                        onClick={() => setIsShowConfirmPassword(v => !v)}>
-                        {isShowConfirmPassword ? (
-                          <EyeOff />
-                        ) : (
-                          <Eye />
-                        )}
-                      </button>
-                    </div>
+                    <ShowPassword isShowPassword={isShowConfirmPassword} setIsShowPassword={setIsShowConfirmPassword} />
                   </div>
                 </>
               )}

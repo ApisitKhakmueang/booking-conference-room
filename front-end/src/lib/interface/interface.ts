@@ -93,3 +93,8 @@ export interface SignIn_SignUpProps {
   title: string
   subTitle: string
 }
+
+export interface ShowPasswordProps {
+  isShowPassword: boolean
+  setIsShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
+}
