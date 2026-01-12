@@ -1,7 +1,14 @@
-import SignUpSuccessForm from "@/components/auth/sign-up-success-form"
+import AuthLayout from "@/components/auth/auth-layout"
 
-export default function Page() {
+export default function SignUpSuccessForm() {
   return (
-    <SignUpSuccessForm />
+    <AuthLayout>
+      <p className="text-3xl font-semibold">Thank you for signing up!</p>
+      <p className="text-slate">Check your email to confirm</p>
+      <p>
+        You&apos;ve successfully signed up. <br />
+        Please check your email to confirm your account before signing in.
+      </p>
+    </AuthLayout>
   )
 }
