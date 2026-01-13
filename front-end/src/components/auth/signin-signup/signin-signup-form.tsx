@@ -16,7 +16,7 @@ export default function SignIn_SignupForm() {
   }, [pathname])
 
   return (
-    <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary`}>
+    <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary overflow-auto`}>
       <div className='relative flex flex-col xl:w-3/5 w-full h-screen'>
         <div className='flex justify-between items-center p-5'>
           <Image 

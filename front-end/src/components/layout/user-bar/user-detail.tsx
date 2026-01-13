@@ -3,13 +3,7 @@ import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSignout } from "@/hooks/auth/useSignout"
-import button from "../../ui/button"
-
-interface UserButtonProps {
-  name: string
-  onClick: () => void
-  variant: 'dark-purple' | 'danger'
-}
+import { UserButtonProps } from "@/lib/interface/interface"
 
 export default function UserDetail() {
   const router = useRouter()
@@ -32,6 +26,7 @@ export default function UserDetail() {
       variant: 'danger'
     }
   ]
+
   return (
     <div className="cursor-none p-5 rounded-lg flex flex-col justify-center gap-2 dark:bg-sidebar bg-light-main-background shadow-lg">
       <div className="w-full flex justify-center">
