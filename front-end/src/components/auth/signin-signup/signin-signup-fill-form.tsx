@@ -12,16 +12,14 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isShowPassword, setIsShowPassword] = useState(false)
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false)
   const router = useRouter()
-  const { validatePassword } = useValidatePassword()
+  const { validatePassword, passwordValidation } = useValidatePassword()
   const { submitSignIn, submitSignUp, isLoading, error } = useAuthSubmit()
 
   return (
     <form 
       className='flex flex-col items-center w-full'
-      onSubmit={isSignIn ? (e) => submitSignIn(e, email, password) : (e) => submitSignUp(e, email, password, confirmPassword)}
+      onSubmit={isSignIn ? (e) => submitSignIn(e, email, password) : (e) => submitSignUp(e, email, password)}
       >
       <div className='flex flex-col w-full md:gap-5 gap-3 dark:text-main'>
         <label htmlFor="email">Email</label>
@@ -65,22 +63,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
 
         {!isSignIn && (
           <>
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="relative">
-              <Input
-                id='confirmPassword'
-                type={isShowConfirmPassword ? 'text' : 'password'}
-                placeholder="********"
-                value={confirmPassword}
-                className="w-full"
-                required
-                onChange={e => setConfirmPassword(e.target.value)}
-              />
-
-              <ShowPassword isShowPassword={isShowConfirmPassword} setIsShowPassword={setIsShowConfirmPassword} />
-            </div>
-
-            <DisplayStrongPassword />
+            <DisplayStrongPassword password={passwordValidation} />
           </>
         )}
 

@@ -34,17 +34,10 @@ export default function useAuthSubmit() {
     e: React.FormEvent,
     email: string,
     password: string,
-    confirmPassword: string
   ) => {
     e.preventDefault()
     setIsLoading(true);
     setError(null);
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return
-    }
 
     if (!isStrongPassword(password)) {
       setError("Password is not strong enough");
