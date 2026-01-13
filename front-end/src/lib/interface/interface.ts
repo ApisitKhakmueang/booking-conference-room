@@ -97,3 +97,26 @@ export interface ShowPasswordProps {
   isShowPassword: boolean
   setIsShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+export interface UserButtonProps {
+  name: string
+  onClick: () => void
+  variant: 'dark-purple' | 'danger'
+}
+
+export interface PasswordValidation {
+  hasUppercase: boolean
+  hasLowercase: boolean
+  hasNumber: boolean
+  hasSpecial: boolean
+  hasLength: boolean
+}
+
+export interface ValidateDetailProps {
+  text: string,
+  name: keyof PasswordValidation
+}
+
+export interface DisplayStrongPasswordProps {
+  password: PasswordValidation
+}
