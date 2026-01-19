@@ -3,7 +3,7 @@ import Card from "@/components/ui/card"
 const ROOM_STATUS = [
   { name: 'Total', amount: 10, variant: 'dark-purple' },
   { name: 'Available', amount: 4, variant: 'purple' },
-  { name: 'Unavailable', amount: 5, variant: 'purple' },
+  { name: 'Occupied', amount: 5, variant: 'purple' },
   { name: 'Maintainance', amount: 1, variant: 'purple' },
 ] as const
 
