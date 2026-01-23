@@ -1,7 +1,7 @@
 package usercase
 
 import (
-	"guyae/internal/domain"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
 	"github.com/google/uuid"
 )

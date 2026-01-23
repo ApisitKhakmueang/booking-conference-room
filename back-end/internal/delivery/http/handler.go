@@ -1,8 +1,8 @@
 package http
 
 import (
-	"guyae/internal/domain"
-	// "guyae/internal/usecase"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
