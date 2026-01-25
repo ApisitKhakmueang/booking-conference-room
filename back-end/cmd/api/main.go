@@ -35,12 +35,22 @@ func initialDBConnection() *gorm.DB {
 	return db
 }
 
+func setupFiber(handler *http.OrderHandler) *fiber.App {
+	app := fiber.New()
+
+	app.Get("/book", handler.GetBooks)
+	app.Get("/book/:id", handler.GetBook)
+	app.Post("/book", handler.CreateBook)
+	app.Put("/book/:id", handler.UpdateBook)
+	app.Delete("/book/:id", handler.DeleteBook)
+
+	return app
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Cann't to load env file")
 	}
-
-	app := fiber.New()
 
 	db := initialDBConnection()
 
@@ -48,12 +58,7 @@ func main() {
 	orderUsecase := usercase.NewOrderUsecase(orderRepo)
 	handleUsecase := http.NewOrderHandler(orderUsecase)
 
-	app.Get("/book", handleUsecase.GetBooks)
-	app.Get("/book/:id", handleUsecase.GetBook)
-	app.Post("/book", handleUsecase.CreateBook)
-	app.Put("/book/:id", handleUsecase.UpdateBook)
-	app.Delete("/book/:id", handleUsecase.DeleteBook)
-
+	app := setupFiber(handleUsecase)
 	app.Listen(":8080")
 }
 
