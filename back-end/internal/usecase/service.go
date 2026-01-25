@@ -7,12 +7,16 @@ import (
 )
 
 type orderUsecase struct {
-	repo domain.OrderRepository // เรียกผ่าน Interface
+	repo domain.BookingRepository // เรียกผ่าน Interface
+	gateway domain.CalendarGateway
 }
 
 // NewOrderUsecase คือ Constructor
-func NewOrderUsecase(repo domain.OrderRepository) domain.OrderUsecase {
-	return &orderUsecase{repo: repo}
+func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGateway) domain.OrderUsecase {
+	return &orderUsecase{
+		repo: repo,
+		gateway: gateway,
+	}
 }
 
 func (u *orderUsecase)	CreateBook(book *domain.Books) error {

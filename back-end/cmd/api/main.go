@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"context"
 
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
 
+	"google.golang.org/api/calendar/v3"
+	"google.golang.org/api/option"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -35,7 +39,7 @@ func initialDBConnection() *gorm.DB {
 	return db
 }
 
-func setupFiber(handler *http.OrderHandler) *fiber.App {
+func initialFiber(handler *http.OrderHandler) *fiber.App {
 	app := fiber.New()
 
 	app.Get("/book", handler.GetBooks)
@@ -47,6 +51,16 @@ func setupFiber(handler *http.OrderHandler) *fiber.App {
 	return app
 }
 
+func initialCalendarService() (*calendar.Service, error) {
+	jsonCreds := os.Getenv("GOOGLE_CREDENTIALS_JSON")
+	if jsonCreds == "" {
+			return nil, fmt.Errorf("GOOGLE_CREDENTIALS_JSON is missing")
+	}
+
+	ctx := context.Background()
+	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Cann't to load env file")
@@ -54,11 +68,17 @@ func main() {
 
 	db := initialDBConnection()
 
-	orderRepo := repository.NewPostgresOrderRepo(db)
-	orderUsecase := usercase.NewOrderUsecase(orderRepo)
+	googleCalendarService, err := initialCalendarService()
+	if err != nil {
+		log.Fatal("Can't connect to google calendar")
+	}
+
+	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
+	bookingRepo := repository.NewPostgresBookingRepo(db)
+	orderUsecase := usercase.NewOrderUsecase(bookingRepo, calendarService)
 	handleUsecase := http.NewOrderHandler(orderUsecase)
 
-	app := setupFiber(handleUsecase)
+	app := initialFiber(handleUsecase)
 	app.Listen(":8080")
 }
 
