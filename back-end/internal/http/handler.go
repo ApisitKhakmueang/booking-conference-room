@@ -100,14 +100,14 @@ func NewOrderHandler(usecase domain.OrderUsecase) *OrderHandler {
 func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	filter := new(domain.SearchFilter)
 
 	// ดึงจาก Query
 	if err = c.QueryParser(filter); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 	
 	if filter.Email == "" || filter.Room == 0 {
@@ -126,4 +126,17 @@ func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).SendString("Create booking successfully !")
+}
+
+func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("bookingID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := u.usecase.DeleteBooking(id) ; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
 }

@@ -1,9 +1,9 @@
 package domain
 
-import (
-	// "github.com/google/uuid"
-	// "github.com/gofiber/fiber/v2"
-)
+import "github.com/google/uuid"
+
+// "github.com/google/uuid"
+// "github.com/gofiber/fiber/v2"
 
 type OrderUsecase interface {
 	// CreateBook(book *Books) error
@@ -13,4 +13,5 @@ type OrderUsecase interface {
 	// DeleteBook(id uuid.UUID) error
 
 	CreateBooking(booking *Booking, filter *SearchFilter) error
+	DeleteBooking(bookingID uuid.UUID) error
 }

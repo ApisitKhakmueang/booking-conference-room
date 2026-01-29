@@ -77,7 +77,7 @@ type Booking struct {
 	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`
 
 	// Relations
-	Room     Room     						`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	User     User     						`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Calendar Calendar 						`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Room     			Room     				`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	User     			User     				`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Calendar 			Calendar 				`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

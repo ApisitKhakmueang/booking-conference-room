@@ -5,14 +5,17 @@ import (
 )
 
 type BookingRepository interface {
-	Create(book *Books) error
-	Get(id uuid.UUID) (*Books, error)
-	Gets() ([]Books, error)
-	Update(book *Books) error
-	Delete(id uuid.UUID) error
+	// Create(book *Books) error
+	// Get(id uuid.UUID) (*Books, error)
+	// Gets() ([]Books, error)
+	// Update(book *Books) error
+	// Delete(id uuid.UUID) error
+
+	GetEventID(bookingID uuid.UUID) (*Booking, error)
+	GetCalendar(roomNumber uint) (*Calendar, error)
 
 	CreateBookingDB(booking *Booking) error
-	GetCalendar(roomNumber uint) (*Calendar, error)
+	DeleteBookingDB(bookingID uuid.UUID) error
 }
 
 type CalendarGateway interface {

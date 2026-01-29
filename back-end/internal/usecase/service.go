@@ -2,8 +2,9 @@ package usercase
 
 import (
 	// "log"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/google/uuid"
 	// "github.com/google/uuid"
 )
 
@@ -72,6 +73,25 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 	booking.GoogleEventID = EventID
 
 	if err = u.repo.CreateBookingDB(booking); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
+	booking, err := u.repo.GetEventID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	// log.Printf("booking: %v", booking)
+	// log.Printf("booking: %v", booking.GoogleEventID)
+	if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
+		return err
+	}
+	
+	if err = u.repo.DeleteBookingDB(bookingID); err != nil {
 		return err
 	}
 
