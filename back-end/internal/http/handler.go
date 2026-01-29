@@ -125,5 +125,5 @@ func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(booking)
+	return c.Status(fiber.StatusOK).SendString("Create booking successfully !")
 }
