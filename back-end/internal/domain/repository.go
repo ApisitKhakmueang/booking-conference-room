@@ -12,7 +12,7 @@ type BookingRepository interface {
 	Delete(id uuid.UUID) error
 
 	CreateBookingDB(booking *Booking) error
-	GetCalendar(calendarID string) (uuid.UUID, error)
+	GetCalendar(roomNumber uint) (*Calendar, error)
 }
 
 type CalendarGateway interface {

@@ -57,15 +57,14 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.SearchFilter) error {
-	googleCalendarID := roomCalendarID[filter.Room-1]
-	calendarID, err := u.repo.GetCalendar(googleCalendarID)
+	calendar, err := u.repo.GetCalendar(uint(filter.Room))
 	if err != nil {
 		return err
 	}
 
-	booking.CalendarID = calendarID
+	booking.CalendarID = calendar.ID
 	
-	EventID, err := u.gateway.CreateEvent(booking, googleCalendarID, filter)
+	EventID, err := u.gateway.CreateEvent(booking, calendar.GoogleCalendarID, filter)
 	if err != nil {
 		return err
 	}

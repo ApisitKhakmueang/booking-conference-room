@@ -64,7 +64,6 @@ type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	CreatedAt 		time.Time				`json:"createAt"`
 	UpdatedAt 		time.Time				`json:"updatedAt"`
-	DeletedAt 		gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
 
 	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId"`
 	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId"`

@@ -57,14 +57,14 @@ func (p *postgresBookingRepo) Delete(id uuid.UUID) error {
   return nil
 }
 
-func (p *postgresBookingRepo) GetCalendar(CalendarID string) (uuid.UUID, error) {
+func (p *postgresBookingRepo) GetCalendar(roomNumber uint) (*domain.Calendar, error) {
 	calendar := new(domain.Calendar)
-	result := p.db.Select("id").Where("google_calendar_id = ?", CalendarID).First(calendar)
+	result := p.db.Select("id, google_calendar_id").Where("calendar_number = ?", roomNumber).First(calendar)
   if err := result.Error; err != nil {
-    return uuid.Nil, err
+    return nil, err
   }
 
-	return calendar.ID, result.Error
+	return calendar, result.Error
 }
 
 func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
