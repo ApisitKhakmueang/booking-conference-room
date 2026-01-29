@@ -1,7 +1,10 @@
 package repository
 
 import (
+	// "log"
 	"errors"
+	// "log"
+
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
 	"github.com/google/uuid"
@@ -54,3 +57,25 @@ func (p *postgresBookingRepo) Delete(id uuid.UUID) error {
   return nil
 }
 
+func (p *postgresBookingRepo) GetCalendar(CalendarID string) (uuid.UUID, error) {
+	calendar := new(domain.Calendar)
+	result := p.db.Select("id").Where("google_calendar_id = ?", CalendarID).First(calendar)
+  if err := result.Error; err != nil {
+    return uuid.Nil, err
+  }
+
+	return calendar.ID, result.Error
+}
+
+func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
+	calendar := new(domain.Calendar)
+	result := p.db.Select("room_id").First(calendar, booking.CalendarID)
+  if err := result.Error; err != nil {
+    return err
+  }
+
+	booking.RoomID = calendar.RoomID
+
+	result = p.db.Create(&booking)
+	return result.Error
+}

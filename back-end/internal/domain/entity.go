@@ -14,47 +14,71 @@ type Books struct {
 	Name      string    `json:"name"`
 }
 
+type SearchFilter struct {
+	Email   string `query:"email"` // จาก URL Query
+	Room   	int    `query:"room"`      // จาก URL Query
+}
+
+type BookingDetail struct {
+	Email 		string
+	StartTime string
+	EndTime 	string
+	Room 			uint
+}
+
 type Room struct {
-	gorm.Model
-	Name 				string 	`gorm:"unique"`
-	Location 		string
-	Capacity 		uint
-	IsActive 		string 	`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')"`
+	ID        	uuid.UUID 			`gorm:"type:uuid;primaryKey" json:"id"`
+	CreatedAt 	time.Time				`json:"createdAt"`
+	UpdatedAt 	time.Time				`json:"updatedAt"`
+	DeletedAt 	gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
+	
+	Name 				string 					`gorm:"unique" json:"name"`
+	Location 		string					`json:"location"`
+	Capacity 		uint						`json:"capacity"`
+	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive"`
 }
 
 type User struct {
-	ID 					uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Email 			string 
-	FullName 		string
-	AvatarUrl 	string
-	Role				string
-	CreatedAt 	time.Time
+	ID 					uuid.UUID 	`gorm:"type:uuid;primaryKey" json:"id"`
+	Email 			string 			`json:"email"`
+	FullName 		string			`json:"fullName"`
+	AvatarUrl 	string			`json:"avatarUrl"`
+	Role				string			`json:"role"`
+	CreatedAt 	time.Time		`json:"createdAt"`
 }
 
 type Calendar struct {
-	gorm.Model
-	CalendarNumber 		uint 				`gorm:"default:0"`	
-	GoogleCalendarID 	string 			`gorm:"unique;not null"`
-	RoomID 						uuid.UUID 	`gorm:"not null"`
+	ID        				uuid.UUID 					`gorm:"type:uuid;primaryKey" json:"id"`
+	CreatedAt 				time.Time						`json:"createdAt"`
+	UpdatedAt 				time.Time						`json:"updatedAt"`
+	DeletedAt 				gorm.DeletedAt 			`gorm:"index" json:"deletedAt"`
 
-	Room     Room     `gorm:"foreignKey:RoomID"`
+	CalendarNumber 		uint 								`gorm:"default:0" json:"calendarNumber"`	
+	GoogleCalendarID 	string 							`gorm:"unique;not null" json:"google_calendarId"`
+	RoomID 						uuid.UUID 					`gorm:"not null" json:"roomId"`
+
+	Room     					Room     						`gorm:"foreignKey:RoomID"`
 }
 
 type Booking struct {
-	gorm.Model
-	RoomID        uint           `gorm:"not null"`
-	UserID        uint           `gorm:"not null"`
-	CalendarID    uint           `gorm:"not null"`
-	GoogleEventID string         `gorm:"type:text"` // สำคัญมากสำหรับสถานะ cancelled
+	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	CreatedAt 		time.Time				`json:"createAt"`
+	UpdatedAt 		time.Time				`json:"updatedAt"`
+	DeletedAt 		gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
+
+	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId"`
+	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId"`
+	CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
+	GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
 	
-	StartTime     time.Time      `gorm:"not null"`
-	EndTime       time.Time      `gorm:"not null"`
+	StartTime     string      		`gorm:"not null" json:"startTime"`
+	EndTime       string      		`gorm:"not null" json:"endTime"`
 	
 	// สถานะ: confirm, cancelled, complete
-	Status        string         `gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')"`
+	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`
 
 	// Relations
-	Room     Room     `gorm:"foreignKey:RoomID"`
-	User     User     `gorm:"foreignKey:UserID"`
-	Calendar Calendar `gorm:"foreignKey:CalendarID"`
+	Room     Room     						`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	User     User     						`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Calendar Calendar 						`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

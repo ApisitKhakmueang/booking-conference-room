@@ -10,10 +10,15 @@ type BookingRepository interface {
 	Gets() ([]Books, error)
 	Update(book *Books) error
 	Delete(id uuid.UUID) error
+
+	CreateBookingDB(booking *Booking) error
+	GetCalendar(calendarID string) (uuid.UUID, error)
 }
 
 type CalendarGateway interface {
-	CreateEvent() (string, error)
-	UpdateEvent() (string, error)
-	CancelEvent() (string, error)
+	CreateEvent(booking *Booking, googleCalendarID string, filter *SearchFilter) (string, error)
+	UpdateEvent(booking *Booking, googleCalendarID string, filter *SearchFilter) error
+	CancelEvent(roomCalendarID string, eventID string) error
+	IsRoomAvailable(roomCalendarID string, Time []string) error
+	ParseTime(booking *Booking) ([]string, error)
 }
