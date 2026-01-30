@@ -53,6 +53,7 @@ func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, googleCalen
 func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) error {
 	Time, err := s.ParseTime(booking)
 	if err != nil {
+		// log.Println("out update event")
 		return err
 	}
 	
@@ -61,9 +62,9 @@ func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) err
 		return err
 	}
 
-	log.Println("enter update event")
-	log.Println("calendar id: ", booking.Calendar.GoogleCalendarID)
-	log.Println("event id: ", booking.GoogleEventID)
+	// log.Println("enter update event")
+	// log.Println("calendar id: ", booking.Calendar.GoogleCalendarID)
+	// log.Println("event id: ", booking.GoogleEventID)
 
 	event := &calendar.Event{
 		Start: 	&calendar.EventDateTime{DateTime: Time[0]},

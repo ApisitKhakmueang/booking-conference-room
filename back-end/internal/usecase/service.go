@@ -92,9 +92,9 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 			Room: roomNumber,
 		}
 
-		eventID, createErr := u.gateway.CreateEvent(booking, booking.Calendar.GoogleCalendarID, &filter)
-		if createErr != nil {
-			return createErr
+		eventID, err := u.gateway.CreateEvent(booking, booking.Calendar.GoogleCalendarID, &filter)
+		if err != nil {
+			return err
 		}
 
 		calendar, err := u.repo.GetCalendar(roomNumber)
@@ -105,12 +105,12 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 		booking.GoogleEventID = eventID
 	} else {
 		// UpdateSameRoom
-		log.Println("enter update same room")
-		log.Printf("booking: %v\n", booking)
+		// log.Println("enter update same room")
+		// log.Printf("booking: %v\n", booking)
 
 		updateErr := u.gateway.UpdateEventSameRoom(booking)
 		if updateErr != nil {
-			return err
+			return updateErr
 		}
 	}
 
