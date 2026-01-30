@@ -16,6 +16,7 @@ type BookingRepository interface {
 	GetEventID(bookingID uuid.UUID) (*Booking, error)
 	GetCalendar(roomNumber uint) (*Calendar, error)
 	CheckSameRoom(booking *Booking, roomNumber uint) error
+	CheckDayOff(date string) error
 
 	CreateBookingDB(booking *Booking) error
 	UpdateBookingDB(booking *Booking) error
@@ -23,7 +24,7 @@ type BookingRepository interface {
 }
 
 type CalendarGateway interface {
-	CreateEvent(booking *Booking, googleCalendarID string, filter *SearchFilter) (string, error)
+	CreateEvent(booking *Booking, createEvent *CreateEvent) (string, error)
 	UpdateEventSameRoom(booking *Booking) error
 	CancelEvent(roomCalendarID string, eventID string) error
 

@@ -19,20 +19,21 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 	return &googleCalendarGateway{service: client}
 }
 
-func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, googleCalendarID string, filter *domain.SearchFilter) (string, error) {
+func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent *domain.CreateEvent) (string, error) {
 	Time, err := s.ParseTime(booking)
 	if err != nil {
 		return "", err
 	}
 
-	err = s.IsRoomAvailable(googleCalendarID, Time)
+	err = s.IsRoomAvailable(createEvent.GoogleCalendarID, Time)
 	if err != nil {
 		return "", err
 	}
 
 	log.Printf("after check available")
-	summary := fmt.Sprintf("Book room %d (By %s)", filter.Room, filter.Email)
-	description := fmt.Sprintf("Booker: %s", filter.Email)
+	log.Println("calendar id: ", createEvent.GoogleCalendarID)
+	summary := fmt.Sprintf("Book %s (By %s)", createEvent.RoomName, createEvent.SearchFilter.Email)
+	description := fmt.Sprintf("Booker: %s", createEvent.SearchFilter.Email)
 
 	event := &calendar.Event{
 		Summary:     summary, // ใส่ชื่อผู้จองในหัวข้อแทน
@@ -41,7 +42,7 @@ func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, googleCalen
 		End:         &calendar.EventDateTime{DateTime: Time[1]},
 		// ลบส่วน Attendees ออกทั้งหมด
 	}
-	createdEvent, err := s.service.Events.Insert(googleCalendarID, event).Do()
+	createdEvent, err := s.service.Events.Insert(createEvent.GoogleCalendarID, event).Do()
 
 	if err != nil {
 		return "", err

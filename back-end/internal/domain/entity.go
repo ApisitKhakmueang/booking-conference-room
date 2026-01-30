@@ -19,11 +19,26 @@ type SearchFilter struct {
 	Room   	uint    `query:"room"`      // จาก URL Query
 }
 
+type CreateEvent struct {
+	GoogleCalendarID 	string
+	RoomName 					string
+	SearchFilter
+}
+
 type BookingDetail struct {
 	Email 		string
 	StartTime string
 	EndTime 	string
 	Room 			uint
+}
+
+type Holiday struct {
+	ID 				int64 			`gorm:"primaryKey;column:id" json:"id"`
+	UpdatedAt time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt"`
+	Date 			time.Time 	`gorm:"type:date;column:date;unique" json:"date"`
+	Name 			string 			`gorm:"type:text;column:name" json:"name"`
+	IsDayOff 	bool 				`gorm:"column:is_day_off;default:true" json:"isDayOff"`
+	Source 		string 			`gorm:"type:text;column:source" json:"source"`
 }
 
 type Room struct {
@@ -33,7 +48,7 @@ type Room struct {
 	DeletedAt 	gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
 	
 	Name 				string 					`gorm:"unique" json:"name"`
-	RoomNumber  uint						`json:"room_number"`
+	RoomNumber  uint						`json:"roomNumber"`
 	Location 		string					`json:"location"`
 	Capacity 		uint						`json:"capacity"`
 	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive"`

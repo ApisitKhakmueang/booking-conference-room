@@ -2,6 +2,7 @@ package usercase
 
 import (
 	"log"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/google/uuid"
@@ -58,14 +59,30 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.SearchFilter) error {
+	loc := time.FixedZone("ICT", 7*60*60)
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", booking.StartTime, loc)
+	if err != nil {
+		return err
+	}
+
+	dateToCheck := t.Format("2006-01-02")
+	if err := u.repo.CheckDayOff(dateToCheck); err != nil {
+		return err
+	}
+
 	calendar, err := u.repo.GetCalendar(filter.Room)
 	if err != nil {
 		return err
 	}
 
 	booking.CalendarID = calendar.ID
+	createEvent := &domain.CreateEvent{
+		GoogleCalendarID: calendar.GoogleCalendarID,
+		RoomName: calendar.Room.Name,
+		SearchFilter: *filter,
+	}
 	
-	eventID, err := u.gateway.CreateEvent(booking, calendar.GoogleCalendarID, filter)
+	eventID, err := u.gateway.CreateEvent(booking, createEvent)
 	if err != nil {
 		return err
 	}
@@ -80,6 +97,17 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 }
 
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
+	loc := time.FixedZone("ICT", 7*60*60)
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", booking.StartTime, loc)
+	if err != nil {
+		return err
+	}
+
+	dateToCheck := t.Format("2006-01-02")
+	if err := u.repo.CheckDayOff(dateToCheck); err != nil {
+		return err
+	}
+
 	if err := u.repo.CheckSameRoom(booking, roomNumber); err != nil {
 		// UpdateNewRoom
 		cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
@@ -88,19 +116,28 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 		}
 
 		filter := domain.SearchFilter{
-			Email: booking.User.Email,
 			Room: roomNumber,
 		}
 
-		eventID, err := u.gateway.CreateEvent(booking, booking.Calendar.GoogleCalendarID, &filter)
+		calendar, err := u.repo.GetCalendar(filter.Room)
 		if err != nil {
 			return err
 		}
 
-		calendar, err := u.repo.GetCalendar(roomNumber)
+		createEvent := &domain.CreateEvent{
+			GoogleCalendarID: booking.Calendar.GoogleCalendarID,
+			RoomName: calendar.Room.Name,
+			SearchFilter: domain.SearchFilter{
+				Email: booking.User.Email,
+				Room: roomNumber,
+			},
+		}
+
+		eventID, err := u.gateway.CreateEvent(booking, createEvent)
 		if err != nil {
 			return err
 		}
+
 		booking.CalendarID = calendar.ID
 		booking.GoogleEventID = eventID
 	} else {

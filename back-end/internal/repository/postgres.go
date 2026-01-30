@@ -57,6 +57,39 @@ func NewPostgresBookingRepo(db *gorm.DB) domain.BookingRepository {
 //   return nil
 // }
 
+func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
+	booking := new(domain.Booking)
+	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, google_calendar_id") 
+    }).
+    // 2. ส่วนของตาราง Booking (ตารางหลัก)
+    // ต้อง Select calendar_id (FK) ด้วย เพื่อให้รู้ว่าต้องไปดึง Calendar อันไหน
+    Select("google_event_id, calendar_id"). 
+    First(booking, bookingID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return booking, result.Error
+}
+
+func (p *postgresBookingRepo) GetCalendar(roomNumber uint) (*domain.Calendar, error) {
+	calendar := new(domain.Calendar)
+	result := p.db.Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name") 
+    }).
+		Select("id, room_id, google_calendar_id").
+		Where("calendar_number = ?", roomNumber).
+		First(calendar)
+  if result.Error != nil {
+    return nil, result.Error
+  }
+
+	return calendar, result.Error
+}
+
 func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber uint) error {
 	newStartTime := booking.StartTime
 	newEndTime := booking.EndTime
@@ -86,31 +119,18 @@ func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber 
 	return nil
 }
 
-func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
-	booking := new(domain.Booking)
-	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
-			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-			return db.Select("id, google_calendar_id") 
-    }).
-    // 2. ส่วนของตาราง Booking (ตารางหลัก)
-    // ต้อง Select calendar_id (FK) ด้วย เพื่อให้รู้ว่าต้องไปดึง Calendar อันไหน
-    Select("google_event_id, calendar_id"). 
-    First(booking, bookingID)
-	if result.Error != nil {
-		return nil, result.Error
+func (p *postgresBookingRepo) CheckDayOff(date string) error {
+	holiday := new(domain.Holiday)
+	result := p.db.Where("date = ? AND is_day_off = TRUE", date).First(holiday)
+
+	switch result.Error {
+		case nil:
+			return errors.New("Can't to book in day off")
+		case gorm.ErrRecordNotFound:
+			return nil
+		default:
+			return result.Error
 	}
-
-	return booking, result.Error
-}
-
-func (p *postgresBookingRepo) GetCalendar(roomNumber uint) (*domain.Calendar, error) {
-	calendar := new(domain.Calendar)
-	result := p.db.Select("id, google_calendar_id").Where("calendar_number = ?", roomNumber).First(calendar)
-  if result.Error != nil {
-    return nil, result.Error
-  }
-
-	return calendar, result.Error
 }
 
 func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
