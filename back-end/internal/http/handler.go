@@ -1,6 +1,9 @@
 package http
 
 import (
+	// "log"
+	"strconv"
+
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 
@@ -128,13 +131,43 @@ func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Create booking successfully !")
 }
 
-func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
-	id, err := uuid.Parse(c.Params("bookingID"))
+func (u *OrderHandler) UpdateBooking(c *fiber.Ctx) error {
+	bookingID, err := uuid.Parse(c.Params("bookingID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	if err := u.usecase.DeleteBooking(id) ; err != nil {
+	// ดึงจาก Query
+	roomNumber, err := strconv.Atoi(c.Query("roomNumber", "0"))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	if roomNumber == 0 {
+		return c.Status(fiber.StatusBadRequest).SendString("Please send room number")
+	}
+
+	booking := new(domain.Booking)
+	if err := c.BodyParser(booking); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	booking.ID = bookingID
+
+	if err := u.usecase.UpdateBooking(booking, uint(roomNumber)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	} 
+
+	return c.Status(fiber.StatusOK).SendString("Update book successfully")
+}
+
+func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
+	bookingID, err := uuid.Parse(c.Params("bookingID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := u.usecase.DeleteBooking(bookingID) ; err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 

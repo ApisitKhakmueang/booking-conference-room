@@ -16,7 +16,7 @@ type Books struct {
 
 type SearchFilter struct {
 	Email   string `query:"email"` // จาก URL Query
-	Room   	int    `query:"room"`      // จาก URL Query
+	Room   	uint    `query:"room"`      // จาก URL Query
 }
 
 type BookingDetail struct {
@@ -33,6 +33,7 @@ type Room struct {
 	DeletedAt 	gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
 	
 	Name 				string 					`gorm:"unique" json:"name"`
+	RoomNumber  uint						`json:"room_number"`
 	Location 		string					`json:"location"`
 	Capacity 		uint						`json:"capacity"`
 	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive"`

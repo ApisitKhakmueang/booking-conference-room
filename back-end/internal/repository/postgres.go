@@ -2,8 +2,8 @@ package repository
 
 import (
 	// "log"
-	// "errors"
-	// "log"
+
+	"errors"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
@@ -57,6 +57,35 @@ func NewPostgresBookingRepo(db *gorm.DB) domain.BookingRepository {
 //   return nil
 // }
 
+func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber uint) error {
+	newStartTime := booking.StartTime
+	newEndTime := booking.EndTime
+
+	room := new(domain.Room)
+	result := p.db.Select("id").Where("room_number = ?", roomNumber).First(room)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	result = p.db.Preload("Calendar").First(booking, booking.ID)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	booking.StartTime = newStartTime
+	booking.EndTime = newEndTime
+
+	// log.Println("room ID: ", room.ID)
+	// log.Println("room ID: ", booking.RoomID)
+	// log.Printf("booking: %v", booking)
+
+	if room.ID != booking.RoomID {
+		return errors.New("New room")
+	}
+
+	return nil
+}
+
 func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
 	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
@@ -94,6 +123,11 @@ func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
 	booking.RoomID = calendar.RoomID
 
 	result = p.db.Create(&booking)
+	return result.Error
+}
+
+func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
+	result := p.db.Save(booking)
 	return result.Error
 }
 

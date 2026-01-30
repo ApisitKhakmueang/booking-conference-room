@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -13,15 +15,19 @@ type BookingRepository interface {
 
 	GetEventID(bookingID uuid.UUID) (*Booking, error)
 	GetCalendar(roomNumber uint) (*Calendar, error)
+	CheckSameRoom(booking *Booking, roomNumber uint) error
 
 	CreateBookingDB(booking *Booking) error
+	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
 }
 
 type CalendarGateway interface {
 	CreateEvent(booking *Booking, googleCalendarID string, filter *SearchFilter) (string, error)
-	UpdateEvent(booking *Booking, googleCalendarID string, filter *SearchFilter) error
+	UpdateEventSameRoom(booking *Booking) error
 	CancelEvent(roomCalendarID string, eventID string) error
+
 	IsRoomAvailable(roomCalendarID string, Time []string) error
 	ParseTime(booking *Booking) ([]string, error)
+	CheckValidTime(startTime time.Time, endTime time.Time) error
 }

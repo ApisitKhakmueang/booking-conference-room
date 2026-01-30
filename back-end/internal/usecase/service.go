@@ -1,7 +1,7 @@
 package usercase
 
 import (
-	// "log"
+	"log"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/google/uuid"
@@ -58,21 +58,65 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.SearchFilter) error {
-	calendar, err := u.repo.GetCalendar(uint(filter.Room))
+	calendar, err := u.repo.GetCalendar(filter.Room)
 	if err != nil {
 		return err
 	}
 
 	booking.CalendarID = calendar.ID
 	
-	EventID, err := u.gateway.CreateEvent(booking, calendar.GoogleCalendarID, filter)
+	eventID, err := u.gateway.CreateEvent(booking, calendar.GoogleCalendarID, filter)
 	if err != nil {
 		return err
 	}
 	
-	booking.GoogleEventID = EventID
+	booking.GoogleEventID = eventID
 
 	if err = u.repo.CreateBookingDB(booking); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
+	if err := u.repo.CheckSameRoom(booking, roomNumber); err != nil {
+		// UpdateNewRoom
+		cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
+		if cancelErr != nil {
+			return cancelErr
+		}
+
+		filter := domain.SearchFilter{
+			Email: booking.User.Email,
+			Room: roomNumber,
+		}
+
+		eventID, createErr := u.gateway.CreateEvent(booking, booking.Calendar.GoogleCalendarID, &filter)
+		if createErr != nil {
+			return createErr
+		}
+
+		calendar, err := u.repo.GetCalendar(roomNumber)
+		if err != nil {
+			return err
+		}
+		booking.CalendarID = calendar.ID
+		booking.GoogleEventID = eventID
+	} else {
+		// UpdateSameRoom
+		log.Println("enter update same room")
+		log.Printf("booking: %v\n", booking)
+
+		updateErr := u.gateway.UpdateEventSameRoom(booking)
+		if updateErr != nil {
+			return err
+		}
+	}
+
+	log.Println("enter before update in db")
+	log.Printf("booking: %v\n", booking)
+	if err := u.repo.UpdateBookingDB(booking); err != nil {
 		return err
 	}
 

@@ -13,5 +13,6 @@ type OrderUsecase interface {
 	// DeleteBook(id uuid.UUID) error
 
 	CreateBooking(booking *Booking, filter *SearchFilter) error
+	UpdateBooking(booking *Booking, roomNumber uint) error
 	DeleteBooking(bookingID uuid.UUID) error
 }
