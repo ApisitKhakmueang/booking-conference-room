@@ -13,14 +13,15 @@ type BookingRepository interface {
 	// Update(book *Books) error
 	// Delete(id uuid.UUID) error
 
+	CreateBookingDB(booking *Booking) error
+	GetMonthBookingDB(dateTime *Date, roomID uuid.UUID) (*[]Booking, error)
+	UpdateBookingDB(booking *Booking) error
+	DeleteBookingDB(bookingID uuid.UUID) error
+
 	GetEventID(bookingID uuid.UUID) (*Booking, error)
 	GetCalendar(roomNumber uint) (*Calendar, error)
 	CheckSameRoom(booking *Booking, roomNumber uint) error
 	CheckDayOff(date string) error
-
-	CreateBookingDB(booking *Booking) error
-	UpdateBookingDB(booking *Booking) error
-	DeleteBookingDB(bookingID uuid.UUID) error
 }
 
 type CalendarGateway interface {

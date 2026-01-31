@@ -146,6 +146,30 @@ func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
 	return result.Error
 }
 
+func (p *postgresBookingRepo) GetMonthBookingDB(dateTime *domain.Date, roomID uuid.UUID) (*[]domain.Booking, error) {
+	var bookings []domain.Booking
+
+	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
+	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
+	result := p.db.
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name") 
+    }).
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+        return db.Select("id, email, full_name")
+    }).
+		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", dateTime.StartStr, dateTime.EndStr, roomID).
+		Order("start_time desc").
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &bookings, nil
+}
+
 func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
 	result := p.db.Save(booking)
 	return result.Error

@@ -14,6 +14,11 @@ type Books struct {
 	Name      string    `json:"name"`
 }
 
+type Schedule struct {
+	Date   string    `json:"date"`
+	Events []Booking `json:"events"`
+}
+
 type SearchFilter struct {
 	Email   string `query:"email"` // จาก URL Query
 	Room   	uint    `query:"room"`      // จาก URL Query
@@ -23,6 +28,11 @@ type CreateEvent struct {
 	GoogleCalendarID 	string
 	RoomName 					string
 	SearchFilter
+}
+
+type Date struct {
+	StartStr 	string
+	EndStr 		string
 }
 
 type BookingDetail struct {
@@ -73,7 +83,7 @@ type Calendar struct {
 	GoogleCalendarID 	string 							`gorm:"unique;not null" json:"google_calendarId"`
 	RoomID 						uuid.UUID 					`gorm:"not null" json:"roomId"`
 
-	Room     					Room     						`gorm:"foreignKey:RoomID"`
+	Room     					*Room     						`gorm:"foreignKey:RoomID" json:"Calendar,omitempty"`
 }
 
 type Booking struct {
@@ -93,7 +103,7 @@ type Booking struct {
 	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`
 
 	// Relations
-	Room     			Room     				`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	User     			User     				`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Calendar 			Calendar 				`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Room     			*Room     			`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Room,omitempty"`
+	User     			*User     			`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"User,omitempty"`
+	Calendar 			*Calendar 			`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Calendar,omitempty"`
 }

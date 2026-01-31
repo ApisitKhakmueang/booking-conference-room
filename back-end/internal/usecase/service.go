@@ -2,9 +2,10 @@ package usercase
 
 import (
 	"log"
-	"time"
+	// "time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 	"github.com/google/uuid"
 	// "github.com/google/uuid"
 )
@@ -59,8 +60,8 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.SearchFilter) error {
-	loc := time.FixedZone("ICT", 7*60*60)
-	t, err := time.ParseInLocation("2006-01-02 15:04:05", booking.StartTime, loc)
+	layout := "2006-01-02 15:04:05"
+	t, err := helper.ParseTimeFormat(layout, booking.StartTime)
 	if err != nil {
 		return err
 	}
@@ -96,9 +97,44 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 	return nil
 }
 
+func (u *orderUsecase) GetMonthBooking(date string, roomNumber uint) ([]domain.Schedule, error) {
+	var response []domain.Schedule
+
+	DateTime, err := helper.ConvertDateToStr(date)
+	if err != nil {
+		return nil, err
+	}
+
+	calendar, err := u.repo.GetCalendar(roomNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	bookings, err := u.repo.GetMonthBookingDB(DateTime, calendar.RoomID)
+	if err != nil {
+		return nil, err
+	}
+	// log.Printf("bookings: %v\n", bookings)
+	
+	groupBookings := helper.ConvertBooking(*bookings)
+
+	log.Printf("bookings: %v\n", groupBookings)
+
+	for date, events := range groupBookings {
+		response = append(response, domain.Schedule{
+			Date:   date,
+			Events: events,
+		})
+	}
+
+	log.Printf("response: %v", response)
+
+	return response, nil
+}
+
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
-	loc := time.FixedZone("ICT", 7*60*60)
-	t, err := time.ParseInLocation("2006-01-02 15:04:05", booking.StartTime, loc)
+	layout := "2006-01-02 15:04:05"
+	t, err := helper.ParseTimeFormat(layout, booking.StartTime)
 	if err != nil {
 		return err
 	}

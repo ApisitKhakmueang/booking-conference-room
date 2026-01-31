@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"google.golang.org/api/calendar/v3"
 )
@@ -117,14 +118,12 @@ func (u *googleCalendarGateway) ParseTime(booking *domain.Booking) ([]string, er
 	var timeSlice []string
 
 	layout := "2006-01-02 15:04:05"
-	loc := time.FixedZone("ICT", 7*60*60)
-
-	start, err := time.ParseInLocation(layout, booking.StartTime, loc)
+	start, err := helper.ParseTimeFormat(layout, booking.StartTime)
 	if err != nil {
 		return timeSlice, err
 	}
 
-	end, err := time.ParseInLocation(layout, booking.EndTime, loc)
+	end, err := helper.ParseTimeFormat(layout, booking.EndTime)
 	if err != nil {
 		return timeSlice, err
 	}

@@ -138,7 +138,7 @@ func (u *OrderHandler) UpdateBooking(c *fiber.Ctx) error {
 	}
 
 	// ดึงจาก Query
-	roomNumber, err := strconv.Atoi(c.Query("roomNumber", "0"))
+	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -159,6 +159,23 @@ func (u *OrderHandler) UpdateBooking(c *fiber.Ctx) error {
 	} 
 
 	return c.Status(fiber.StatusOK).SendString("Update book successfully")
+}
+
+func (u *OrderHandler) GetMonthBooking(c *fiber.Ctx) error {
+	date := c.Params("date")
+
+	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	response, err := u.usecase.GetMonthBooking(date, uint(roomNumber))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	// log.Printf("res: %v", response)
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
 func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
