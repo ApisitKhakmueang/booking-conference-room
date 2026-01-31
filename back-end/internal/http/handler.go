@@ -1,7 +1,7 @@
 package http
 
 import (
-	// "log"
+	"log"
 	"strconv"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
@@ -106,15 +106,9 @@ func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	filter := new(domain.SearchFilter)
-
-	// ดึงจาก Query
-	if err = c.QueryParser(filter); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-	
-	if filter.Email == "" || filter.Room == 0 {
-		return c.Status(fiber.StatusBadRequest).SendString("Please send email and room number")
+	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 	
 	booking := new(domain.Booking)
@@ -124,7 +118,7 @@ func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {
 
 	booking.UserID = id
 
-	if err := u.usecase.CreateBooking(booking, filter) ; err != nil {
+	if err := u.usecase.CreateBooking(booking, uint(roomNumber)) ; err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
@@ -161,15 +155,23 @@ func (u *OrderHandler) UpdateBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Update book successfully")
 }
 
-func (u *OrderHandler) GetMonthBooking(c *fiber.Ctx) error {
+func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
 	date := c.Params("date")
 
-	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	filter := new(domain.GetBookingFilter)
+
+	// ดึงจาก Query
+	if err := c.QueryParser(filter); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	response, err := u.usecase.GetMonthBooking(date, uint(roomNumber))
+	log.Printf("duration: %s, room: %v", filter.Duration, filter.Room)
+	
+	if filter.Duration == "" || filter.Room == 0 {
+		return c.Status(fiber.StatusBadRequest).SendString("Please send duration and room number")
+	}
+
+	response, err := u.usecase.GetBooking(date, filter)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

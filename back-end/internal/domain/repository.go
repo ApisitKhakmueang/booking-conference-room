@@ -14,12 +14,13 @@ type BookingRepository interface {
 	// Delete(id uuid.UUID) error
 
 	CreateBookingDB(booking *Booking) error
-	GetMonthBookingDB(dateTime *Date, roomID uuid.UUID) (*[]Booking, error)
+	GetBookingDB(dateTime *Date, roomID uuid.UUID) (*[]Booking, error)
 	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
 
 	GetEventID(bookingID uuid.UUID) (*Booking, error)
 	GetCalendar(roomNumber uint) (*Calendar, error)
+	GetUser(userID uuid.UUID) (*User, error)
 	CheckSameRoom(booking *Booking, roomNumber uint) error
 	CheckDayOff(date string) error
 }

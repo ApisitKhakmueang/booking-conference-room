@@ -33,8 +33,8 @@ func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent
 
 	log.Printf("after check available")
 	log.Println("calendar id: ", createEvent.GoogleCalendarID)
-	summary := fmt.Sprintf("Book %s (By %s)", createEvent.RoomName, createEvent.SearchFilter.Email)
-	description := fmt.Sprintf("Booker: %s", createEvent.SearchFilter.Email)
+	summary := fmt.Sprintf("Book %s (By %s)", createEvent.RoomName, createEvent.Email)
+	description := fmt.Sprintf("Booker: %s", createEvent.Email)
 
 	event := &calendar.Event{
 		Summary:     summary, // ใส่ชื่อผู้จองในหัวข้อแทน

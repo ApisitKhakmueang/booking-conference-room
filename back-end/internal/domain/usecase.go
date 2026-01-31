@@ -12,8 +12,8 @@ type OrderUsecase interface {
 	// UpdateBook(book *Books) error 
 	// DeleteBook(id uuid.UUID) error
 
-	CreateBooking(booking *Booking, filter *SearchFilter) error
-	GetMonthBooking(date string, roomNumber uint) ([]Schedule, error)
+	CreateBooking(booking *Booking, roomNumber uint) error
+	GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
 	UpdateBooking(booking *Booking, roomNumber uint) error
 	DeleteBooking(bookingID uuid.UUID) error
 }

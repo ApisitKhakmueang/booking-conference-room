@@ -19,15 +19,20 @@ type Schedule struct {
 	Events []Booking `json:"events"`
 }
 
-type SearchFilter struct {
-	Email   string `query:"email"` // จาก URL Query
-	Room   	uint    `query:"room"`      // จาก URL Query
+// type CreateBookFilter struct {
+// 	Email   string 		`query:"email"` // จาก URL Query
+// 	Room   	uint    	`query:"room"`      // จาก URL Query
+// }
+
+type GetBookingFilter struct {
+	Duration   	string 	`query:"duration"` // จาก URL Query
+	Room   			uint    `query:"room"`      // จาก URL Query
 }
 
 type CreateEvent struct {
 	GoogleCalendarID 	string
 	RoomName 					string
-	SearchFilter
+	Email 						string
 }
 
 type Date struct {

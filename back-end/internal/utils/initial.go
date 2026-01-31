@@ -49,7 +49,7 @@ func InitialFiber(handler *http.OrderHandler) *fiber.App {
 	// app.Delete("/book/:id", handler.DeleteBook)
 
 	app.Post("api/booking/:id", handler.CreateBooking)
-	app.Get("api/booking/:date", handler.GetMonthBooking)
+	app.Get("api/booking/:date", handler.GetBooking)
 	app.Put("api/booking/:bookingID", handler.UpdateBooking)
 	app.Delete("api/booking/:bookingID", handler.DeleteBooking)
 

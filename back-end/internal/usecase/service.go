@@ -59,7 +59,7 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // 	return u.repo.Delete(id)
 // }
 
-func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.SearchFilter) error {
+func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
 	layout := "2006-01-02 15:04:05"
 	t, err := helper.ParseTimeFormat(layout, booking.StartTime)
 	if err != nil {
@@ -71,7 +71,12 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 		return err
 	}
 
-	calendar, err := u.repo.GetCalendar(filter.Room)
+	calendar, err := u.repo.GetCalendar(roomNumber)
+	if err != nil {
+		return err
+	}
+
+	user, err := u.repo.GetUser(booking.UserID)
 	if err != nil {
 		return err
 	}
@@ -80,7 +85,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 	createEvent := &domain.CreateEvent{
 		GoogleCalendarID: calendar.GoogleCalendarID,
 		RoomName: calendar.Room.Name,
-		SearchFilter: *filter,
+		Email: user.Email,
 	}
 	
 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
@@ -97,28 +102,28 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, filter *domain.Sea
 	return nil
 }
 
-func (u *orderUsecase) GetMonthBooking(date string, roomNumber uint) ([]domain.Schedule, error) {
+func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) ([]domain.Schedule, error) {
 	var response []domain.Schedule
 
-	DateTime, err := helper.ConvertDateToStr(date)
+	DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
 	if err != nil {
 		return nil, err
 	}
 
-	calendar, err := u.repo.GetCalendar(roomNumber)
+	calendar, err := u.repo.GetCalendar(filter.Room)
 	if err != nil {
 		return nil, err
 	}
 
-	bookings, err := u.repo.GetMonthBookingDB(DateTime, calendar.RoomID)
+	bookings, err := u.repo.GetBookingDB(DateTime, calendar.RoomID)
 	if err != nil {
 		return nil, err
 	}
-	// log.Printf("bookings: %v\n", bookings)
+	log.Printf("bookings: %v\n", bookings)
 	
 	groupBookings := helper.ConvertBooking(*bookings)
 
-	log.Printf("bookings: %v\n", groupBookings)
+	// log.Printf("bookings: %v\n", groupBookings)
 
 	for date, events := range groupBookings {
 		response = append(response, domain.Schedule{
@@ -127,7 +132,7 @@ func (u *orderUsecase) GetMonthBooking(date string, roomNumber uint) ([]domain.S
 		})
 	}
 
-	log.Printf("response: %v", response)
+	// log.Printf("response: %v", response)
 
 	return response, nil
 }
@@ -144,29 +149,33 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 		return err
 	}
 
+	// log.Println("after check day off")
+
 	if err := u.repo.CheckSameRoom(booking, roomNumber); err != nil {
 		// UpdateNewRoom
+		// log.Println("enter update new room")
+
 		cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
 		if cancelErr != nil {
 			return cancelErr
 		}
 
-		filter := domain.SearchFilter{
-			Room: roomNumber,
+		// log.Println("After cancel event")
+
+		calendar, err := u.repo.GetCalendar(roomNumber)
+		if err != nil {
+			return err
 		}
 
-		calendar, err := u.repo.GetCalendar(filter.Room)
+		user, err := u.repo.GetUser(booking.UserID)
 		if err != nil {
 			return err
 		}
 
 		createEvent := &domain.CreateEvent{
-			GoogleCalendarID: booking.Calendar.GoogleCalendarID,
+			GoogleCalendarID: calendar.GoogleCalendarID,
 			RoomName: calendar.Room.Name,
-			SearchFilter: domain.SearchFilter{
-				Email: booking.User.Email,
-				Room: roomNumber,
-			},
+			Email: user.Email,
 		}
 
 		eventID, err := u.gateway.CreateEvent(booking, createEvent)
@@ -174,8 +183,14 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 			return err
 		}
 
+
 		booking.CalendarID = calendar.ID
 		booking.GoogleEventID = eventID
+
+		booking.Calendar = nil
+		// log.Println("room id: ", booking.RoomID)
+		// log.Println("calnedarID: ", booking.CalendarID)
+		// log.Println("event id: ", booking.GoogleEventID)
 	} else {
 		// UpdateSameRoom
 		// log.Println("enter update same room")

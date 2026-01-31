@@ -90,29 +90,42 @@ func (p *postgresBookingRepo) GetCalendar(roomNumber uint) (*domain.Calendar, er
 	return calendar, result.Error
 }
 
+func (p *postgresBookingRepo) GetUser(userID uuid.UUID) (*domain.User, error) {
+	user := new(domain.User)
+	result := p.db.First(user, userID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return user, nil
+}
+
 func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber uint) error {
 	newStartTime := booking.StartTime
 	newEndTime := booking.EndTime
-
+	
 	room := new(domain.Room)
 	result := p.db.Select("id").Where("room_number = ?", roomNumber).First(room)
 	if result.Error != nil {
 		return result.Error
 	}
-
+	
 	result = p.db.Preload("Calendar").First(booking, booking.ID)
 	if result.Error != nil {
 		return result.Error
 	}
-
+	
 	booking.StartTime = newStartTime
 	booking.EndTime = newEndTime
+
+	// log.Println("enter check same room")
 
 	// log.Println("room ID: ", room.ID)
 	// log.Println("room ID: ", booking.RoomID)
 	// log.Printf("booking: %v", booking)
 
 	if room.ID != booking.RoomID {
+		booking.RoomID = room.ID
 		return errors.New("New room")
 	}
 
@@ -146,7 +159,7 @@ func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
 	return result.Error
 }
 
-func (p *postgresBookingRepo) GetMonthBookingDB(dateTime *domain.Date, roomID uuid.UUID) (*[]domain.Booking, error) {
+func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UUID) (*[]domain.Booking, error) {
 	var bookings []domain.Booking
 
 	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
