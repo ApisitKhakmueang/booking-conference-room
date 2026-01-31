@@ -15,13 +15,27 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
 
   return (
     <button type="button" className={cn("p-5 cursor-pointer flex justify-center", className)} onClick={toggle}>
-      <div className="dark:flex hidden gap-2 bg-card hover:bg-hover hover:text-main transition-colors p-3 rounded-full shadow-xl">
+      <div className="dark:flex hidden bg-card hover:bg-hover hover:text-main transition-colors p-3 rounded-full shadow-xl">
         <Moon />
-        {isOpen && 'Dark'}
+        <span
+          className={`
+            overflow-hidden whitespace-nowrap transition-duration-300 ease-in-out
+            ${isOpen ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+          `}
+        >
+          Dark
+        </span>
       </div>
-      <div className="flex dark:hidden gap-2 bg-light-card hover:bg-light-hover text-white transition-colors p-3 rounded-full shadow-xl">
+      <div className="flex dark:hidden bg-light-card hover:bg-light-hover text-white transition-colors p-3 rounded-full shadow-xl">
         <Sun />
-        {isOpen &&'Light'}
+        <span
+          className={`
+            overflow-hidden whitespace-nowrap transition-duration-300 ease-in-out
+            ${isOpen ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+          `}
+        >
+          Light
+        </span>
       </div>
     </button>
   )
