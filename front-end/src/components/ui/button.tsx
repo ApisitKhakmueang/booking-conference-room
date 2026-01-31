@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { ButtonHTMLAttributes } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'slate' | 'dark-purple'
-type ButtonSize = 'sm' | 'md' | 'lg' | 'circle'
+type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -49,5 +49,4 @@ const sizeStyles = {
   sm: 'px-3 py-2 text-sm',
   md: 'px-4 py-2',
   lg: 'px-6 py-3 text-lg',
-  circle: 'p-3',
 }

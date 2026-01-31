@@ -56,7 +56,6 @@ export default function EditProfileForm() {
           <Button 
             type="button"
             variant="danger" 
-            size="circle"
             onClick={cancelImage}
             className="absolute -top-1 -right-1 p-1.5">
             <X />
