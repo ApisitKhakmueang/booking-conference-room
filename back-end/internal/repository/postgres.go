@@ -57,6 +57,74 @@ func NewPostgresBookingRepo(db *gorm.DB) domain.BookingRepository {
 //   return nil
 // }
 
+func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
+	calendar := new(domain.Calendar)
+	result := p.db.Select("room_id").First(calendar, booking.CalendarID)
+  if result.Error != nil {
+    return result.Error
+  }
+
+	booking.RoomID = calendar.RoomID
+
+	result = p.db.Create(&booking)
+	return result.Error
+}
+
+func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+
+	result := p.db.
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
+    }).
+		Where("user_id = ?", userID).
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
+func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+
+	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
+	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
+	result := p.db.
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name") 
+    }).
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+        return db.Select("id, email, full_name")
+    }).
+		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", dateTime.StartStr, dateTime.EndStr, roomID).
+		Order("start_time desc").
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
+func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
+	result := p.db.Save(booking)
+	return result.Error
+}
+
+func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
+	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
+	booking := new(domain.Booking)
+	result := p.db.Model(booking).Select("status").Where("id = ?", bookingID).Updates(domain.Booking{
+		Status: "cancelled",
+	})
+	return result.Error
+}
+
 func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
 	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
@@ -144,55 +212,4 @@ func (p *postgresBookingRepo) CheckDayOff(date string) error {
 		default:
 			return result.Error
 	}
-}
-
-func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
-	calendar := new(domain.Calendar)
-	result := p.db.Select("room_id").First(calendar, booking.CalendarID)
-  if result.Error != nil {
-    return result.Error
-  }
-
-	booking.RoomID = calendar.RoomID
-
-	result = p.db.Create(&booking)
-	return result.Error
-}
-
-func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UUID) (*[]domain.Booking, error) {
-	var bookings []domain.Booking
-
-	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
-	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
-	result := p.db.
-		Preload("Room", func(db *gorm.DB) *gorm.DB {
-			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-			return db.Select("id, name") 
-    }).
-		Preload("User", func(db *gorm.DB) *gorm.DB {
-        return db.Select("id, email, full_name")
-    }).
-		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", dateTime.StartStr, dateTime.EndStr, roomID).
-		Order("start_time desc").
-		Find(&bookings)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return &bookings, nil
-}
-
-func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
-	result := p.db.Save(booking)
-	return result.Error
-}
-
-func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
-	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
-	booking := new(domain.Booking)
-	result := p.db.Model(booking).Select("status").Where("id = ?", bookingID).Updates(domain.Booking{
-		Status: "cancelled",
-	})
-	return result.Error
 }

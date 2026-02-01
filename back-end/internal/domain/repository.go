@@ -14,7 +14,8 @@ type BookingRepository interface {
 	// Delete(id uuid.UUID) error
 
 	CreateBookingDB(booking *Booking) error
-	GetBookingDB(dateTime *Date, roomID uuid.UUID) (*[]Booking, error)
+	GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
+	GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
 	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
 

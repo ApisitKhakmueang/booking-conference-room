@@ -102,6 +102,15 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 	return nil
 }
 
+func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
+	bookings, err := u.repo.GetUserBookingDB(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return bookings, nil
+}
+
 func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) ([]domain.Schedule, error) {
 	var response []domain.Schedule
 
@@ -121,7 +130,7 @@ func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) 
 	}
 	log.Printf("bookings: %v\n", bookings)
 	
-	groupBookings := helper.ConvertBooking(*bookings)
+	groupBookings := helper.ConvertBooking(bookings)
 
 	// log.Printf("bookings: %v\n", groupBookings)
 
