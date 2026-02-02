@@ -1,8 +1,10 @@
 package helper
 
 import (
-	"time"
 	"fmt"
+	"strings"
+	"time"
+	"errors"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 )
@@ -88,4 +90,83 @@ func GetStartDayWeek(t time.Time) time.Time {
 	startOfWeek := t.AddDate(0, 0, -offset)
 
 	return startOfWeek
+}
+
+func CheckIsDayOff(summary string, description string) bool {
+	// แปลงเป็นตัวพิมพ์เล็กทั้งหมดเพื่อให้เช็คง่าย
+	summaryLower := strings.ToLower(summary)
+	descLower := strings.ToLower(description)
+
+	// 1. Blacklist Keywords: คำที่ถ้าเจอในชื่อวัน แสดงว่า "ไม่หยุด" แน่นอน
+	notHolidayKeywords := []string{
+		"valentine",    // วาเลนไทน์
+		"halloween",    // ฮาโลวีน
+		"loy krathong", // ลอยกระทง
+		"christmas eve",
+		"observance",   // วันสำคัญทางศาสนาที่ไม่หยุด
+		"วาเลนไทน์",
+		"ฮาโลวีน",
+		"ลอยกระทง",
+		"คริสต์มาสอีฟ",
+		"วันสำคัญ",
+	}
+
+	for _, keyword := range notHolidayKeywords {
+		if strings.Contains(summaryLower, keyword) {
+			return false // เจอคำต้องห้าม = ไม่หยุด
+		}
+	}
+
+	// 2. เช็คจาก Description (Google มักจะระบุประเภทวันหยุดไว้)
+	// ถ้าใน description มีคำว่า "observance" (การสังเกตการณ์/วันสำคัญ) ถือว่าไม่หยุด
+	if strings.Contains(descLower, "observance") || strings.Contains(strings.ToLower(descLower), "วันสำคัญ") {
+		return false
+	}
+
+	// 3. (Optional) Whitelist: ถ้าต้องการความชัวร์ระดับสูง
+	// อาจจะเช็คว่าต้องมีคำว่า "holiday", "หยุดราชการ" ถึงจะให้ผ่าน
+	// แต่ปกติแค่ Blacklist ก็เพียงพอแล้วสำหรับ Calendar ไทย
+
+	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
+}
+
+func ParseTime(booking *domain.Booking) ([]string, error) {
+	var timeSlice []string
+
+	layout := "2006-01-02 15:04:05"
+	start, err := ParseTimeFormat(layout, booking.StartTime)
+	if err != nil {
+		return timeSlice, err
+	}
+
+	end, err := ParseTimeFormat(layout, booking.EndTime)
+	if err != nil {
+		return timeSlice, err
+	}
+
+	if err = CheckValidTime(start, end); err != nil {
+		return timeSlice, err
+	}
+
+	timeSlice = append(timeSlice, start.Format(time.RFC3339))
+	timeSlice = append(timeSlice, end.Format(time.RFC3339))
+
+	return timeSlice, nil
+}
+
+func CheckValidTime(startTime time.Time, endTime time.Time) error {
+	startLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 8, 0, 0, 0, startTime.Location())
+	endLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 20, 0, 0, 0, startTime.Location())
+
+	// 4. ตรวจสอบเงื่อนไข (ต้องไม่ก่อน 08:00 และ ต้องไม่หลัง 20:00)
+	// หมายเหตุ: ใช้ Equal เพื่อรวมขอบเขต 08:00:00 และ 20:00:00 เป๊ะๆ ด้วย
+	isStartValid := (startTime.Equal(startLimit) || startTime.After(startLimit)) && (startTime.Equal(endLimit) || startTime.Before(endLimit))
+	isEndValid := (endTime.Equal(startLimit) || endTime.After(startLimit)) && (endTime.Equal(endLimit) || endTime.Before(endLimit))
+	// log.Printf("isStartValid: %v, isEndValid: %v", isStartValid, isEndValid)
+
+	if !(isStartValid && isEndValid) {
+		return errors.New("Please booking in 8 a.m. - 8 p.m.")
+	} 
+
+	return nil
 }
