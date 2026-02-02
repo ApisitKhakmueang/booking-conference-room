@@ -2,7 +2,7 @@ package usercase
 
 import (
 	"log"
-	// "time"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
@@ -237,4 +237,82 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarResponse, error) {
+	loc := time.FixedZone("ICT", 7*60*60)
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
+	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+
+	startWeekday := int(startDate.Weekday())
+
+	// 2. หาจำนวนวันทั้งหมดในเดือน
+	totalDays := endDate.Day()
+
+	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
+	var weekends []int
+	for day := range totalDays {
+		d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+		if d.Weekday() == time.Saturday || d.Weekday() == time.Sunday {
+			weekends = append(weekends, day)
+		}
+	}
+
+	holidays, err := u.repo.GetHolidayDB(startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &domain.CalendarResponse{
+		Year:         year,
+		Month:        month,
+		TotalDays:    totalDays,
+		StartWeekday: startWeekday,
+		Weekends:     weekends,
+		Holidays:     nil,
+	}
+
+	if len(holidays) > 0 {
+		response.Holidays = holidays
+		return response, nil
+	}
+
+	googleHolidays, err := u.gateway.FetchHolidays(year) 
+	if err != nil {
+		return nil, err // ถ้าต่อ Google ไม่ได้ ก็จบ
+	}
+
+	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
+	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
+	if len(googleHolidays) > 0 {
+		if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
+			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้ 
+			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
+			log.Println("Failed to cache holidays:", err)
+		}
+	}
+
+	response.Holidays = googleHolidays
+	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
+	return response, nil
+}	
+
+func (u *orderUsecase) CheckTimeUpdated(year uint, month uint) (*time.Time, error) {
+	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
+	loc := time.FixedZone("ICT", 7*60*60)
+	startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
+	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+
+	lastUpdated, err := u.repo.CheckLatestUpdateHoliday(startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
+	checkTime := time.Now() 
+	if lastUpdated != nil {
+		checkTime = *lastUpdated
+	}
+
+	return &checkTime, nil
 }
