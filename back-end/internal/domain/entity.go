@@ -1,10 +1,12 @@
 package domain
 
 import (
+	"fmt"
+	"strings"
 	"time"
+	"database/sql/driver"
 
 	"github.com/google/uuid"
-
 	"gorm.io/gorm"
 )
 
@@ -24,6 +26,86 @@ type Schedule struct {
 // 	Room   	uint    	`query:"room"`      // จาก URL Query
 // }
 
+// type BookingDetail struct {
+// 	Email 		string
+// 	StartTime string
+// 	EndTime 	string
+// 	Room 			uint
+// }
+
+// 1. สร้าง Type ใหม่ชื่อ Date
+type DateRes time.Time
+
+// 2. Implement MarshalJSON: กำหนดหน้าตาตอนเป็น JSON
+func (d DateRes) MarshalJSON() ([]byte, error) {
+	t := time.Time(d)
+	// จัด Format เป็น YYYY-MM-DD และต้องใส่เครื่องหมาย " ครอบด้วย
+	formatted := fmt.Sprintf("\"%s\"", t.Format("2006-01-02"))
+	return []byte(formatted), nil
+}
+
+// 3. Implement UnmarshalJSON: รองรับการรับค่า JSON เข้ามา
+func (d *DateRes) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return err
+	}
+	*d = DateRes(t)
+	return nil
+}
+
+// 4. Implement Value: ให้ GORM รู้ว่าจะเซฟลง DB ยังไง
+func (d DateRes) Value() (driver.Value, error) {
+	return time.Time(d), nil
+}
+
+// 5. Implement Scan: ให้ GORM รู้ว่าจะดึงจาก DB มาใส่ตัวแปรยังไง
+func (d *DateRes) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+	
+	switch v := value.(type) {
+	case time.Time:
+		*d = DateRes(v)
+	case []byte:
+		t, err := time.Parse("2006-01-02", string(v))
+		if err != nil {
+			return err
+		}
+		*d = DateRes(t)
+	case string:
+		t, err := time.Parse("2006-01-02", v)
+		if err != nil {
+			return err
+		}
+		*d = DateRes(t)
+	}
+	return nil
+}
+
+// Helper: แปลงกลับเป็น time.Time ปกติ (เผื่อต้องเอาไปคำนวณบวกลบวัน)
+func (d DateRes) Time() time.Time {
+	return time.Time(d)
+}
+
+// Response
+type CalendarResponse struct {
+	Year         int       `json:"year"`
+	Month        int       `json:"month"`
+	TotalDays    int       `json:"total_days"`
+	StartWeekday int       `json:"start_weekday"` // 0=อาทิตย์, 1=จันทร์... (เอาไปวาดช่องว่างหน้าปฏิทิน)
+	Weekends     []int     `json:"weekend_days"`  // [1, 7, 8, 14, 15...]
+	Holidays     []Holiday `json:"holidays"`      // ข้อมูลจาก DB
+}
+
+// Query & group data
+type CalendarFilter struct {
+	Year		uint		`query:"year"`
+	Month 	uint 		`query:"month"`
+}
+
 type GetBookingFilter struct {
 	Duration   	string 	`query:"duration"` // จาก URL Query
 	Room   			uint    `query:"room"`      // จาก URL Query
@@ -40,19 +122,14 @@ type Date struct {
 	EndStr 		string
 }
 
-type BookingDetail struct {
-	Email 		string
-	StartTime string
-	EndTime 	string
-	Room 			uint
-}
 
+// Schema
 type Holiday struct {
 	ID 				int64 			`gorm:"primaryKey;column:id" json:"id"`
 	UpdatedAt time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt"`
-	Date 			time.Time 	`gorm:"type:date;column:date;unique" json:"date"`
+	Date 			DateRes 		`gorm:"type:date;column:date;unique" json:"date"`
 	Name 			string 			`gorm:"type:text;column:name" json:"name"`
-	IsDayOff 	bool 				`gorm:"column:is_day_off;default:true" json:"isDayOff"`
+	IsDayOff 	*bool 			`gorm:"column:is_day_off;default:true" json:"isDayOff"`
 	Source 		string 			`gorm:"type:text;column:source" json:"source"`
 }
 
