@@ -1,19 +1,20 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"context"
 
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/http"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 
+	"github.com/gofiber/fiber/v2"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -48,11 +49,11 @@ func InitialFiber(handler *http.OrderHandler) *fiber.App {
 	// app.Put("/book/:id", handler.UpdateBook)
 	// app.Delete("/book/:id", handler.DeleteBook)
 
-	app.Post("api/booking/:id", handler.CreateBooking)
-	app.Get("api/booking/:date", handler.GetBooking)
-	app.Get("api/userBooking/:id", handler.GetUserBooking)
-	app.Put("api/booking/:bookingID", handler.UpdateBooking)
-	app.Delete("api/booking/:bookingID", handler.DeleteBooking)
+	api := app.Group("/api")
+
+	controller.InitialBookingRoute(api, handler)
+
+	app.Get("/test/calendar", handler.GetCalendar)
 
 	return app
 }
