@@ -3,12 +3,15 @@ package repository
 import (
 	// "log"
 
+	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type postgresBookingRepo struct {
@@ -125,6 +128,35 @@ func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
 	return result.Error
 }
 
+func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
+	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
+	sDate := startDate.Format("2006-01-02")
+	eDate := endDate.Format("2006-01-02")
+
+	var holidays []domain.Holiday
+	// SQL: SELECT * FROM holidays WHERE date ...
+	result := p.db.Where("date >= ? AND date <= ?", sDate, eDate).Order("date ASC").Find(&holidays)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return holidays, nil
+}
+
+func (r *postgresBookingRepo) BulkUpsertHolidays(holidays []domain.Holiday) error {
+	if len(holidays) == 0 {
+		return nil
+	}
+
+	// ใช้ Batch Upsert เดิมของคุณ ดีมากแล้วครับ
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "date"}}, // เช็คซ้ำที่วันที่
+		DoUpdates: clause.AssignmentColumns([]string{"name", "is_day_off", "updated_at"}), // อัปเดตข้อมูลใหม่
+	}).Create(&holidays)
+
+	return result.Error
+}
+
 func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
 	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
@@ -212,4 +244,30 @@ func (p *postgresBookingRepo) CheckDayOff(date string) error {
 		default:
 			return result.Error
 	}
+}
+
+func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error){
+	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
+	sDate := startDate.Format("2006-01-02")
+	eDate := endDate.Format("2006-01-02")
+
+	var result sql.NullTime
+
+	err := p.db.Model(&domain.Holiday{}).
+		Select("MAX(updated_at)").
+		Where("date >= ? AND date <= ?", sDate, eDate).
+		Scan(&result).Error // Scan เข้า sql.NullTime
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
+	if result.Valid {
+		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
+		return &result.Time, nil
+	}
+
+	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
+	return nil, nil
 }

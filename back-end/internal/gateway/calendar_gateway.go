@@ -8,6 +8,7 @@ import (
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
+	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"google.golang.org/api/calendar/v3"
 )
@@ -21,7 +22,7 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 }
 
 func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent *domain.CreateEvent) (string, error) {
-	Time, err := s.ParseTime(booking)
+	Time, err := helper.ParseTime(booking)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +54,7 @@ func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent
 }
 
 func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) error {
-	Time, err := s.ParseTime(booking)
+	Time, err := helper.ParseTime(booking)
 	if err != nil {
 		// log.Println("out update event")
 		return err
@@ -91,6 +92,55 @@ func (s *googleCalendarGateway) CancelEvent(roomCalendarID string, eventID strin
 	return nil
 }
 
+func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
+	// 1. Set Time Range (ตามปีที่ส่งมา)
+	calendarID := "en.th#holiday@group.v.calendar.google.com"
+
+	loc := time.FixedZone("ICT", 7*60*60)
+	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
+	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
+
+	// 2. Fetch Events
+	events, err := r.service.Events.List(calendarID).
+		ShowDeleted(false).
+		SingleEvents(true).
+		TimeMin(timeMin).
+		TimeMax(timeMax).
+		OrderBy("startTime").
+		Do()
+
+	if err != nil {
+		return nil, err // ❌ ห้ามใช้ log.Fatalf
+	}
+
+	// 3. Process Data
+	var holidays []domain.Holiday
+	for _, item := range events.Items {
+		dateStr := item.Start.Date
+		if dateStr == "" {
+			dateStr = item.Start.DateTime
+		}
+
+		dateObj, err := time.Parse("2006-01-02", dateStr[:10])
+		if err != nil {
+			log.Printf("Skipping invalid date: %s", dateStr)
+			continue
+		}
+
+		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
+
+		holidays = append(holidays, domain.Holiday{
+			Date:      domain.DateRes(dateObj),
+			Name:      item.Summary,
+			IsDayOff:  &isOff,
+			Source:    "google_calendar",
+			UpdatedAt: time.Now(),
+		})
+	}
+
+	return holidays, nil
+}
+
 func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time []string) error {
 	req := &calendar.FreeBusyRequest{
 		TimeMin: Time[0],
@@ -110,47 +160,6 @@ func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time []string
 	if len(busy) > 0 {
 		return errors.New("This time unavailable")
 	}
-
-	return nil
-}
-
-func (u *googleCalendarGateway) ParseTime(booking *domain.Booking) ([]string, error) {
-	var timeSlice []string
-
-	layout := "2006-01-02 15:04:05"
-	start, err := helper.ParseTimeFormat(layout, booking.StartTime)
-	if err != nil {
-		return timeSlice, err
-	}
-
-	end, err := helper.ParseTimeFormat(layout, booking.EndTime)
-	if err != nil {
-		return timeSlice, err
-	}
-
-	if err = u.CheckValidTime(start, end); err != nil {
-		return timeSlice, err
-	}
-
-	timeSlice = append(timeSlice, start.Format(time.RFC3339))
-	timeSlice = append(timeSlice, end.Format(time.RFC3339))
-
-	return timeSlice, nil
-}
-
-func (u *googleCalendarGateway) CheckValidTime(startTime time.Time, endTime time.Time) error {
-	startLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 8, 0, 0, 0, startTime.Location())
-	endLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 20, 0, 0, 0, startTime.Location())
-
-	// 4. ตรวจสอบเงื่อนไข (ต้องไม่ก่อน 08:00 และ ต้องไม่หลัง 20:00)
-	// หมายเหตุ: ใช้ Equal เพื่อรวมขอบเขต 08:00:00 และ 20:00:00 เป๊ะๆ ด้วย
-	isStartValid := (startTime.Equal(startLimit) || startTime.After(startLimit)) && (startTime.Equal(endLimit) || startTime.Before(endLimit))
-	isEndValid := (endTime.Equal(startLimit) || endTime.After(startLimit)) && (endTime.Equal(endLimit) || endTime.Before(endLimit))
-	// log.Printf("isStartValid: %v, isEndValid: %v", isStartValid, isEndValid)
-
-	if !(isStartValid && isEndValid) {
-		return errors.New("Please booking in 8 a.m. - 8 p.m.")
-	} 
 
 	return nil
 }
