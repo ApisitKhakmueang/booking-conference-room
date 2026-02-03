@@ -113,7 +113,7 @@ type GetBookingFilter struct {
 
 type CreateEvent struct {
 	GoogleCalendarID 	string
-	RoomName 					string
+	Title 					string
 	Email 						string
 }
 
@@ -180,6 +180,7 @@ type Booking struct {
 	
 	StartTime     string      		`gorm:"not null" json:"startTime"`
 	EndTime       string      		`gorm:"not null" json:"endTime"`
+	Title					string					`gorm:"not null;default:no_tilte" json:"title"`
 	
 	// สถานะ: confirm, cancelled, complete
 	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`

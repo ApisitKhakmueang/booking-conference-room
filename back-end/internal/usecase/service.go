@@ -60,14 +60,14 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 // }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
-	layout := "2006-01-02 15:04:05"
-	t, err := helper.ParseTimeFormat(layout, booking.StartTime)
-	if err != nil {
-		return err
-	}
+	// layout := "2006-01-02 15:04:05"
+	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
+	// if err != nil {
+	// 	return err
+	// }
 
-	dateToCheck := t.Format("2006-01-02")
-	if err := u.repo.CheckDayOff(dateToCheck); err != nil {
+	// dateToCheck := t.Format("2006-01-02")
+	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
 		return err
 	}
 
@@ -84,7 +84,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 	booking.CalendarID = calendar.ID
 	createEvent := &domain.CreateEvent{
 		GoogleCalendarID: calendar.GoogleCalendarID,
-		RoomName: calendar.Room.Name,
+		Title: booking.Title,
 		Email: user.Email,
 	}
 	
@@ -147,14 +147,14 @@ func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) 
 }
 
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
-	layout := "2006-01-02 15:04:05"
-	t, err := helper.ParseTimeFormat(layout, booking.StartTime)
-	if err != nil {
-		return err
-	}
+	// layout := "2006-01-02 15:04:05"
+	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
+	// if err != nil {
+	// 	return err
+	// }
 
-	dateToCheck := t.Format("2006-01-02")
-	if err := u.repo.CheckDayOff(dateToCheck); err != nil {
+	// dateToCheck := t.Format("2006-01-02")
+	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
 		return err
 	}
 
@@ -183,7 +183,7 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 
 		createEvent := &domain.CreateEvent{
 			GoogleCalendarID: calendar.GoogleCalendarID,
-			RoomName: calendar.Room.Name,
+			Title: booking.Title,
 			Email: user.Email,
 		}
 
@@ -203,7 +203,8 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 	} else {
 		// UpdateSameRoom
 		// log.Println("enter update same room")
-		// log.Printf("booking: %v\n", booking)
+		// log.Printf("title: %v\n", booking.Title)
+		// log.Printf("booking after checksameroom: %v", booking)
 
 		updateErr := u.gateway.UpdateEventSameRoom(booking)
 		if updateErr != nil {
@@ -211,8 +212,8 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 		}
 	}
 
-	log.Println("enter before update in db")
-	log.Printf("booking: %v\n", booking)
+	// log.Println("enter before update in db")
+	// log.Printf("booking: %v\n", booking)
 	if err := u.repo.UpdateBookingDB(booking); err != nil {
 		return err
 	}
@@ -252,7 +253,7 @@ func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarRespons
 	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
 	var weekends []int
 	for day := range totalDays {
-		d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+		d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, loc)
 		if d.Weekday() == time.Saturday || d.Weekday() == time.Sunday {
 			weekends = append(weekends, day)
 		}

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -201,28 +202,30 @@ func (p *postgresBookingRepo) GetUser(userID uuid.UUID) (*domain.User, error) {
 }
 
 func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber uint) error {
-	newStartTime := booking.StartTime
-	newEndTime := booking.EndTime
-	
 	room := new(domain.Room)
 	result := p.db.Select("id").Where("room_number = ?", roomNumber).First(room)
 	if result.Error != nil {
 		return result.Error
 	}
 	
-	result = p.db.Preload("Calendar").First(booking, booking.ID)
+	currentBooking := new(domain.Booking)
+	result = p.db.Preload("Calendar").First(currentBooking, booking.ID)
 	if result.Error != nil {
 		return result.Error
 	}
 	
-	booking.StartTime = newStartTime
-	booking.EndTime = newEndTime
+	// log.Printf("currentBooking: %v", currentBooking)
+	currentBooking.StartTime = booking.StartTime
+	currentBooking.EndTime = booking.EndTime
+	currentBooking.Title = booking.Title
+
+	*booking = *currentBooking
 
 	// log.Println("enter check same room")
 
 	// log.Println("room ID: ", room.ID)
 	// log.Println("room ID: ", booking.RoomID)
-	// log.Printf("booking: %v", booking)
+	// log.Printf("booking db: %v", booking)
 
 	if room.ID != booking.RoomID {
 		booking.RoomID = room.ID
@@ -233,8 +236,15 @@ func (p *postgresBookingRepo) CheckSameRoom(booking *domain.Booking, roomNumber 
 }
 
 func (p *postgresBookingRepo) CheckDayOff(date string) error {
+	t, err := helper.IsWeekend(date)
+	if err != nil {
+		return err
+	}
+
+	dateToCheck := t.Format("2006-01-02")
+
 	holiday := new(domain.Holiday)
-	result := p.db.Where("date = ? AND is_day_off = TRUE", date).First(holiday)
+	result := p.db.Where("date = ? AND is_day_off = TRUE", dateToCheck).First(holiday)
 
 	switch result.Error {
 		case nil:

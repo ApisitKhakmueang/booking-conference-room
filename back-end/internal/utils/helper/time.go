@@ -1,10 +1,11 @@
 package helper
 
 import (
+	// "log"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
-	"errors"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 )
@@ -169,4 +170,19 @@ func CheckValidTime(startTime time.Time, endTime time.Time) error {
 	} 
 
 	return nil
+}
+
+func IsWeekend(dateStr string) (time.Time, error) {
+	layout := "2006-01-02 15:04:05"
+	t, err := ParseTimeFormat(layout, dateStr)
+	if err != nil {
+		return time.Time{}, errors.New("Can't to book in day off") // หรือ handle error ตามต้องการ
+	}
+
+	if t.Weekday() == time.Saturday || t.Weekday() == time.Sunday {
+		return time.Time{}, errors.New("Can't to book in day off")
+	}
+
+	// เช็คว่าเป็น เสาร์ (6) หรือ อาทิตย์ (0)
+	return t, nil
 }
