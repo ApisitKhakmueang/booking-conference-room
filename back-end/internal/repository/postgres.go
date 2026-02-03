@@ -1,7 +1,7 @@
 package repository
 
 import (
-	// "log"
+	"log"
 
 	"database/sql"
 	"errors"
@@ -133,6 +133,8 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Tim
 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
 	sDate := startDate.Format("2006-01-02")
 	eDate := endDate.Format("2006-01-02")
+
+	log.Printf("start: %v, end: %v", sDate, eDate)
 
 	var holidays []domain.Holiday
 	// SQL: SELECT * FROM holidays WHERE date ...

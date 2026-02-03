@@ -285,15 +285,33 @@ func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarRespons
 
 	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
 	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
-	if len(googleHolidays) > 0 {
-		if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
-			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้ 
-			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
-			log.Println("Failed to cache holidays:", err)
+	// if len(googleHolidays) > 0 {
+	// 	if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
+	// 		// Log error ไว้ แต่ไม่ต้อง return error ก็ได้ 
+	// 		// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
+	// 		log.Println("Failed to cache holidays:", err)
+	// 	}
+	// }
+
+	var filteredHolidays []domain.Holiday
+
+	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
+	targetMonth := time.Month(month) 
+
+	for _, h := range googleHolidays {
+		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
+		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
+		t := time.Time(h.Date) 
+
+		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
+		if t.Month() == targetMonth && t.Year() == year {
+			filteredHolidays = append(filteredHolidays, h)
 		}
 	}
 
-	response.Holidays = googleHolidays
+	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
+	response.Holidays = filteredHolidays
+	
 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 	return response, nil
 }	
