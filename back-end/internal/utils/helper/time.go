@@ -131,43 +131,62 @@ func CheckIsDayOff(summary string, description string) bool {
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
 }
 
-func ParseTime(booking *domain.Booking) (*domain.Date, error) {
-	layout := "2006-01-02 15:04:05"
-	start, err := ParseTimeFormat(layout, booking.StartTime)
+// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
+// 	layout := "2006-01-02 15:04:05"
+// 	start, err := ParseTimeFormat(layout, booking.StartTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	end, err := ParseTimeFormat(layout, booking.EndTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if err = CheckValidTime(start, end); err != nil {
+// 		return nil, err
+// 	}
+
+// 	date := &domain.Date{
+// 		StartStr: start.Format(time.RFC3339),
+// 		EndStr: end.Format(time.RFC3339),
+// 	}
+
+// 	return date, nil
+// }
+
+func ValidateBusinessHours(start, end time.Time) error {
+	// 1. โหลด Timezone ไทย (Asia/Bangkok)
+	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
-		return nil, err
+			return err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
 	}
 
-	end, err := ParseTimeFormat(layout, booking.EndTime)
-	if err != nil {
-		return nil, err
+	// 2. แปลงเวลาที่รับมา (UTC) ให้เป็นเวลาไทย
+	thaiStart := start.In(loc)
+	thaiEnd := end.In(loc)
+
+	// 3. กฎข้อที่ 1: ห้ามเริ่มก่อน 08:00
+	// (เช็คชั่วโมง < 8)
+	if thaiStart.Hour() < 8 {
+		return errors.New("Not allow to book before 08:00 a.m.")
 	}
 
-	if err = CheckValidTime(start, end); err != nil {
-		return nil, err
+	// 4. กฎข้อที่ 2: ห้ามจบหลัง 20:00
+	// กรณีที่ 1: ชั่วโมงมากกว่า 20 (เช่น 21:00) -> ผิด
+	// กรณีที่ 2: ชั่วโมงเป็น 20 แต่มีเศษนาที (เช่น 20:01) -> ผิด
+	if thaiEnd.Hour() > 20 || (thaiEnd.Hour() == 20 && thaiEnd.Minute() > 0) {
+		return errors.New("Not allow to book after 08:00 p.m")
 	}
 
-	date := &domain.Date{
-		StartStr: start.Format(time.RFC3339),
-		EndStr: end.Format(time.RFC3339),
+	// 5. (แถม) เช็คว่าต้องจองและจบในวันเดียวกันไหม? (ถ้าไม่ข้ามคืน)
+	if thaiStart.Day() != thaiEnd.Day() {
+		return errors.New("Booking in same day")
 	}
 
-	return date, nil
-}
-
-func CheckValidTime(startTime time.Time, endTime time.Time) error {
-	startLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 8, 0, 0, 0, startTime.Location())
-	endLimit := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 20, 0, 0, 0, startTime.Location())
-
-	// 4. ตรวจสอบเงื่อนไข (ต้องไม่ก่อน 08:00 และ ต้องไม่หลัง 20:00)
-	// หมายเหตุ: ใช้ Equal เพื่อรวมขอบเขต 08:00:00 และ 20:00:00 เป๊ะๆ ด้วย
-	isStartValid := (startTime.Equal(startLimit) || startTime.After(startLimit)) && (startTime.Equal(endLimit) || startTime.Before(endLimit))
-	isEndValid := (endTime.Equal(startLimit) || endTime.After(startLimit)) && (endTime.Equal(endLimit) || endTime.Before(endLimit))
-	// log.Printf("isStartValid: %v, isEndValid: %v", isStartValid, isEndValid)
-
-	if !(isStartValid && isEndValid) {
-		return errors.New("Please booking in 8 a.m. - 8 p.m.")
-	} 
+	if !thaiStart.Before(thaiEnd) { 
+		return errors.New("Start time must be less than end time")
+	}
 
 	return nil
 }
