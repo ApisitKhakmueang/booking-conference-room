@@ -59,7 +59,7 @@ func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) err
 		return err
 	}
 	
-	err = s.IsRoomAvailable(booking.Calendar.GoogleCalendarID, Time)
+	err = s.IsRoomAvailableWithExclude(booking.Calendar.GoogleCalendarID, Time, booking.GoogleEventID)
 	if err != nil {
 		return err
 	}
@@ -159,6 +159,50 @@ func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time *domain.
 
 	if len(busy) > 0 {
 		return errors.New("This time unavailable")
+	}
+
+	return nil
+}
+
+func (s *googleCalendarGateway) IsRoomAvailableWithExclude(calendarID string, Time *domain.Date, excludeEventID string) error {
+	
+	// 1. เรียก Events.List แทน FreeBusy
+	// SingleEvents: true เพื่อให้แตก Recurrent event ออกมาเป็นชิ้นๆ เช็คง่าย
+	eventsResult, err := s.service.Events.List(calendarID).
+		TimeMin(Time.StartStr).
+		TimeMax(Time.EndStr).
+		SingleEvents(true).
+		Do()
+
+	if err != nil {
+		return err
+	}
+
+	// 2. แปลงเวลาที่ต้องการจองเป็น time.Time เพื่อใช้เทียบ
+	reqStart, _ := time.Parse(time.RFC3339, Time.StartStr)
+	reqEnd, _ := time.Parse(time.RFC3339, Time.EndStr)
+
+	// 3. วนลูปเช็ค Event ที่ Google ส่งกลับมา
+	for _, item := range eventsResult.Items {
+		
+		// ✅ จุดสำคัญ: ถ้านี่คือ Event ตัวเอง ให้ข้ามไปเลย (ไม่นับว่าขวาง)
+		if excludeEventID != "" && item.Id == excludeEventID {
+			continue
+		}
+
+		// แปลงเวลาของ Event นั้นๆ
+		if item.Start.DateTime == "" || item.End.DateTime == "" {
+			continue // ข้ามพวก All-day event (ถ้าไม่เกี่ยว)
+		}
+		
+		eventStart, _ := time.Parse(time.RFC3339, item.Start.DateTime)
+		eventEnd, _ := time.Parse(time.RFC3339, item.End.DateTime)
+
+		// 4. Logic เช็ค Overlap (ชนกันไหม)
+		// สูตร: (Start A < End B) AND (End A > Start B)
+		if reqStart.Before(eventEnd) && reqEnd.After(eventStart) {
+			return fmt.Errorf("Time slot is busy with event: %s", item.Summary)
+		}
 	}
 
 	return nil

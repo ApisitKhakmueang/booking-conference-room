@@ -35,5 +35,6 @@ type CalendarGateway interface {
 	CancelEvent(roomCalendarID string, eventID string) error
 	FetchHolidays(year int) ([]Holiday, error)
 
-	IsRoomAvailable(roomCalendarID string, Time []string) error
+	IsRoomAvailable(roomCalendarID string, Time *Date) error
+	IsRoomAvailableWithExclude(calendarID string, Time *Date, excludeEventID string) error
 }
