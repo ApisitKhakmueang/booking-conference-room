@@ -34,14 +34,13 @@ func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent
 
 	log.Printf("after check available")
 	log.Println("calendar id: ", createEvent.GoogleCalendarID)
-	summary := fmt.Sprintf("Book %s (By %s)", createEvent.RoomName, createEvent.Email)
 	description := fmt.Sprintf("Booker: %s", createEvent.Email)
 
 	event := &calendar.Event{
-		Summary:     summary, // ใส่ชื่อผู้จองในหัวข้อแทน
+		Summary:     booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
 		Description: description,
-		Start:       &calendar.EventDateTime{DateTime: Time[0]},
-		End:         &calendar.EventDateTime{DateTime: Time[1]},
+		Start:       &calendar.EventDateTime{DateTime: Time.StartStr},
+		End:         &calendar.EventDateTime{DateTime: Time.EndStr},
 		// ลบส่วน Attendees ออกทั้งหมด
 	}
 	createdEvent, err := s.service.Events.Insert(createEvent.GoogleCalendarID, event).Do()
@@ -70,8 +69,9 @@ func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) err
 	// log.Println("event id: ", booking.GoogleEventID)
 
 	event := &calendar.Event{
-		Start: 	&calendar.EventDateTime{DateTime: Time[0]},
-		End: 		&calendar.EventDateTime{DateTime: Time[1]},
+		Summary:	booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
+		Start: 		&calendar.EventDateTime{DateTime: Time.StartStr},
+		End: 			&calendar.EventDateTime{DateTime: Time.EndStr},
 		// ลบส่วน Attendees ออกทั้งหมด
 	}
 
@@ -141,10 +141,10 @@ func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error
 	return holidays, nil
 }
 
-func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time []string) error {
+func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time *domain.Date) error {
 	req := &calendar.FreeBusyRequest{
-		TimeMin: Time[0],
-		TimeMax: Time[1],
+		TimeMin: Time.StartStr,
+		TimeMax: Time.EndStr,
 		Items: []*calendar.FreeBusyRequestItem{
 			{Id: calendarID},
 		},

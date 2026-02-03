@@ -130,28 +130,28 @@ func CheckIsDayOff(summary string, description string) bool {
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
 }
 
-func ParseTime(booking *domain.Booking) ([]string, error) {
-	var timeSlice []string
-
+func ParseTime(booking *domain.Booking) (*domain.Date, error) {
 	layout := "2006-01-02 15:04:05"
 	start, err := ParseTimeFormat(layout, booking.StartTime)
 	if err != nil {
-		return timeSlice, err
+		return nil, err
 	}
 
 	end, err := ParseTimeFormat(layout, booking.EndTime)
 	if err != nil {
-		return timeSlice, err
+		return nil, err
 	}
 
 	if err = CheckValidTime(start, end); err != nil {
-		return timeSlice, err
+		return nil, err
 	}
 
-	timeSlice = append(timeSlice, start.Format(time.RFC3339))
-	timeSlice = append(timeSlice, end.Format(time.RFC3339))
+	date := &domain.Date{
+		StartStr: start.Format(time.RFC3339),
+		EndStr: end.Format(time.RFC3339),
+	}
 
-	return timeSlice, nil
+	return date, nil
 }
 
 func CheckValidTime(startTime time.Time, endTime time.Time) error {
