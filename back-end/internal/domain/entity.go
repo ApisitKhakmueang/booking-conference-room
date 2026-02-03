@@ -155,18 +155,18 @@ type User struct {
 	CreatedAt 	time.Time		`json:"createdAt"`
 }
 
-type Calendar struct {
-	ID        				uuid.UUID 					`gorm:"type:uuid;primaryKey" json:"id"`
-	CreatedAt 				time.Time						`json:"createdAt"`
-	UpdatedAt 				time.Time						`json:"updatedAt"`
-	DeletedAt 				gorm.DeletedAt 			`gorm:"index" json:"deletedAt"`
+// type Calendar struct {
+// 	ID        				uuid.UUID 					`gorm:"type:uuid;primaryKey" json:"id"`
+// 	CreatedAt 				time.Time						`json:"createdAt"`
+// 	UpdatedAt 				time.Time						`json:"updatedAt"`
+// 	DeletedAt 				gorm.DeletedAt 			`gorm:"index" json:"deletedAt"`
 
-	CalendarNumber 		uint 								`gorm:"default:0" json:"calendarNumber"`	
-	GoogleCalendarID 	string 							`gorm:"unique;not null" json:"google_calendarId"`
-	RoomID 						uuid.UUID 					`gorm:"not null" json:"roomId"`
+// 	CalendarNumber 		uint 								`gorm:"default:0" json:"calendarNumber"`	
+// 	GoogleCalendarID 	string 							`gorm:"unique;not null" json:"google_calendarId"`
+// 	RoomID 						uuid.UUID 					`gorm:"not null" json:"roomId"`
 
-	Room     					*Room     						`gorm:"foreignKey:RoomID" json:"Calendar,omitempty"`
-}
+// 	Room     					*Room     						`gorm:"foreignKey:RoomID" json:"Calendar,omitempty"`
+// }
 
 type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
@@ -175,12 +175,13 @@ type Booking struct {
 
 	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId"`
 	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId"`
-	CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
-	GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
+	// CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
+	// GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
 	
-	StartTime     string      		`gorm:"not null" json:"startTime"`
-	EndTime       string      		`gorm:"not null" json:"endTime"`
-	Title					string					`gorm:"not null;default:no_tilte" json:"title"`
+	StartTime     time.Time      	`gorm:"not null" json:"startTime"`
+	EndTime       time.Time      	`gorm:"not null" json:"endTime"`
+	Title					string					`gorm:"unique;default:no_tilte" json:"title"`
+	Passcode      string          `gorm:"type:varchar(10);not null" json:"passcode"`
 	
 	// สถานะ: confirm, cancelled, complete
 	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`
@@ -188,5 +189,5 @@ type Booking struct {
 	// Relations
 	Room     			*Room     			`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Room,omitempty"`
 	User     			*User     			`gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"User,omitempty"`
-	Calendar 			*Calendar 			`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Calendar,omitempty"`
+	// Calendar 			*Calendar 			`gorm:"foreignKey:CalendarID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Calendar,omitempty"`
 }
