@@ -53,7 +53,7 @@ func InitialFiber(handler *http.OrderHandler) *fiber.App {
 
 	controller.InitialBookingRoute(api, handler)
 
-	app.Get("/test/calendar", handler.GetCalendar)
+	// app.Get("/test/calendar", handler.GetCalendar)
 
 	return app
 }

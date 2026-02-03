@@ -1,13 +1,13 @@
 package gateway
 
 import (
-	"errors"
-	"fmt"
-	"log"
-	"time"
+	// "errors"
+	// "fmt"
+	// "log"
+	// "time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
+	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"google.golang.org/api/calendar/v3"
@@ -21,189 +21,190 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 	return &googleCalendarGateway{service: client}
 }
 
-func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent *domain.CreateEvent) (string, error) {
-	Time, err := helper.ParseTime(booking)
-	if err != nil {
-		return "", err
-	}
+// func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent *domain.CreateEvent) (string, error) {
+// 	Time, err := helper.ParseTime(booking)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	err = s.IsRoomAvailable(createEvent.GoogleCalendarID, Time)
-	if err != nil {
-		return "", err
-	}
+// 	err = s.IsRoomAvailable(createEvent.GoogleCalendarID, Time)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	log.Printf("after check available")
-	log.Println("calendar id: ", createEvent.GoogleCalendarID)
-	description := fmt.Sprintf("Booker: %s", createEvent.Email)
+// 	log.Printf("after check available")
+// 	log.Println("calendar id: ", createEvent.GoogleCalendarID)
+// 	description := fmt.Sprintf("Booker: %s", createEvent.Email)
 
-	event := &calendar.Event{
-		Summary:     booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
-		Description: description,
-		Start:       &calendar.EventDateTime{DateTime: Time.StartStr},
-		End:         &calendar.EventDateTime{DateTime: Time.EndStr},
-		// ลบส่วน Attendees ออกทั้งหมด
-	}
-	createdEvent, err := s.service.Events.Insert(createEvent.GoogleCalendarID, event).Do()
+// 	event := &calendar.Event{
+// 		Summary:     booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
+// 		Description: description,
+// 		Start:       &calendar.EventDateTime{DateTime: Time.StartStr},
+// 		End:         &calendar.EventDateTime{DateTime: Time.EndStr},
+// 		// ลบส่วน Attendees ออกทั้งหมด
+// 	}
+// 	createdEvent, err := s.service.Events.Insert(createEvent.GoogleCalendarID, event).Do()
 
-	if err != nil {
-		return "", err
-	}
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	return createdEvent.Id, nil
-}
+// 	return createdEvent.Id, nil
+// }
 
-func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) error {
-	Time, err := helper.ParseTime(booking)
-	if err != nil {
-		// log.Println("out update event")
-		return err
-	}
+// func (s *googleCalendarGateway) UpdateEventSameRoom(booking *domain.Booking) error {
+// 	Time, err := helper.ParseTime(booking)
+// 	if err != nil {
+// 		// log.Println("out update event")
+// 		return err
+// 	}
 	
-	err = s.IsRoomAvailableWithExclude(booking.Calendar.GoogleCalendarID, Time, booking.GoogleEventID)
-	if err != nil {
-		return err
-	}
+// 	err = s.IsRoomAvailableWithExclude(booking.Calendar.GoogleCalendarID, Time, booking.GoogleEventID)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// log.Println("enter update event")
-	// log.Println("calendar id: ", booking.Calendar.GoogleCalendarID)
-	// log.Println("event id: ", booking.GoogleEventID)
+// 	// log.Println("enter update event")
+// 	// log.Println("calendar id: ", booking.Calendar.GoogleCalendarID)
+// 	// log.Println("event id: ", booking.GoogleEventID)
 
-	event := &calendar.Event{
-		Summary:	booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
-		Start: 		&calendar.EventDateTime{DateTime: Time.StartStr},
-		End: 			&calendar.EventDateTime{DateTime: Time.EndStr},
-		// ลบส่วน Attendees ออกทั้งหมด
-	}
+// 	event := &calendar.Event{
+// 		Summary:	booking.Title, // ใส่ชื่อผู้จองในหัวข้อแทน
+// 		Start: 		&calendar.EventDateTime{DateTime: Time.StartStr},
+// 		End: 			&calendar.EventDateTime{DateTime: Time.EndStr},
+// 		// ลบส่วน Attendees ออกทั้งหมด
+// 	}
 
-	_, err = s.service.Events.Patch(booking.Calendar.GoogleCalendarID, booking.GoogleEventID, event).Do()
-	if err != nil {
-		return err
-	}
+// 	_, err = s.service.Events.Patch(booking.Calendar.GoogleCalendarID, booking.GoogleEventID, event).Do()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (s *googleCalendarGateway) CancelEvent(roomCalendarID string, eventID string) error {
-	err := s.service.Events.Delete(roomCalendarID, eventID).Do()
-	if err != nil {
-		return err
-	}
+// func (s *googleCalendarGateway) CancelEvent(roomCalendarID string, eventID string) error {
+// 	err := s.service.Events.Delete(roomCalendarID, eventID).Do()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
-	// 1. Set Time Range (ตามปีที่ส่งมา)
-	calendarID := "en.th#holiday@group.v.calendar.google.com"
+// func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
+// 	// 1. Set Time Range (ตามปีที่ส่งมา)
+// 	calendarID := "en.th#holiday@group.v.calendar.google.com"
 
-	loc := time.FixedZone("ICT", 7*60*60)
-	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
-	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
+// 	loc := time.FixedZone("ICT", 7*60*60)
+// 	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
+// 	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
 
-	// 2. Fetch Events
-	events, err := r.service.Events.List(calendarID).
-		ShowDeleted(false).
-		SingleEvents(true).
-		TimeMin(timeMin).
-		TimeMax(timeMax).
-		OrderBy("startTime").
-		Do()
+// 	// 2. Fetch Events
+// 	events, err := r.service.Events.List(calendarID).
+// 		ShowDeleted(false).
+// 		SingleEvents(true).
+// 		TimeMin(timeMin).
+// 		TimeMax(timeMax).
+// 		OrderBy("startTime").
+// 		Do()
 
-	if err != nil {
-		return nil, err // ❌ ห้ามใช้ log.Fatalf
-	}
+// 	if err != nil {
+// 		return nil, err // ❌ ห้ามใช้ log.Fatalf
+// 	}
 
-	// 3. Process Data
-	var holidays []domain.Holiday
-	for _, item := range events.Items {
-		dateStr := item.Start.Date
-		if dateStr == "" {
-			dateStr = item.Start.DateTime
-		}
+// 	// 3. Process Data
+// 	var holidays []domain.Holiday
+// 	for _, item := range events.Items {
+// 		dateStr := item.Start.Date
+// 		log.Println("date string: ", item.Start.Date)
+// 		if dateStr == "" {
+// 			dateStr = item.Start.DateTime
+// 		}
 
-		dateObj, err := time.Parse("2006-01-02", dateStr[:10])
-		if err != nil {
-			log.Printf("Skipping invalid date: %s", dateStr)
-			continue
-		}
+// 		dateObj, err := time.Parse("2006-01-02", dateStr[:10])
+// 		if err != nil {
+// 			log.Printf("Skipping invalid date: %s", dateStr)
+// 			continue
+// 		}
 
-		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
+// 		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
 
-		holidays = append(holidays, domain.Holiday{
-			Date:      domain.DateRes(dateObj),
-			Name:      item.Summary,
-			IsDayOff:  &isOff,
-			Source:    "google_calendar",
-			UpdatedAt: time.Now(),
-		})
-	}
+// 		holidays = append(holidays, domain.Holiday{
+// 			Date:      domain.DateRes(dateObj),
+// 			Name:      item.Summary,
+// 			IsDayOff:  &isOff,
+// 			Source:    "google_calendar",
+// 			UpdatedAt: time.Now(),
+// 		})
+// 	}
 
-	return holidays, nil
-}
+// 	return holidays, nil
+// }
 
-func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time *domain.Date) error {
-	req := &calendar.FreeBusyRequest{
-		TimeMin: Time.StartStr,
-		TimeMax: Time.EndStr,
-		Items: []*calendar.FreeBusyRequestItem{
-			{Id: calendarID},
-		},
-	}
+// func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time *domain.Date) error {
+// 	req := &calendar.FreeBusyRequest{
+// 		TimeMin: Time.StartStr,
+// 		TimeMax: Time.EndStr,
+// 		Items: []*calendar.FreeBusyRequestItem{
+// 			{Id: calendarID},
+// 		},
+// 	}
 
-	resp, err := s.service.Freebusy.Query(req).Do()
-	if err != nil {
-		return err
-	}
+// 	resp, err := s.service.Freebusy.Query(req).Do()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	busy := resp.Calendars[calendarID].Busy
+// 	busy := resp.Calendars[calendarID].Busy
 
-	if len(busy) > 0 {
-		return errors.New("This time unavailable")
-	}
+// 	if len(busy) > 0 {
+// 		return errors.New("This time unavailable")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (s *googleCalendarGateway) IsRoomAvailableWithExclude(calendarID string, Time *domain.Date, excludeEventID string) error {
+// func (s *googleCalendarGateway) IsRoomAvailableWithExclude(calendarID string, Time *domain.Date, excludeEventID string) error {
 	
-	// 1. เรียก Events.List แทน FreeBusy
-	// SingleEvents: true เพื่อให้แตก Recurrent event ออกมาเป็นชิ้นๆ เช็คง่าย
-	eventsResult, err := s.service.Events.List(calendarID).
-		TimeMin(Time.StartStr).
-		TimeMax(Time.EndStr).
-		SingleEvents(true).
-		Do()
+// 	// 1. เรียก Events.List แทน FreeBusy
+// 	// SingleEvents: true เพื่อให้แตก Recurrent event ออกมาเป็นชิ้นๆ เช็คง่าย
+// 	eventsResult, err := s.service.Events.List(calendarID).
+// 		TimeMin(Time.StartStr).
+// 		TimeMax(Time.EndStr).
+// 		SingleEvents(true).
+// 		Do()
 
-	if err != nil {
-		return err
-	}
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// 2. แปลงเวลาที่ต้องการจองเป็น time.Time เพื่อใช้เทียบ
-	reqStart, _ := time.Parse(time.RFC3339, Time.StartStr)
-	reqEnd, _ := time.Parse(time.RFC3339, Time.EndStr)
+// 	// 2. แปลงเวลาที่ต้องการจองเป็น time.Time เพื่อใช้เทียบ
+// 	reqStart, _ := time.Parse(time.RFC3339, Time.StartStr)
+// 	reqEnd, _ := time.Parse(time.RFC3339, Time.EndStr)
 
-	// 3. วนลูปเช็ค Event ที่ Google ส่งกลับมา
-	for _, item := range eventsResult.Items {
+// 	// 3. วนลูปเช็ค Event ที่ Google ส่งกลับมา
+// 	for _, item := range eventsResult.Items {
 		
-		// ✅ จุดสำคัญ: ถ้านี่คือ Event ตัวเอง ให้ข้ามไปเลย (ไม่นับว่าขวาง)
-		if excludeEventID != "" && item.Id == excludeEventID {
-			continue
-		}
+// 		// ✅ จุดสำคัญ: ถ้านี่คือ Event ตัวเอง ให้ข้ามไปเลย (ไม่นับว่าขวาง)
+// 		if excludeEventID != "" && item.Id == excludeEventID {
+// 			continue
+// 		}
 
-		// แปลงเวลาของ Event นั้นๆ
-		if item.Start.DateTime == "" || item.End.DateTime == "" {
-			continue // ข้ามพวก All-day event (ถ้าไม่เกี่ยว)
-		}
+// 		// แปลงเวลาของ Event นั้นๆ
+// 		if item.Start.DateTime == "" || item.End.DateTime == "" {
+// 			continue // ข้ามพวก All-day event (ถ้าไม่เกี่ยว)
+// 		}
 		
-		eventStart, _ := time.Parse(time.RFC3339, item.Start.DateTime)
-		eventEnd, _ := time.Parse(time.RFC3339, item.End.DateTime)
+// 		eventStart, _ := time.Parse(time.RFC3339, item.Start.DateTime)
+// 		eventEnd, _ := time.Parse(time.RFC3339, item.End.DateTime)
 
-		// 4. Logic เช็ค Overlap (ชนกันไหม)
-		// สูตร: (Start A < End B) AND (End A > Start B)
-		if reqStart.Before(eventEnd) && reqEnd.After(eventStart) {
-			return fmt.Errorf("Time slot is busy with event: %s", item.Summary)
-		}
-	}
+// 		// 4. Logic เช็ค Overlap (ชนกันไหม)
+// 		// สูตร: (Start A < End B) AND (End A > Start B)
+// 		if reqStart.Before(eventEnd) && reqEnd.After(eventStart) {
+// 			return fmt.Errorf("Time slot is busy with event: %s", item.Summary)
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
