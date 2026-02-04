@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 	"os"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
@@ -17,18 +18,29 @@ import (
 	"google.golang.org/api/option"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 
 func InitialDBConnection() *gorm.DB {
 	// ใช้ Connection String จากหน้าเมนู Settings > Database ใน Supabase
 	dsn := os.Getenv("DATABASE_URL")
-
+	
+	newLogger := logger.New(
+    log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+    logger.Config{
+      SlowThreshold: time.Second, // Slow SQL threshold
+      LogLevel:      logger.Info, // Log level
+      Colorful:      true,        // Enable color
+    },
+  )
+	
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: dsn,
 		PreferSimpleProtocol: true, // บังคับใช้ Simple Protocol (เหมาะสำหรับ Supabase/PgBouncer)
 	}), &gorm.Config{
 		PrepareStmt: false, // ปิด Caching ในระดับ GORM
+		Logger: newLogger,
 	})
 	
 	if err != nil {
