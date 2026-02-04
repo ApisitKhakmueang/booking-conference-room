@@ -93,6 +93,81 @@ func GetStartDayWeek(t time.Time) time.Time {
 	return startOfWeek
 }
 
+// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
+// 	layout := "2006-01-02 15:04:05"
+// 	start, err := ParseTimeFormat(layout, booking.StartTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	end, err := ParseTimeFormat(layout, booking.EndTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if err = CheckValidTime(start, end); err != nil {
+// 		return nil, err
+// 	}
+
+// 	date := &domain.Date{
+// 		StartStr: start.Format(time.RFC3339),
+// 		EndStr: end.Format(time.RFC3339),
+// 	}
+
+// 	return date, nil
+// }
+
+func ValidateBusinessHours(start, end time.Time) error {
+	// 1. โหลด Timezone ไทย (Asia/Bangkok)
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
+	}
+
+	// 2. แปลงเวลาที่รับมา (UTC) ให้เป็นเวลาไทย
+	thaiStart := start.In(loc)
+	thaiEnd := end.In(loc)
+
+	// 3. กฎข้อที่ 1: ห้ามเริ่มก่อน 08:00
+	// (เช็คชั่วโมง < 8)
+	if thaiStart.Hour() < 8 {
+		return errors.New("Not allow to book before 08:00 a.m.")
+	}
+
+	// 4. กฎข้อที่ 2: ห้ามจบหลัง 20:00
+	// กรณีที่ 1: ชั่วโมงมากกว่า 20 (เช่น 21:00) -> ผิด
+	// กรณีที่ 2: ชั่วโมงเป็น 20 แต่มีเศษนาที (เช่น 20:01) -> ผิด
+	if thaiEnd.Hour() > 20 || (thaiEnd.Hour() == 20 && thaiEnd.Minute() > 0) {
+		return errors.New("Not allow to book after 08:00 p.m")
+	}
+
+	// 5. (แถม) เช็คว่าต้องจองและจบในวันเดียวกันไหม? (ถ้าไม่ข้ามคืน)
+	if thaiStart.Day() != thaiEnd.Day() {
+		return errors.New("Booking in same day")
+	}
+
+	if !thaiStart.Before(thaiEnd) { 
+		return errors.New("Start time must be less than end time")
+	}
+
+	return nil
+}
+
+func IsWeekend(date time.Time) error {
+	// layout := "2006-01-02 15:04:05"
+	// t, err := ParseTimeFormat(layout, dateStr)
+	// if err != nil {
+	// 	return time.Time{}, errors.New("Can't to book in day off") // หรือ handle error ตามต้องการ
+	// }
+
+	if date.Weekday() == time.Saturday || date.Weekday() == time.Sunday {
+		return errors.New("Can't to book in day off")
+	}
+
+	// เช็คว่าเป็น เสาร์ (6) หรือ อาทิตย์ (0)
+	return nil
+}
+
 func CheckIsDayOff(summary string, description string) bool {
 	// แปลงเป็นตัวพิมพ์เล็กทั้งหมดเพื่อให้เช็คง่าย
 	summaryLower := strings.ToLower(summary)
@@ -129,79 +204,4 @@ func CheckIsDayOff(summary string, description string) bool {
 	// แต่ปกติแค่ Blacklist ก็เพียงพอแล้วสำหรับ Calendar ไทย
 
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
-}
-
-// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
-// 	layout := "2006-01-02 15:04:05"
-// 	start, err := ParseTimeFormat(layout, booking.StartTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	end, err := ParseTimeFormat(layout, booking.EndTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if err = CheckValidTime(start, end); err != nil {
-// 		return nil, err
-// 	}
-
-// 	date := &domain.Date{
-// 		StartStr: start.Format(time.RFC3339),
-// 		EndStr: end.Format(time.RFC3339),
-// 	}
-
-// 	return date, nil
-// }
-
-func ValidateBusinessHours(start, end time.Time) error {
-	// 1. โหลด Timezone ไทย (Asia/Bangkok)
-	loc, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-			return err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
-	}
-
-	// 2. แปลงเวลาที่รับมา (UTC) ให้เป็นเวลาไทย
-	thaiStart := start.In(loc)
-	thaiEnd := end.In(loc)
-
-	// 3. กฎข้อที่ 1: ห้ามเริ่มก่อน 08:00
-	// (เช็คชั่วโมง < 8)
-	if thaiStart.Hour() < 8 {
-		return errors.New("Not allow to book before 08:00 a.m.")
-	}
-
-	// 4. กฎข้อที่ 2: ห้ามจบหลัง 20:00
-	// กรณีที่ 1: ชั่วโมงมากกว่า 20 (เช่น 21:00) -> ผิด
-	// กรณีที่ 2: ชั่วโมงเป็น 20 แต่มีเศษนาที (เช่น 20:01) -> ผิด
-	if thaiEnd.Hour() > 20 || (thaiEnd.Hour() == 20 && thaiEnd.Minute() > 0) {
-		return errors.New("Not allow to book after 08:00 p.m")
-	}
-
-	// 5. (แถม) เช็คว่าต้องจองและจบในวันเดียวกันไหม? (ถ้าไม่ข้ามคืน)
-	if thaiStart.Day() != thaiEnd.Day() {
-		return errors.New("Booking in same day")
-	}
-
-	if !thaiStart.Before(thaiEnd) { 
-		return errors.New("Start time must be less than end time")
-	}
-
-	return nil
-}
-
-func IsWeekend(dateStr string) (time.Time, error) {
-	layout := "2006-01-02 15:04:05"
-	t, err := ParseTimeFormat(layout, dateStr)
-	if err != nil {
-		return time.Time{}, errors.New("Can't to book in day off") // หรือ handle error ตามต้องการ
-	}
-
-	if t.Weekday() == time.Saturday || t.Weekday() == time.Sunday {
-		return time.Time{}, errors.New("Can't to book in day off")
-	}
-
-	// เช็คว่าเป็น เสาร์ (6) หรือ อาทิตย์ (0)
-	return t, nil
 }
