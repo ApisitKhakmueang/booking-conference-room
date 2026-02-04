@@ -8,9 +8,9 @@ import (
 
 type BookingRepository interface {
 	CreateBookingDB(booking *Booking) error
+	UpdateBookingDB(booking *Booking) error
 	// GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
 	// GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
-	// UpdateBookingDB(booking *Booking) error
 	// DeleteBookingDB(bookingID uuid.UUID) error
 	// GetHolidayDB(startDate time.Time, endDate time.Time) ([]Holiday, error)
 

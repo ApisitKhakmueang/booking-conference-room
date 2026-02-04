@@ -1,7 +1,7 @@
 package repository
 
 import (
-	// "log"
+	"log"
 
 	// "database/sql"
 	// "errors"
@@ -12,7 +12,7 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	// "gorm.io/gorm/clause"
 )
@@ -27,6 +27,11 @@ func NewPostgresBookingRepo(db *gorm.DB) domain.BookingRepository {
 
 func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
 	err := p.db.Create(&booking).Error
+	return err
+}
+
+func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
+	err := p.db.Model(&booking).Updates(booking).Error
 	return err
 }
 
@@ -51,14 +56,19 @@ func (p* postgresBookingRepo) IsRoomAvailable(booking *domain.Booking) bool {
 	var count int64
 
 	// Query เพื่อ "จับผิด" ว่ามีใครใช้รหัสนี้อยู่ไหม
-	err := p.db.Model(&domain.Booking{}).
+	query := p.db.Model(&domain.Booking{}).
 		Where("room_id = ?", booking.RoomID).                 // 1. ตีกรอบแค่ห้องนี้ (ห้องอื่นใช้เลขเดียวกันได้ ไม่เกี่ยวกัน)
 		Where("status = ?", "confirm").             // 3. เฉพาะสถานะที่ Active (ถ้า Cancelled ไปแล้วถือว่าไม่นับ)
-		Where("start_time < ? AND end_time > ?", booking.EndTime, booking.StartTime). // 4. สูตรเช็คเวลาชน (Overlap)
-		Count(&count).Error
+		Where("start_time < ? AND end_time > ?", booking.EndTime, booking.StartTime) // 4. สูตรเช็คเวลาชน (Overlap)
 
+	if booking.ID != uuid.Nil { // หรือ booking.ID != "" ถ้าเป็น string
+		query = query.Where("id != ?", booking.ID)
+	}
+
+	err := query.Count(&count).Error
+		
 	if err != nil {
-			// กรณี Database Error ให้ตอบ False (ไม่ว่าง) ไปก่อนเพื่อความปลอดภัย กันระบบล่ม
+		// กรณี Database Error ให้ตอบ False (ไม่ว่าง) ไปก่อนเพื่อความปลอดภัย กันระบบล่ม
 		return false
 	}
 
@@ -127,11 +137,6 @@ func (p *postgresBookingRepo) IsPasscodeAvailable(booking *domain.Booking, passc
 // 	}
 
 // 	return bookings, nil
-// }
-
-// func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
-// 	result := p.db.Save(booking)
-// 	return result.Error
 // }
 
 // func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {

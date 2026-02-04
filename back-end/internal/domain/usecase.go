@@ -17,9 +17,9 @@ type OrderUsecase interface {
 	// DeleteBook(id uuid.UUID) error
 
 	CreateBooking(booking *Booking, roomNumber uint) error
+	UpdateBooking(booking *Booking, roomNumber uint) error
 	// GetUserBooking(userID uuid.UUID) ([]Booking, error)
 	// GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
-	// UpdateBooking(booking *Booking, roomNumber uint) error
 	// DeleteBooking(bookingID uuid.UUID) error
 
 	// GetCalendar(year int, month int) (*CalendarResponse, error)
