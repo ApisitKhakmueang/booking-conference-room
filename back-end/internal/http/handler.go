@@ -172,27 +172,27 @@ func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
 // 	return c.Status(fiber.StatusOK).JSON(bookings)
 // }
 
-// func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
-// 	date := c.Params("date")
+func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
+	date := c.Params("date")
 
-// 	filter := new(domain.GetBookingFilter)
+	filter := new(domain.GetBookingFilter)
 
-// 	// ดึงจาก Query
-// 	if err := c.QueryParser(filter); err != nil {
-// 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-// 	}
+	// ดึงจาก Query
+	if err := c.QueryParser(filter); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
-// 	log.Printf("duration: %s, room: %v", filter.Duration, filter.Room)
+	// log.Printf("duration: %s, room: %v", filter.Duration, filter.Room)
 	
-// 	if filter.Duration == "" || filter.Room == 0 {
-// 		return c.Status(fiber.StatusBadRequest).SendString("Please send duration and room number")
-// 	}
+	if filter.Duration == "" || filter.Room == 0 {
+		return c.Status(fiber.StatusBadRequest).SendString("Please send duration and room number")
+	}
 
-// 	response, err := u.usecase.GetBooking(date, filter)
-// 	if err != nil {
-// 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
-// 	}
-// 	// log.Printf("res: %v", response)
+	response, err := u.usecase.GetBooking(date, filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	// log.Printf("res: %v", response)
 
-// 	return c.Status(fiber.StatusOK).JSON(response)
-// }
+	return c.Status(fiber.StatusOK).JSON(response)
+}

@@ -1,7 +1,7 @@
 package domain
 
 import (
-	// "time"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -10,19 +10,19 @@ type BookingRepository interface {
 	CreateBookingDB(booking *Booking) error
 	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
+	GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
 	// GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
-	// GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
 	// GetHolidayDB(startDate time.Time, endDate time.Time) ([]Holiday, error)
 
 	GetRoomID(booking *Booking, roomNumber uint) error
 	IsRoomAvailable(booking *Booking) bool
 	IsPasscodeAvailable(booking *Booking, passcode string) bool 
+	CheckDayOff(date time.Time) error
 	// BulkUpsertHolidays(holidays []Holiday) error
 	// GetEventID(bookingID uuid.UUID) (*Booking, error)
 	// GetCalendar(roomNumber uint) (*Calendar, error)
 	// GetUser(userID uuid.UUID) (*User, error)
 	// CheckSameRoom(booking *Booking, roomNumber uint) error
-	// CheckDayOff(date string) error
 	// CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error)
 }
 

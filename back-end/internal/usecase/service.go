@@ -30,6 +30,10 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
+	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
+		return err
+	}
+
 	err := helper.ValidateBusinessHours(booking.StartTime, booking.EndTime)
 	if err != nil {
 		return err
@@ -76,9 +80,6 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 	// }
 
 	// dateToCheck := t.Format("2006-01-02")
-	// if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
-	// 	return err
-	// }
 
 	// calendar, err := u.repo.GetCalendar(roomNumber)
 	// if err != nil {
@@ -112,6 +113,10 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 }
 
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
+	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
+		return err
+	}
+
 	err := helper.ValidateBusinessHours(booking.StartTime, booking.EndTime)
 	if err != nil {
 		return err
@@ -135,9 +140,6 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 	// // }
 
 	// // dateToCheck := t.Format("2006-01-02")
-	// if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
-	// 	return err
-	// }
 
 	// // log.Println("after check day off")
 
@@ -220,6 +222,44 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 	return nil
 }
 
+func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) ([]domain.Schedule, error) {
+	var response []domain.Schedule
+
+	DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
+	if err != nil {
+		return nil, err
+	}
+
+	instBooking := new(domain.Booking)
+	if err := u.repo.GetRoomID(instBooking, filter.Room); err != nil {
+		return nil, err
+	}
+
+	bookings, err := u.repo.GetBookingDB(DateTime, instBooking.RoomID)
+	if err != nil {
+		return nil, err
+	}
+	// log.Printf("bookings: %v\n", bookings)
+
+	groupBookings, err := helper.ConvertBooking(bookings)
+	if err != nil {
+		return nil, err
+	}
+
+	// // log.Printf("bookings: %v\n", groupBookings)
+
+	for date, events := range groupBookings {
+		response = append(response, domain.Schedule{
+			Date:   date,
+			Events: events,
+		})
+	}
+
+	// log.Printf("response: %v", response)
+
+	return response, nil
+}
+
 // func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
 // 	bookings, err := u.repo.GetUserBookingDB(userID)
 // 	if err != nil {
@@ -227,41 +267,6 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 // 	}
 
 // 	return bookings, nil
-// }
-
-// func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) ([]domain.Schedule, error) {
-// 	var response []domain.Schedule
-
-// 	DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	calendar, err := u.repo.GetCalendar(filter.Room)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	bookings, err := u.repo.GetBookingDB(DateTime, calendar.RoomID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	log.Printf("bookings: %v\n", bookings)
-
-// 	groupBookings := helper.ConvertBooking(bookings)
-
-// 	// log.Printf("bookings: %v\n", groupBookings)
-
-// 	for date, events := range groupBookings {
-// 		response = append(response, domain.Schedule{
-// 			Date:   date,
-// 			Events: events,
-// 		})
-// 	}
-
-// 	// log.Printf("response: %v", response)
-
-// 	return response, nil
 // }
 
 // func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarResponse, error) {
