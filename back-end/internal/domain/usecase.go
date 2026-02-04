@@ -3,10 +3,8 @@ package domain
 import (
 	// "time"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 )
-
-// "github.com/google/uuid"
 // "github.com/gofiber/fiber/v2"
 
 type OrderUsecase interface {
@@ -18,9 +16,9 @@ type OrderUsecase interface {
 
 	CreateBooking(booking *Booking, roomNumber uint) error
 	UpdateBooking(booking *Booking, roomNumber uint) error
+	DeleteBooking(bookingID uuid.UUID) error
 	// GetUserBooking(userID uuid.UUID) ([]Booking, error)
 	// GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
-	// DeleteBooking(bookingID uuid.UUID) error
 
 	// GetCalendar(year int, month int) (*CalendarResponse, error)
 	// CheckTimeUpdated(year uint, month uint) (*time.Time, error)

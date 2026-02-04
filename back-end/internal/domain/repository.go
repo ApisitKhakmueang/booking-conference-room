@@ -3,15 +3,15 @@ package domain
 import (
 	// "time"
 
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 type BookingRepository interface {
 	CreateBookingDB(booking *Booking) error
 	UpdateBookingDB(booking *Booking) error
+	DeleteBookingDB(bookingID uuid.UUID) error
 	// GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
 	// GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
-	// DeleteBookingDB(bookingID uuid.UUID) error
 	// GetHolidayDB(startDate time.Time, endDate time.Time) ([]Holiday, error)
 
 	GetRoomID(booking *Booking, roomNumber uint) error

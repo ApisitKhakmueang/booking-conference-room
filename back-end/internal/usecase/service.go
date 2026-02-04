@@ -8,8 +8,7 @@ import (
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
-	// "github.com/google/uuid"
-	// "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 // var roomCalendarID = []string{
@@ -202,6 +201,25 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 	return nil
 }
 
+func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
+	// booking, err := u.repo.GetEventID(bookingID)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// // log.Printf("booking: %v", booking)
+	// // log.Printf("booking: %v", booking.GoogleEventID)
+	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
+	// 	return err
+	// }
+
+	if err := u.repo.DeleteBookingDB(bookingID); err != nil {
+		return errors.New("Don't have this booking")
+	}
+
+	return nil
+}
+
 // func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
 // 	bookings, err := u.repo.GetUserBookingDB(userID)
 // 	if err != nil {
@@ -244,25 +262,6 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 // 	// log.Printf("response: %v", response)
 
 // 	return response, nil
-// }
-
-// func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
-// 	booking, err := u.repo.GetEventID(bookingID)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// log.Printf("booking: %v", booking)
-// 	// log.Printf("booking: %v", booking.GoogleEventID)
-// 	if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
-// 		return err
-// 	}
-
-// 	if err = u.repo.DeleteBookingDB(bookingID); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
 // }
 
 // func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarResponse, error) {

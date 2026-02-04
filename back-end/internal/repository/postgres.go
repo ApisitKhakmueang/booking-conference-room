@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"log"
+	// "log"
 
 	// "database/sql"
 	// "errors"
@@ -33,6 +33,20 @@ func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
 func (p *postgresBookingRepo) UpdateBookingDB(booking *domain.Booking) error {
 	err := p.db.Model(&booking).Updates(booking).Error
 	return err
+}
+
+func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
+	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
+	booking := new(domain.Booking)
+	result := p.db.
+		Model(booking).
+		Select("status").
+		Where("id = ? AND status = confirm", bookingID).
+		Updates(domain.Booking{
+			Status: "cancelled",
+		},
+	)
+	return result.Error
 }
 
 func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint) error {
@@ -137,15 +151,6 @@ func (p *postgresBookingRepo) IsPasscodeAvailable(booking *domain.Booking, passc
 // 	}
 
 // 	return bookings, nil
-// }
-
-// func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
-// 	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
-// 	booking := new(domain.Booking)
-// 	result := p.db.Model(booking).Select("status").Where("id = ?", bookingID).Updates(domain.Booking{
-// 		Status: "cancelled",
-// 	})
-// 	return result.Error
 // }
 
 // func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
