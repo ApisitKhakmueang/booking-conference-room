@@ -24,7 +24,7 @@ const SIDEBAR_ITEMS = [
   { name: "Booking", href: "/booking", icon: List },
 ] as const;
 
-export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, isSmallDisplay }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -33,8 +33,8 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
         className={`
           h-screen fixed dark:bg-sidebar
           bg-light-sidebar
-          transition-duration-300 z-20
-          ${isMobile
+          transition-[margin,padding,width] duration-300 z-20
+          ${isSmallDisplay
               ? isOpen
                 ? "translate-x-0 w-64"
                 : "-translate-x-full w-64"
@@ -48,7 +48,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
           <SidebarToggle
             isOpen={isOpen}
             toggle={() => setIsOpen(v => !v)}
-            isMobile={isMobile}
+            isSmallDisplay={isSmallDisplay}
           />
 
           <ul className="space-y-2 font-semibold text-lg">
@@ -75,12 +75,12 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                     className={`
                       flex items-center gap-3
                       p-3 lg:p-4 rounded-full
-                      transition-duration-300
+                      transition-colors duration-300
                       ${isActive
                         ? "bg-light-hover text-white dark:bg-hover dark:text-main"
                         : "hover:bg-light-hover hover:text-white dark:hover:bg-hover dark:hover:text-main"}
                     `}
-                    onClick={() => isMobile && setIsOpen(false)}
+                    onClick={() => isSmallDisplay && setIsOpen(false)}
                   >
                     
                     <Icon size={20} />
@@ -95,7 +95,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
         </nav>
       </aside>
 
-      <BackgroundDrop isOpen={isOpen} isMobile={isMobile} setIsOpen={setIsOpen} />
+      <BackgroundDrop isOpen={isOpen} isSmallDisplay={isSmallDisplay} setIsOpen={setIsOpen} />
     </>
   );
 }

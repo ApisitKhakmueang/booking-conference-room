@@ -26,7 +26,7 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
           Dark
         </span>
       </div>
-      <div className="flex dark:hidden bg-light-card hover:bg-light-hover text-white transition-duartino-300 p-3 rounded-full shadow-xl">
+      <div className="flex dark:hidden bg-light-card hover:bg-light-hover text-white transition-duartion-300 p-3 rounded-full shadow-xl">
         <Sun />
         <span
           className={`

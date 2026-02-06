@@ -6,25 +6,29 @@ import NotificationComp from "./notification";
 import UserIcon from "./user-icon";
 import Welcomeback from "./welcome";
 
-export default function UserBar({ isOpen, isMobile }: UserBarProps) {
+export default function UserBar({ isOpen, isSmallDisplay }: UserBarProps) {
   const user = useAuthStore((s) => s.user)
 
   return (
     <div className={`fixed w-full`}>
-      <nav className={`w-full dark:bg-main-background bg-light-main-background flex ${!isMobile
+      <nav className={`w-full dark:bg-main-background bg-light-main-background flex ${!isSmallDisplay
       ? isOpen
-        ? "pl-70 justify-between"
-        : "pl-23 justify-between"
-      : 'justify-end'} p-5  transition-duration-300`}>
+        ? "translate-x-70 justify-between"
+        : "translate-x-23 justify-between"
+      : 'justify-end'} p-5 transition-transform duration-300`}>
 
-        {!isMobile && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
+        {!isSmallDisplay && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
 
-        <div className="flex items-center sm:gap-2 gap-1">
+        <div className={`flex items-center sm:gap-2 gap-1 ${!isSmallDisplay
+          ? isOpen
+            ? "-translate-x-70 justify-between"
+            : "-translate-x-23 justify-between"
+          : 'justify-end'}}`}>
           <CodeDisplay />
 
           <NotificationComp />
           
-          <UserIcon user={user} isMobile={isMobile} />
+          <UserIcon user={user} isSmallDisplay={isSmallDisplay} />
         </div>
       </nav>
     </div>

@@ -8,11 +8,11 @@ export default function EachPageLayout({
   children,
   className
 }: EachPageLayoutProps) {
-  const { isOpen, isMobile } = useSidebarLayout()
+  const { isOpen, isSmallDisplay } = useSidebarLayout()
 
   return (
     <div className={`flex flex-col transition-[margin,padding] duration-300 
-      ${!isMobile 
+      ${!isSmallDisplay 
           ? isOpen 
             ? 'px-5' 
             : 'lg:px-30 px-5'

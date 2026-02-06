@@ -2,13 +2,13 @@
 import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
 import { SidebarToggleProps } from "@/lib/interface/interface";
 
-export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggleProps) {
+export default function SidebarToggle({ isOpen, toggle, isSmallDisplay }: SidebarToggleProps) {
   return (
     <>
-      {isMobile ? (
+      {isSmallDisplay ? (
         <button
           onClick={toggle}
-          className={`absolute top-5 ${isOpen ? "translate-x-48 top-9 dark:hover:text-main" : "translate-x-62 dark:bg-hover dark:text-secondary dark:hover:text-main bg-light-hover p-[15px] text-white rounded-full"} transition-duration-300 cursor-pointer`}
+          className={`absolute top-5 ${isOpen ? "translate-x-48 top-9 dark:hover:text-main" : "translate-x-62 dark:bg-hover dark:text-secondary dark:hover:text-main bg-light-hover p-[15px] text-white rounded-full"} transition-colors duration-300 cursor-pointer`}
         >
           <Menu />
         </button>
@@ -23,7 +23,7 @@ export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggl
             bg-light-hover text-white
             shadow-md
             hover:scale-105
-            transition-duration-300
+            transition-colors duration-300
             cursor-pointer
           `}
         >

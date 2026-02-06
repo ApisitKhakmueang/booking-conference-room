@@ -6,7 +6,7 @@ export interface EachPageLayoutProps {
 
 export interface OpenMobileProps {
   isOpen: boolean
-  isMobile: boolean
+  isSmallDisplay: boolean
 }
 
 // Group the same interface
@@ -25,7 +25,7 @@ export interface SidebarToggleProps extends OpenMobileProps {
 export type UserBarProps = OpenMobileProps;
 
 export interface UserIconProps {
-  isMobile?: boolean;
+  isSmallDisplay?: boolean;
   user: UserProfile | null
 }
 
@@ -36,7 +36,7 @@ export interface WelcombackProps {
 
 export interface SidebarLayoutContextType {
   isOpen: boolean;
-  isMobile: boolean;
+  isSmallDisplay: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 

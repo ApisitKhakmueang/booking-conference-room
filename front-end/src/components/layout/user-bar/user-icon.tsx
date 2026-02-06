@@ -3,16 +3,16 @@ import UserDetail from "./user-detail";
 import { UserIconProps } from "@/lib/interface/interface";
 import Image from "next/image";
 
-export default function UserIcon({ isMobile, user }: UserIconProps) {
+export default function UserIcon({ isSmallDisplay, user }: UserIconProps) {
   const [ isOpen, setIsOpen ] = useState(false)
   
   return (
     <>
       <div 
-        className={`border dark:border-none dark:bg-sidebar dark:hover:bg-hover border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-duration-300 rounded-full cursor-pointer  select-none ${!isMobile ? 'p-1' : ''}`}
+        className={`border dark:border-none dark:bg-sidebar dark:hover:bg-hover border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-transform duration-300 rounded-full cursor-pointer  select-none ${!isSmallDisplay ? 'p-1' : ''}`}
         onClick={() => setIsOpen(v => !v)}
         >
-        <div className={`flex items-center gap-2 relative ${!isMobile ? 'pr-5' : 'p-[7px]'}`}>
+        <div className={`flex items-center gap-2 relative ${!isSmallDisplay ? 'pr-5' : 'p-[7px]'}`}>
           <div className="w-10 h-10 relative flex">
             <Image 
               src={user?.avatar || '/user/profile.jpg'}

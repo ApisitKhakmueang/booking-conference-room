@@ -4,7 +4,7 @@
 import { useState } from "react";
 
 // Hook
-import useMediaQuery from "@/hooks/ui/useMediaQuery";
+import { useMediaQuery } from "@/hooks/ui/useMediaQuery";
 import useAuth from "@/hooks/auth/useAuth";
 
 // Component
@@ -19,26 +19,26 @@ export default function NavigationLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  const isSmallDisplay = useMediaQuery("(max-width: 1024px)");
   const [isOpen, setIsOpen] = useState(true);
   
   useAuth()
   
   return (
     <div>
-      <SidebarLayoutProvider value={{ isOpen, setIsOpen, isMobile }}>
+      <SidebarLayoutProvider value={{ isOpen, setIsOpen, isSmallDisplay }}>
         <div className="flex dark:bg-main-background bg-light-main-background dark:text-secondary text-black">
           <Sidebar 
             isOpen={isOpen} 
             setIsOpen={setIsOpen} 
-            isMobile={isMobile}/>
+            isSmallDisplay={isSmallDisplay}/>
 
           <UserBar 
             isOpen={isOpen} 
-            isMobile={isMobile}/>
+            isSmallDisplay={isSmallDisplay}/>
 
           <main
-            className={`flex-1 transition-duration-300 mt-25 ${!isMobile && (isOpen ? "ml-70" : "ml-23")}
+            className={`flex-1 transition-[margin,padding] duration-300 mt-25 ${!isSmallDisplay && (isOpen ? "ml-70" : "ml-23")}
           `}>
             {children}
           </main>
