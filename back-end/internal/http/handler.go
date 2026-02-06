@@ -158,20 +158,6 @@ func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
 }
 
-// func (u *OrderHandler) GetUserBooking(c *fiber.Ctx) error {
-// 	id, err := uuid.Parse(c.Params("id"))
-// 	if err != nil {
-// 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-// 	}
-
-// 	bookings, err := u.usecase.GetUserBooking(id)
-// 	if err != nil {
-// 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
-// 	}
-
-// 	return c.Status(fiber.StatusOK).JSON(bookings)
-// }
-
 func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
 	date := c.Params("date")
 
@@ -195,4 +181,18 @@ func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
 	// log.Printf("res: %v", response)
 
 	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (u *OrderHandler) GetUserBooking(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	bookings, err := u.usecase.GetUserBooking(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(bookings)
 }

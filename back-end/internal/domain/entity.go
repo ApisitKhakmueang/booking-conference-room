@@ -125,34 +125,34 @@ type Date struct {
 
 // Schema
 type Holiday struct {
-	ID 				int64 			`gorm:"primaryKey;column:id" json:"id"`
-	UpdatedAt time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt"`
-	Date 			DateRes 		`gorm:"type:date;column:date;unique" json:"date"`
-	Name 			string 			`gorm:"type:text;column:name" json:"name"`
-	IsDayOff 	*bool 			`gorm:"column:is_day_off;default:true" json:"isDayOff"`
-	Source 		string 			`gorm:"type:text;column:source" json:"source"`
+	ID 				int64 			`gorm:"primaryKey;column:id" json:"id,omitempty"`
+	UpdatedAt *time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt,omitempty"`
+	Date 			*DateRes 		`gorm:"type:date;column:date;unique" json:"date,omitempty"`
+	Name 			string 			`gorm:"type:text;column:name" json:"name,omitempty"`
+	IsDayOff 	*bool 			`gorm:"column:is_day_off;default:true" json:"isDayOff,omitempty"`
+	Source 		string 			`gorm:"type:text;column:source" json:"source,omitempty"`
 }
 
 type Room struct {
-	ID        	uuid.UUID 			`gorm:"type:uuid;primaryKey" json:"id"`
-	CreatedAt 	time.Time				`json:"createdAt"`
-	UpdatedAt 	time.Time				`json:"updatedAt"`
-	DeletedAt 	gorm.DeletedAt 	`gorm:"index" json:"deletedAt"`
+	ID        	uuid.UUID 			`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
+	CreatedAt 	*time.Time				`json:"createdAt,omitempty"`
+	UpdatedAt 	*time.Time				`json:"updatedAt,omitempty"`
+	DeletedAt 	*gorm.DeletedAt 	`gorm:"index" json:"deletedAt,omitempty"`
 	
-	Name 				string 					`gorm:"unique" json:"name"`
-	RoomNumber  uint						`json:"roomNumber"`
-	Location 		string					`json:"location"`
-	Capacity 		uint						`json:"capacity"`
-	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive"`
+	Name 				string 					`gorm:"unique" json:"name,omitempty"`
+	RoomNumber  uint						`json:"roomNumber,omitempty"`
+	Location 		string					`json:"location,omitempty"`
+	Capacity 		uint						`json:"capacity,omitempty"`
+	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive,omitempty"`
 }
 
 type User struct {
-	ID 					uuid.UUID 	`gorm:"type:uuid;primaryKey" json:"id"`
-	Email 			string 			`json:"email"`
-	FullName 		string			`json:"fullName"`
-	AvatarUrl 	string			`json:"avatarUrl"`
-	Role				string			`json:"role"`
-	CreatedAt 	time.Time		`json:"createdAt"`
+	ID 					uuid.UUID 		`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
+	Email 			string 				`json:"email,omitempty"`
+	FullName 		string				`json:"fullName,omitempty"`
+	AvatarUrl 	string				`json:"avatarUrl,omitempty"`
+	Role				string				`json:"role,omitempty"`
+	CreatedAt 	*time.Time		`json:"createdAt,omitempty"`
 }
 
 // type Calendar struct {
@@ -169,22 +169,22 @@ type User struct {
 // }
 
 type Booking struct {
-	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	CreatedAt 		time.Time				`json:"createAt"`
-	UpdatedAt 		time.Time				`json:"updatedAt"`
+	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id,omitempty"`
+	CreatedAt 		*time.Time				`json:"createAt,omitempty"`
+	UpdatedAt 		*time.Time				`json:"updatedAt,omitempty"`
 
-	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId"`
-	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId"`
+	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId,omitempty"`
+	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId,omitempty"`
 	// CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
 	// GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
 	
-	StartTime     time.Time      	`gorm:"not null" json:"startTime"`
-	EndTime       time.Time      	`gorm:"not null" json:"endTime"`
-	Title					string					`gorm:"unique;default:no_tilte" json:"title"`
-	Passcode      string          `gorm:"type:varchar(10);not null" json:"passcode"`
+	StartTime     *time.Time      	`gorm:"not null" json:"startTime,omitempty"`
+	EndTime       *time.Time      	`gorm:"not null" json:"endTime,omitempty"`
+	Title					string					`gorm:"unique;default:no_tilte" json:"title,omitempty"`
+	Passcode      string          `gorm:"type:varchar(10);not null" json:"passcode,omitempty"`
 	
 	// สถานะ: confirm, cancelled, complete
-	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status"`
+	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status,omitempty"`
 
 	// Relations
 	Room     			*Room     			`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Room,omitempty"`

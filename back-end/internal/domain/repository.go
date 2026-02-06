@@ -11,7 +11,7 @@ type BookingRepository interface {
 	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
 	GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
-	// GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
+	GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
 	// GetHolidayDB(startDate time.Time, endDate time.Time) ([]Holiday, error)
 
 	GetRoomID(booking *Booking, roomNumber uint) error

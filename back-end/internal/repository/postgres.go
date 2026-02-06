@@ -157,22 +157,22 @@ func (p *postgresBookingRepo) CheckDayOff(date time.Time) error {
 	}
 }
 
-// func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
-// 	var bookings []domain.Booking
+func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
+	var bookings []domain.Booking
 
-// 	result := p.db.
-// 		Preload("User", func(db *gorm.DB) *gorm.DB {
-// 			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
-//     }).
-// 		Where("user_id = ?", userID).
-// 		Find(&bookings)
+	result := p.db.
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
+    }).
+		Where("user_id = ?", userID).
+		Find(&bookings)
 
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-// 	return bookings, nil
-// }
+	return bookings, nil
+}
 
 // func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
 // 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)

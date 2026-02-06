@@ -30,11 +30,11 @@ func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGatew
 }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
+	if err := u.repo.CheckDayOff(*booking.StartTime); err != nil {
 		return err
 	}
 
-	err := helper.ValidateBusinessHours(booking.StartTime, booking.EndTime)
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
 		return err
 	}
@@ -113,11 +113,11 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 }
 
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.repo.CheckDayOff(booking.StartTime); err != nil {
+	if err := u.repo.CheckDayOff(*booking.StartTime); err != nil {
 		return err
 	}
 
-	err := helper.ValidateBusinessHours(booking.StartTime, booking.EndTime)
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
 		return err
 	}
@@ -260,14 +260,14 @@ func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) 
 	return response, nil
 }
 
-// func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
-// 	bookings, err := u.repo.GetUserBookingDB(userID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
+	bookings, err := u.repo.GetUserBookingDB(userID)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return bookings, nil
-// }
+	return bookings, nil
+}
 
 // func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarResponse, error) {
 // 	loc := time.FixedZone("ICT", 7*60*60)

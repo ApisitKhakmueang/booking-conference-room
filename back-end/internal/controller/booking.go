@@ -14,5 +14,5 @@ func InitialBookingRoute(router fiber.Router, handler *http.OrderHandler) {
 	booking.Put("/:bookingID", handler.UpdateBooking)
 	booking.Delete("/:bookingID", handler.DeleteBooking)
 	booking.Get("/:date", handler.GetBooking)
-	// booking.Get("/user/:id", handler.GetUserBooking)
+	booking.Get("/user/:id", handler.GetUserBooking)
 }
