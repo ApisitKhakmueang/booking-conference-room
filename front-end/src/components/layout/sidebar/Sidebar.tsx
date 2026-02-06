@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, setIsOpen, isMobile }: SidebarProps) {
                     className={`
                       flex items-center gap-3
                       p-3 lg:p-4 rounded-full
-                      transition-colors
+                      transition-duration-300
                       ${isActive
                         ? "bg-light-hover text-white dark:bg-hover dark:text-main"
                         : "hover:bg-light-hover hover:text-white dark:hover:bg-hover dark:hover:text-main"}

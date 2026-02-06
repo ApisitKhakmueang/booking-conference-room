@@ -19,7 +19,7 @@ export default function Card({
   return (
     <div
       className={cn(
-        'rounded-2xl transition font-medium',
+        'rounded-2xl transition-duration-300 font-medium',
         variantStyles[variant],
         (loading) && 'opacity-50 cursor-not-allowed',
         className

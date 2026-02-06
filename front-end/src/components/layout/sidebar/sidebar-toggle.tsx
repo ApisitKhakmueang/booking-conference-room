@@ -23,7 +23,7 @@ export default function SidebarToggle({ isOpen, toggle, isMobile }: SidebarToggl
             bg-light-hover text-white
             shadow-md
             hover:scale-105
-            transition
+            transition-duration-300
             cursor-pointer
           `}
         >

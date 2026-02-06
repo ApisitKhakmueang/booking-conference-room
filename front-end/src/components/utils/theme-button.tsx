@@ -15,7 +15,7 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
 
   return (
     <button type="button" className={cn("p-5 cursor-pointer flex justify-center", className)} onClick={toggle}>
-      <div className="dark:flex hidden bg-card hover:bg-hover hover:text-main transition-colors p-3 rounded-full shadow-xl">
+      <div className="dark:flex hidden bg-card hover:bg-hover hover:text-main transition-duration-300 p-3 rounded-full shadow-xl">
         <Moon />
         <span
           className={`
@@ -26,7 +26,7 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
           Dark
         </span>
       </div>
-      <div className="flex dark:hidden bg-light-card hover:bg-light-hover text-white transition-colors p-3 rounded-full shadow-xl">
+      <div className="flex dark:hidden bg-light-card hover:bg-light-hover text-white transition-duartino-300 p-3 rounded-full shadow-xl">
         <Sun />
         <span
           className={`
