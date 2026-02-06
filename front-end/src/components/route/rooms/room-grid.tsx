@@ -31,7 +31,7 @@ export default function RoomsGrid() {
         {MOCK_ROOMS.map((room) => {
           const StatusIcon = STATUS_CONFIG[room.status].icon;
           
-          return (<li key={room.id} className="p-7 dark:hover:bg-hover hover:bg-light-hover hover:text-white transition-duration-300 cursor-pointer group/icons">
+          return (<li key={room.id} className="p-5 dark:hover:bg-hover hover:bg-light-hover hover:text-white transition-duration-300 cursor-pointer group/icons">
             <h2 className="text-xl font-semibold">{room.name}</h2>
 
             <div className='flex justify-center py-10'>

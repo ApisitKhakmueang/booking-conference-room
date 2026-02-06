@@ -11,7 +11,7 @@ export default function EachPageLayout({
   const { isOpen } = useSidebarLayout()
 
   return (
-    <div className={`flex flex-col py-5 transition-duration-300 ${isOpen ? 'px-5' : 'lg:px-30 sm:px-10 px-5'}`}>
+    <div className={`flex flex-col transition-duration-300 ${isOpen ? 'px-5' : 'lg:px-30 sm:px-10 px-5'}`}>
       <h1 className="font-semibold text-4xl pb-5 dark:text-main">
         {pageName}
       </h1>

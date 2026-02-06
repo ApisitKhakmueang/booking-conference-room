@@ -27,7 +27,7 @@ export default async function RootLayout({
   const theme = cookieStore.get('theme')?.value ?? 'light'
 
   return (
-    <html lang="en" className={theme}>
+    <html lang="en" className={`${theme} dark:bg-main-background bg-light-main-background`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

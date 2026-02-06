@@ -3,7 +3,7 @@ import Room from "@/components/route/rooms"
 
 export default function Page() {
   return (
-    <EachPageLayout pageName="Rooms" className="flex flex-col gap-7">
+    <EachPageLayout pageName="Rooms" className="flex flex-col gap-5">
       <Room />
     </EachPageLayout>
   )
