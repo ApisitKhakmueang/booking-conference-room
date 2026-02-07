@@ -14,6 +14,7 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 	"gorm.io/driver/postgres"
@@ -54,7 +55,7 @@ func InitialDBConnection() *gorm.DB {
 
 func InitialFiber(handler *http.OrderHandler) *fiber.App {
 	app := fiber.New()
-
+	app.Use(cors.New())
 	// app.Get("/book", handler.GetBooks)
 	// app.Get("/book/:id", handler.GetBook)
 	// app.Post("/book", handler.CreateBook)
