@@ -19,11 +19,11 @@ type BookingRepository interface {
 	IsPasscodeAvailable(booking *Booking, passcode string) bool 
 	CheckDayOff(date time.Time) error
 	BulkUpsertHolidays(holidays []Holiday) error
+	CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error)
 	// GetEventID(bookingID uuid.UUID) (*Booking, error)
 	// GetCalendar(roomNumber uint) (*Calendar, error)
 	// GetUser(userID uuid.UUID) (*User, error)
 	// CheckSameRoom(booking *Booking, roomNumber uint) error
-	CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error)
 }
 
 type CalendarGateway interface {
