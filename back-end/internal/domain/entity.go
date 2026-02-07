@@ -127,7 +127,7 @@ type Date struct {
 type Holiday struct {
 	ID 				int64 			`gorm:"primaryKey;column:id" json:"id,omitempty"`
 	UpdatedAt *time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt,omitempty"`
-	Date 			*DateRes 		`gorm:"type:date;column:date;unique" json:"date,omitempty"`
+	Date 			DateRes 		`gorm:"type:date;column:date;unique" json:"date,omitempty"`
 	Name 			string 			`gorm:"type:text;column:name" json:"name,omitempty"`
 	IsDayOff 	*bool 			`gorm:"column:is_day_off;default:true" json:"isDayOff,omitempty"`
 	Source 		string 			`gorm:"type:text;column:source" json:"source,omitempty"`

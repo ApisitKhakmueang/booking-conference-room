@@ -1,7 +1,7 @@
 package domain
 
 import (
-	// "time"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -20,6 +20,6 @@ type OrderUsecase interface {
 	GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
 	GetUserBooking(userID uuid.UUID) ([]Booking, error)
 
-	// GetCalendar(year int, month int) (*CalendarResponse, error)
-	// CheckTimeUpdated(year uint, month uint) (*time.Time, error)
+	GetCalendar(year int, month int) (*CalendarResponse, error)
+	CheckTimeUpdated(year uint, month uint) (*time.Time, error)
 }
