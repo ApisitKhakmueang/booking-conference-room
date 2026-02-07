@@ -15,14 +15,14 @@ export default function UserBar({ isOpen, isSmallDisplay }: UserBarProps) {
       ? isOpen
         ? "translate-x-70 justify-between"
         : "translate-x-23 justify-between"
-      : 'justify-end'} p-5 transition-transform duration-300`}>
+      : 'justify-end'} py-5 transition-transform duration-300`}>
 
         {!isSmallDisplay && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
 
         <div className={`flex items-center sm:gap-2 gap-1 ${!isSmallDisplay
           ? isOpen
-            ? "-translate-x-70 justify-between"
-            : "-translate-x-23 justify-between"
+            ? "-translate-x-75 justify-between"
+            : "-translate-x-28 justify-between"
           : 'justify-end'}}`}>
           <CodeDisplay />
 
