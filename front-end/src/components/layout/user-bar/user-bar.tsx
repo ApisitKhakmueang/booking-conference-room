@@ -15,7 +15,7 @@ export default function UserBar({ isOpen, isSmallDisplay }: UserBarProps) {
       ? isOpen
         ? "translate-x-70 justify-between"
         : "translate-x-23 justify-between"
-      : 'justify-end'} py-5 transition-transform duration-300`}>
+      : 'justify-end px-5'} py-5 transition-transform duration-300`}>
 
         {!isSmallDisplay && <Welcomeback isOpen={isOpen} user={user}></Welcomeback>}
 
