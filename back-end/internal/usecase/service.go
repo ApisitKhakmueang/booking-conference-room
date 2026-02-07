@@ -1,8 +1,8 @@
 package usercase
 
 import (
-	// "log"
-	// "time"
+	"log"
+	"time"
 
 	"errors"
 
@@ -269,98 +269,84 @@ func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error
 	return bookings, nil
 }
 
-// func (u *orderUsecase) GetCalendar(year int, month int) (*domain.CalendarResponse, error) {
-// 	loc := time.FixedZone("ICT", 7*60*60)
-// 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
-// 	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+func (u *orderUsecase) GetHoliday(year int, month int) (*domain.HolidayResponse, error) {
+	loc := time.FixedZone("ICT", 7*60*60)
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
+	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
 
-// 	startWeekday := int(startDate.Weekday())
+	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
+	holidays, err := u.repo.GetHolidayDB(startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// 2. หาจำนวนวันทั้งหมดในเดือน
-// 	totalDays := endDate.Day()
+	response := &domain.HolidayResponse{
+		Year:         year,
+		Month:        month,
+		Holidays:     nil,
+	}
 
-// 	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
-// 	var weekends []int
-// 	for day := range totalDays {
-// 		d := time.Date(year, time.Month(month), day, 0, 0, 0, 0, loc)
-// 		if d.Weekday() == time.Saturday || d.Weekday() == time.Sunday {
-// 			weekends = append(weekends, day)
-// 		}
-// 	}
+	if len(holidays) > 0 {
+		response.Holidays = holidays
+		return response, nil
+	}
 
-// 	holidays, err := u.repo.GetHolidayDB(startDate, endDate)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	googleHolidays, err := u.gateway.FetchHolidays(year)
+	if err != nil {
+		return nil, err // ถ้าต่อ Google ไม่ได้ ก็จบ
+	}
 
-// 	response := &domain.CalendarResponse{
-// 		Year:         year,
-// 		Month:        month,
-// 		TotalDays:    totalDays,
-// 		StartWeekday: startWeekday,
-// 		Weekends:     weekends,
-// 		Holidays:     nil,
-// 	}
+	// log.Printf("BEFORE INSERT: First=%v, Last=%v\n", googleHolidays[0].Date.Time(), googleHolidays[len(googleHolidays)-1].Date.Time())
 
-// 	if len(holidays) > 0 {
-// 		response.Holidays = holidays
-// 		return response, nil
-// 	}
+	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
+	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
+	if len(googleHolidays) > 0 {
+		if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
+			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้
+			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
+			log.Println("Failed to cache holidays:", err)
+		}
+	}
 
-// 	googleHolidays, err := u.gateway.FetchHolidays(year)
-// 	if err != nil {
-// 		return nil, err // ถ้าต่อ Google ไม่ได้ ก็จบ
-// 	}
+	var filteredHolidays []domain.Holiday
 
-// 	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
-// 	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
-// 	// if len(googleHolidays) > 0 {
-// 	// 	if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
-// 	// 		// Log error ไว้ แต่ไม่ต้อง return error ก็ได้
-// 	// 		// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
-// 	// 		log.Println("Failed to cache holidays:", err)
-// 	// 	}
-// 	// }
+	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
+	targetMonth := time.Month(month)
 
-// 	var filteredHolidays []domain.Holiday
+	for _, h := range googleHolidays {
+		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
+		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
+		t := h.Date.Time()
 
-// 	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
-// 	targetMonth := time.Month(month)
+		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
+		if t.Month() == targetMonth && t.Year() == year {
+			filteredHolidays = append(filteredHolidays, h)
+		}
+	}
 
-// 	for _, h := range googleHolidays {
-// 		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
-// 		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
-// 		t := time.Time(h.Date)
+	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
+	response.Holidays = filteredHolidays
 
-// 		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
-// 		if t.Month() == targetMonth && t.Year() == year {
-// 			filteredHolidays = append(filteredHolidays, h)
-// 		}
-// 	}
+	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
+	return response, nil
+}
 
-// 	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
-// 	response.Holidays = filteredHolidays
+func (u *orderUsecase) CheckTimeUpdated(year uint, month uint) (*time.Time, error) {
+	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
+	loc := time.FixedZone("ICT", 7*60*60)
+	startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
+	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
 
-// 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
-// 	return response, nil
-// }
+	lastUpdated, err := u.repo.CheckLatestUpdateHoliday(startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
 
-// func (u *orderUsecase) CheckTimeUpdated(year uint, month uint) (*time.Time, error) {
-// 	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
-// 	loc := time.FixedZone("ICT", 7*60*60)
-// 	startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
-// 	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
+	checkTime := time.Now()
+	if lastUpdated != nil {
+		checkTime = *lastUpdated
+	}
 
-// 	lastUpdated, err := u.repo.CheckLatestUpdateHoliday(startDate, endDate)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
-// 	checkTime := time.Now()
-// 	if lastUpdated != nil {
-// 		checkTime = *lastUpdated
-// 	}
-
-// 	return &checkTime, nil
-// }
+	return &checkTime, nil
+}

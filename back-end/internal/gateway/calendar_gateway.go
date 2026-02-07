@@ -3,12 +3,11 @@ package gateway
 import (
 	// "errors"
 	// "fmt"
-	// "log"
-	// "time"
+	"log"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
-	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"google.golang.org/api/calendar/v3"
 )
@@ -19,6 +18,72 @@ type googleCalendarGateway struct {
 
 func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 	return &googleCalendarGateway{service: client}
+}
+
+func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
+	// 1. Set Time Range (ตามปีที่ส่งมา)
+	calendarID := "en.th#holiday@group.v.calendar.google.com"
+
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err
+	}
+	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
+	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
+	log.Println("time min: ", timeMin)
+	log.Println("time max: ", timeMax)
+
+	// 2. Fetch Events
+	events, err := r.service.Events.List(calendarID).
+		ShowDeleted(false).
+		SingleEvents(true).
+		TimeMin(timeMin).
+		TimeMax(timeMax).
+		OrderBy("startTime").
+		Do()
+
+	if err != nil {
+		return nil, err // ❌ ห้ามใช้ log.Fatalf
+	}
+
+	// 3. Process Data
+	var holidays []domain.Holiday
+	for _, item := range events.Items {
+		dateStr := item.Start.Date
+		// log.Println("date string: ", item.Start.Date)
+		if dateStr == "" {
+			dateStr = item.Start.DateTime
+		}
+
+		dateObj, err := time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			log.Printf("Skipping invalid date: %s", dateStr)
+			continue
+		}
+
+		if dateObj.Year() != year {
+			continue
+    }
+
+		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
+		// fmt.Printf("dateObj: %v, isOff: %v\n", dateObj, isOff)
+
+		// 1. แปลงค่า DateRes เก็บใส่ตัวแปรไว้ก่อน
+		dateVal := domain.DateRes(dateObj)
+
+		// 2. เอาเวลาปัจจุบันเก็บใส่ตัวแปร (ถ้าจำเป็นต้องใส่เอง)
+		now := time.Now()
+
+		holidays = append(holidays, domain.Holiday{
+			Date:      dateVal,
+			Name:      item.Summary,
+			IsDayOff:  &isOff,
+			Source:    "google_calendar",
+			UpdatedAt: &now,
+		})
+	}
+
+	return holidays, nil
 }
 
 // func (s *googleCalendarGateway) CreateEvent(booking *domain.Booking, createEvent *domain.CreateEvent) (string, error) {
@@ -90,56 +155,6 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 // 	}
 
 // 	return nil
-// }
-
-// func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
-// 	// 1. Set Time Range (ตามปีที่ส่งมา)
-// 	calendarID := "en.th#holiday@group.v.calendar.google.com"
-
-// 	loc := time.FixedZone("ICT", 7*60*60)
-// 	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
-// 	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
-
-// 	// 2. Fetch Events
-// 	events, err := r.service.Events.List(calendarID).
-// 		ShowDeleted(false).
-// 		SingleEvents(true).
-// 		TimeMin(timeMin).
-// 		TimeMax(timeMax).
-// 		OrderBy("startTime").
-// 		Do()
-
-// 	if err != nil {
-// 		return nil, err // ❌ ห้ามใช้ log.Fatalf
-// 	}
-
-// 	// 3. Process Data
-// 	var holidays []domain.Holiday
-// 	for _, item := range events.Items {
-// 		dateStr := item.Start.Date
-// 		log.Println("date string: ", item.Start.Date)
-// 		if dateStr == "" {
-// 			dateStr = item.Start.DateTime
-// 		}
-
-// 		dateObj, err := time.Parse("2006-01-02", dateStr[:10])
-// 		if err != nil {
-// 			log.Printf("Skipping invalid date: %s", dateStr)
-// 			continue
-// 		}
-
-// 		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
-
-// 		holidays = append(holidays, domain.Holiday{
-// 			Date:      domain.DateRes(dateObj),
-// 			Name:      item.Summary,
-// 			IsDayOff:  &isOff,
-// 			Source:    "google_calendar",
-// 			UpdatedAt: time.Now(),
-// 		})
-// 	}
-
-// 	return holidays, nil
 // }
 
 // func (s *googleCalendarGateway) IsRoomAvailable(calendarID string, Time *domain.Date) error {

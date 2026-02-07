@@ -3,7 +3,7 @@ package repository
 import (
 	// "log"
 
-	// "database/sql"
+	"database/sql"
 	"errors"
 	"time"
 	// "time"
@@ -15,7 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	// "gorm.io/gorm/clause"
+	"gorm.io/gorm/clause"
 )
 
 type postgresBookingRepo struct {
@@ -72,6 +72,40 @@ func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UU
 	}
 
 	return bookings, nil
+}
+
+func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+
+	result := p.db.
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
+    }).
+		Where("user_id = ?", userID).
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
+func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
+	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
+	sDate := startDate.Format("2006-01-02")
+	eDate := endDate.Format("2006-01-02")
+
+	// log.Printf("start: %v, end: %v", sDate, eDate)
+
+	var holidays []domain.Holiday
+	// SQL: SELECT * FROM holidays WHERE date ...
+	result := p.db.Where("date >= ? AND date <= ?", sDate, eDate).Order("date ASC").Find(&holidays)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return holidays, nil
 }
 
 func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint) error {
@@ -157,53 +191,45 @@ func (p *postgresBookingRepo) CheckDayOff(date time.Time) error {
 	}
 }
 
-func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
-	var bookings []domain.Booking
-
-	result := p.db.
-		Preload("User", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
-    }).
-		Where("user_id = ?", userID).
-		Find(&bookings)
-
-	if result.Error != nil {
-		return nil, result.Error
+func (r *postgresBookingRepo) BulkUpsertHolidays(holidays []domain.Holiday) error {
+	if len(holidays) == 0 {
+		return nil
 	}
 
-	return bookings, nil
+	// ใช้ Batch Upsert เดิมของคุณ ดีมากแล้วครับ
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "date"}}, // เช็คซ้ำที่วันที่
+		DoUpdates: clause.AssignmentColumns([]string{"name", "is_day_off", "updated_at"}), // อัปเดตข้อมูลใหม่
+	}).Create(&holidays)
+
+	return result.Error
 }
 
-// func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
-// 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
-// 	sDate := startDate.Format("2006-01-02")
-// 	eDate := endDate.Format("2006-01-02")
+func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error){
+	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
+	sDate := startDate.Format("2006-01-02")
+	eDate := endDate.Format("2006-01-02")
 
-// 	// log.Printf("start: %v, end: %v", sDate, eDate)
+	var result sql.NullTime
 
-// 	var holidays []domain.Holiday
-// 	// SQL: SELECT * FROM holidays WHERE date ...
-// 	result := p.db.Where("date >= ? AND date <= ?", sDate, eDate).Order("date ASC").Find(&holidays)
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
+	err := p.db.Model(&domain.Holiday{}).
+		Select("MAX(updated_at)").
+		Where("date >= ? AND date <= ?", sDate, eDate).
+		Scan(&result).Error // Scan เข้า sql.NullTime
 
-// 	return holidays, nil
-// }
+	if err != nil {
+		return nil, err
+	}
 
-// func (r *postgresBookingRepo) BulkUpsertHolidays(holidays []domain.Holiday) error {
-// 	if len(holidays) == 0 {
-// 		return nil
-// 	}
+	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
+	if result.Valid {
+		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
+		return &result.Time, nil
+	}
 
-// 	// ใช้ Batch Upsert เดิมของคุณ ดีมากแล้วครับ
-// 	result := r.db.Clauses(clause.OnConflict{
-// 		Columns:   []clause.Column{{Name: "date"}}, // เช็คซ้ำที่วันที่
-// 		DoUpdates: clause.AssignmentColumns([]string{"name", "is_day_off", "updated_at"}), // อัปเดตข้อมูลใหม่
-// 	}).Create(&holidays)
-
-// 	return result.Error
-// }
+	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
+	return nil, nil
+}
 
 // func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
 // 	booking := new(domain.Booking)
@@ -280,30 +306,4 @@ func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booki
 // 	}
 
 // 	return nil
-// }
-
-// func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error){
-// 	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
-// 	sDate := startDate.Format("2006-01-02")
-// 	eDate := endDate.Format("2006-01-02")
-
-// 	var result sql.NullTime
-
-// 	err := p.db.Model(&domain.Holiday{}).
-// 		Select("MAX(updated_at)").
-// 		Where("date >= ? AND date <= ?", sDate, eDate).
-// 		Scan(&result).Error // Scan เข้า sql.NullTime
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
-// 	if result.Valid {
-// 		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
-// 		return &result.Time, nil
-// 	}
-
-// 	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
-// 	return nil, nil
 // }
