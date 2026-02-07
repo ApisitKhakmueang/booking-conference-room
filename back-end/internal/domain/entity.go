@@ -91,12 +91,9 @@ func (d DateRes) Time() time.Time {
 }
 
 // Response
-type CalendarResponse struct {
+type HolidayResponse struct {
 	Year         int       `json:"year"`
 	Month        int       `json:"month"`
-	TotalDays    int       `json:"total_days"`
-	StartWeekday int       `json:"start_weekday"` // 0=อาทิตย์, 1=จันทร์... (เอาไปวาดช่องว่างหน้าปฏิทิน)
-	Weekends     []int     `json:"weekend_days"`  // [1, 7, 8, 14, 15...]
 	Holidays     []Holiday `json:"holidays"`      // ข้อมูลจาก DB
 }
 

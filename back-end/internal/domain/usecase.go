@@ -20,6 +20,6 @@ type OrderUsecase interface {
 	GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
 	GetUserBooking(userID uuid.UUID) ([]Booking, error)
 
-	GetCalendar(year int, month int) (*CalendarResponse, error)
+	GetHoliday(year int, month int) (*HolidayResponse, error)
 	CheckTimeUpdated(year uint, month uint) (*time.Time, error)
 }
