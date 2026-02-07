@@ -7,6 +7,7 @@ import {
   startOfWeek, endOfWeek, startOfDay,  eachDayOfInterval,
   isSameDay, isSameMonth, startOfMonth, endOfMonth, differenceInMinutes, setHours, setMinutes
 } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -88,17 +89,17 @@ export default function Calendar() {
   }, [isMobile, isTablet, view]); // ใส่ view เข้ามาด้วย เพื่อให้เช็คค่าล่าสุดเสมอ
 
   return (
-    <div className="min-h-screen bg-main-background text-gray-200 p-6 font-sans">
-      <div className="flex flex-col h-[85vh] max-w-7xl mx-auto border border-gray-800 rounded-lg bg-[#1e1e1e] shadow-2xl overflow-hidden">
+    <div className="h-full dark:bg-main-background bg-white text-gray-200 font-sans">
+      <div className="flex flex-col h-[80vh] max-w-7xl mx-auto border dark:border-sidebar rounded-lg dark:bg-card border-light-hover shadow-2xl overflow-hidden">
         
         {/* --- Header Controls --- */}
-        <div className="flex sm:flex-row sm:gap-0 gap-2 flex-col items-center justify-between px-6 py-4 border-b border-gray-800 bg-[#252525]">
+        <div className="flex sm:flex-row sm:gap-0 gap-2 flex-col items-center justify-between px-6 py-4 border-b dark:border-sidebar dark:bg-sidebar bg-light-hover text-white">
           <div className="flex md:flex-row flex-col sm:items-start items-center md:gap-4 gap-2">
             <h2 className="sm:text-start text-center text-2xl font-bold text-white lg:w-64 md:w-full">
               {format(currentDate, view === 'day' ? 'd MMMM yyyy' : 'MMMM yyyy')}
             </h2>
             {!isMobile && (
-              <div className="flex bg-gray-800 rounded-lg p-1">
+              <div className="flex border dark:border-hover rounded-lg p-1">
                 {/* ปุ่มสลับ View */}
                 {availableViews.map((v) => (
                   <button
@@ -108,7 +109,7 @@ export default function Calendar() {
                       px-4 py-1 rounded capitalize text-sm font-medium transition-all
                       ${view === v 
                         ? 'bg-blue-600 text-white shadow' 
-                        : 'text-gray-400 hover:text-white hover:bg-gray-700'}
+                        : 'dark:text-gray-400 dark:hover:bg-hover text-gray-300 hover:text-white hover:bg-light-card'}
                     `}
                   >
                     {/* แปลง text ให้สวยงาม (optional) */}
@@ -120,14 +121,14 @@ export default function Calendar() {
           </div>
           
           <div className="flex gap-2">
-            <button onClick={prev} className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm">Prev</button>
-            <button onClick={today} className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm">Today</button>
-            <button onClick={next} className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm">Next</button>
+            <button onClick={prev} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Prev</button>
+            <button onClick={today} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Today</button>
+            <button onClick={next} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Next</button>
           </div>
         </div>
 
         {/* --- Body: Render ตาม View --- */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
           {view === 'month' && <MonthView currentDate={currentDate} />}
           {(view === 'week' || view === 'day') && <TimeGridView currentDate={currentDate} view={view} />}
         </div>
@@ -147,9 +148,9 @@ function MonthView({ currentDate }: { currentDate: Date }) {
   return (
     <div className="h-full flex flex-col">
        {/* Week Header */}
-       <div className="grid grid-cols-7 border-b border-gray-800 bg-[#1e1e1e]">
+       <div className="grid grid-cols-7 border-b dark:border-sidebar border-white">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-          <div key={d} className="py-2 text-center text-sm text-gray-500 border-r border-gray-800 last:border-0">{d}</div>
+          <div key={d} className="py-2 text-center text-sm dark:text-gray-400 text-white border-r dark:border-sidebar dark:bg-sidebar bg-light-hover last:border-0">{d}</div>
         ))}
       </div>
       {/* Grid */}
@@ -158,7 +159,11 @@ function MonthView({ currentDate }: { currentDate: Date }) {
            const isToday = isSameDay(day, new Date());
            const dayEvents = EVENTS.filter(e => isSameDay(e.start, day));
            return (
-            <div key={day.toString()} className={`border-b border-r border-gray-800 p-2 min-h-25 ${!isSameMonth(day, currentDate) ? 'bg-[#181818] text-gray-600' : ''}`}>
+            <div key={day.toString()} className={`border-b dark:border-hover border-light-hover p-2 min-h-25 
+            ${day.getDay() !== 6 ? 'border-r' : ''}
+            ${!isSameMonth(day, currentDate) 
+              ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
+              : 'dark:text-white text-violet-900'}`}>
               <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 text-white' : ''}`}>
                 {format(day, 'd')}
               </div>
@@ -195,11 +200,11 @@ function TimeGridView({ currentDate, view }: { currentDate: Date, view: 'week' |
   return (
     <div className="flex h-full overflow-hidden flex-col">
       {/* Header (แสดงวันที่ด้านบน) */}
-      <div className={`grid border-b border-gray-800 bg-[#1e1e1e] ${view === 'day' ? 'grid-cols-1 md:pl-16 pl-0' : 'grid-cols-7 pl-16'}`}>
+      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover ${view === 'day' ? 'grid-cols-1 md:pl-16 pl-0' : 'grid-cols-7 pl-16'}`}>
         {days.map(day => (
-          <div key={day.toString()} className={`py-3 text-center border-r border-gray-800 last:border-0 ${isSameDay(day, new Date()) ? 'text-blue-500' : 'text-gray-400'}`}>
+          <div key={day.toString()} className={`py-3 text-center border-r dark:border-sidebar last:border-0 ${isSameDay(day, new Date()) ? 'dark:text-blue-500 text-violet-900' : 'dark:text-gray-400'}`}>
             <div className="text-xs uppercase font-bold">{format(day, 'EEE')}</div>
-            <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'bg-blue-600/20 inline-block px-2 rounded-full' : ''}`}>
+            <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-blue-600/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
                 {format(day, 'd')}
             </div>
           </div>
@@ -207,25 +212,25 @@ function TimeGridView({ currentDate, view }: { currentDate: Date, view: 'week' |
       </div>
 
       {/* Scrollable Body */}
-      <div className="flex-1 overflow-y-auto relative">
+      <div className="flex-1 overflow-y-auto no-scrollbar relative">
         <div className="flex relative min-h-360"> {/* 1440px = 60px per hour height */}
           
           {/* Timeline Labels (แกนซ้าย) */}
-          <div className="w-16 shrink-0 border-r border-gray-800 bg-[#1e1e1e] z-10 sticky left-0">
+          <div className="w-16 shrink-0 border-r dark:border-sidebar dark:bg-sidebar bg-light-hover z-10 sticky left-0">
             {hours.map(h => (
-              <div key={h} className="h-15 text-xs text-gray-500 text-right pr-2 pt-2 relative -top-2">
+              <div key={h} className="h-15 text-xs dark:text-gray-500 text-right pr-2 pt-2 relative -top-2">
                 {h}:00
               </div>
             ))}
           </div>
 
           {/* Grid Columns */}
-          <div className={`flex-1 grid ${view === 'day' ? 'grid-cols-1' : 'grid-cols-7'} divide-x divide-gray-800`}>
+          <div className={`flex-1 grid ${view === 'day' ? 'grid-cols-1' : 'grid-cols-7'} divide-x dark:divide-sidebar divide-light-hover`}>
             {days.map(day => (
               <div key={day.toString()} className="relative group">
                 {/* เส้น Grid แนวนอน (Hour lines) */}
                 {hours.map(h => (
-                  <div key={h} className="h-15 border-b border-gray-800/30 w-full box-border"></div>
+                  <div key={h} className="h-15 border-b dark:border-sidebar/30 border-light-hover/30 w-full box-border"></div>
                 ))}
 
                 {/* --- Render Events (Absolute Positioning) --- */}
