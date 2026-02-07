@@ -6,6 +6,19 @@
   @apply bg-indigo-300 text-black;
 }
 
+@layer utilities {
+  /* ซ่อน Scrollbar สำหรับ Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ซ่อน Scrollbar สำหรับ IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
 @theme {
   /* Light theme */
   --color-light-purple: #f6f4ff;
