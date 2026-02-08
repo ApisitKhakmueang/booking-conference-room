@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"context"
+	_ "time/tzdata" // 🔥 เพิ่มบรรทัดนี้ (ขีดล่าง _ สำคัญมาก)
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils"
 

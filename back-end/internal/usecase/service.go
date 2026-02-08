@@ -293,21 +293,27 @@ func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]dom
 		endDateStr = nextMonth.Format(layout)
 	}
 
-	holidays, err := u.postgres.GetHolidayDB(startDateStr, endDateStr)
-	if err != nil {
-		return nil, err
-	}
+	isSynced := u.postgres.IsHolidaySynced(startDateStr, endDateStr)
 
-	// return holidays, nil
-
-
-	if len(holidays) > 0 {
+	if isSynced {
+		// ถ้า Sync แล้ว -> ดึงจาก DB ได้เลย มั่นใจได้ว่าข้อมูลครบ
+		holidays, err := u.postgres.GetHolidayDB(startDateStr, endDateStr)
+		if err != nil {
+				return nil, err
+		}
+		// ถ้า DB ว่างเปล่า (len=0) ก็แปลว่าเดือนนั้นไม่มีวันหยุดจริงๆ (เพราะ Sync มาแล้ว)
+		// ดังนั้น return ได้เลย
 		return holidays, nil
 	}
 
 	googleHolidays, err := u.gateway.FetchHolidays(startDateStr, endDateStr)
 	if err != nil {
-		return nil, err // ถ้าต่อ Google ไม่ได้ ก็จบ
+		// กรณีต่อ Google ไม่ได้ ให้ลองไปดึงของเก่าจาก DB มาใช้แก้ขัดไปก่อน (Fallback)
+		fallbackHolidays, dbErr := u.postgres.GetHolidayDB(startDateStr, endDateStr)
+		if dbErr == nil && len(fallbackHolidays) > 0 {
+			return fallbackHolidays, nil // ดีกว่า return error
+		}
+		return nil, err
 	}
 
 // 	// log.Printf("BEFORE INSERT: First=%v, Last=%v\n", googleHolidays[0].Date.Time(), googleHolidays[len(googleHolidays)-1].Date.Time())
@@ -324,6 +330,10 @@ func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]dom
 		if err := u.postgres.DeleteHolidayCache(startDateStr, endDateStr); err != nil {
 			return nil, err
 		}
+	}
+
+	if err := u.postgres.SetHolidaySynced(startDateStr, endDateStr); err != nil {
+		log.Println("Failed to set sync flag:", err)
 	}
 
 	return googleHolidays, nil

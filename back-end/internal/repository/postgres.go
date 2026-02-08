@@ -4,7 +4,7 @@ import (
 	// "log"
 
 	"context"
-	"database/sql"
+	// "database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -124,6 +124,7 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]
 	val, err := p.rdb.Get(p.ctx, cacheKey).Result()
 	if err == nil {
 		// เจอข้อมูล! (Cache Hit)
+		// log.Println("Cache hit")
 		var holidays []domain.Holiday
 		
 		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
@@ -177,6 +178,24 @@ func (p *postgresBookingRepo) DeleteHolidayCache(startDate string, endDate strin
 		return err // หรือจะแค่ log ก็ได้ ถ้าซีเรียส
 	}
 	return nil
+}
+
+// repository.go
+
+// ใช้ Redis เช็คว่าช่วงเวลานี้ Sync หรือยัง
+func (p *postgresBookingRepo) IsHolidaySynced(start, end string) bool {
+	key := fmt.Sprintf("sync_flag:holidays:%s:%s", start, end)
+	// ถ้ามี key นี้อยู่ แสดงว่า sync แล้ว (Exists return 1)
+	exists, _ := p.rdb.Exists(p.ctx, key).Result()
+	return exists > 0
+}
+
+// ใช้ Redis แปะป้ายว่า Sync แล้ว (Set Flag)
+func (p *postgresBookingRepo) SetHolidaySynced(start, end string) error {
+	key := fmt.Sprintf("sync_flag:holidays:%s:%s", start, end)
+	// ตั้ง TTL ตามความเหมาะสม เช่น 1 วัน หรือ 7 วัน (ถ้า Google Calendar ไม่ได้แก้บ่อย)
+	// ข้อมูลใน DB จะถือว่า "สดใหม่" เท่ากับระยะเวลา TTL นี้
+	return p.rdb.Set(p.ctx, key, "1", 24*time.Hour).Err()
 }
 
 func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint) error {
@@ -276,31 +295,31 @@ func (r *postgresBookingRepo) BulkUpsertHolidays(holidays []domain.Holiday) erro
 	return result.Error
 }
 
-func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error){
-	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
-	// sDate := startDate.Format("2006-01-02")
-	// eDate := endDate.Format("2006-01-02")
+// func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error){
+// 	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
+// 	// sDate := startDate.Format("2006-01-02")
+// 	// eDate := endDate.Format("2006-01-02")
 
-	var result sql.NullTime
+// 	var result sql.NullTime
 
-	err := p.db.Model(&domain.Holiday{}).
-		Select("MAX(updated_at)").
-		Where("date >= ? AND date <= ?", startDate, endDate).
-		Scan(&result).Error // Scan เข้า sql.NullTime
+// 	err := p.db.Model(&domain.Holiday{}).
+// 		Select("MAX(updated_at)").
+// 		Where("date >= ? AND date <= ?", startDate, endDate).
+// 		Scan(&result).Error // Scan เข้า sql.NullTime
 
-	if err != nil {
-		return nil, err
-	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
-	if result.Valid {
-		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
-		return &result.Time, nil
-	}
+// 	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
+// 	if result.Valid {
+// 		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
+// 		return &result.Time, nil
+// 	}
 
-	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
-	return nil, nil
-}
+// 	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
+// 	return nil, nil
+// }
 
 // func (p *postgresBookingRepo) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
 // 	booking := new(domain.Booking)

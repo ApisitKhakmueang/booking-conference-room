@@ -37,8 +37,8 @@ func (r *googleCalendarGateway) FetchHolidays(startDate string, endDate string) 
 
 	timeMinStr := timeMin.Format(time.RFC3339)
 	timeMaxStr := timeMax.Format(time.RFC3339)
-	// log.Println("time min: ", timeMin)
-	// log.Println("time max: ", timeMax)
+	log.Println("time min: ", timeMin)
+	log.Println("time max: ", timeMax)
 
 	// 2. Fetch Events
 	events, err := r.service.Events.List(calendarID).
@@ -46,6 +46,7 @@ func (r *googleCalendarGateway) FetchHolidays(startDate string, endDate string) 
 		SingleEvents(true).
 		TimeMin(timeMinStr).
 		TimeMax(timeMaxStr).
+		TimeZone("Asia/Bangkok").
 		OrderBy("startTime").
 		Do()
 

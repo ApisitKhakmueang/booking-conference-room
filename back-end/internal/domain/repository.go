@@ -15,6 +15,8 @@ type PostgresRepository interface {
 	
 	GetHolidayDB(startDate string, endDate string) ([]Holiday, error)
 	DeleteHolidayCache(startDate string, endDate string) error
+	IsHolidaySynced(start, end string) bool
+	SetHolidaySynced(start, end string) error
 
 	GetRoomID(booking *Booking, roomNumber uint) error
 	IsRoomAvailable(booking *Booking) bool
@@ -23,7 +25,7 @@ type PostgresRepository interface {
 
 	BulkUpsertHolidays(holidays []Holiday) error
 
-	CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
+	// CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
 	// GetEventID(bookingID uuid.UUID) (*Booking, error)
 	// GetCalendar(roomNumber uint) (*Calendar, error)
 	// GetUser(userID uuid.UUID) (*User, error)
