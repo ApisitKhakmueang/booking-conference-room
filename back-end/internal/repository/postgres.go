@@ -156,7 +156,7 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]
 	// แปลง Struct เป็น JSON (Marshal)
 	if jsonBytes, err := json.Marshal(holidays); err == nil {
 		// ตั้ง TTL (เช่น 24 ชั่วโมง เพราะวันหยุดไม่น่าเปลี่ยนบ่อย)
-		err = p.rdb.Set(p.ctx, cacheKey, jsonBytes, 24*time.Hour).Err()
+		err = p.rdb.Set(p.ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err()
 		if err != nil {
 			// ถ้า Save Redis ไม่ได้ ไม่ต้อง return error ให้ user รู้
 			// แค่ Log ไว้ เพราะ user ยังได้ข้อมูลจาก DB ครบถ้วน
@@ -195,7 +195,7 @@ func (p *postgresBookingRepo) SetHolidaySynced(start, end string) error {
 	key := fmt.Sprintf("sync_flag:holidays:%s:%s", start, end)
 	// ตั้ง TTL ตามความเหมาะสม เช่น 1 วัน หรือ 7 วัน (ถ้า Google Calendar ไม่ได้แก้บ่อย)
 	// ข้อมูลใน DB จะถือว่า "สดใหม่" เท่ากับระยะเวลา TTL นี้
-	return p.rdb.Set(p.ctx, key, "1", 24*time.Hour).Err()
+	return p.rdb.Set(p.ctx, key, "1", 7*24*time.Hour).Err()
 }
 
 func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint) error {
