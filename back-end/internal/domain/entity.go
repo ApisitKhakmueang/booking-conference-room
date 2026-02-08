@@ -91,16 +91,16 @@ func (d DateRes) Time() time.Time {
 }
 
 // Response
-type HolidayResponse struct {
-	Year         int       `json:"year"`
-	Month        int       `json:"month"`
-	Holidays     []Holiday `json:"holidays"`      // ข้อมูลจาก DB
-}
+// type HolidayResponse struct {
+// 	Year         int       `json:"year"`
+// 	Month        int       `json:"month"`
+// 	Holidays     []Holiday `json:"holidays"`      // ข้อมูลจาก DB
+// }
 
 // Query & group data
-type CalendarFilter struct {
-	Year		uint		`query:"year"`
-	Month 	uint 		`query:"month"`
+type PeriodFilter struct {
+	StartDate		string			`query:"startDate"`
+	EndDate 		string 			`query:"endDate"`
 }
 
 type GetBookingFilter struct {
