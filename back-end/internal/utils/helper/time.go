@@ -14,11 +14,13 @@ func ConvertDateToStr(duration string, dateInput string) (*domain.Date, error) {
 	DateTime := new(domain.Date)
 	
 	// 1. กำหนด Location (ICT)
-	loc := time.FixedZone("ICT", 7*60*60)
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return nil, err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
+	}
 
 	var startOfMonth time.Time
 	var endOfMonth time.Time
-	var err error
 
 	// 2. แยก Logic ตาม Duration
 	switch duration {
@@ -73,7 +75,10 @@ func ConvertDateToStr(duration string, dateInput string) (*domain.Date, error) {
 }
 
 func ParseTimeFormat(layout string, timeStr string) (time.Time, error) {
-	loc := time.FixedZone("ICT", 7*60*60)
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		return time.Time{}, err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
+	}
 	t, err := time.ParseInLocation(layout, timeStr, loc)
 	if err != nil {
 		return time.Time{}, err
