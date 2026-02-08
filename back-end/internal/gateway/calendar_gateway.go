@@ -20,25 +20,32 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 	return &googleCalendarGateway{service: client}
 }
 
-func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error) {
+func (r *googleCalendarGateway) FetchHolidays(startDate string, endDate string) ([]domain.Holiday, error) {
 	// 1. Set Time Range (ตามปีที่ส่งมา)
 	calendarID := "en.th#holiday@group.v.calendar.google.com"
 
-	loc, err := time.LoadLocation("Asia/Bangkok")
+	layout := "2006-01-02"
+	timeMin, err := helper.ParseTimeFormat(layout, startDate)
 	if err != nil {
 		return nil, err
 	}
-	timeMin := time.Date(year, 1, 1, 0, 0, 0, 0, loc).Format(time.RFC3339)
-	timeMax := time.Date(year, 12, 31, 23, 59, 59, 0, loc).Format(time.RFC3339)
-	log.Println("time min: ", timeMin)
-	log.Println("time max: ", timeMax)
+
+	timeMax, err := helper.ParseTimeFormat(layout, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	timeMinStr := timeMin.Format(time.RFC3339)
+	timeMaxStr := timeMax.Format(time.RFC3339)
+	// log.Println("time min: ", timeMin)
+	// log.Println("time max: ", timeMax)
 
 	// 2. Fetch Events
 	events, err := r.service.Events.List(calendarID).
 		ShowDeleted(false).
 		SingleEvents(true).
-		TimeMin(timeMin).
-		TimeMax(timeMax).
+		TimeMin(timeMinStr).
+		TimeMax(timeMaxStr).
 		OrderBy("startTime").
 		Do()
 
@@ -60,10 +67,6 @@ func (r *googleCalendarGateway) FetchHolidays(year int) ([]domain.Holiday, error
 			log.Printf("Skipping invalid date: %s", dateStr)
 			continue
 		}
-
-		if dateObj.Year() != year {
-			continue
-    }
 
 		isOff := helper.CheckIsDayOff(item.Summary, item.Description)
 		// fmt.Printf("dateObj: %v, isOff: %v\n", dateObj, isOff)

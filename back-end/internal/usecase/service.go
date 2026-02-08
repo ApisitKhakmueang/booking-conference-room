@@ -17,20 +17,20 @@ import (
 // }
 
 type orderUsecase struct {
-	repo    domain.BookingRepository // เรียกผ่าน Interface
-	gateway domain.CalendarGateway
+	postgres    domain.PostgresRepository // เรียกผ่าน Interface
+	gateway 		domain.CalendarGateway
 }
 
 // NewOrderUsecase คือ Constructor
-func NewOrderUsecase(repo domain.BookingRepository, gateway domain.CalendarGateway) domain.OrderUsecase {
+func NewOrderUsecase(postgres domain.PostgresRepository, gateway domain.CalendarGateway) domain.OrderUsecase {
 	return &orderUsecase{
-		repo:    repo,
+		postgres:    postgres,
 		gateway: gateway,
 	}
 }
 
 func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.repo.CheckDayOff(*booking.StartTime); err != nil {
+	if err := u.postgres.CheckDayOff(*booking.StartTime); err != nil {
 		return err
 	}
 
@@ -39,11 +39,11 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 		return err
 	}
 
-	if err := u.repo.GetRoomID(booking, roomNumber); err != nil {
+	if err := u.postgres.GetRoomID(booking, roomNumber); err != nil {
 		return err
 	}
 
-	if !u.repo.IsRoomAvailable(booking) {
+	if !u.postgres.IsRoomAvailable(booking) {
 		return errors.New("Room unavailable")
 	}
 
@@ -59,7 +59,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 		// 2. ส่งไปเช็คในฟังก์ชันข้างบน
 		// "เฮ้ DB! ห้อง 1 เวลา 10:00-11:00 รหัส 1234 ว่างไหม?"
-		if u.repo.IsPasscodeAvailable(booking, passcode) {
+		if u.postgres.IsPasscodeAvailable(booking, passcode) {
 			finalPasscode = passcode // เย้! ว่าง -> เก็บค่าไว้
 			break                    // หยุดวนลูป
 		}
@@ -69,7 +69,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 	booking.Passcode = finalPasscode
 
-	if err := u.repo.CreateBookingDB(booking); err != nil {
+	if err := u.postgres.CreateBookingDB(booking); err != nil {
 		return err
 	}
 
@@ -81,12 +81,12 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// dateToCheck := t.Format("2006-01-02")
 
-	// calendar, err := u.repo.GetCalendar(roomNumber)
+	// calendar, err := u.postgres.GetCalendar(roomNumber)
 	// if err != nil {
 	// 	return err
 	// }
 
-	// user, err := u.repo.GetUser(booking.UserID)
+	// user, err := u.postgres.GetUser(booking.UserID)
 	// if err != nil {
 	// 	return err
 	// }
@@ -105,7 +105,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// booking.GoogleEventID = eventID
 
-	// if err = u.repo.CreateBookingDB(booking); err != nil {
+	// if err = u.postgres.CreateBookingDB(booking); err != nil {
 	// 	return err
 	// }
 
@@ -113,7 +113,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 }
 
 func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.repo.CheckDayOff(*booking.StartTime); err != nil {
+	if err := u.postgres.CheckDayOff(*booking.StartTime); err != nil {
 		return err
 	}
 
@@ -122,15 +122,15 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 		return err
 	}
 
-	if err := u.repo.GetRoomID(booking, roomNumber); err != nil {
+	if err := u.postgres.GetRoomID(booking, roomNumber); err != nil {
 		return err
 	}
 
-	if !u.repo.IsRoomAvailable(booking) {
+	if !u.postgres.IsRoomAvailable(booking) {
 		return errors.New("Room unavailable")
 	}
 
-	if err := u.repo.UpdateBookingDB(booking); err != nil {
+	if err := u.postgres.UpdateBookingDB(booking); err != nil {
 		return err
 	}
 	// // layout := "2006-01-02 15:04:05"
@@ -143,7 +143,7 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// // log.Println("after check day off")
 
-	// if err := u.repo.CheckSameRoom(booking, roomNumber); err != nil {
+	// if err := u.postgres.CheckSameRoom(booking, roomNumber); err != nil {
 	// 	// UpdateNewRoom
 	// 	// log.Println("enter update new room")
 
@@ -154,12 +154,12 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// 	// log.Println("After cancel event")
 
-	// 	calendar, err := u.repo.GetCalendar(roomNumber)
+	// 	calendar, err := u.postgres.GetCalendar(roomNumber)
 	// 	if err != nil {
 	// 		return err
 	// 	}
 
-	// 	user, err := u.repo.GetUser(booking.UserID)
+	// 	user, err := u.postgres.GetUser(booking.UserID)
 	// 	if err != nil {
 	// 		return err
 	// 	}
@@ -196,7 +196,7 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// // log.Println("enter before update in db")
 	// // log.Printf("booking: %v\n", booking)
-	// if err := u.repo.UpdateBookingDB(booking); err != nil {
+	// if err := u.postgres.UpdateBookingDB(booking); err != nil {
 	// 	return err
 	// }
 
@@ -204,7 +204,7 @@ func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) e
 }
 
 func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
-	// booking, err := u.repo.GetEventID(bookingID)
+	// booking, err := u.postgres.GetEventID(bookingID)
 	// if err != nil {
 	// 	return err
 	// }
@@ -215,7 +215,7 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 	// 	return err
 	// }
 
-	if err := u.repo.DeleteBookingDB(bookingID); err != nil {
+	if err := u.postgres.DeleteBookingDB(bookingID); err != nil {
 		return errors.New("Don't have this booking")
 	}
 
@@ -231,11 +231,11 @@ func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) 
 	}
 
 	instBooking := new(domain.Booking)
-	if err := u.repo.GetRoomID(instBooking, filter.Room); err != nil {
+	if err := u.postgres.GetRoomID(instBooking, filter.Room); err != nil {
 		return nil, err
 	}
 
-	bookings, err := u.repo.GetBookingDB(DateTime, instBooking.RoomID)
+	bookings, err := u.postgres.GetBookingDB(DateTime, instBooking.RoomID)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,7 @@ func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) 
 }
 
 func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
-	bookings, err := u.repo.GetUserBookingDB(userID)
+	bookings, err := u.postgres.GetUserBookingDB(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -269,84 +269,102 @@ func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error
 	return bookings, nil
 }
 
-func (u *orderUsecase) GetHoliday(year int, month int) (*domain.HolidayResponse, error) {
-	loc := time.FixedZone("ICT", 7*60*60)
-	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
-	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]domain.Holiday, error) {
+// 	// loc := time.FixedZone("ICT", 7*60*60)
+// 	// startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
+// 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
 
-	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
-	holidays, err := u.repo.GetHolidayDB(startDate, endDate)
+// 	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
+
+	now := time.Now()
+
+	// 2. ใช้ Format มาตรฐาน (2006-01-02 คือสูตรลับของ Go ห้ามเปลี่ยนเลข)
+	layout := "2006-01-02"
+
+	// StartDate: วันนี้
+	if startDateStr == "" {
+		startDateStr = now.Format(layout)
+	}
+
+	// 3. EndDate: ใช้ AddDate(ปี, เดือน, วัน)
+	// Go จะจัดการเรื่อง เดือน 12 -> 1 หรือ ปีอธิกสุรทิน ให้เองอัตโนมัติ
+	if endDateStr == "" {
+		nextMonth := now.AddDate(0, 1, 0) 
+		endDateStr = nextMonth.Format(layout)
+	}
+
+	holidays, err := u.postgres.GetHolidayDB(startDateStr, endDateStr)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &domain.HolidayResponse{
-		Year:         year,
-		Month:        month,
-		Holidays:     nil,
-	}
+	// return holidays, nil
+
 
 	if len(holidays) > 0 {
-		response.Holidays = holidays
-		return response, nil
+		return holidays, nil
 	}
 
-	googleHolidays, err := u.gateway.FetchHolidays(year)
+	googleHolidays, err := u.gateway.FetchHolidays(startDateStr, endDateStr)
 	if err != nil {
 		return nil, err // ถ้าต่อ Google ไม่ได้ ก็จบ
 	}
 
-	// log.Printf("BEFORE INSERT: First=%v, Last=%v\n", googleHolidays[0].Date.Time(), googleHolidays[len(googleHolidays)-1].Date.Time())
+// 	// log.Printf("BEFORE INSERT: First=%v, Last=%v\n", googleHolidays[0].Date.Time(), googleHolidays[len(googleHolidays)-1].Date.Time())
 
-	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
-	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
+// 	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
+// 	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
 	if len(googleHolidays) > 0 {
-		if err := u.repo.BulkUpsertHolidays(googleHolidays); err != nil {
+		if err := u.postgres.BulkUpsertHolidays(googleHolidays); err != nil {
 			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้
 			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
 			log.Println("Failed to cache holidays:", err)
 		}
-	}
 
-	var filteredHolidays []domain.Holiday
-
-	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
-	targetMonth := time.Month(month)
-
-	for _, h := range googleHolidays {
-		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
-		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
-		t := h.Date.Time()
-
-		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
-		if t.Month() == targetMonth && t.Year() == year {
-			filteredHolidays = append(filteredHolidays, h)
+		if err := u.postgres.DeleteHolidayCache(startDateStr, endDateStr); err != nil {
+			return nil, err
 		}
 	}
 
-	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
-	response.Holidays = filteredHolidays
+	return googleHolidays, nil
+// 	var filteredHolidays []domain.Holiday
 
-	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
-	return response, nil
+// 	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
+// 	targetMonth := time.Month(month)
+
+// 	for _, h := range googleHolidays {
+// 		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
+// 		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
+// 		t := h.Date.Time()
+
+// 		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
+// 		if t.Month() == targetMonth && t.Year() == year {
+// 			filteredHolidays = append(filteredHolidays, h)
+// 		}
+// 	}
+
+// 	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
+// 	response.Holidays = filteredHolidays
+
+// 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 }
 
-func (u *orderUsecase) CheckTimeUpdated(year uint, month uint) (*time.Time, error) {
-	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
-	loc := time.FixedZone("ICT", 7*60*60)
-	startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
-	endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
+// func (u *orderUsecase) CheckTimeUpdated(startDate string, endDate string) (*time.Time, error) {
+// 	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
+// 	// loc := time.FixedZone("ICT", 7*60*60)
+// 	// startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
+// 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
 
-	lastUpdated, err := u.repo.CheckLatestUpdateHoliday(startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
+// 	lastUpdated, err := u.postgres.CheckLatestUpdateHoliday(startDate, endDate)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
-	checkTime := time.Now()
-	if lastUpdated != nil {
-		checkTime = *lastUpdated
-	}
+// 	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
+// 	checkTime := time.Now()
+// 	if lastUpdated != nil {
+// 		checkTime = *lastUpdated
+// 	}
 
-	return &checkTime, nil
-}
+// 	return &checkTime, nil
+// }

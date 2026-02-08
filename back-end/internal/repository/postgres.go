@@ -3,10 +3,12 @@ package repository
 import (
 	// "log"
 
+	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
-	// "time"
 
 	// "errors"
 
@@ -14,16 +16,19 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type postgresBookingRepo struct {
+	ctx  	context.Context
+	rdb *redis.Client
 	db *gorm.DB
 }
 
-func NewPostgresBookingRepo(db *gorm.DB) domain.BookingRepository {
-	return &postgresBookingRepo{db: db}
+func NewPostgresBookingRepo(ctx context.Context, rdb *redis.Client, db *gorm.DB) domain.PostgresRepository {
+	return &postgresBookingRepo{ctx: ctx, rdb: rdb, db: db}
 }
 
 func (p *postgresBookingRepo) CreateBookingDB(booking *domain.Booking) error {
@@ -91,21 +96,87 @@ func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booki
 	return bookings, nil
 }
 
-func (p *postgresBookingRepo) GetHolidayDB(startDate time.Time, endDate time.Time) ([]domain.Holiday, error) {
+func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]domain.Holiday, error) {
 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
-	sDate := startDate.Format("2006-01-02")
-	eDate := endDate.Format("2006-01-02")
+	// sDate := startDate.Format("2006-01-02")
+	// eDate := endDate.Format("2006-01-02")
 
 	// log.Printf("start: %v, end: %v", sDate, eDate)
 
+	// var holidays []domain.Holiday
+	// // SQL: SELECT * FROM holidays WHERE date ...
+	// result := p.db.Where("date >= ? AND date <= ?", startDate, endDate).Order("date ASC").Find(&holidays)
+	// if result.Error != nil {
+	// 	return nil, result.Error
+	// }
+
+	// return holidays, nil
+
+	// ---------------------------------------------------------
+	// STEP 1: สร้าง Key สำหรับ Redis
+	// ---------------------------------------------------------
+	// key ควรจะไม่ซ้ำกันตามช่วงเวลา เช่น "holidays:2023-01-01:2023-01-31"
+	cacheKey := fmt.Sprintf("holidays:%s:%s", startDate, endDate)
+
+	// ---------------------------------------------------------
+	// STEP 2: ลองดึงจาก Redis ก่อน (Cache Hit)
+	// ---------------------------------------------------------
+	val, err := p.rdb.Get(p.ctx, cacheKey).Result()
+	if err == nil {
+		// เจอข้อมูล! (Cache Hit)
+		var holidays []domain.Holiday
+		
+		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
+		if err := json.Unmarshal([]byte(val), &holidays); err == nil {
+			// log.Println("Cache HIT: Return data from Redis")
+			return holidays, nil
+		}
+		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+	}
+
+	// ---------------------------------------------------------
+	// STEP 3: ถ้าไม่เจอ หรือ Redis Error ให้ดึงจาก DB (Cache Miss)
+	// ---------------------------------------------------------
+	// log.Println("Cache MISS: Fetching from DB...")
+	
 	var holidays []domain.Holiday
-	// SQL: SELECT * FROM holidays WHERE date ...
-	result := p.db.Where("date >= ? AND date <= ?", sDate, eDate).Order("date ASC").Find(&holidays)
+	result := p.db.WithContext(p.ctx). // อย่าลืมใส่ WithContext
+		Where("date >= ? AND date <= ?", startDate, endDate).
+		Order("date ASC").
+		Find(&holidays)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
+	// ---------------------------------------------------------
+	// STEP 4: บันทึกลง Redis (Set Cache) เพื่อใช้รอบหน้า
+	// ---------------------------------------------------------
+	// แปลง Struct เป็น JSON (Marshal)
+	if jsonBytes, err := json.Marshal(holidays); err == nil {
+		// ตั้ง TTL (เช่น 24 ชั่วโมง เพราะวันหยุดไม่น่าเปลี่ยนบ่อย)
+		err = p.rdb.Set(p.ctx, cacheKey, jsonBytes, 24*time.Hour).Err()
+		if err != nil {
+			// ถ้า Save Redis ไม่ได้ ไม่ต้อง return error ให้ user รู้
+			// แค่ Log ไว้ เพราะ user ยังได้ข้อมูลจาก DB ครบถ้วน
+			// log.Printf("Failed to set cache: %v", err)
+		}
+	}
+
 	return holidays, nil
+}
+
+// ใน Implementation (postgresBookingRepo)
+func (p *postgresBookingRepo) DeleteHolidayCache(startDate string, endDate string) error {
+	// 1. สร้าง Key ให้เหมือนกับตอน Get เป๊ะๆ
+	cacheKey := fmt.Sprintf("holidays:%s:%s", startDate, endDate)
+
+	// 2. สั่งลบ (Del)
+	err := p.rdb.Del(p.ctx, cacheKey).Err()
+	if err != nil {
+		return err // หรือจะแค่ log ก็ได้ ถ้าซีเรียส
+	}
+	return nil
 }
 
 func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint) error {
@@ -205,16 +276,16 @@ func (r *postgresBookingRepo) BulkUpsertHolidays(holidays []domain.Holiday) erro
 	return result.Error
 }
 
-func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate time.Time, endDate time.Time) (*time.Time, error){
+func (p *postgresBookingRepo) CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error){
 	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
-	sDate := startDate.Format("2006-01-02")
-	eDate := endDate.Format("2006-01-02")
+	// sDate := startDate.Format("2006-01-02")
+	// eDate := endDate.Format("2006-01-02")
 
 	var result sql.NullTime
 
 	err := p.db.Model(&domain.Holiday{}).
 		Select("MAX(updated_at)").
-		Where("date >= ? AND date <= ?", sDate, eDate).
+		Where("date >= ? AND date <= ?", startDate, endDate).
 		Scan(&result).Error // Scan เข้า sql.NullTime
 
 	if err != nil {

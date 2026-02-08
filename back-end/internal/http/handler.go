@@ -2,9 +2,9 @@ package http
 
 import (
 	// "log"
+	// "fmt"
 	"strconv"
-	"fmt"
-	"time"
+	// "time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
@@ -22,72 +22,90 @@ func NewOrderHandler(usecase domain.OrderUsecase) *OrderHandler {
 }
 
 // dataFetcher คือฟังก์ชันที่เราจะโยน "วิธีการดึงข้อมูล" เข้าไป (ยังไม่ดึงทันที)
-func (u *OrderHandler) ServeContentWithTimeETag(
-	c *fiber.Ctx, 
-	lastModified time.Time, 
-	dataFetcher func() (interface{}, error)) error {
-	// 1. สร้าง ETag จากเวลา (Unix Timestamp)
-	etag := fmt.Sprintf(`"%d"`, lastModified.Unix())
+// func (u *OrderHandler) ServeContentWithTimeETag(
+// 	c *fiber.Ctx, 
+// 	lastModified time.Time, 
+// 	dataFetcher func() (interface{}, error)) error {
+// 	// 1. สร้าง ETag จากเวลา (Unix Timestamp)
+// 	etag := fmt.Sprintf(`"%d"`, lastModified.Unix())
 
-	// 2. ตรวจสอบว่า Client มีของเดิมไหม (If-None-Match)
-	if c.Get("If-None-Match") == etag {
-		// ✅ HIT: มีของแล้ว ไม่ต้องทำอะไรเพิ่ม
-		return c.SendStatus(fiber.StatusNotModified) // ส่ง 304 กลับทันที
-	}
+// 	// 2. ตรวจสอบว่า Client มีของเดิมไหม (If-None-Match)
+// 	if c.Get("If-None-Match") == etag {
+// 		// ✅ HIT: มีของแล้ว ไม่ต้องทำอะไรเพิ่ม
+// 		return c.SendStatus(fiber.StatusNotModified) // ส่ง 304 กลับทันที
+// 	}
 
-	// ❌ MISS: ของเก่า หรือ ไม่มีของ
+// 	// ❌ MISS: ของเก่า หรือ ไม่มีของ
 	
-	// 3. เตรียม Header ไว้ให้รอบหน้า
-	c.Set("ETag", etag)
-	c.Set("Cache-Control", "no-cache") // ให้ Client กลับมาเช็คทุกครั้ง
+// 	// 3. เตรียม Header ไว้ให้รอบหน้า
+// 	c.Set("ETag", etag)
+// 	c.Set("Cache-Control", "no-cache") // ให้ Client กลับมาเช็คทุกครั้ง
 
-	// 4. 🔥 จุดสำคัญ: เพิ่งจะเริ่มดึงข้อมูลจริงตรงนี้ (Lazy Loading)
-	data, err := dataFetcher()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
-	}
+// 	// 4. 🔥 จุดสำคัญ: เพิ่งจะเริ่มดึงข้อมูลจริงตรงนี้ (Lazy Loading)
+// 	data, err := dataFetcher()
+// 	if err != nil {
+// 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+// 	}
 
-	// 5. ส่งข้อมูล JSON กลับไป
-	return c.Status(fiber.StatusOK).JSON(data)
-}
+// 	// 5. ส่งข้อมูล JSON กลับไป
+// 	return c.Status(fiber.StatusOK).JSON(data)
+// }
+
+// func (u *OrderHandler) GetHoliday(c *fiber.Ctx) error {
+// 	// 1. รับค่า Year/Month จาก URL (เช่น /api/calendar?year=2024&month=12)
+// 	q := domain.PeriodFilter{}
+
+// 	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
+// 	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
+// 	if err := c.QueryParser(&q); err != nil {
+// 			// กรณี Parse Error (ปกติ Fiber จะจัดการให้เงียบๆ)
+// 	}
+	
+// 	// ถ้า User ส่ง ?year=-2025 -> ParseUint Error -> ค่าจะเป็น 0 หรือค่าเดิม
+// 	// แต่เพื่อความชัวร์ ใส่ Logic กันเหนียวได้:
+// 	if q.StartDate == "" { q.StartDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day()) }
+// 	if q.EndDate == "" { q.EndDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month() + 1, time.Now().Day()) }
+
+// 	// if q.Month > 12 {
+// 	// 	return c.Status(fiber.StatusBadRequest).SendString("Can't send month more than 12")
+// 	// }
+
+// 	checkTime, err := u.usecase.CheckTimeUpdated(q.StartDate, q.EndDate)
+// 	if err != nil {
+// 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+// 	}
+
+// 	return u.ServeContentWithTimeETag(c, *checkTime, 
+// 		func() (interface{}, error) {
+// 			response, err := u.usecase.GetHoliday(q.StartDate, q.EndDate)
+// 			if err != nil {
+// 				return nil, err
+// 			}
+
+// 			return response, nil
+// 		},
+// 	)
+// }
 
 func (u *OrderHandler) GetHoliday(c *fiber.Ctx) error {
-	// 1. รับค่า Year/Month จาก URL (เช่น /api/calendar?year=2024&month=12)
-	q := domain.CalendarFilter{
-		Year:  uint(time.Now().Year()),
-		Month: uint(time.Now().Month()),
-	}
+	q := domain.PeriodFilter{}
 
 	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
 	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
 	if err := c.QueryParser(&q); err != nil {
-			// กรณี Parse Error (ปกติ Fiber จะจัดการให้เงียบๆ)
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 	
 	// ถ้า User ส่ง ?year=-2025 -> ParseUint Error -> ค่าจะเป็น 0 หรือค่าเดิม
 	// แต่เพื่อความชัวร์ ใส่ Logic กันเหนียวได้:
-	if q.Year == 0 { q.Year = uint(time.Now().Year()) }
-	if q.Month == 0 { q.Month = uint(time.Now().Month()) }
-
-	if q.Month > 12 {
-		return c.Status(fiber.StatusBadRequest).SendString("Can't send month more than 12")
-	}
-
-	checkTime, err := u.usecase.CheckTimeUpdated(q.Year, q.Month)
+	// if q.StartDate == "" { q.StartDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day()) }
+	// if q.EndDate == "" { q.EndDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month() + 1, time.Now().Day()) }
+	response, err := u.usecase.GetHoliday(q.StartDate, q.EndDate)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return u.ServeContentWithTimeETag(c, *checkTime, 
-		func() (interface{}, error) {
-			response, err := u.usecase.GetHoliday(int(q.Year), int(q.Month))
-			if err != nil {
-				return nil, err
-			}
-
-			return response, nil
-		},
-	)
+	return c.JSON(response)
 }
 
 func (u *OrderHandler) CreateBooking(c *fiber.Ctx) error {

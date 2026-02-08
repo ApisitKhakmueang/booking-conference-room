@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 	"os"
+	// "encoding/json"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
@@ -15,13 +16,36 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/etag"
+	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/redis/go-redis/v9"
 )
 
+type Product struct {
+	ID    string  `json:"id"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+	Desc  string  `json:"description"`
+}
+
+func mockDBFetch(id string) (Product, error) {
+	time.Sleep(1 * time.Second) // จำลองความช้า
+	if id == "1" {
+		return Product{ID: "1", Name: "Gaming Mouse", Price: 1500.00, Desc: "High DPI mouse"}, nil
+	}
+	if id == "2" {
+		return Product{ID: "2", Name: "Mechanical Keyboard", Price: 3200.00, Desc: "Blue switches"}, nil
+	}
+	return Product{}, fmt.Errorf("not found")
+}
 
 func InitialDBConnection() *gorm.DB {
 	// ใช้ Connection String จากหน้าเมนู Settings > Database ใน Supabase
@@ -53,9 +77,35 @@ func InitialDBConnection() *gorm.DB {
 	return db
 }
 
-func InitialFiber(handler *http.OrderHandler) *fiber.App {
+func InitialRedisConnection(ctx context.Context) *redis.Client {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "redis-service:6379", 
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	// ตรวจสอบการเชื่อมต่อ
+	_, err := rdb.Ping(ctx).Result()
+	if err != nil {
+		log.Fatalf("Could not connect to Redis: %v", err)
+		return nil
+	}
+
+	return rdb
+}
+
+func InitialFiber(handler *http.OrderHandler, rdb *redis.Client, ctx context.Context) *fiber.App {
 	app := fiber.New()
 	app.Use(cors.New())
+
+	// 2. Middleware
+	app.Use(fiberLogger.New()) // Log requests
+	
+	// ETag Middleware: Fiber จะสร้าง Hash ของ Response Body อัตโนมัติ
+	// ถ้า Client ส่ง If-None-Match มาตรงกัน Server จะตอบ 304 ทันที
+	app.Use(etag.New(etag.Config{
+		Weak: true, // ใช้ Weak ETag (W/...) เหมาะกับ JSON
+	}))
 	// app.Get("/book", handler.GetBooks)
 	// app.Get("/book/:id", handler.GetBook)
 	// app.Post("/book", handler.CreateBook)
@@ -67,6 +117,8 @@ func InitialFiber(handler *http.OrderHandler) *fiber.App {
 	controller.InitialBookingRoute(api, handler)
 
 	api.Get("/holiday", handler.GetHoliday)
+
+	// app.Get("/api/product/:id", handler.TestRedis)
 
 	return app
 }
@@ -81,9 +133,10 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(db *gorm.DB, googleCalendarService *calendar.Service) (*http.OrderHandler) {
+func InitialCleanArch(ctx context.Context, rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service) (*http.OrderHandler) {
+	// redisRepo := repository.NewredisRepo(ctx, rdb)
 	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
-	bookingRepo := repository.NewPostgresBookingRepo(db)
+	bookingRepo := repository.NewPostgresBookingRepo(ctx, rdb, db)
 	orderUsecase := usercase.NewOrderUsecase(bookingRepo, calendarService)
 	handleUsecase := http.NewOrderHandler(orderUsecase)
 
