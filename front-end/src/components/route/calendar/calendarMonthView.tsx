@@ -63,7 +63,7 @@ export default function MonthView({ currentDate, holiday }: { currentDate: Date,
               </div>
               <div className="space-y-1">
                 {dayEvents?.map(evt => (
-                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate bg-green-900/60 border-green-500 text-orange-100`}>
+                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100`}>
                     {evt.name}
                   </div>
                 ))}

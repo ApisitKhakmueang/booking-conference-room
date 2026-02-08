@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useResponsive } from '@/hooks/ui/useMediaQuery';
 import {
-  format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, setHours, setMinutes, parseISO
+  format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, setHours, setMinutes, parseISO,
+  startOfWeek, startOfMonth, endOfMonth, endOfWeek
 } from 'date-fns';
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
@@ -72,9 +73,11 @@ export default function Calendar() {
 
   const fetchData = async () => {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL
+    const start = startOfWeek(startOfMonth(currentDate));
+    const end = endOfWeek(endOfMonth(currentDate));
     try{
-      const response = await axios.get(`${url as string}/api/holiday?year=${currentDate.getFullYear()}&month=${currentDate.getMonth() + 1}`)
-      const rawDate = response.data.holidays
+      const response = await axios.get(`${url as string}/api/holiday?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
+      const rawDate = response.data
       const holidays = rawDate.map((holiday: Holiday) => {
         return {
           ...holiday, // copy ค่าเดิมมาทั้งหมด (id, name, isDayOff)
