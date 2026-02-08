@@ -1,0 +1,24 @@
+# Stage 1: Builder
+FROM golang:1.25-alpine AS builder
+WORKDIR /app
+
+# Copy ไฟล์ module dependency (อยู่ที่ root เหมือนเดิม)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy Source Code ทั้งหมด (รวมถึงโฟลเดอร์ api/ ด้วย)
+COPY . .
+
+# --- จุดที่ต้องแก้ (บรรทัดนี้) ---
+# เดิม: RUN go build -o main .
+# ใหม่: ระบุ path ไปยังโฟลเดอร์ที่เก็บ main.go (คือ ./api)
+RUN go build -o main ./api
+
+# Stage 2: Runner (ส่วนนี้เหมือนเดิมไม่ต้องแก้)
+FROM alpine:latest
+WORKDIR /root/
+# Copy binary ที่ build เสร็จแล้ว (มันจะวางอยู่ที่ /app/main จากขั้นตอนบน)
+COPY --from=builder /app/main .
+
+EXPOSE 8080
+CMD ["./main"]
