@@ -98,30 +98,6 @@ func GetStartDayWeek(t time.Time) time.Time {
 	return startOfWeek
 }
 
-// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
-// 	layout := "2006-01-02 15:04:05"
-// 	start, err := ParseTimeFormat(layout, booking.StartTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	end, err := ParseTimeFormat(layout, booking.EndTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if err = CheckValidTime(start, end); err != nil {
-// 		return nil, err
-// 	}
-
-// 	date := &domain.Date{
-// 		StartStr: start.Format(time.RFC3339),
-// 		EndStr: end.Format(time.RFC3339),
-// 	}
-
-// 	return date, nil
-// }
-
 func ValidateBusinessHours(start, end time.Time) error {
 	// 1. โหลด Timezone ไทย (Asia/Bangkok)
 	loc, err := time.LoadLocation("Asia/Bangkok")
@@ -210,3 +186,27 @@ func CheckIsDayOff(summary string, description string) bool {
 
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
 }
+
+// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
+// 	layout := "2006-01-02 15:04:05"
+// 	start, err := ParseTimeFormat(layout, booking.StartTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	end, err := ParseTimeFormat(layout, booking.EndTime)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if err = CheckValidTime(start, end); err != nil {
+// 		return nil, err
+// 	}
+
+// 	date := &domain.Date{
+// 		StartStr: start.Format(time.RFC3339),
+// 		EndStr: end.Format(time.RFC3339),
+// 	}
+
+// 	return date, nil
+// }
