@@ -16,10 +16,10 @@ type Books struct {
 	Name      string    `json:"name"`
 }
 
-type Schedule struct {
-	Date   string    `json:"date"`
-	Events []Booking `json:"events"`
-}
+// type Schedule struct {
+// 	Date   string    `json:"date"`
+// 	Events []Booking `json:"events"`
+// }
 
 // type CreateBookFilter struct {
 // 	Email   string 		`query:"email"` // จาก URL Query

@@ -222,8 +222,8 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 	return nil
 }
 
-func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.Schedule, error) {
-	var response []domain.Schedule
+func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
+	var response []domain.Booking
 
 	// DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
 	// if err != nil {
@@ -246,13 +246,10 @@ func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.
 		return nil, err
 	}
 
-	// // log.Printf("bookings: %v\n", groupBookings)
+	log.Printf("bookings: %v\n", groupBookings)
 
-	for date, events := range groupBookings {
-		response = append(response, domain.Schedule{
-			Date:   date,
-			Events: events,
-		})
+	for _, events := range groupBookings {
+		response = append(response, events...)
 	}
 
 	// log.Printf("response: %v", response)
