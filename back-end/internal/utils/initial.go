@@ -78,8 +78,13 @@ func InitialDBConnection() *gorm.DB {
 }
 
 func InitialRedisConnection(ctx context.Context) *redis.Client {
+	redisAddr := os.Getenv("REDIS_ADDR")
+  if redisAddr == "" {
+    redisAddr = "localhost:6379"
+  }
+
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis-service:6379", 
+		Addr:     redisAddr, 
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})

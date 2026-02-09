@@ -10,11 +10,12 @@ type PostgresRepository interface {
 	CreateBookingDB(booking *Booking) error
 	UpdateBookingDB(booking *Booking) error
 	DeleteBookingDB(bookingID uuid.UUID) error
-	GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
+	GetBookingDB(dateTime *Date, roomID uuid.UUID, roomNumber uint) ([]Booking, error)
 	GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
 	
 	GetHolidayDB(date *Date) ([]Holiday, error)
 	DeleteHolidayCache(date *Date) error
+	ClearCacheByPrefix(prefix string) error
 	IsHolidaySynced(date *Date) bool
 	SetHolidaySynced(date *Date) error
 

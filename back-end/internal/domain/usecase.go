@@ -17,7 +17,7 @@ type OrderUsecase interface {
 	CreateBooking(booking *Booking, roomNumber uint) error
 	UpdateBooking(booking *Booking, roomNumber uint) error
 	DeleteBooking(bookingID uuid.UUID) error
-	GetBooking(date string, filter *GetBookingFilter) ([]Schedule, error)
+	GetBooking(date *Date, roomNumber uint) ([]Schedule, error)
 	GetUserBooking(userID uuid.UUID) ([]Booking, error)
 	GetHoliday(date *Date) ([]Holiday, error)
 	// CheckTimeUpdated(startDate string, endDate string) (*time.Time, error)
