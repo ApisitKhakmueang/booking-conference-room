@@ -67,6 +67,12 @@ export default function MonthView({ currentDate, holiday }: { currentDate: Date,
                     {evt.name}
                   </div>
                 ))}
+
+                {EVENTS.filter(e => isSameDay(e.start, day)).map(evt => (
+                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100`}>
+                    {evt.title}
+                  </div>
+                ))}
               </div>
             </div>
            );
