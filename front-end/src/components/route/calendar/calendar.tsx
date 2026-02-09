@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useResponsive } from '@/hooks/ui/useMediaQuery';
 import {
   format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, setHours, setMinutes, parseISO,
@@ -9,7 +9,7 @@ import {
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
 import axios from 'axios';
-import { Holiday } from '@/lib/interface/response';
+import { Holiday, BookingEvent } from '@/lib/interface/response';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -42,10 +42,15 @@ const EVENTS = [
 ];
 
 export default function Calendar() {
+  const [events, setEvents] = useState(null);
   const [holiday, setHoliday] = useState<Holiday[] | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const { isMobile, isTablet } = useResponsive();
+
+  const currentMonthKey = format(currentDate, 'yyyy-MM');
+  const start = startOfWeek(startOfMonth(currentDate));
+  const end = endOfWeek(endOfMonth(currentDate));
 
   let availableViews: ViewType[] = ['month', 'week', 'day']; // 1. ตั้งค่า Default ไว้ก่อนเลย (กันเหนียว)
   if (isMobile) {
@@ -71,10 +76,8 @@ export default function Calendar() {
 
   const today = () => setCurrentDate(new Date());
 
-  const fetchData = async () => {
+  const fetchHolidays = useCallback(async () => {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL
-    const start = startOfWeek(startOfMonth(currentDate));
-    const end = endOfWeek(endOfMonth(currentDate));
     try{
       const response = await axios.get(`${url as string}/api/holiday?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
       const rawDate = response.data
@@ -90,11 +93,37 @@ export default function Calendar() {
         };
       });
 
+      console.log("holidays: ", holidays)
       setHoliday(holidays)
     } catch(error) {
       console.log('error: ', error);
     }
-  }
+  }, [start, end])
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      const url = process.env.NEXT_PUBLIC_BACKEND_URL
+      const response = await axios.get(`${url as string}/api/booking/1?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
+      const rawDate = response.data
+      const events = rawDate?.map((event: BookingEvent) => {
+        return {
+          ...event, // copy ค่าเดิมมาทั้งหมด (id, name, isDayOff)
+          
+          // แปลง string '2026-01-01' -> Date Object
+          startTime: parseISO(event.startTime), 
+          endTime: parseISO(event.endTime),
+          
+          // แปลง string '2026-02-07T...' -> Date Object
+          updatedAt: event.updatedAt ? parseISO(event.updatedAt) : null 
+        };
+      });
+      console.log("events: ", events)
+
+      setEvents(events)
+    } catch(error) {
+      console.log("error: ", error)
+    }
+  }, [start, end])
 
 // --- 1. Logic การบังคับเปลี่ยน View (Auto-switch) ---
   useEffect(() => {
@@ -117,8 +146,13 @@ export default function Calendar() {
   }, [isMobile, isTablet, view]); // ใส่ view เข้ามาด้วย เพื่อให้เช็คค่าล่าสุดเสมอ
 
   useEffect(() => {
-    fetchData()
-  }, [currentDate])
+    fetchHolidays()
+    fetchEvents()
+  }, [currentMonthKey])
+
+  useEffect(() => {
+
+  }, [])
 
   return (
     <div className="h-full dark:bg-main-background bg-white text-gray-200 font-sans">
@@ -161,7 +195,7 @@ export default function Calendar() {
 
         {/* --- Body: Render ตาม View --- */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          {view === 'month' && <MonthView currentDate={currentDate} holiday={holiday} />}
+          {view === 'month' && <MonthView currentDate={currentDate} events={events} holiday={holiday} />}
           {(view === 'week' || view === 'day') && <TimeGridView currentDate={currentDate} view={view} holiday={holiday} />}
         </div>
       </div>

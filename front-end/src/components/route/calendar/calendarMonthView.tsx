@@ -4,7 +4,7 @@ import {
   startOfWeek, endOfWeek,  eachDayOfInterval,
   isSameDay, isSameMonth, startOfMonth, endOfMonth, setHours, setMinutes
 } from 'date-fns';
-import { Holiday } from '@/lib/interface/response';
+import { Holiday, BookingEvent } from '@/lib/interface/response';
 
 const TODAY = new Date(); 
 const EVENTS = [
@@ -32,7 +32,7 @@ const EVENTS = [
 ];
 
 // --- Component: Month View (แบบเดิม) ---
-export default function MonthView({ currentDate, holiday }: { currentDate: Date, holiday: Holiday[] | null }) {
+export default function MonthView({ currentDate, events, holiday }: { currentDate: Date, events: BookingEvent[] | null, holiday: Holiday[] | null }) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate));
     const end = endOfWeek(endOfMonth(currentDate));
@@ -68,8 +68,8 @@ export default function MonthView({ currentDate, holiday }: { currentDate: Date,
                   </div>
                 ))}
 
-                {EVENTS.filter(e => isSameDay(e.start, day)).map(evt => (
-                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100`}>
+                {events?.filter(e => isSameDay(e.startTime, day)).map(evt => (
+                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-orange-100`}>
                     {evt.title}
                   </div>
                 ))}
