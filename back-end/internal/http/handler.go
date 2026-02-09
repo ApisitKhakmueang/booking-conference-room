@@ -177,22 +177,26 @@ func (u *OrderHandler) DeleteBooking(c *fiber.Ctx) error {
 }
 
 func (u *OrderHandler) GetBooking(c *fiber.Ctx) error {
-	date := c.Params("date")
+	room, err := strconv.Atoi(c.Params("room"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
-	filter := new(domain.GetBookingFilter)
+	q := new(domain.Date)
 
-	// ดึงจาก Query
-	if err := c.QueryParser(filter); err != nil {
+	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
+	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
+	if err := c.QueryParser(q); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	// log.Printf("duration: %s, room: %v", filter.Duration, filter.Room)
 	
-	if filter.Duration == "" || filter.Room == 0 {
+	if room == 0 {
 		return c.Status(fiber.StatusBadRequest).SendString("Please send duration and room number")
 	}
 
-	response, err := u.usecase.GetBooking(date, filter)
+	response, err := u.usecase.GetBooking(q, uint(room))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

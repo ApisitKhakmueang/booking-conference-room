@@ -1,7 +1,7 @@
 package repository
 
 import (
-	// "log"
+	"log"
 
 	"context"
 	// "database/sql"
@@ -55,12 +55,26 @@ func (p *postgresBookingRepo) DeleteBookingDB(bookingID uuid.UUID) error {
 	return result.Error
 }
 
-func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
+func (p *postgresBookingRepo) GetBookingDB(date *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
+	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, date.StartStr, date.EndStr)
+
 	var bookings []domain.Booking
+	val, err := p.rdb.Get(p.ctx, cacheKey).Result()
+	if err == nil {
+		// เจอข้อมูล! (Cache Hit)
+		// log.Println("Cache hit")
+		
+		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
+		if err := json.Unmarshal([]byte(val), &bookings); err == nil {
+			// log.Println("Cache HIT: Return data from Redis")
+			return bookings, nil
+		}
+		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+	}
 
 	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
 	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
-	result := p.db.
+	result := p.db.WithContext(p.ctx).
 		Preload("Room", func(db *gorm.DB) *gorm.DB {
 			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
 			return db.Select("id, name") 
@@ -68,7 +82,7 @@ func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UU
 		Preload("User", func(db *gorm.DB) *gorm.DB {
         return db.Select("id, email, full_name")
     }).
-		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", dateTime.StartStr, dateTime.EndStr, roomID).
+		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", date.StartStr, date.EndStr, roomID).
 		Order("start_time desc").
 		Find(&bookings)
 
@@ -76,13 +90,37 @@ func (p *postgresBookingRepo) GetBookingDB(dateTime *domain.Date, roomID uuid.UU
 		return nil, result.Error
 	}
 
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		// ใช้ ctx ตัวเดิมส่งให้ Redis ด้วย
+		err = p.rdb.Set(p.ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err() // TTL ปรับตามความเหมาะสม
+		if err != nil {
+			// log.Println("Redis Set Error:", err) 
+			// Error ตรงนี้ปล่อยผ่านได้ เพราะ User ได้ข้อมูลจาก DB แล้ว
+			log.Printf("Failed to set cache: %v", err)
+		}
+	}
+
 	return bookings, nil
 }
 
 func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booking, error) {
-	var bookings []domain.Booking
+	cacheKey := fmt.Sprintf("booking:user:%s", userID)
 
-	result := p.db.
+	var bookings []domain.Booking
+	val, err := p.rdb.Get(p.ctx, cacheKey).Result()
+	if err == nil {
+		// เจอข้อมูล! (Cache Hit)
+		// log.Println("Cache hit")
+		
+		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
+		if err := json.Unmarshal([]byte(val), &bookings); err == nil {
+			// log.Println("Cache HIT: Return data from Redis")
+			return bookings, nil
+		}
+		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+	}
+
+	result := p.db.WithContext(p.ctx).
 		Preload("User", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
     }).
@@ -91,6 +129,16 @@ func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booki
 
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		// ใช้ ctx ตัวเดิมส่งให้ Redis ด้วย
+		err = p.rdb.Set(p.ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err() // TTL ปรับตามความเหมาะสม
+		if err != nil {
+			// log.Println("Redis Set Error:", err) 
+			// Error ตรงนี้ปล่อยผ่านได้ เพราะ User ได้ข้อมูลจาก DB แล้ว
+			log.Printf("Failed to set cache: %v", err)
+		}
 	}
 
 	return bookings, nil
@@ -121,11 +169,11 @@ func (p *postgresBookingRepo) GetHolidayDB(date *domain.Date) ([]domain.Holiday,
 	// ---------------------------------------------------------
 	// STEP 2: ลองดึงจาก Redis ก่อน (Cache Hit)
 	// ---------------------------------------------------------
+	var holidays []domain.Holiday
 	val, err := p.rdb.Get(p.ctx, cacheKey).Result()
 	if err == nil {
 		// เจอข้อมูล! (Cache Hit)
 		// log.Println("Cache hit")
-		var holidays []domain.Holiday
 		
 		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
 		if err := json.Unmarshal([]byte(val), &holidays); err == nil {
@@ -140,7 +188,6 @@ func (p *postgresBookingRepo) GetHolidayDB(date *domain.Date) ([]domain.Holiday,
 	// ---------------------------------------------------------
 	// log.Println("Cache MISS: Fetching from DB...")
 	
-	var holidays []domain.Holiday
 	result := p.db.WithContext(p.ctx). // อย่าลืมใส่ WithContext
 		Where("date >= ? AND date <= ?", date.StartStr, date.EndStr).
 		Order("date ASC").
@@ -160,7 +207,7 @@ func (p *postgresBookingRepo) GetHolidayDB(date *domain.Date) ([]domain.Holiday,
 		if err != nil {
 			// ถ้า Save Redis ไม่ได้ ไม่ต้อง return error ให้ user รู้
 			// แค่ Log ไว้ เพราะ user ยังได้ข้อมูลจาก DB ครบถ้วน
-			// log.Printf("Failed to set cache: %v", err)
+			log.Printf("Failed to set cache: %v", err)
 		}
 	}
 
@@ -177,6 +224,33 @@ func (p *postgresBookingRepo) DeleteHolidayCache(date *domain.Date) error {
 	if err != nil {
 		return err // หรือจะแค่ log ก็ได้ ถ้าซีเรียส
 	}
+	return nil
+}
+
+// ใน repository.go
+func (p *postgresBookingRepo) ClearCacheByPrefix(prefix string) error {
+	var keys []string
+
+	// วนลูปหา Key ที่ขึ้นต้นด้วย prefix (เช่น "holidays:*")
+	// เราใช้ Scan แทน Keys เพราะ Keys จะทำให้ Redis ค้างถ้าข้อมูลเยอะ
+	iter := p.rdb.Scan(p.ctx, 0, prefix+"*", 0).Iterator()
+	
+	for iter.Next(p.ctx) {
+		keys = append(keys, iter.Val())
+	}
+
+	if err := iter.Err(); err != nil {
+		return err
+	}
+
+	// ถ้าเจอ Key ก็สั่งลบทีเดียว
+	if len(keys) > 0 {
+		err := p.rdb.Del(p.ctx, keys...).Err()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

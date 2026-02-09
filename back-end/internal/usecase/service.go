@@ -222,20 +222,20 @@ func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
 	return nil
 }
 
-func (u *orderUsecase) GetBooking(date string, filter *domain.GetBookingFilter) ([]domain.Schedule, error) {
+func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.Schedule, error) {
 	var response []domain.Schedule
 
-	DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
-	if err != nil {
-		return nil, err
-	}
+	// DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	instBooking := new(domain.Booking)
-	if err := u.postgres.GetRoomID(instBooking, filter.Room); err != nil {
+	if err := u.postgres.GetRoomID(instBooking, roomNumber); err != nil {
 		return nil, err
 	}
 
-	bookings, err := u.postgres.GetBookingDB(DateTime, instBooking.RoomID)
+	bookings, err := u.postgres.GetBookingDB(date, instBooking.RoomID, roomNumber)
 	if err != nil {
 		return nil, err
 	}
