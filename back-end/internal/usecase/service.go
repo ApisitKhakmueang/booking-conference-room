@@ -269,7 +269,7 @@ func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error
 	return bookings, nil
 }
 
-func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]domain.Holiday, error) {
+func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 // 	// loc := time.FixedZone("ICT", 7*60*60)
 // 	// startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
 // 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
@@ -282,22 +282,22 @@ func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]dom
 	layout := "2006-01-02"
 
 	// StartDate: วันนี้
-	if startDateStr == "" {
-		startDateStr = now.Format(layout)
+	if date.StartStr == "" {
+		date.StartStr = now.Format(layout)
 	}
 
 	// 3. EndDate: ใช้ AddDate(ปี, เดือน, วัน)
 	// Go จะจัดการเรื่อง เดือน 12 -> 1 หรือ ปีอธิกสุรทิน ให้เองอัตโนมัติ
-	if endDateStr == "" {
+	if date.EndStr == "" {
 		nextMonth := now.AddDate(0, 1, 0) 
-		endDateStr = nextMonth.Format(layout)
+		date.EndStr = nextMonth.Format(layout)
 	}
 
-	isSynced := u.postgres.IsHolidaySynced(startDateStr, endDateStr)
+	isSynced := u.postgres.IsHolidaySynced(date)
 
 	if isSynced {
 		// ถ้า Sync แล้ว -> ดึงจาก DB ได้เลย มั่นใจได้ว่าข้อมูลครบ
-		holidays, err := u.postgres.GetHolidayDB(startDateStr, endDateStr)
+		holidays, err := u.postgres.GetHolidayDB(date)
 		if err != nil {
 				return nil, err
 		}
@@ -306,10 +306,10 @@ func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]dom
 		return holidays, nil
 	}
 
-	googleHolidays, err := u.gateway.FetchHolidays(startDateStr, endDateStr)
+	googleHolidays, err := u.gateway.FetchHolidays(date)
 	if err != nil {
 		// กรณีต่อ Google ไม่ได้ ให้ลองไปดึงของเก่าจาก DB มาใช้แก้ขัดไปก่อน (Fallback)
-		fallbackHolidays, dbErr := u.postgres.GetHolidayDB(startDateStr, endDateStr)
+		fallbackHolidays, dbErr := u.postgres.GetHolidayDB(date)
 		if dbErr == nil && len(fallbackHolidays) > 0 {
 			return fallbackHolidays, nil // ดีกว่า return error
 		}
@@ -327,12 +327,12 @@ func (u *orderUsecase) GetHoliday(startDateStr string, endDateStr string) ([]dom
 			log.Println("Failed to cache holidays:", err)
 		}
 
-		if err := u.postgres.DeleteHolidayCache(startDateStr, endDateStr); err != nil {
+		if err := u.postgres.DeleteHolidayCache(date); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := u.postgres.SetHolidaySynced(startDateStr, endDateStr); err != nil {
+	if err := u.postgres.SetHolidaySynced(date); err != nil {
 		log.Println("Failed to set sync flag:", err)
 	}
 

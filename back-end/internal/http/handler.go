@@ -88,11 +88,11 @@ func NewOrderHandler(usecase domain.OrderUsecase) *OrderHandler {
 // }
 
 func (u *OrderHandler) GetHoliday(c *fiber.Ctx) error {
-	q := domain.PeriodFilter{}
+	q := new(domain.Date)
 
 	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
 	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
-	if err := c.QueryParser(&q); err != nil {
+	if err := c.QueryParser(q); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 	
@@ -100,7 +100,7 @@ func (u *OrderHandler) GetHoliday(c *fiber.Ctx) error {
 	// แต่เพื่อความชัวร์ ใส่ Logic กันเหนียวได้:
 	// if q.StartDate == "" { q.StartDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day()) }
 	// if q.EndDate == "" { q.EndDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month() + 1, time.Now().Day()) }
-	response, err := u.usecase.GetHoliday(q.StartDate, q.EndDate)
+	response, err := u.usecase.GetHoliday(q)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

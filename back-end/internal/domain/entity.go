@@ -98,10 +98,6 @@ func (d DateRes) Time() time.Time {
 // }
 
 // Query & group data
-type PeriodFilter struct {
-	StartDate		string			`query:"startDate"`
-	EndDate 		string 			`query:"endDate"`
-}
 
 type GetBookingFilter struct {
 	Duration   	string 	`query:"duration"` // จาก URL Query
@@ -115,8 +111,8 @@ type CreateEvent struct {
 }
 
 type Date struct {
-	StartStr 	string
-	EndStr 		string
+	StartStr 	string		`query:"startDate"`
+	EndStr 		string		`query:"endDate"`
 }
 
 

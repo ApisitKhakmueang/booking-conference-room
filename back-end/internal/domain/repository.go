@@ -13,10 +13,10 @@ type PostgresRepository interface {
 	GetBookingDB(dateTime *Date, roomID uuid.UUID) ([]Booking, error)
 	GetUserBookingDB(userID uuid.UUID) ([]Booking, error)
 	
-	GetHolidayDB(startDate string, endDate string) ([]Holiday, error)
-	DeleteHolidayCache(startDate string, endDate string) error
-	IsHolidaySynced(start, end string) bool
-	SetHolidaySynced(start, end string) error
+	GetHolidayDB(date *Date) ([]Holiday, error)
+	DeleteHolidayCache(date *Date) error
+	IsHolidaySynced(date *Date) bool
+	SetHolidaySynced(date *Date) error
 
 	GetRoomID(booking *Booking, roomNumber uint) error
 	IsRoomAvailable(booking *Booking) bool
@@ -37,7 +37,7 @@ type PostgresRepository interface {
 // }
 
 type CalendarGateway interface {
-	FetchHolidays(startDate string, endDate string) ([]Holiday, error)
+	FetchHolidays(date *Date) ([]Holiday, error)
 	// CreateEvent(booking *Booking, createEvent *CreateEvent) (string, error)
 	// UpdateEventSameRoom(booking *Booking) error
 	// CancelEvent(roomCalendarID string, eventID string) error

@@ -96,7 +96,7 @@ func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booki
 	return bookings, nil
 }
 
-func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]domain.Holiday, error) {
+func (p *postgresBookingRepo) GetHolidayDB(date *domain.Date) ([]domain.Holiday, error) {
 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
 	// sDate := startDate.Format("2006-01-02")
 	// eDate := endDate.Format("2006-01-02")
@@ -116,7 +116,7 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]
 	// STEP 1: สร้าง Key สำหรับ Redis
 	// ---------------------------------------------------------
 	// key ควรจะไม่ซ้ำกันตามช่วงเวลา เช่น "holidays:2023-01-01:2023-01-31"
-	cacheKey := fmt.Sprintf("holidays:%s:%s", startDate, endDate)
+	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
 
 	// ---------------------------------------------------------
 	// STEP 2: ลองดึงจาก Redis ก่อน (Cache Hit)
@@ -142,7 +142,7 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]
 	
 	var holidays []domain.Holiday
 	result := p.db.WithContext(p.ctx). // อย่าลืมใส่ WithContext
-		Where("date >= ? AND date <= ?", startDate, endDate).
+		Where("date >= ? AND date <= ?", date.StartStr, date.EndStr).
 		Order("date ASC").
 		Find(&holidays)
 
@@ -168,9 +168,9 @@ func (p *postgresBookingRepo) GetHolidayDB(startDate string, endDate string) ([]
 }
 
 // ใน Implementation (postgresBookingRepo)
-func (p *postgresBookingRepo) DeleteHolidayCache(startDate string, endDate string) error {
+func (p *postgresBookingRepo) DeleteHolidayCache(date *domain.Date) error {
 	// 1. สร้าง Key ให้เหมือนกับตอน Get เป๊ะๆ
-	cacheKey := fmt.Sprintf("holidays:%s:%s", startDate, endDate)
+	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
 
 	// 2. สั่งลบ (Del)
 	err := p.rdb.Del(p.ctx, cacheKey).Err()
@@ -183,16 +183,16 @@ func (p *postgresBookingRepo) DeleteHolidayCache(startDate string, endDate strin
 // repository.go
 
 // ใช้ Redis เช็คว่าช่วงเวลานี้ Sync หรือยัง
-func (p *postgresBookingRepo) IsHolidaySynced(start, end string) bool {
-	key := fmt.Sprintf("sync_flag:holidays:%s:%s", start, end)
+func (p *postgresBookingRepo) IsHolidaySynced(date *domain.Date) bool {
+	key := fmt.Sprintf("sync_flag:holidays:%s:%s", date.StartStr, date.EndStr)
 	// ถ้ามี key นี้อยู่ แสดงว่า sync แล้ว (Exists return 1)
 	exists, _ := p.rdb.Exists(p.ctx, key).Result()
 	return exists > 0
 }
 
 // ใช้ Redis แปะป้ายว่า Sync แล้ว (Set Flag)
-func (p *postgresBookingRepo) SetHolidaySynced(start, end string) error {
-	key := fmt.Sprintf("sync_flag:holidays:%s:%s", start, end)
+func (p *postgresBookingRepo) SetHolidaySynced(date *domain.Date) error {
+	key := fmt.Sprintf("sync_flag:holidays:%s:%s", date.StartStr, date.EndStr)
 	// ตั้ง TTL ตามความเหมาะสม เช่น 1 วัน หรือ 7 วัน (ถ้า Google Calendar ไม่ได้แก้บ่อย)
 	// ข้อมูลใน DB จะถือว่า "สดใหม่" เท่ากับระยะเวลา TTL นี้
 	return p.rdb.Set(p.ctx, key, "1", 7*24*time.Hour).Err()

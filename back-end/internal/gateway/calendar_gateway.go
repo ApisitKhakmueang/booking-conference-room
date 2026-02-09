@@ -20,17 +20,17 @@ func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
 	return &googleCalendarGateway{service: client}
 }
 
-func (r *googleCalendarGateway) FetchHolidays(startDate string, endDate string) ([]domain.Holiday, error) {
+func (r *googleCalendarGateway) FetchHolidays(date *domain.Date) ([]domain.Holiday, error) {
 	// 1. Set Time Range (ตามปีที่ส่งมา)
 	calendarID := "en.th#holiday@group.v.calendar.google.com"
 
 	layout := "2006-01-02"
-	timeMin, err := helper.ParseTimeFormat(layout, startDate)
+	timeMin, err := helper.ParseTimeFormat(layout, date.StartStr)
 	if err != nil {
 		return nil, err
 	}
 
-	timeMax, err := helper.ParseTimeFormat(layout, endDate)
+	timeMax, err := helper.ParseTimeFormat(layout, date.EndStr)
 	if err != nil {
 		return nil, err
 	}
