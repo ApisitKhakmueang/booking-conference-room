@@ -163,7 +163,7 @@ type User struct {
 
 type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id,omitempty"`
-	CreatedAt 		*time.Time				`json:"createAt,omitempty"`
+	CreatedAt 		*time.Time				`json:"createdAt,omitempty"`
 	UpdatedAt 		*time.Time				`json:"updatedAt,omitempty"`
 
 	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId,omitempty"`
