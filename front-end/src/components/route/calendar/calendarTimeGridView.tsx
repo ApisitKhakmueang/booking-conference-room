@@ -49,15 +49,29 @@ export default function TimeGridView({ currentDate, view, holiday }: { currentDa
   return (
     <div className="flex h-full overflow-hidden flex-col">
       {/* Header (แสดงวันที่ด้านบน) */}
-      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover ${view === 'day' ? 'grid-cols-1 md:pl-16 pl-0' : 'grid-cols-7 pl-16'}`}>
-        {days.map(day => (
-          <div key={day.toString()} className={`py-3 text-center border-r dark:border-sidebar last:border-0 ${isSameDay(day, new Date()) ? 'dark:text-blue-500 text-violet-900' : 'dark:text-gray-400'}`}>
-            <div className="text-xs uppercase font-bold">{format(day, 'EEE')}</div>
-            <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-blue-600/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
-                {format(day, 'd')}
+      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover ${view === 'day' ? 'grid-cols-1 pl-0' : 'grid-cols-7 pl-16'}`}>
+        {days.map(day => {
+          const holidays = holiday?.filter(e => isSameDay(e.date, day));
+          return (
+            <div 
+             key={day.toString()}
+             className={`flex items-center border-r dark:border-sidebar border-white last:border-0 ${view === 'day' ? 'flex-row' : 'flex-col'}`}>
+              <div className={`py-3 text-center shrink-0 w-16 ${isSameDay(day, new Date()) ? 'dark:text-blue-500 text-violet-900' : 'dark:text-gray-400'}`}>
+                <div className="text-xs uppercase font-bold">{format(day, 'EEE')}</div>
+                <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-blue-600/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
+                    {format(day, 'd')}
+                </div>
+              </div>
+              <div className="py-3 text-center border-r dark:border-sidebar last:border-0 dark:text-gray-400 w-full">
+                {holidays?.map(evt => (
+                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100 mx-1`}>
+                    {evt.name}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Scrollable Body */}

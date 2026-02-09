@@ -51,7 +51,7 @@ export default function MonthView({ currentDate, holiday }: { currentDate: Date,
       <div className="grid grid-cols-7 flex-1 auto-rows-fr">
         {days.map((day) => {
            const isToday = isSameDay(day, new Date());
-           const dayEvents = holiday?.filter(e => isSameDay(e.date, day));
+           const holidays = holiday?.filter(e => isSameDay(e.date, day));
            return (
             <div key={day.toString()} className={`border-b dark:border-hover border-light-hover p-2 min-h-25 
             ${day.getDay() !== 6 ? 'border-r' : ''}
@@ -62,7 +62,7 @@ export default function MonthView({ currentDate, holiday }: { currentDate: Date,
                 {format(day, 'd')}
               </div>
               <div className="space-y-1">
-                {dayEvents?.map(evt => (
+                {holidays?.map(evt => (
                   <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100`}>
                     {evt.name}
                   </div>

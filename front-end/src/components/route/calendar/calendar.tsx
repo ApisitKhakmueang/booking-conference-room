@@ -153,9 +153,9 @@ export default function Calendar() {
           </div>
           
           <div className="flex gap-2">
-            <button onClick={prev} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Prev</button>
-            <button onClick={today} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Today</button>
-            <button onClick={next} className="px-3 py-1 dark:bg-card dark:hover:bg-hover border border-white rounded hover:bg-light-card text-sm">Next</button>
+            <button onClick={prev} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Prev</button>
+            <button onClick={today} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Today</button>
+            <button onClick={next} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Next</button>
           </div>
         </div>
 
