@@ -1,16 +1,16 @@
 # version: '3.8'
 
 services:
-  backend-service:
-    build: ./back-end
-    ports:
-      - "8080:8080"
-    depends_on:
-      - redis-service
-    env_file:
-      - ./back-end/.env  # ระบุ Path ไปที่ไฟล์ .env ของคุณ
-    environment:
-      - REDIS_ADDR=redis-service:6379
+  # backend-service:
+  #   build: ./back-end
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - redis-service
+  #   env_file:
+  #     - ./back-end/.env  # ระบุ Path ไปที่ไฟล์ .env ของคุณ
+  #   environment:
+  #     - REDIS_ADDR=redis-service:6379
 
   redis-service:
     image: redis:7-alpine
