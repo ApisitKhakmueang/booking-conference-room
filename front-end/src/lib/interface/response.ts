@@ -10,6 +10,7 @@ export interface Holiday {
 interface Room {
   id: string
   name: string
+  roomNumber: number
 }
 
 interface User {
@@ -20,9 +21,6 @@ interface User {
 
 export interface BookingEvent {
   id: string
-  updatedAt: string
-  roomId: string
-  userId: string
   startTime: string
   endTime: string
   title: string
