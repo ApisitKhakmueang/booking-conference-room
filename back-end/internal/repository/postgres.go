@@ -294,8 +294,9 @@ func (p *postgresBookingRepo) GetRoomID(booking *domain.Booking, roomNumber uint
 }
 
 // รับค่า DB, RoomID (สำคัญ), รหัสที่สุ่มได้, และช่วงเวลาที่จะจอง
-func (p* postgresBookingRepo) IsRoomAvailable(booking *domain.Booking) bool {
-	var count int64
+func (p *postgresBookingRepo) IsRoomAvailable(booking *domain.Booking) bool {
+	var countBooking int64
+	var countRoom int64
 
 	// Query เพื่อ "จับผิด" ว่ามีใครใช้รหัสนี้อยู่ไหม
 	query := p.db.Model(&domain.Booking{}).
@@ -307,17 +308,30 @@ func (p* postgresBookingRepo) IsRoomAvailable(booking *domain.Booking) bool {
 		query = query.Where("id != ?", booking.ID)
 	}
 
-	err := query.Count(&count).Error
+	err := query.Count(&countBooking).Error
 		
 	if err != nil {
 		// กรณี Database Error ให้ตอบ False (ไม่ว่าง) ไปก่อนเพื่อความปลอดภัย กันระบบล่ม
 		return false
 	}
 
+	room := new(domain.Room)
+	queryRoom := p.db.Model(room).
+		Where("id = ?", booking.RoomID).
+		Where("is_active = ?", "available").
+		Count(&countRoom)
+
+	log.Println("countRoom: ", countRoom)
+
+	if queryRoom.Error != nil {
+		// กรณีห้องไม่มีใน DB ให้ตอบ False (ไม่ว่าง) ไปก่อนเพื่อความปลอดภัย
+		return false
+	}
+
 	// หัวใจสำคัญ:
-	// ถ้า count == 0 แปลว่า "ไม่เจอใครใช้เลย" -> รหัสนี้ "ว่าง" (True)
-	// ถ้า count > 0  แปลว่า "มีคนใช้แล้ว"     -> รหัสนี้ "ไม่ว่าง" (False)
-	return count == 0
+	// ถ้า countBooking == 0 แปลว่า "ไม่เจอใครใช้เลย" -> รหัสนี้ "ว่าง" (True)
+	// ถ้า countBooking > 0  แปลว่า "มีคนใช้แล้ว"     -> รหัสนี้ "ไม่ว่าง" (False)
+	return countBooking == 0 && countRoom > 0
 }
 
 func (p *postgresBookingRepo) IsPasscodeAvailable(booking *domain.Booking, passcode string) bool {
