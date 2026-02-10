@@ -1,7 +1,12 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { SidebarLayoutContextType } from "../lib/interface/interface";
+
+interface SidebarLayoutContextType {
+  isOpen: boolean;
+  isSmallDisplay: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 const SidebarLayoutContext = createContext<SidebarLayoutContextType | null>(null);
 

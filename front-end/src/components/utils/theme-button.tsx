@@ -1,16 +1,13 @@
 import useTheme from "@/hooks/ui/useTheme";
 import { cn } from "@/lib/utils";
+import { useControlLayoutStore } from "@/stores/control-layout.store";
 import {
   Moon,
   Sun
 } from "lucide-react";
 
-interface ThemeButtonProps {
-  isOpen: boolean
-  className?: string
-}
-
-export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
+export default function ThemeButton({ className }: { className?: string}) {
+  const isOpenNav = useControlLayoutStore((state) => state.isOpenNav)
   const { toggle } = useTheme();
 
   return (
@@ -20,7 +17,7 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
         <span
           className={`
             overflow-hidden whitespace-nowrap transition-duration-300 ease-in-out
-            ${isOpen ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+            ${isOpenNav ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
           `}
         >
           Dark
@@ -31,7 +28,7 @@ export default function ThemeButton({ isOpen, className }: ThemeButtonProps) {
         <span
           className={`
             overflow-hidden whitespace-nowrap transition-duration-300 ease-in-out
-            ${isOpen ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
+            ${isOpenNav ? "max-w-[100px] opacity-100 ml-2" : "max-w-0 opacity-0 ml-0"}
           `}
         >
           Light

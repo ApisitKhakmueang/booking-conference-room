@@ -10,12 +10,13 @@ import {
   Calendar,
   List,
 } from "lucide-react";
-import { SidebarProps } from "@/lib/interface/interface";
 
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import BackgroundDrop from "./drop-background";
 import ThemeButton from "../../utils/theme-button";
+import { useShallow } from "zustand/shallow";
+import { useControlLayoutStore } from "@/stores/control-layout.store";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -24,7 +25,14 @@ const SIDEBAR_ITEMS = [
   { name: "Booking", href: "/booking", icon: List },
 ] as const;
 
-export default function Sidebar({ isOpen, setIsOpen, isSmallDisplay }: SidebarProps) {
+export default function Sidebar() {
+  const { isOpenNav, setIsOpenNav, isHideNav } = useControlLayoutStore(
+    useShallow(((state) => ({
+      isOpenNav: state.isOpenNav,
+      setIsOpenNav: state.setIsOpenNav,
+      isHideNav: state.isHideNav
+    })))
+  )
   const pathname = usePathname();
 
   return (
@@ -33,28 +41,24 @@ export default function Sidebar({ isOpen, setIsOpen, isSmallDisplay }: SidebarPr
         className={`
           h-screen fixed dark:bg-sidebar
           bg-light-sidebar
-          transition-[margin,padding,width] duration-300 z-20
-          ${isSmallDisplay
-              ? isOpen
-                ? "translate-x-0 w-64"
-                : "-translate-x-full w-64"
-              : isOpen
-                ? "w-70"
-                : "w-23"}
+          duration-300 z-20
+          ${isHideNav
+              ? isOpenNav
+                ? "translate-x-0 w-64 transition-transform"
+                : "-translate-x-full w-64 transition-transform"
+              : isOpenNav
+                ? "transition-[margin,padding,width] w-70"
+                : "transition-[margin,padding,width] w-23"}
         `}
       >
 
         <nav className="p-5 relative flex flex-col justify-between h-full">
-          <SidebarToggle
-            isOpen={isOpen}
-            toggle={() => setIsOpen(v => !v)}
-            isSmallDisplay={isSmallDisplay}
-          />
+          <SidebarToggle />
 
           <ul className="space-y-2 font-semibold text-lg">
             {/* Logo */}
             <li className="flex justify-center mb-6">
-              {/* {isOpen && (
+              {/* {isOpenNav && (
               )} */}
               <Image
                 src='/logo/logoEE-color.png'
@@ -80,22 +84,22 @@ export default function Sidebar({ isOpen, setIsOpen, isSmallDisplay }: SidebarPr
                         ? "bg-light-hover text-white dark:bg-hover dark:text-main"
                         : "hover:bg-light-hover hover:text-white dark:hover:bg-hover dark:hover:text-main"}
                     `}
-                    onClick={() => isSmallDisplay && setIsOpen(false)}
+                    onClick={() => isHideNav && setIsOpenNav(false)}
                   >
                     
                     <Icon size={20} />
-                    {isOpen && <span>{item.name}</span>}
+                    {isOpenNav && <span>{item.name}</span>}
                   </Link>
                 </li>
               );
             })}
           </ul>
 
-          <ThemeButton isOpen={isOpen} />
+          <ThemeButton />
         </nav>
       </aside>
 
-      <BackgroundDrop isOpen={isOpen} isSmallDisplay={isSmallDisplay} setIsOpen={setIsOpen} />
+      <BackgroundDrop />
     </>
   );
 }
