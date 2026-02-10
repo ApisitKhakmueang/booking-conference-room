@@ -163,11 +163,11 @@ type User struct {
 
 type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id,omitempty"`
-	CreatedAt 		*time.Time				`json:"createdAt,omitempty"`
-	UpdatedAt 		*time.Time				`json:"updatedAt,omitempty"`
+	CreatedAt 		*time.Time				`json:"-"`
+	UpdatedAt 		*time.Time				`json:"-"`
 
-	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"roomId,omitempty"`
-	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"userId,omitempty"`
+	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"-"`
+	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"-"`
 	// CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
 	// GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
 	

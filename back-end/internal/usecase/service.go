@@ -1,6 +1,7 @@
 package usercase
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -70,6 +71,12 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 	booking.Passcode = finalPasscode
 
 	if err := u.postgres.CreateBookingDB(booking); err != nil {
+		return err
+	}
+
+	prefix := fmt.Sprintf("booking:%d:", roomNumber)
+
+	if err := u.postgres.ClearCacheByPrefix(prefix); err != nil {
 		return err
 	}
 
@@ -246,7 +253,7 @@ func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.
 		return nil, err
 	}
 
-	log.Printf("bookings: %v\n", groupBookings)
+	// log.Printf("bookings: %v\n", groupBookings)
 
 	for _, events := range groupBookings {
 		response = append(response, events...)

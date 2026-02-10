@@ -74,10 +74,11 @@ func (p *postgresBookingRepo) GetBookingDB(date *domain.Date, roomID uuid.UUID, 
 
 	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
 	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
+	// log.Println("Cache miss")
 	result := p.db.WithContext(p.ctx).
 		Preload("Room", func(db *gorm.DB) *gorm.DB {
 			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-			return db.Select("id, name") 
+			return db.Select("id, name, room_number") 
     }).
 		Preload("User", func(db *gorm.DB) *gorm.DB {
         return db.Select("id, email, full_name")
@@ -121,6 +122,10 @@ func (p *postgresBookingRepo) GetUserBookingDB(userID uuid.UUID) ([]domain.Booki
 	}
 
 	result := p.db.WithContext(p.ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name, room_number") 
+    }).
 		Preload("User", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
     }).
