@@ -4,60 +4,12 @@ export interface EachPageLayoutProps {
   className?: string;
 }
 
-export interface OpenMobileProps {
-  isOpen: boolean
-  isSmallDisplay: boolean
-}
-
-// Group the same interface
-export interface DropBgProps extends OpenMobileProps {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export interface SidebarProps extends OpenMobileProps  {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-export interface SidebarToggleProps extends OpenMobileProps {
-  toggle: () => void;
-};
-
-export type UserBarProps = OpenMobileProps;
-
-export interface UserIconProps {
-  isSmallDisplay?: boolean;
-  user: UserProfile | null
-}
-
-export interface WelcombackProps {
-  isOpen?: boolean;
-  user: UserProfile | null
-}
-
-export interface SidebarLayoutContextType {
-  isOpen: boolean;
-  isSmallDisplay: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-interface UserProfile {
+export interface UserProfile {
   id: string
   email: string
   name?: string
   avatar?: string
   role: string
-}
-
-export interface AuthState {
-  user: UserProfile | null
-  setUser: (user: UserProfile | null) => void
-}
-
-type Theme = 'dark' | 'light'
-
-export interface ThemeState {
-  theme: Theme
-  setTheme: (theme: Theme) => void
 }
 
 
