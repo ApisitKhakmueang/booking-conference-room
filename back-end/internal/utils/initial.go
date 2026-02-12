@@ -140,8 +140,9 @@ func InitialCalendarService() (*calendar.Service, error) {
 
 func InitialCleanArch(ctx context.Context, rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service) (*http.OrderHandler) {
 	// redisRepo := repository.NewredisRepo(ctx, rdb)
+	RedisRepository := repository.NewRedisRepository(ctx, rdb)
 	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
-	bookingRepo := repository.NewPostgresBookingRepo(ctx, rdb, db)
+	bookingRepo := repository.NewPostgresBookingRepo(ctx, RedisRepository, db)
 	orderUsecase := usercase.NewOrderUsecase(bookingRepo, calendarService)
 	handleUsecase := http.NewOrderHandler(orderUsecase)
 
