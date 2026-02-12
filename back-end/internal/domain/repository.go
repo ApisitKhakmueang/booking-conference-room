@@ -37,6 +37,17 @@ type PostgresRepository interface {
 // 	GetHolidayCache(start)
 // }
 
+type RedisRepository interface {
+	GetBookingRedis(cacheKey string) ([]Booking, error)
+	GetHolidayRedis(cacheKey string) ([]Holiday, error)
+	SetJsonCache(cacheKey string, jsonBytes []byte)
+	SetHolidaySynced(cacheKey string) error
+	DeleteCache(cacheKey ...string) error
+	ClearCacheByPrefix(prefix string) error
+
+	IsHolidaySynced(cacheKey string) int64
+}
+
 type CalendarGateway interface {
 	FetchHolidays(date *Date) ([]Holiday, error)
 	// CreateEvent(booking *Booking, createEvent *CreateEvent) (string, error)

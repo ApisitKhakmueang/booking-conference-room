@@ -25,8 +25,8 @@ type orderUsecase struct {
 // NewOrderUsecase คือ Constructor
 func NewOrderUsecase(postgres domain.PostgresRepository, gateway domain.CalendarGateway) domain.OrderUsecase {
 	return &orderUsecase{
-		postgres:    postgres,
-		gateway: gateway,
+		postgres:   postgres,
+		gateway: 		gateway,
 	}
 }
 
@@ -303,7 +303,7 @@ func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 		// ถ้า Sync แล้ว -> ดึงจาก DB ได้เลย มั่นใจได้ว่าข้อมูลครบ
 		holidays, err := u.postgres.GetHolidayDB(date)
 		if err != nil {
-				return nil, err
+			return nil, err
 		}
 		// ถ้า DB ว่างเปล่า (len=0) ก็แปลว่าเดือนนั้นไม่มีวันหยุดจริงๆ (เพราะ Sync มาแล้ว)
 		// ดังนั้น return ได้เลย
