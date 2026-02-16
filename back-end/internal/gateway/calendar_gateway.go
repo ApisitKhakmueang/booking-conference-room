@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/calendar"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
@@ -16,7 +17,7 @@ type googleCalendarGateway struct {
 	service *calendar.Service // Google Client
 }
 
-func NewGoogleCalendarGateway(client *calendar.Service) domain.CalendarGateway {
+func NewGoogleCalendarGateway(client *calendar.Service) calendarGateway.CalendarGateway {
 	return &googleCalendarGateway{service: client}
 }
 
