@@ -1,0 +1,33 @@
+package postgresRepo
+
+import (
+	"context"
+	"time"
+
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/google/uuid"
+)
+
+type PostgresRepository interface {
+	CreateBookingDB(ctx context.Context, booking *domain.Booking) error
+	// UpdateBookingDB(ctx context.Context, booking *Booking) error
+	// DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error
+	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
+	// GetUserBookingDB(ctx context.Context, userID uuid.UUID) ([]Booking, error)
+	GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
+
+	// CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
+	// GetEventID(bookingID uuid.UUID) (*Booking, error)
+	// GetCalendar(roomNumber uint) (*Calendar, error)
+	// GetUser(userID uuid.UUID) (*User, error)
+	// CheckSameRoom(booking *Booking, roomNumber uint) error
+}
+
+type HelperPostgresRepository interface {
+	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
+	GetRoomID(ctx context.Context, booking *domain.Booking, roomNumber uint) error
+	IsRoomAvailable(ctx context.Context, booking *domain.Booking) bool
+	IsPasscodeAvailable(ctx context.Context, booking *domain.Booking, passcode string) bool
+	CheckDayOff(ctx context.Context, date time.Time) error
+	BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error
+}
