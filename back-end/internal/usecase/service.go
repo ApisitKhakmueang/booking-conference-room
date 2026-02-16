@@ -1,37 +1,48 @@
 package usercase
 
 import (
-	"fmt"
+	// "fmt"
+	"context"
 	"log"
 	"time"
 
 	"errors"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/calendar"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/postgres"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 	"github.com/google/uuid"
+	// "github.com/google/uuid"
 )
 
-// var roomCalendarID = []string{
-// 	"1d126786ac639781b3265cefc212f26fa03d88fd770aaf77ce6131190618d323@group.calendar.google.com",
-// 	"84aac15c69968c01979556cb2a69806ab8b0e1abd4850e3c3fce14ada426c1ed@group.calendar.google.com",
-// }
-
-type orderUsecase struct {
-	postgres    domain.PostgresRepository // เรียกผ่าน Interface
-	gateway 		domain.CalendarGateway
+type bookingUsecase struct {
+	redis 						redisRepo.RedisRepository       // เรียกผ่าน Interface
+	helperRedis 			redisRepo.HelperRedisRepository
+	helperPostgres    postgresRepo.HelperPostgresRepository // เรียกผ่าน Interface
+	publisher         redisRepo.RealtimePublisher
+	gateway 					calendarGateway.CalendarGateway
 }
 
-// NewOrderUsecase คือ Constructor
-func NewOrderUsecase(postgres domain.PostgresRepository, gateway domain.CalendarGateway) domain.OrderUsecase {
-	return &orderUsecase{
-		postgres:   postgres,
-		gateway: 		gateway,
+// NewBookingUsecase คือ Constructor
+func NewBookingUsecase(
+	redis 					redisRepo.RedisRepository, 
+	helperRedis 		redisRepo.HelperRedisRepository, 
+	helperPostgres 	postgresRepo.HelperPostgresRepository, 
+	publisher       redisRepo.RealtimePublisher,
+	gateway 				calendarGateway.CalendarGateway) domain.BookingUsecase {
+	return &bookingUsecase{
+		redis:      			redis,
+		helperRedis: 			helperRedis,
+		helperPostgres:   helperPostgres,
+		publisher:       publisher,
+		gateway: 					gateway,
 	}
 }
 
-func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.postgres.CheckDayOff(*booking.StartTime); err != nil {
+func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
+	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
 		return err
 	}
 
@@ -40,11 +51,11 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 		return err
 	}
 
-	if err := u.postgres.GetRoomID(booking, roomNumber); err != nil {
+	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
 	}
 
-	if !u.postgres.IsRoomAvailable(booking) {
+	if !u.helperPostgres.IsRoomAvailable(ctx, booking) {
 		return errors.New("Room unavailable")
 	}
 
@@ -60,7 +71,7 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 		// 2. ส่งไปเช็คในฟังก์ชันข้างบน
 		// "เฮ้ DB! ห้อง 1 เวลา 10:00-11:00 รหัส 1234 ว่างไหม?"
-		if u.postgres.IsPasscodeAvailable(booking, passcode) {
+		if u.helperPostgres.IsPasscodeAvailable(ctx,booking, passcode) {
 			finalPasscode = passcode // เย้! ว่าง -> เก็บค่าไว้
 			break                    // หยุดวนลูป
 		}
@@ -69,16 +80,31 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 	}
 
 	booking.Passcode = finalPasscode
+	booking.ID = uuid.New()
 
-	if err := u.postgres.CreateBookingDB(booking); err != nil {
+	if err := u.redis.CreateBooking(ctx, booking, roomNumber); err != nil {
 		return err
 	}
 
-	prefix := fmt.Sprintf("booking:%d:", roomNumber)
-
-	if err := u.postgres.ClearCacheByPrefix(prefix); err != nil {
+	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
+	if err != nil {
 		return err
 	}
+
+	payload := map[string]interface{}{
+		"room_number": roomNumber,
+		"booking":     completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
+	}
+
+	// log.Printf("Publishing real-time event: %v", payload)
+
+	go func() {
+		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
+		bgCtx := context.Background()
+		if pubErr := u.publisher.PublishEvent(bgCtx, "booking_created", payload); pubErr != nil {
+			log.Printf("Failed to publish real-time event: %v", pubErr)
+		}
+	}()
 
 	// layout := "2006-01-02 15:04:05"
 	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
@@ -88,12 +114,12 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// dateToCheck := t.Format("2006-01-02")
 
-	// calendar, err := u.postgres.GetCalendar(roomNumber)
+	// calendar, err := u.helperPostgres.GetCalendar(roomNumber)
 	// if err != nil {
 	// 	return err
 	// }
 
-	// user, err := u.postgres.GetUser(booking.UserID)
+	// user, err := u.helperPostgres.GetUser(booking.UserID)
 	// if err != nil {
 	// 	return err
 	// }
@@ -112,124 +138,124 @@ func (u *orderUsecase) CreateBooking(booking *domain.Booking, roomNumber uint) e
 
 	// booking.GoogleEventID = eventID
 
-	// if err = u.postgres.CreateBookingDB(booking); err != nil {
+	// if err = u.helperPostgres.CreateBookingDB(booking); err != nil {
 	// 	return err
 	// }
 
 	return nil
 }
 
-func (u *orderUsecase) UpdateBooking(booking *domain.Booking, roomNumber uint) error {
-	if err := u.postgres.CheckDayOff(*booking.StartTime); err != nil {
-		return err
-	}
+// func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
+// 	if err := u.helperPostgres.CheckDayOff(*booking.StartTime); err != nil {
+// 		return err
+// 	}
 
-	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	if err != nil {
-		return err
-	}
+// 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if err := u.postgres.GetRoomID(booking, roomNumber); err != nil {
-		return err
-	}
+// 	if err := u.helperPostgres.GetRoomID(booking, roomNumber); err != nil {
+// 		return err
+// 	}
 
-	if !u.postgres.IsRoomAvailable(booking) {
-		return errors.New("Room unavailable")
-	}
+// 	if !u.helperPostgres.IsRoomAvailable(booking) {
+// 		return errors.New("Room unavailable")
+// 	}
 
-	if err := u.postgres.UpdateBookingDB(booking); err != nil {
-		return err
-	}
-	// // layout := "2006-01-02 15:04:05"
-	// // t, err := helper.ParseTimeFormat(layout, booking.StartTime)
-	// // if err != nil {
-	// // 	return err
-	// // }
+// 	if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
+// 		return err
+// 	}
+// 	// // layout := "2006-01-02 15:04:05"
+// 	// // t, err := helper.ParseTimeFormat(layout, booking.StartTime)
+// 	// // if err != nil {
+// 	// // 	return err
+// 	// // }
 
-	// // dateToCheck := t.Format("2006-01-02")
+// 	// // dateToCheck := t.Format("2006-01-02")
 
-	// // log.Println("after check day off")
+// 	// // log.Println("after check day off")
 
-	// if err := u.postgres.CheckSameRoom(booking, roomNumber); err != nil {
-	// 	// UpdateNewRoom
-	// 	// log.Println("enter update new room")
+// 	// if err := u.helperPostgres.CheckSameRoom(booking, roomNumber); err != nil {
+// 	// 	// UpdateNewRoom
+// 	// 	// log.Println("enter update new room")
 
-	// 	cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
-	// 	if cancelErr != nil {
-	// 		return cancelErr
-	// 	}
+// 	// 	cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
+// 	// 	if cancelErr != nil {
+// 	// 		return cancelErr
+// 	// 	}
 
-	// 	// log.Println("After cancel event")
+// 	// 	// log.Println("After cancel event")
 
-	// 	calendar, err := u.postgres.GetCalendar(roomNumber)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+// 	// 	calendar, err := u.helperPostgres.GetCalendar(roomNumber)
+// 	// 	if err != nil {
+// 	// 		return err
+// 	// 	}
 
-	// 	user, err := u.postgres.GetUser(booking.UserID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+// 	// 	user, err := u.helperPostgres.GetUser(booking.UserID)
+// 	// 	if err != nil {
+// 	// 		return err
+// 	// 	}
 
-	// 	createEvent := &domain.CreateEvent{
-	// 		GoogleCalendarID: calendar.GoogleCalendarID,
-	// 		Title: booking.Title,
-	// 		Email: user.Email,
-	// 	}
+// 	// 	createEvent := &domain.CreateEvent{
+// 	// 		GoogleCalendarID: calendar.GoogleCalendarID,
+// 	// 		Title: booking.Title,
+// 	// 		Email: user.Email,
+// 	// 	}
 
-	// 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+// 	// 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
+// 	// 	if err != nil {
+// 	// 		return err
+// 	// 	}
 
-	// 	booking.CalendarID = calendar.ID
-	// 	booking.GoogleEventID = eventID
+// 	// 	booking.CalendarID = calendar.ID
+// 	// 	booking.GoogleEventID = eventID
 
-	// 	booking.Calendar = nil
-	// 	// log.Println("room id: ", booking.RoomID)
-	// 	// log.Println("calnedarID: ", booking.CalendarID)
-	// 	// log.Println("event id: ", booking.GoogleEventID)
-	// } else {
-	// 	// UpdateSameRoom
-	// 	// log.Println("enter update same room")
-	// 	// log.Printf("title: %v\n", booking.Title)
-	// 	// log.Printf("booking after checksameroom: %v", booking)
+// 	// 	booking.Calendar = nil
+// 	// 	// log.Println("room id: ", booking.RoomID)
+// 	// 	// log.Println("calnedarID: ", booking.CalendarID)
+// 	// 	// log.Println("event id: ", booking.GoogleEventID)
+// 	// } else {
+// 	// 	// UpdateSameRoom
+// 	// 	// log.Println("enter update same room")
+// 	// 	// log.Printf("title: %v\n", booking.Title)
+// 	// 	// log.Printf("booking after checksameroom: %v", booking)
 
-	// 	updateErr := u.gateway.UpdateEventSameRoom(booking)
-	// 	if updateErr != nil {
-	// 		return updateErr
-	// 	}
-	// }
+// 	// 	updateErr := u.gateway.UpdateEventSameRoom(booking)
+// 	// 	if updateErr != nil {
+// 	// 		return updateErr
+// 	// 	}
+// 	// }
 
-	// // log.Println("enter before update in db")
-	// // log.Printf("booking: %v\n", booking)
-	// if err := u.postgres.UpdateBookingDB(booking); err != nil {
-	// 	return err
-	// }
+// 	// // log.Println("enter before update in db")
+// 	// // log.Printf("booking: %v\n", booking)
+// 	// if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
+// 	// 	return err
+// 	// }
 
-	return nil
-}
+// 	return nil
+// }
 
-func (u *orderUsecase) DeleteBooking(bookingID uuid.UUID) error {
-	// booking, err := u.postgres.GetEventID(bookingID)
-	// if err != nil {
-	// 	return err
-	// }
+// func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) error {
+// 	// booking, err := u.helperPostgres.GetEventID(bookingID)
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
 
-	// // log.Printf("booking: %v", booking)
-	// // log.Printf("booking: %v", booking.GoogleEventID)
-	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
-	// 	return err
-	// }
+// 	// // log.Printf("booking: %v", booking)
+// 	// // log.Printf("booking: %v", booking.GoogleEventID)
+// 	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
+// 	// 	return err
+// 	// }
 
-	if err := u.postgres.DeleteBookingDB(bookingID); err != nil {
-		return errors.New("Don't have this booking")
-	}
+// 	if err := u.helperPostgres.DeleteBookingDB(bookingID); err != nil {
+// 		return errors.New("Don't have this booking")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
+func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
 
 	// DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
@@ -238,11 +264,11 @@ func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.
 	// }
 
 	instBooking := new(domain.Booking)
-	if err := u.postgres.GetRoomID(instBooking, roomNumber); err != nil {
+	if err := u.helperPostgres.GetRoomID(ctx, instBooking, roomNumber); err != nil {
 		return nil, err
 	}
 
-	bookings, err := u.postgres.GetBookingDB(date, instBooking.RoomID, roomNumber)
+	bookings, err := u.redis.GetBooking(ctx, date, instBooking.RoomID, roomNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -264,16 +290,16 @@ func (u *orderUsecase) GetBooking(date *domain.Date, roomNumber uint) ([]domain.
 	return response, nil
 }
 
-func (u *orderUsecase) GetUserBooking(userID uuid.UUID) ([]domain.Booking, error) {
-	bookings, err := u.postgres.GetUserBookingDB(userID)
-	if err != nil {
-		return nil, err
-	}
+// func (u *bookingUsecase) GetUserBooking(ctx context.Context,userID uuid.UUID) ([]domain.Booking, error) {
+// 	bookings, err := u.helperPostgres.GetUserBookingDB(userID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return bookings, nil
-}
+// 	return bookings, nil
+// }
 
-func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
+func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]domain.Holiday, error) {
 // 	// loc := time.FixedZone("ICT", 7*60*60)
 // 	// startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
 // 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
@@ -297,11 +323,11 @@ func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 		date.EndStr = nextMonth.Format(layout)
 	}
 
-	isSynced := u.postgres.IsHolidaySynced(date)
+	isSynced := u.helperRedis.FindHolidaySynced(ctx, date)
 
-	if isSynced {
+	if isSynced > 0{
 		// ถ้า Sync แล้ว -> ดึงจาก DB ได้เลย มั่นใจได้ว่าข้อมูลครบ
-		holidays, err := u.postgres.GetHolidayDB(date)
+		holidays, err := u.redis.GetHoliday(ctx, date)
 		if err != nil {
 			return nil, err
 		}
@@ -313,7 +339,7 @@ func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 	googleHolidays, err := u.gateway.FetchHolidays(date)
 	if err != nil {
 		// กรณีต่อ Google ไม่ได้ ให้ลองไปดึงของเก่าจาก DB มาใช้แก้ขัดไปก่อน (Fallback)
-		fallbackHolidays, dbErr := u.postgres.GetHolidayDB(date)
+		fallbackHolidays, dbErr := u.redis.GetHoliday(ctx, date)
 		if dbErr == nil && len(fallbackHolidays) > 0 {
 			return fallbackHolidays, nil // ดีกว่า return error
 		}
@@ -325,18 +351,18 @@ func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 // 	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
 // 	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
 	if len(googleHolidays) > 0 {
-		if err := u.postgres.BulkUpsertHolidays(googleHolidays); err != nil {
+		if err := u.helperPostgres.BulkUpsertHolidays(ctx, googleHolidays); err != nil {
 			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้
 			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
 			log.Println("Failed to cache holidays:", err)
 		}
 
-		if err := u.postgres.DeleteHolidayCache(date); err != nil {
+		if err := u.helperRedis.DeleteHolidayCache(ctx, date); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := u.postgres.SetHolidaySynced(date); err != nil {
+	if err := u.helperRedis.SetHolidaySynced(ctx, date); err != nil {
 		log.Println("Failed to set sync flag:", err)
 	}
 
@@ -363,13 +389,13 @@ func (u *orderUsecase) GetHoliday(date *domain.Date) ([]domain.Holiday, error) {
 // 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 }
 
-// func (u *orderUsecase) CheckTimeUpdated(startDate string, endDate string) (*time.Time, error) {
+// func (u *bookingUsecase) CheckTimeUpdated(startDate string, endDate string) (*time.Time, error) {
 // 	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
 // 	// loc := time.FixedZone("ICT", 7*60*60)
 // 	// startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
 // 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
 
-// 	lastUpdated, err := u.postgres.CheckLatestUpdateHoliday(startDate, endDate)
+// 	lastUpdated, err := u.helperPostgres.CheckLatestUpdateHoliday(startDate, endDate)
 // 	if err != nil {
 // 		return nil, err
 // 	}
