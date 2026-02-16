@@ -4,20 +4,25 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 	"os"
+	"time"
+
 	// "encoding/json"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/http"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/postgres"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+	// "github.com/gofiber/websocket/v2"
 
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
@@ -77,51 +82,48 @@ func InitialDBConnection() *gorm.DB {
 	return db
 }
 
-func InitialRedisConnection(ctx context.Context) *redis.Client {
+func InitialRedisConnection(ctx context.Context) (*redis.Client, error) { // Return error เพิ่ม
 	redisAddr := os.Getenv("REDIS_ADDR")
-  if redisAddr == "" {
-    redisAddr = "localhost:6379"
-  }
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     redisAddr, 
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	// ตรวจสอบการเชื่อมต่อ
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		log.Fatalf("Could not connect to Redis: %v", err)
-		return nil
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
 	}
 
-	return rdb
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",
+		DB:       0,
+	})
+
+	// Ping เพื่อเช็ค connection
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		return nil, err // ส่ง error กลับไปให้ main จัดการ
+	}
+
+	return rdb, nil
 }
 
-func InitialFiber(handler *http.OrderHandler, rdb *redis.Client, ctx context.Context) *fiber.App {
+func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) *fiber.App {
 	app := fiber.New()
 	app.Use(cors.New())
 
 	// 2. Middleware
 	app.Use(fiberLogger.New()) // Log requests
-	
+
 	// ETag Middleware: Fiber จะสร้าง Hash ของ Response Body อัตโนมัติ
 	// ถ้า Client ส่ง If-None-Match มาตรงกัน Server จะตอบ 304 ทันที
 	app.Use(etag.New(etag.Config{
 		Weak: true, // ใช้ Weak ETag (W/...) เหมาะกับ JSON
 	}))
-	// app.Get("/book", handler.GetBooks)
-	// app.Get("/book/:id", handler.GetBook)
-	// app.Post("/book", handler.CreateBook)
-	// app.Put("/book/:id", handler.UpdateBook)
-	// app.Delete("/book/:id", handler.DeleteBook)
-
+	
 	api := app.Group("/api")
 
-	controller.InitialBookingRoute(api, handler)
-
 	api.Get("/holiday", handler.GetHoliday)
+
+	wsGroup := app.Group("/ws")
+	wsGroup.Use(middleware.WebsocketMiddleware)
+
+	controller.InitialBookingRoute(api, handler)
+	controller.InitialWSRoute(wsGroup, ws)
 
 	// app.Get("/api/product/:id", handler.TestRedis)
 
@@ -138,13 +140,15 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(ctx context.Context, rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service) (*http.OrderHandler) {
-	// redisRepo := repository.NewredisRepo(ctx, rdb)
-	RedisRepository := repository.NewRedisRepository(ctx, rdb)
+func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, wsHub *Websocket.Hub) (*http.BookingHandler, *Websocket.WSBookingHandler) {
+	postgresRepo := Postgres.NewPostgresRepository(db)
+	redisRepo := Redis.NewRedisRepository(rdb, postgresRepo)
+	redisPublisher := Redis.NewRedisPublisher(rdb)
 	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
-	bookingRepo := repository.NewPostgresBookingRepo(ctx, RedisRepository, db)
-	orderUsecase := usercase.NewOrderUsecase(bookingRepo, calendarService)
-	handleUsecase := http.NewOrderHandler(orderUsecase)
 
-	return handleUsecase
+	bookingUsecase := usercase.NewBookingUsecase(redisRepo, redisRepo, postgresRepo, redisPublisher, calendarService)
+	handler := http.NewBookingHandler(bookingUsecase)
+	websocketHandler := Websocket.NewWSBookingHandler(wsHub, bookingUsecase)
+
+	return handler, websocketHandler
 }
