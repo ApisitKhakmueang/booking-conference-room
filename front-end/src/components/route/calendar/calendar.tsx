@@ -9,7 +9,8 @@ import {
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
 import axios from 'axios';
-import { Holiday, BookingEvent } from '@/lib/interface/response';
+import { Holiday } from '@/lib/interface/response';
+import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -42,15 +43,16 @@ const EVENTS = [
 ];
 
 export default function Calendar() {
-  const [events, setEvents] = useState(null);
   const [holiday, setHoliday] = useState<Holiday[] | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
   const { isMobile, isTablet } = useResponsive();
-
-  const currentMonthKey = format(currentDate, 'yyyy-MM');
-  const start = startOfWeek(startOfMonth(currentDate));
-  const end = endOfWeek(endOfMonth(currentDate));
+  const [isLoadingHoliday, setIsLoadingHoliday] = useState(true);
+  
+  const currentYear = currentDate.getFullYear();
+  const startYear = `${currentYear}-01-01`;
+  const endYear = `${currentYear}-12-31`;
+  const { bookings, isLoadingBooking } = useBookingWebSocket(1, startYear, endYear)
 
   let availableViews: ViewType[] = ['month', 'week', 'day']; // 1. ตั้งค่า Default ไว้ก่อนเลย (กันเหนียว)
   if (isMobile) {
@@ -77,9 +79,10 @@ export default function Calendar() {
   const today = () => setCurrentDate(new Date());
 
   const fetchHolidays = useCallback(async () => {
-    const url = process.env.NEXT_PUBLIC_BACKEND_URL
+    const url = process.env.NEXT_PUBLIC_BACKEND_HTTP
     try{
-      const response = await axios.get(`${url as string}/api/holiday?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
+      setIsLoadingHoliday(true)
+      const response = await axios.get(`${url as string}/api/holiday?startDate=${startYear}&endDate=${endYear}`)
       const rawDate = response.data
       const holidays = rawDate.map((holiday: Holiday) => {
         return {
@@ -93,37 +96,36 @@ export default function Calendar() {
         };
       });
 
-      console.log("holidays: ", holidays)
+      // console.log("holidays: ", holidays)
       setHoliday(holidays)
     } catch(error) {
       console.log('error: ', error);
+    } finally {
+      setIsLoadingHoliday(false)
     }
-  }, [start, end])
+  }, [currentDate.getFullYear()])
 
-  const fetchEvents = useCallback(async () => {
-    try {
-      const url = process.env.NEXT_PUBLIC_BACKEND_URL
-      const response = await axios.get(`${url as string}/api/booking/1?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
-      const rawDate = response.data
-      const events = rawDate?.map((event: BookingEvent) => {
-        return {
-          ...event, // copy ค่าเดิมมาทั้งหมด (id, name, isDayOff)
+  // const fetchEvents = useCallback(async () => {
+  //   try {
+  //     const url = process.env.NEXT_PUBLIC_BACKEND_HTTP
+  //     const response = await axios.get(`${url as string}/api/booking/1?startDate=${format(start, 'yyyy-MM-dd')}&endDate=${format(end, 'yyyy-MM-dd')}`)
+  //     const rawDate = response.data
+  //     const events = rawDate?.map((event: BookingEvent) => {
+  //       return {
+  //         ...event, // copy ค่าเดิมมาทั้งหมด (id, name, isDayOff)
           
-          // แปลง string '2026-01-01' -> Date Object
-          startTime: parseISO(event.startTime), 
-          endTime: parseISO(event.endTime),
-          
-          // แปลง string '2026-02-07T...' -> Date Object
-          updatedAt: event.updatedAt ? parseISO(event.updatedAt) : null 
-        };
-      });
-      console.log("events: ", events)
+  //         // แปลง string '2026-01-01' -> Date Object
+  //         startTime: parseISO(event.startTime), 
+  //         endTime: parseISO(event.endTime),
+  //       };
+  //     });
+  //     console.log("events: ", events)
 
-      setEvents(events)
-    } catch(error) {
-      console.log("error: ", error)
-    }
-  }, [start, end])
+  //     setEvents(events)
+  //   } catch(error) {
+  //     console.log("error: ", error)
+  //   }
+  // }, [start, end])
 
 // --- 1. Logic การบังคับเปลี่ยน View (Auto-switch) ---
   useEffect(() => {
@@ -147,12 +149,10 @@ export default function Calendar() {
 
   useEffect(() => {
     fetchHolidays()
-    fetchEvents()
-  }, [currentMonthKey])
+    // fetchEvents()
+  }, [currentYear])
 
-  useEffect(() => {
-
-  }, [])
+  const isSyncing = isLoadingBooking || isLoadingHoliday;
 
   return (
     <div className="h-full dark:bg-main-background bg-white text-gray-200 font-sans">
@@ -172,7 +172,7 @@ export default function Calendar() {
                     key={v}
                     onClick={() => setView(v)}
                     className={`
-                      px-4 py-1 rounded capitalize text-sm font-medium transition-all
+                      px-4 py-1 rounded capitalize text-sm font-medium transition-all cursor-pointer
                       ${view === v 
                         ? 'bg-blue-600 text-white shadow' 
                         : 'dark:text-gray-400 dark:hover:bg-hover text-gray-300 hover:text-white hover:bg-light-card'}
@@ -186,16 +186,21 @@ export default function Calendar() {
             )}
           </div>
           
-          <div className="flex gap-2">
-            <button onClick={prev} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Prev</button>
-            <button onClick={today} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Today</button>
-            <button onClick={next} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1">Next</button>
+          <div className='flex gap-4 items-center'>
+            <div>
+              test
+            </div>
+            <div className="flex gap-2">
+              <button onClick={prev} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
+              <button onClick={today} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
+              <button onClick={next} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
+            </div>
           </div>
         </div>
 
         {/* --- Body: Render ตาม View --- */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          {view === 'month' && <MonthView currentDate={currentDate} events={events} holiday={holiday} />}
+          {view === 'month' && <MonthView currentDate={currentDate} bookingEvents={bookings} holiday={holiday} isSyncing={isSyncing} />}
           {(view === 'week' || view === 'day') && <TimeGridView currentDate={currentDate} view={view} holiday={holiday} />}
         </div>
       </div>
