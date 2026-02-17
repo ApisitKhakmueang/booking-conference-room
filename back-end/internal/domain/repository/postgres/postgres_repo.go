@@ -10,11 +10,13 @@ import (
 
 type PostgresRepository interface {
 	CreateBookingDB(ctx context.Context, booking *domain.Booking) error
-	// UpdateBookingDB(ctx context.Context, booking *Booking) error
-	// DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error
+	UpdateBookingDB(ctx context.Context, booking *domain.Booking) error
+	DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error
 	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
 	// GetUserBookingDB(ctx context.Context, userID uuid.UUID) ([]Booking, error)
 	GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
+
+	GetRoomNumber(ctx context.Context, booking *domain.Booking) (uint, error)
 
 	// CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
 	// GetEventID(bookingID uuid.UUID) (*Booking, error)
@@ -30,4 +32,5 @@ type HelperPostgresRepository interface {
 	IsPasscodeAvailable(ctx context.Context, booking *domain.Booking, passcode string) bool
 	CheckDayOff(ctx context.Context, date time.Time) error
 	BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error
+	GetRoomNumber(ctx context.Context, booking *domain.Booking) (uint, error)
 }

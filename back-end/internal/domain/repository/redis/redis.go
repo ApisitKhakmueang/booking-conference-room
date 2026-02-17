@@ -9,8 +9,8 @@ import (
 
 type RedisRepository interface {
 	CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error
-	// UpdateBooking(ctx context.Context,booking *Booking) error
-	// DeleteBooking(ctx context.Context,bookingID uuid.UUID) error
+	UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error
+	DeleteBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error
 	GetBooking(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error)
 	// GetUserBooking(ctx context.Context,userID uuid.UUID) ([]Booking, error)
 	GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
