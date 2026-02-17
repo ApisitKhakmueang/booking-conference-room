@@ -61,6 +61,7 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 	if jsonBytes, err := json.Marshal(bookings); err == nil {
 		// ใช้ ctx ตัวเดิมส่งให้ Redis ด้วย
 		r.SetJsonCache(ctx, cacheKey, jsonBytes)
+		return bookings, nil
 	}
 
 	return nil, err
