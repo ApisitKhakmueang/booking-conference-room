@@ -91,14 +91,14 @@ func (d DateRes) Time() time.Time {
 }
 
 // Response
-// type HolidayResponse struct {
-// 	Year         int       `json:"year"`
-// 	Month        int       `json:"month"`
-// 	Holidays     []Holiday `json:"holidays"`      // ข้อมูลจาก DB
-// }
+type WebSocketPayload struct {
+	Type string 				`json:"type"`
+	Data struct {
+		RoomNumber uint 	`json:"room_number"`
+	} 									`json:"data"`
+}
 
 // Query & group data
-
 type GetBookingFilter struct {
 	Duration   	string 	`query:"duration"` // จาก URL Query
 	Room   			uint    `query:"room"`      // จาก URL Query

@@ -2,10 +2,11 @@ package Websocket
 
 import (
 	"context"
-	"sync"
 	"encoding/json"
-	"log"
+	// "log"
+	"sync"
 
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/websocket/v2"
 	"github.com/redis/go-redis/v9"
 )
@@ -46,7 +47,7 @@ func (h *Hub) Unregister(c *websocket.Conn, roomNumber uint) {
 }
 
 func (h *Hub) Run(ctx context.Context) {
-	log.Println("Hub started, listening to Redis...")
+	// log.Println("Hub started, listening to Redis...")
 	pubsub := h.rdb.Subscribe(ctx, "bookings_realtime")
 	defer pubsub.Close()
 	ch := pubsub.Channel()
@@ -58,17 +59,12 @@ func (h *Hub) Run(ctx context.Context) {
 		case msg := <-ch:
             // 1. แปลงข้อความจาก Redis เป็น Struct เพื่ออ่านค่า RoomNumber
             // โครงสร้างที่เรา Publish มาคือ {"type": "...", "data": {"id": 1, "room_number": 1, ...}}
-			log.Println("Received message from Redis:", msg.Payload)
-			var payload struct {
-				Type string `json:"type"`
-				Data struct {
-					RoomNumber uint `json:"room_number"`
-				} `json:"data"`
-			}
+			// log.Println("Received message from Redis:", msg.Payload)
+			var payload domain.WebSocketPayload
 			
 			if err := json.Unmarshal([]byte(msg.Payload), &payload); err == nil {
 				// 2. เรียกฟังก์ชัน Broadcast แบบเจาะจงห้อง
-				log.Printf("Payload: %+v\n", payload)
+				// log.Printf("Payload: %+v\n", payload)
 				h.broadcastToRoom(payload.Data.RoomNumber, []byte(msg.Payload))
 			}
 		}
@@ -82,10 +78,10 @@ func (h *Hub) broadcastToRoom(roomNumber uint, message []byte) {
 
     // ดึงรายชื่อ Client ทั้งหมดที่กำลังดูห้องนี้อยู่
 	clients := h.rooms[roomNumber]
-	log.Println("clients: ", h.rooms)
+	// log.Println("clients: ", h.rooms)
 	for client := range clients {
         // ยัดข้อมูลใหม่ใส่ท่อ WebSocket กลับไปหา Frontend
-		log.Printf("Broadcasting to room %d: %s", roomNumber, string(message))
+		// log.Printf("Broadcasting to room %d: %s", roomNumber, string(message))
 		if err := client.WriteMessage(websocket.TextMessage, message); err != nil {
 			client.Close()
 			delete(h.rooms[roomNumber], client)

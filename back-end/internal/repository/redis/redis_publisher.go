@@ -21,7 +21,7 @@ func (p *redisPub) PublishEvent(ctx context.Context, event string, payload inter
 	// log.Println("enter publish event")
 	data, _ := json.Marshal(map[string]interface{}{
 		"type": event,   // เช่น "create", "update"
-		"data":  payload, // ข้อมูล booking
+		"data": payload, // ข้อมูล booking
 	})
 	
 	// ส่งเข้า Channel ชื่อ "bookings_realtime"
