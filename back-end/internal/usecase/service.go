@@ -91,20 +91,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	payload := map[string]interface{}{
-		"room_number": roomNumber,
-		"booking":     completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
-	}
-
-	// log.Printf("Publishing real-time event: %v", payload)
-
-	go func() {
-		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
-		bgCtx := context.Background()
-		if pubErr := u.publisher.PublishEvent(bgCtx, "booking_created", payload); pubErr != nil {
-			log.Printf("Failed to publish real-time event: %v", pubErr)
-		}
-	}()
+	u.PublishEvent(completedBooking, roomNumber, "booking_created")
 
 	// layout := "2006-01-02 15:04:05"
 	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
@@ -145,115 +132,136 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	return nil
 }
 
-// func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-// 	if err := u.helperPostgres.CheckDayOff(*booking.StartTime); err != nil {
-// 		return err
-// 	}
+func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
+	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+		return err
+	}
 
-// 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-// 	if err != nil {
-// 		return err
-// 	}
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	if err != nil {
+		return err
+	}
 
-// 	if err := u.helperPostgres.GetRoomID(booking, roomNumber); err != nil {
-// 		return err
-// 	}
+	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
+		return err
+	}
 
-// 	if !u.helperPostgres.IsRoomAvailable(booking) {
-// 		return errors.New("Room unavailable")
-// 	}
+	if !u.helperPostgres.IsRoomAvailable(ctx, booking) {
+		return errors.New("Room unavailable")
+	}
 
-// 	if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
-// 		return err
-// 	}
-// 	// // layout := "2006-01-02 15:04:05"
-// 	// // t, err := helper.ParseTimeFormat(layout, booking.StartTime)
-// 	// // if err != nil {
-// 	// // 	return err
-// 	// // }
+	if err := u.redis.UpdateBooking(ctx, booking, roomNumber); err != nil {
+		return err
+	}
 
-// 	// // dateToCheck := t.Format("2006-01-02")
+	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
+	if err != nil {
+		return err
+	}
 
-// 	// // log.Println("after check day off")
+	u.PublishEvent(completedBooking, roomNumber, "booking_updated")
 
-// 	// if err := u.helperPostgres.CheckSameRoom(booking, roomNumber); err != nil {
-// 	// 	// UpdateNewRoom
-// 	// 	// log.Println("enter update new room")
+	// // }
 
-// 	// 	cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
-// 	// 	if cancelErr != nil {
-// 	// 		return cancelErr
-// 	// 	}
+	// // dateToCheck := t.Format("2006-01-02")
 
-// 	// 	// log.Println("After cancel event")
+	// // log.Println("after check day off")
 
-// 	// 	calendar, err := u.helperPostgres.GetCalendar(roomNumber)
-// 	// 	if err != nil {
-// 	// 		return err
-// 	// 	}
+	// if err := u.helperPostgres.CheckSameRoom(booking, roomNumber); err != nil {
+	// 	// UpdateNewRoom
+	// 	// log.Println("enter update new room")
 
-// 	// 	user, err := u.helperPostgres.GetUser(booking.UserID)
-// 	// 	if err != nil {
-// 	// 		return err
-// 	// 	}
+	// 	cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
+	// 	if cancelErr != nil {
+	// 		return cancelErr
+	// 	}
 
-// 	// 	createEvent := &domain.CreateEvent{
-// 	// 		GoogleCalendarID: calendar.GoogleCalendarID,
-// 	// 		Title: booking.Title,
-// 	// 		Email: user.Email,
-// 	// 	}
+	// 	// log.Println("After cancel event")
 
-// 	// 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
-// 	// 	if err != nil {
-// 	// 		return err
-// 	// 	}
+	// 	calendar, err := u.helperPostgres.GetCalendar(roomNumber)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-// 	// 	booking.CalendarID = calendar.ID
-// 	// 	booking.GoogleEventID = eventID
+	// 	user, err := u.helperPostgres.GetUser(booking.UserID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-// 	// 	booking.Calendar = nil
-// 	// 	// log.Println("room id: ", booking.RoomID)
-// 	// 	// log.Println("calnedarID: ", booking.CalendarID)
-// 	// 	// log.Println("event id: ", booking.GoogleEventID)
-// 	// } else {
-// 	// 	// UpdateSameRoom
-// 	// 	// log.Println("enter update same room")
-// 	// 	// log.Printf("title: %v\n", booking.Title)
-// 	// 	// log.Printf("booking after checksameroom: %v", booking)
+	// 	createEvent := &domain.CreateEvent{
+	// 		GoogleCalendarID: calendar.GoogleCalendarID,
+	// 		Title: booking.Title,
+	// 		Email: user.Email,
+	// 	}
 
-// 	// 	updateErr := u.gateway.UpdateEventSameRoom(booking)
-// 	// 	if updateErr != nil {
-// 	// 		return updateErr
-// 	// 	}
-// 	// }
+	// 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-// 	// // log.Println("enter before update in db")
-// 	// // log.Printf("booking: %v\n", booking)
-// 	// if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
-// 	// 	return err
-// 	// }
+	// 	booking.CalendarID = calendar.ID
+	// 	booking.GoogleEventID = eventID
 
-// 	return nil
-// }
+	// 	booking.Calendar = nil
+	// 	// log.Println("room id: ", booking.RoomID)
+	// 	// log.Println("calnedarID: ", booking.CalendarID)
+	// 	// log.Println("event id: ", booking.GoogleEventID)
+	// } else {
+	// 	// UpdateSameRoom
+	// 	// log.Println("enter update same room")
+	// 	// log.Printf("title: %v\n", booking.Title)
+	// 	// log.Printf("booking after checksameroom: %v", booking)
 
-// func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) error {
-// 	// booking, err := u.helperPostgres.GetEventID(bookingID)
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
+	// 	updateErr := u.gateway.UpdateEventSameRoom(booking)
+	// 	if updateErr != nil {
+	// 		return updateErr
+	// 	}
+	// }
 
-// 	// // log.Printf("booking: %v", booking)
-// 	// // log.Printf("booking: %v", booking.GoogleEventID)
-// 	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
-// 	// 	return err
-// 	// }
+	// // log.Println("enter before update in db")
+	// // log.Printf("booking: %v\n", booking)
+	// if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
+	// 	return err
+	// }
 
-// 	if err := u.helperPostgres.DeleteBookingDB(bookingID); err != nil {
-// 		return errors.New("Don't have this booking")
-// 	}
+	return nil
+}
 
-// 	return nil
-// }
+func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) error {
+	// booking, err := u.helperPostgres.GetEventID(bookingID)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// // log.Printf("booking: %v", booking)
+	// // log.Printf("booking: %v", booking.GoogleEventID)
+	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
+	// 	return err
+	// }
+
+	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, bookingID)
+	if err != nil {
+		return err
+	}
+
+	roomNumber, err := u.helperPostgres.GetRoomNumber(ctx, completedBooking)
+	if err != nil {
+		return err
+	}
+
+	if err := u.redis.DeleteBooking(ctx, completedBooking, roomNumber); err != nil {
+		return errors.New("Don't have this booking")
+	}
+
+	completedBooking, err = u.helperPostgres.GetBookingByID(ctx, bookingID)
+	if err != nil {
+		return err
+	}
+
+	u.PublishEvent(completedBooking, roomNumber, "booking_deleted")
+
+	return nil
+}
 
 func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
@@ -408,3 +416,21 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 
 // 	return &checkTime, nil
 // }
+
+//Internal function 
+func (u *bookingUsecase) PublishEvent(completedBooking *domain.Booking, roomNumber uint, event string) {
+	payload := map[string]interface{}{
+		"room_number": roomNumber,
+		"booking":     completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
+	}
+
+	// log.Printf("Publishing real-time event: %v", payload)
+
+	go func() {
+		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
+		bgCtx := context.Background()
+		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
+			log.Printf("Failed to publish real-time event: %v", pubErr)
+		}
+	}()
+}

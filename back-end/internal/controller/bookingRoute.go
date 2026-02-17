@@ -13,8 +13,8 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
     
 	// กำหนด endpoints
 	booking.Post("/:id", handler.CreateBooking)
-	// booking.Put("/:bookingID", handler.UpdateBooking)
-	// booking.Delete("/:bookingID", handler.DeleteBooking)
+	booking.Put("/:bookingID", handler.UpdateBooking)
+	booking.Delete("/:bookingID", handler.DeleteBooking)
 	// booking.Get("/:room", websocket.New(ws.GetBooking))
 	// booking.Get("/:room", handler.GetBooking)
 	// booking.Get("/user/:id", handler.GetUserBooking)

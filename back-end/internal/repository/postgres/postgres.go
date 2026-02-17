@@ -30,25 +30,25 @@ func (p *postgresRepository) CreateBookingDB(ctx context.Context, booking *domai
 	return err
 }
 
-// func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domain.Booking) error {
-// 	err := p.db.WithContext(ctx).Model(&booking).Updates(booking).Error
-// 	return err
-// }
+func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domain.Booking) error {
+	err := p.db.WithContext(ctx).Model(&booking).Updates(booking).Error
+	return err
+}
 
-// func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error {
-// 	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
-// 	booking := new(domain.Booking)
-// 	result := p.db.
-// 	  WithContext(ctx).
-// 		Model(booking).
-// 		Select("status").
-// 		Where("id = ? AND status = confirm", bookingID).
-// 		Updates(domain.Booking{
-// 			Status: "cancelled",
-// 		},
-// 	)
-// 	return result.Error
-// }
+func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error {
+	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
+	booking := new(domain.Booking)
+	result := p.db.
+	  WithContext(ctx).
+		Model(booking).
+		Select("status").
+		Where("id = ? AND status = ?", bookingID, "confirm").
+		Updates(domain.Booking{
+			Status: "cancelled",
+		},
+	)
+	return result.Error
+}
 
 func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
 	var bookings []domain.Booking
@@ -154,6 +154,23 @@ func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date
 	return holidays, nil
 }
 
+func (p *postgresRepository) GetRoomNumber(ctx context.Context, booking *domain.Booking) (uint, error) {
+	instBooking := new(domain.Booking)
+	err := p.db.WithContext(ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, room_number") 
+    }).
+		Select("room_id").
+		First(instBooking, booking.ID).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return instBooking.Room.RoomNumber, err
+}
+
 // helper function
 func (r *postgresRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
@@ -161,7 +178,7 @@ func (r *postgresRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (
 	err := r.db.WithContext(ctx).
 		Preload("Room").
 		Preload("User").
-		First(&booking, "id = ?", id).Error
+		First(booking, id).Error
 	
 	return booking, err
 }
