@@ -1,0 +1,85 @@
+import { BookingEvent } from '@/lib/interface/response';
+import { useState, useEffect } from 'react';
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
+
+// 🌟 1. สร้าง Helper function สำหรับแปลง String -> Date Object
+const formatBookingEvent = (event: any): BookingEvent => {
+  return {
+    ...event,
+    startTime: parseISO(event.startTime),
+    endTime: parseISO(event.endTime),
+  };
+};
+
+export function useBookingWebSocket(roomNumber: number, startDate: string, endDate: string) {
+  const [bookings, setBookings] = useState<BookingEvent[]>([]);
+  const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
+
+  const url = process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET;
+  const wsUrl = roomNumber && startDate && endDate 
+    ? `${url as string}/ws/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
+    : null;
+
+  const { lastJsonMessage, readyState } = useWebSocket(wsUrl, {
+    shouldReconnect: () => true,
+    reconnectAttempts: 10,
+    reconnectInterval: 3000,
+  });
+
+  // เมื่อเปลี่ยนเดือน/เปลี่ยนห้อง ให้ขึ้น Loading แต่ "ไม่ต้องเซ็ต bookings เป็น []"
+  // ปล่อยของเก่าค้างไว้ก่อน พอของใหม่มาค่อยทับ จะได้ไม่กระพริบ
+  useEffect(() => {
+    setIsLoadingBooking(true);
+  }, [startDate, endDate, roomNumber]);
+
+  useEffect(() => {
+    if (lastJsonMessage !== null) {
+      const message = lastJsonMessage as any; 
+
+      switch (message.type) {
+        case 'initial_data':
+          // 🌟 2. แปลงข้อมูลทั้ง Array ก่อน set ลง State
+          const formattedInitialData = (message.data || []).map(formatBookingEvent);
+          setBookings(formattedInitialData); 
+          setIsLoadingBooking(false);
+          break;
+
+        case 'booking_created':
+          setBookings((prevBookings) => {
+            const exists = prevBookings.some((b) => b.id === message.data.booking.id);
+            if (exists) return prevBookings;
+            
+            // 🌟 3. แปลงข้อมูล 1 ก้อนที่เพิ่งสร้าง ก่อนเอาไปต่อท้าย
+            const newEvent = formatBookingEvent(message.data.booking);
+            return [...prevBookings, newEvent];
+          });
+          break;
+
+        case 'booking_updated':
+          setBookings((prevBookings) => 
+            prevBookings.map((booking) => 
+              // 🌟 4. แปลงข้อมูลก้อนที่ถูกอัปเดต
+              booking.id === message.data.booking.id 
+                ? formatBookingEvent(message.data.booking) 
+                : booking
+            )
+          );
+          break;
+
+        case 'booking_deleted':
+          setBookings((prevBookings) => 
+            prevBookings.filter((booking) => booking.id !== message.data.booking_id)
+          );
+          break;
+
+        default:
+          console.warn("⚠️ Unknown message type:", message.type);
+      }
+    }
+  }, [lastJsonMessage]);
+
+  // const isConnected = readyState === ReadyState.OPEN;
+
+  return { bookings, isLoadingBooking };
+}

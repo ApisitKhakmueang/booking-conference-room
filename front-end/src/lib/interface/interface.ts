@@ -12,7 +12,6 @@ export interface UserProfile {
   role: string
 }
 
-
 export interface UseProfileImageReturn {
   profileFile: File | null
   previewProfile: string
