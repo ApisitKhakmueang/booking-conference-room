@@ -69,7 +69,7 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
 
         case 'booking_deleted':
           setBookings((prevBookings) => 
-            prevBookings.filter((booking) => booking.id !== message.data.booking_id)
+            prevBookings.filter((booking) => booking.id !== message.data.booking.id)
           );
           break;
 
