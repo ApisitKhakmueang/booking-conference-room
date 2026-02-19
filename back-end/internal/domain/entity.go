@@ -95,7 +95,14 @@ type WebSocketPayload struct {
 	Type string 				`json:"type"`
 	Data struct {
 		RoomNumber uint 	`json:"room_number"`
+		UserID     string `json:"user_id"`
 	} 									`json:"data"`
+}
+
+type WSMessage struct {
+	Type  string      `json:"type"`  // "auth" หรือ "chat" หรือ "command"
+	Token string      `json:"token,omitempty"` // ใช้ตอน auth
+	Data  interface{} `json:"data,omitempty"`  // ข้อมูลจริงๆ
 }
 
 // Query & group data
