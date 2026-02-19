@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	// "log"
 	"sync"
+	"fmt"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/websocket/v2"
@@ -12,43 +13,92 @@ import (
 )
 
 type Hub struct {
-    // เปลี่ยนจาก map[*websocket.Conn]bool เป็น:
-	rooms map[uint]map[*websocket.Conn]bool // map[roomNumber]map[clients]
-	mu    sync.Mutex
-	rdb   *redis.Client
+	// เปลี่ยนจาก uint เป็น string เพื่อให้ยืดหยุ่น (เช่น "booking:1", "notify:uuid-1234")
+	rooms        map[string]map[*websocket.Conn]bool
+	mu           sync.Mutex
+	rdb          *redis.Client
+	redisChannel string
 }
 
-func NewHub(rdb *redis.Client) *Hub {
+func NewHub(rdb *redis.Client, channelName string) *Hub {
 	return &Hub{
-		rooms: make(map[uint]map[*websocket.Conn]bool),
-		rdb:   rdb,
+		rooms:        make(map[string]map[*websocket.Conn]bool),
+		rdb:          rdb,
+		redisChannel: channelName,
 	}
 }
 
-// ตอน Register ต้องรับเลขห้องมาด้วย
-func (h *Hub) Register(c *websocket.Conn, roomNumber uint) {
+// ==========================================
+// 1. Register (ลงทะเบียนเข้าห้อง/กลุ่ม)
+// ==========================================
+func (h *Hub) Register(c *websocket.Conn, topic string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	
-	if h.rooms[roomNumber] == nil {
-		h.rooms[roomNumber] = make(map[*websocket.Conn]bool)
+
+	// ถ้ายังไม่เคยมีคนเปิดห้องนี้เลย ให้สร้างแผนที่(map)ของห้องนี้ขึ้นมาก่อน
+	if h.rooms[topic] == nil {
+		h.rooms[topic] = make(map[*websocket.Conn]bool)
 	}
-	h.rooms[roomNumber][c] = true
+
+	// จับ Client ยัดใส่ห้อง
+	h.rooms[topic][c] = true
+	// log.Printf("🔌 [Hub] Client joined topic: %s (Total: %d)", topic, len(h.rooms[topic]))
 }
 
-func (h *Hub) Unregister(c *websocket.Conn, roomNumber uint) {
+// ==========================================
+// 2. Unregister (ออกจากห้อง/เตะออก)
+// ==========================================
+func (h *Hub) Unregister(c *websocket.Conn, topic string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	
-	if _, ok := h.rooms[roomNumber][c]; ok {
-		delete(h.rooms[roomNumber], c)
-		c.Close()
+
+	// เช็คว่ามีห้องนี้อยู่ไหม
+	if clients, ok := h.rooms[topic]; ok {
+		// เช็คว่ามี Client คนนี้อยู่ในห้องจริงๆ ไหม
+		if _, exists := clients[c]; exists {
+			delete(clients, c) // ลบรายชื่อออก
+			c.Close()          // ปิดท่อ
+			// log.Printf("❌ [Hub] Client left topic: %s (Remaining: %d)", topic, len(clients))
+
+			// ⭐️ [สำคัญ] ถ้าคนออกไปหมดแล้ว ให้ลบห้องนี้ทิ้งซะ เพื่อคืน RAM ให้ Server!
+			if len(clients) == 0 {
+				delete(h.rooms, topic)
+				// log.Printf("🗑️ [Hub] Topic %s is empty. Deleted to save memory.", topic)
+			}
+		}
+	}
+}
+
+// ==========================================
+// 3. Broadcast (กระจายข่าวให้คนในห้อง)
+// ==========================================
+func (h *Hub) Broadcast(topic string, message []byte) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	// ดึงรายชื่อคนในห้องนั้นมา
+	clients, ok := h.rooms[topic]
+	if !ok || len(clients) == 0 {
+		return // ไม่มีคนอยู่ ก็ไม่ต้องทำอะไร (ไม่ต้องปรินท์ Error ด้วย)
+	}
+
+	// ส่งข้อความให้ทุกคนในห้อง
+	for client := range clients {
+		if err := client.WriteMessage(websocket.TextMessage, message); err != nil {
+			// ถ้าใครท่อขาด/ส่งไม่ผ่าน ก็เตะทิ้งซะ
+			client.Close()
+			delete(clients, client)
+			
+			// ⭐️ คืน RAM ถ้าห้องว่าง
+			if len(clients) == 0 {
+				delete(h.rooms, topic)
+			}
+		}
 	}
 }
 
 func (h *Hub) Run(ctx context.Context) {
-	// log.Println("Hub started, listening to Redis...")
-	pubsub := h.rdb.Subscribe(ctx, "bookings_realtime")
+	pubsub := h.rdb.Subscribe(ctx, h.redisChannel)
 	defer pubsub.Close()
 	ch := pubsub.Channel()
 
@@ -57,34 +107,23 @@ func (h *Hub) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case msg := <-ch:
-            // 1. แปลงข้อความจาก Redis เป็น Struct เพื่ออ่านค่า RoomNumber
-            // โครงสร้างที่เรา Publish มาคือ {"type": "...", "data": {"id": 1, "room_number": 1, ...}}
-			// log.Println("Received message from Redis:", msg.Payload)
+			// สมมติโครงสร้าง Payload มีทั้ง RoomNumber (จองห้อง) หรือ UserID (แจ้งเตือน)
 			var payload domain.WebSocketPayload
 			
 			if err := json.Unmarshal([]byte(msg.Payload), &payload); err == nil {
-				// 2. เรียกฟังก์ชัน Broadcast แบบเจาะจงห้อง
-				// log.Printf("Payload: %+v\n", payload)
-				h.broadcastToRoom(payload.Data.RoomNumber, []byte(msg.Payload))
+				// เช็คว่ามันคือข้อมูลของอันไหน แล้วประกอบชื่อ Topic ให้ตรงกัน
+				var topic string
+				if payload.Data.RoomNumber != 0 {
+					topic = fmt.Sprintf("booking:%d", payload.Data.RoomNumber)
+				} else if payload.Data.UserID != "" {
+					topic = fmt.Sprintf("user:%s", payload.Data.UserID)
+				}
+
+				// 🚀 สั่ง Broadcast!
+				if topic != "" {
+					h.Broadcast(topic, []byte(msg.Payload))
+				}
 			}
-		}
-	}
-}
-
-// แจกจ่ายข้อความเฉพาะคนที่ดูห้องนั้นๆ
-func (h *Hub) broadcastToRoom(roomNumber uint, message []byte) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-    // ดึงรายชื่อ Client ทั้งหมดที่กำลังดูห้องนี้อยู่
-	clients := h.rooms[roomNumber]
-	// log.Println("clients: ", h.rooms)
-	for client := range clients {
-        // ยัดข้อมูลใหม่ใส่ท่อ WebSocket กลับไปหา Frontend
-		// log.Printf("Broadcasting to room %d: %s", roomNumber, string(message))
-		if err := client.WriteMessage(websocket.TextMessage, message); err != nil {
-			client.Close()
-			delete(h.rooms[roomNumber], client)
 		}
 	}
 }
