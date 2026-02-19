@@ -3,6 +3,7 @@ package Websocket
 import (
 	"context"
 	"strconv"
+	"fmt"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/websocket/v2"
@@ -29,8 +30,10 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 		c.WriteJSON(map[string]string{"error": err.Error()})
 	}
 
-	w.hub.Register(c, uint(roomNumber))
-	defer w.hub.Unregister(c, uint(roomNumber))
+	topic := fmt.Sprintf("booking:%d", roomNumber)
+
+	w.hub.Register(c, topic)
+	defer w.hub.Unregister(c, topic)
 
 	q := new(domain.Date)
 
