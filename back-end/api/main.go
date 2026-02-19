@@ -14,8 +14,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var ctx = context.Background()
-
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -38,15 +36,14 @@ func main() {
 	}
 	defer rdb.Close() // ปิด Redis เมื่อจบโปรแกรม
 
-	wsHub := Websocket.NewHub(rdb)
-	
-	go wsHub.Run(ctx)
+	bookingWsHub := Websocket.NewHub(rdb, "bookings_realtime")
+	go bookingWsHub.Run(ctx)
 
 	handleUsecase, websocketHandler := utils.InitialCleanArch(
 		rdb, 
 		db, 
 		googleCalendarService, 
-		wsHub,
+		bookingWsHub,
 	)
 
 	app := utils.InitialFiber(handleUsecase, websocketHandler)	

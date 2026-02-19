@@ -30,6 +30,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"github.com/nedpals/supabase-go"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -82,6 +83,14 @@ func InitialDBConnection() *gorm.DB {
 	return db
 }
 
+func InitialSupabase() *supabase.Client {
+	supabaseUrl := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_KEY")
+	supabaseClient := supabase.CreateClient(supabaseUrl, supabaseKey)
+
+	return supabaseClient
+}
+
 func InitialRedisConnection(ctx context.Context) (*redis.Client, error) { // Return error เพิ่ม
 	redisAddr := os.Getenv("REDIS_ADDR")
 	if redisAddr == "" {
@@ -103,6 +112,8 @@ func InitialRedisConnection(ctx context.Context) (*redis.Client, error) { // Ret
 }
 
 func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) *fiber.App {
+	supabaseClient := InitialSupabase()
+
 	app := fiber.New()
 	app.Use(cors.New())
 
@@ -116,14 +127,15 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	}))
 	
 	api := app.Group("/api")
+	bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
 
 	api.Get("/holiday", handler.GetHoliday)
 
 	wsGroup := app.Group("/ws")
-	wsGroup.Use(middleware.WebsocketMiddleware)
+	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
 
-	controller.InitialBookingRoute(api, handler)
-	controller.InitialWSRoute(wsGroup, ws)
+	controller.InitialBookingRoute(bookingAPI, handler)
+	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)
 
 	// app.Get("/api/product/:id", handler.TestRedis)
 
@@ -140,7 +152,7 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, wsHub *Websocket.Hub) (*http.BookingHandler, *Websocket.WSBookingHandler) {
+func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub) (*http.BookingHandler, *Websocket.WSBookingHandler) {
 	postgresRepo := Postgres.NewPostgresRepository(db)
 	redisRepo := Redis.NewRedisRepository(rdb, postgresRepo)
 	redisPublisher := Redis.NewRedisPublisher(rdb)
@@ -148,7 +160,7 @@ func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *cal
 
 	bookingUsecase := usercase.NewBookingUsecase(redisRepo, redisRepo, postgresRepo, redisPublisher, calendarService)
 	handler := http.NewBookingHandler(bookingUsecase)
-	websocketHandler := Websocket.NewWSBookingHandler(wsHub, bookingUsecase)
+	websocketHandler := Websocket.NewWSBookingHandler(bookingWsHub, bookingUsecase)
 
 	return handler, websocketHandler
 }
