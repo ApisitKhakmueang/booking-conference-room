@@ -1,4 +1,4 @@
-import { ControlLayoutState } from '@/lib/interface/stores'
+import { ControlLayoutState } from '@/utils/interface/stores'
 import { create } from 'zustand'
 
 export const useControlLayoutStore = create<ControlLayoutState>()(

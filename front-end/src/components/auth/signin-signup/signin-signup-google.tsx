@@ -1,6 +1,6 @@
 import Button from "@/components/ui/button";
 import { useRouter } from "next/navigation"
-import { SignInProps } from "@/lib/interface/interface";
+import { SignInProps } from "@/utils/interface/interface";
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 
 export default function Google({ isSignIn }: SignInProps) {

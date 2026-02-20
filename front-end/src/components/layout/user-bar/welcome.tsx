@@ -1,4 +1,4 @@
-import { UserProfile } from "@/lib/interface/interface";
+import { UserProfile } from "@/utils/interface/interface";
 
 export default function Welcomeback({ isOpenNav, user }: { isOpenNav: boolean; user: UserProfile | null }) {
   return (

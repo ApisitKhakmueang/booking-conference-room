@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
 
 export default function useAuth() {

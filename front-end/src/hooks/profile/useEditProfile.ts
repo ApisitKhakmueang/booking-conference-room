@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
-import { UseEditProfileProps } from '@/lib/interface/interface'
+import { UseEditProfileProps } from '@/utils/interface/interface'
 
 export const useEditProfile = () => {
   const supabase = createClient()

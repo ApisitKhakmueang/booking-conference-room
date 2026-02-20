@@ -1,7 +1,8 @@
-import { BookingEvent } from '@/lib/interface/response';
+import { BookingEvent } from '@/utils/interface/response';
 import { useState, useEffect } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
+import useSession from './useSession';
 
 // 🌟 1. สร้าง Helper function สำหรับแปลง String -> Date Object
 const formatBookingEvent = (event: any): BookingEvent => {
@@ -15,17 +16,28 @@ const formatBookingEvent = (event: any): BookingEvent => {
 export function useBookingWebSocket(roomNumber: number, startDate: string, endDate: string) {
   const [bookings, setBookings] = useState<BookingEvent[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
+  const sessionToken = useSession() 
 
   const url = process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET;
   const wsUrl = roomNumber && startDate && endDate 
-    ? `${url as string}/ws/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
+    ? `${url as string}/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
     : null;
 
-  const { lastJsonMessage, readyState } = useWebSocket(wsUrl, {
-    shouldReconnect: () => true,
-    reconnectAttempts: 10,
-    reconnectInterval: 3000,
-  });
+  const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
+    sessionToken ? wsUrl : null, 
+    {
+      onOpen: () => {
+        console.log('WebSocket Connected!');
+        sendMessage(JSON.stringify({
+          type: 'auth',
+          token: sessionToken
+        }));
+      },
+      shouldReconnect: () => true,
+      reconnectAttempts: 20,
+      reconnectInterval: 3000,
+    }
+  );
 
   // เมื่อเปลี่ยนเดือน/เปลี่ยนห้อง ให้ขึ้น Loading แต่ "ไม่ต้องเซ็ต bookings เป็น []"
   // ปล่อยของเก่าค้างไว้ก่อน พอของใหม่มาค่อยทับ จะได้ไม่กระพริบ

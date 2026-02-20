@@ -1,4 +1,4 @@
-import { ValidateDetailProps, DisplayStrongPasswordProps } from "@/lib/interface/interface"
+import { ValidateDetailProps, DisplayStrongPasswordProps } from "@/utils/interface/interface"
 import { CircleCheck, CircleX } from "lucide-react"
 
 const ValidateDetail:ValidateDetailProps[] = [{

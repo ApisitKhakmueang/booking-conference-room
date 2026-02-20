@@ -4,7 +4,7 @@ import {
   startOfWeek, endOfWeek, startOfDay,  eachDayOfInterval,
   isSameDay, differenceInMinutes, setHours, setMinutes
 } from 'date-fns';
-import { Holiday } from '@/lib/interface/response';
+import { Holiday } from '@/utils/interface/response';
 
 const TODAY = new Date(); 
 const EVENTS = [

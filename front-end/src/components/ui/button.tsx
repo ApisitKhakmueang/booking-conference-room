@@ -1,5 +1,5 @@
 'use client'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { ButtonHTMLAttributes } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'slate' | 'dark-purple'

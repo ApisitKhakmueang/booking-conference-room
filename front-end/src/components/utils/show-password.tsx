@@ -1,4 +1,4 @@
-import  { ShowPasswordProps } from '@/lib/interface/interface'
+import  { ShowPasswordProps } from '@/utils/interface/interface'
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ShowPassword({ isShowPassword, setIsShowPassword } : ShowPasswordProps) {

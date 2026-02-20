@@ -9,7 +9,7 @@ import {
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
 import axios from 'axios';
-import { Holiday } from '@/lib/interface/response';
+import { Holiday } from '@/utils/interface/response';
 import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
 
 // --- 1. Types & Mock Data ---
@@ -82,7 +82,7 @@ export default function Calendar() {
     const url = process.env.NEXT_PUBLIC_BACKEND_HTTP
     try{
       setIsLoadingHoliday(true)
-      const response = await axios.get(`${url as string}/api/holiday?startDate=${startYear}&endDate=${endYear}`)
+      const response = await axios.get(`${url as string}/holiday?startDate=${startYear}&endDate=${endYear}`)
       const rawDate = response.data
       const holidays = rawDate.map((holiday: Holiday) => {
         return {

@@ -1,6 +1,6 @@
 'use client'
 
-import { EachPageLayoutProps } from "@/lib/interface/interface";
+import { EachPageLayoutProps } from "@/utils/interface/interface";
 import { useControlLayoutStore } from "@/stores/control-layout.store";
 import { useShallow } from "zustand/shallow";
 

@@ -6,7 +6,7 @@ import {
   startOfDay,
   endOfDay
 } from 'date-fns';
-import { Holiday, BookingEvent } from '@/lib/interface/response';
+import { Holiday, BookingEvent } from '@/utils/interface/response';
 
 const TODAY = new Date(); 
 const EVENTS = [

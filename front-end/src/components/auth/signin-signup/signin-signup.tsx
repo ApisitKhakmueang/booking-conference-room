@@ -1,7 +1,7 @@
 
 import SignIn_SignUp_Fill_Form from "./signin-signup-fill-form";
 import Google from "./signin-signup-google";
-import { SignIn_SignUpProps } from "@/lib/interface/interface";
+import { SignIn_SignUpProps } from "@/utils/interface/interface";
 
 export default function SignIn_SignUp({ isSignIn, title, subTitle } : SignIn_SignUpProps) {
 

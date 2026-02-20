@@ -3,7 +3,7 @@ import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useSignout } from "@/hooks/auth/useSignout"
-import { UserButtonProps } from "@/lib/interface/interface"
+import { UserButtonProps } from "@/utils/interface/interface"
 
 export default function UserDetail() {
   const router = useRouter()

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import UserDetail from "./user-detail";
-import { UserProfile } from "@/lib/interface/interface";
+import { UserProfile } from "@/utils/interface/interface";
 import Image from "next/image";
 
 export default function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserProfile | null }) {

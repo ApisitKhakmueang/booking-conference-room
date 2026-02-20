@@ -1,7 +1,7 @@
 // stores/auth.store.ts
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { AuthState } from '../lib/interface/stores'
+import { AuthState } from '../utils/interface/stores'
 
 export const useAuthStore = create<AuthState>()(
   persist(

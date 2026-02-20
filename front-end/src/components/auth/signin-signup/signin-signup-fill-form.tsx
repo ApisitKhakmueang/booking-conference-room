@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import ShowPassword from "../../utils/show-password";
-import { SignInProps } from "@/lib/interface/interface";
+import { SignInProps } from "@/utils/interface/interface";
 import useAuthSubmit from "@/hooks/auth/useAuthSubmit";
 import { useRouter } from "next/navigation";
 import DisplayStrongPassword from "./display-strong-password";

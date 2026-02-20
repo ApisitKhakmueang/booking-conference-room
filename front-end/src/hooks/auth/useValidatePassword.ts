@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PasswordValidation } from "@/lib/interface/interface";
+import { PasswordValidation } from "@/utils/interface/interface";
 
 export default function useValidatePassword() {
   const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
