@@ -13,7 +13,9 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/postgres"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
 	// "github.com/google/uuid"
 )
 
@@ -23,6 +25,7 @@ type bookingUsecase struct {
 	helperPostgres    postgresRepo.HelperPostgresRepository // เรียกผ่าน Interface
 	publisher         redisRepo.RealtimePublisher
 	gateway 					calendarGateway.CalendarGateway
+	asynqClient				*asynq.Client
 }
 
 // NewBookingUsecase คือ Constructor
@@ -31,13 +34,15 @@ func NewBookingUsecase(
 	helperRedis 		redisRepo.HelperRedisRepository, 
 	helperPostgres 	postgresRepo.HelperPostgresRepository, 
 	publisher       redisRepo.RealtimePublisher,
-	gateway 				calendarGateway.CalendarGateway) domain.BookingUsecase {
+	gateway 				calendarGateway.CalendarGateway,
+	asynqClient     			*asynq.Client) domain.BookingUsecase {
 	return &bookingUsecase{
 		redis:      			redis,
 		helperRedis: 			helperRedis,
 		helperPostgres:   helperPostgres,
-		publisher:       publisher,
+		publisher:       	publisher,
 		gateway: 					gateway,
+		asynqClient:			asynqClient,
 	}
 }
 
@@ -91,7 +96,20 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	u.PublishEvent(completedBooking, roomNumber, "booking_created")
+	u.PublishEvent("booking_created", roomNumber, completedBooking)
+
+	task, err := worker.NewBookingExpiredTask(booking.ID, roomNumber)
+	if err == nil {
+		// Asynq Client จะโยนงานนี้ไปฝากไว้ใน Redis ก่อน
+		// ใช้ `asynq.ProcessAt` เพื่อระบุเวลาเป๊ะๆ ที่จะให้งานนี้ทำงาน!
+		info, err := u.asynqClient.Enqueue(task, asynq.ProcessAt(*booking.EndTime))
+		
+		if err != nil {
+			log.Printf("❌ Failed to enqueue task: %v", err)
+		} else {
+			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, info.ID)
+		}
+	}
 
 	// layout := "2006-01-02 15:04:05"
 	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
@@ -159,7 +177,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	u.PublishEvent(completedBooking, roomNumber, "booking_updated")
+	u.PublishEvent("booking_updated", roomNumber, completedBooking)
 
 	// // }
 
@@ -244,7 +262,7 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 		return err
 	}
 
-	roomNumber, err := u.helperPostgres.GetRoomNumber(ctx, completedBooking)
+	roomNumber, err := u.helperPostgres.GetRoomNumber(ctx, completedBooking.ID)
 	if err != nil {
 		return err
 	}
@@ -258,7 +276,7 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 		return err
 	}
 
-	u.PublishEvent(completedBooking, roomNumber, "booking_deleted")
+	u.PublishEvent("booking_deleted", roomNumber, completedBooking)
 
 	return nil
 }
@@ -417,8 +435,20 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 // 	return &checkTime, nil
 // }
 
-//Internal function 
-func (u *bookingUsecase) PublishEvent(completedBooking *domain.Booking, roomNumber uint, event string) {
+// Helper function
+func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error {
+	booking, roomNumber, err := u.redis.UpdateBookingStatus(ctx, bookingID);
+	if err != nil {
+		return err
+	}
+
+	u.PublishEvent("booking_updated", roomNumber, booking)
+
+	return nil
+}
+
+// Internal function 
+func (u *bookingUsecase) PublishEvent(event string, roomNumber uint, completedBooking *domain.Booking) {
 	payload := map[string]interface{}{
 		"room_number": roomNumber,
 		"booking":     completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)

@@ -34,7 +34,7 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 }
 
 func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
-	prevRoomNumber, err := r.postgres.GetRoomNumber(ctx, booking)
+	prevRoomNumber, err := r.postgres.GetRoomNumber(ctx, booking.ID)
 	if err != nil {
 		return err
 	}
@@ -127,6 +127,24 @@ func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]
 	}
 
 	return nil, err
+}
+
+func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
+	roomNumber, err := r.postgres.GetRoomNumber(ctx, bookingID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	updateBooking, err := r.postgres.UpdateBookingStatusDB(ctx, bookingID, "complete")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if err := r.InsertBookingToCache(ctx, updateBooking, roomNumber); err != nil {
+		return nil, 0, err
+	}
+
+	return updateBooking, roomNumber, nil
 }
 
 // HelperRedisRepository methods

@@ -154,7 +154,29 @@ func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date
 	return holidays, nil
 }
 
-func (p *postgresRepository) GetRoomNumber(ctx context.Context, booking *domain.Booking) (uint, error) {
+func (r *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingID uuid.UUID, newStatus string) (*domain.Booking, error) {
+	updatedBooking := new(domain.Booking)
+
+	// ⭐️ สั่ง GORM ว่า: 
+	// 1. ไปที่ตาราง bookings
+	// 2. เติมคำสั่ง RETURNING * ลงไปนะ (clause.Returning{})
+	// 3. หา id นี้
+	// 4. สั่งอัปเดตคอลัมน์ status
+	err := r.db.WithContext(ctx).
+		Model(updatedBooking).
+		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
+		Where("id = ? AND status = ?", bookingID, "confirm").
+		Update("status", newStatus).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// updatedBooking จะถูกเติมข้อมูลใหม่ครบทุกฟิลด์เรียบร้อย
+	return updatedBooking, nil
+}
+
+func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error) {
 	instBooking := new(domain.Booking)
 	err := p.db.WithContext(ctx).
 		Preload("Room", func(db *gorm.DB) *gorm.DB {
@@ -162,7 +184,7 @@ func (p *postgresRepository) GetRoomNumber(ctx context.Context, booking *domain.
 			return db.Select("id, room_number") 
     }).
 		Select("room_id").
-		First(instBooking, booking.ID).Error
+		First(instBooking, bookingID).Error
 
 	if err != nil {
 		return 0, err
