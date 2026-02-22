@@ -14,6 +14,7 @@ type RedisRepository interface {
 	GetBooking(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error)
 	// GetUserBooking(ctx context.Context,userID uuid.UUID) ([]Booking, error)
 	GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
+	UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error)
 }
 
 type HelperRedisRepository interface {
