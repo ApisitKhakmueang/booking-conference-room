@@ -17,20 +17,22 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/middleware"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	fiberLogger "github.com/gofiber/fiber/v2/middleware/logger"
+
 	// "github.com/gofiber/websocket/v2"
 
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
 
+	"github.com/nedpals/supabase-go"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"github.com/nedpals/supabase-go"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -153,14 +155,24 @@ func InitialCalendarService() (*calendar.Service, error) {
 }
 
 func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub) (*http.BookingHandler, *Websocket.WSBookingHandler) {
+	redisAddr := "localhost:6379"
+
+	// 1. สร้าง Asynq Client (ต้องสั่ง defer Close ไว้ที่ main เพื่อปิดคอนเนคชันตอนแอปดับ)
+	asynqClient := worker.NewAsynqClient(redisAddr)
+	defer asynqClient.Close()
+
+	// 3. สตาร์ท Asynq Worker Server อยู่เบื้องหลัง (ส่ง Usecase เข้าไปให้ Worker ใช้)
+	
 	postgresRepo := Postgres.NewPostgresRepository(db)
 	redisRepo := Redis.NewRedisRepository(rdb, postgresRepo)
 	redisPublisher := Redis.NewRedisPublisher(rdb)
 	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
-
-	bookingUsecase := usercase.NewBookingUsecase(redisRepo, redisRepo, postgresRepo, redisPublisher, calendarService)
+	
+	bookingUsecase := usercase.NewBookingUsecase(redisRepo, redisRepo, postgresRepo, redisPublisher, calendarService, asynqClient)
 	handler := http.NewBookingHandler(bookingUsecase)
 	websocketHandler := Websocket.NewWSBookingHandler(bookingWsHub, bookingUsecase)
+	
+	worker.StartAsynqWorker(redisAddr, bookingUsecase)
 
 	return handler, websocketHandler
 }
