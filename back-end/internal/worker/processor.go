@@ -3,8 +3,12 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"log"
+
 	// "log"
 
+	customError "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/customErrors"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/hibiken/asynq"
 )
@@ -29,8 +33,10 @@ func (p *BookingProcessor) HandleBookingExpired(ctx context.Context, t *asynq.Ta
 	// log.Printf("⏰ Time's up! Expiring booking ID: %s for Room: %d", payload.BookingID, payload.RoomNumber)
 
 	// 2. สั่ง DB ให้อัปเดตสถานะ (เช่น UPDATE bookings SET status = 'completed' WHERE id = ?)
-	if err := p.usecase.UpdateBookingStatus(ctx, payload.BookingID); err != nil {
-		return err // สั่ง Retry ถ้า DB มีปัญหาชั่วคราว
+	err := p.usecase.UpdateBookingStatus(ctx, payload.BookingID)
+	if err != nil && !errors.Is(err, customError.ErrorNotFound) {
+		log.Println("Custom error occur")
+		return nil // สั่ง Retry ถ้า DB มีปัญหาชั่วคราว
 	}
 
 	return nil // Return nil แปลว่างานสำเร็จ Asynq จะลบงานนี้ออกจาก Redis ให้เลย

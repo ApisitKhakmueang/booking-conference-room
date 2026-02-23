@@ -162,14 +162,20 @@ func (r *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingI
 	// 2. เติมคำสั่ง RETURNING * ลงไปนะ (clause.Returning{})
 	// 3. หา id นี้
 	// 4. สั่งอัปเดตคอลัมน์ status
-	err := r.db.WithContext(ctx).
+	result := r.db.WithContext(ctx).
 		Model(updatedBooking).
 		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
 		Where("id = ? AND status = ?", bookingID, "confirm").
-		Update("status", newStatus).Error
+		Update("status", newStatus)
 
-	if err != nil {
-		return nil, err
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+			// คืนค่า Error กลับไปบอก Usecase ว่าหาคิวจองไม่เจอ หรือสถานะไม่ใช่ confirm แล้ว
+			return nil, errors.New("booking not found or status is not 'confirm'") 
+			// หรือจะใช้ gorm.ErrRecordNotFound ก็ได้ครับ
 	}
 
 	// updatedBooking จะถูกเติมข้อมูลใหม่ครบทุกฟิลด์เรียบร้อย
