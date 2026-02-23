@@ -18,6 +18,7 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/middleware"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
+	"github.com/hibiken/asynq"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -128,15 +129,17 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 		Weak: true, // ใช้ Weak ETag (W/...) เหมาะกับ JSON
 	}))
 	
-	api := app.Group("/api")
-	bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
+	// api := app.Group("/api")
+	api := app.Group("/api/booking")
+	// bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
 
 	api.Get("/holiday", handler.GetHoliday)
 
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
 
-	controller.InitialBookingRoute(bookingAPI, handler)
+	// controller.InitialBookingRoute(bookingAPI, handler)
+	controller.InitialBookingRoute(api, handler)
 	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)
 
 	// app.Get("/api/product/:id", handler.TestRedis)
@@ -154,15 +157,7 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub) (*http.BookingHandler, *Websocket.WSBookingHandler) {
-	redisAddr := "localhost:6379"
-
-	// 1. สร้าง Asynq Client (ต้องสั่ง defer Close ไว้ที่ main เพื่อปิดคอนเนคชันตอนแอปดับ)
-	asynqClient := worker.NewAsynqClient(redisAddr)
-	defer asynqClient.Close()
-
-	// 3. สตาร์ท Asynq Worker Server อยู่เบื้องหลัง (ส่ง Usecase เข้าไปให้ Worker ใช้)
-	
+func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub, redisAddr string, asynqClient *asynq.Client) (*http.BookingHandler, *Websocket.WSBookingHandler) {
 	postgresRepo := Postgres.NewPostgresRepository(db)
 	redisRepo := Redis.NewRedisRepository(rdb, postgresRepo)
 	redisPublisher := Redis.NewRedisPublisher(rdb)

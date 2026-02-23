@@ -10,6 +10,7 @@ import (
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 
 	"github.com/joho/godotenv"
 )
@@ -39,11 +40,19 @@ func main() {
 	bookingWsHub := Websocket.NewHub(rdb, "bookings_realtime")
 	go bookingWsHub.Run(ctx)
 
+	redisAddr := "localhost:6379"
+
+	// 1. สร้าง Asynq Client (ต้องสั่ง defer Close ไว้ที่ main เพื่อปิดคอนเนคชันตอนแอปดับ)
+	asynqClient := worker.NewAsynqClient(redisAddr)
+	defer asynqClient.Close()
+
 	handleUsecase, websocketHandler := utils.InitialCleanArch(
 		rdb, 
 		db, 
 		googleCalendarService, 
 		bookingWsHub,
+		redisAddr,
+		asynqClient,
 	)
 
 	app := utils.InitialFiber(handleUsecase, websocketHandler)	

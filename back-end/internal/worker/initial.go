@@ -39,7 +39,7 @@ func StartAsynqWorker(redisAddr string, bookingUC domain.BookingUsecase) {
 
 	// สตาร์ทแบบ Goroutine
 	go func() {
-		log.Println("🚀 Asynq Worker Server is running...")
+		// log.Println("🚀 Asynq Worker Server is running...")
 		if err := asynqServer.Run(mux); err != nil {
 			log.Fatalf("❌ Could not run Asynq server: %v", err)
 		}
