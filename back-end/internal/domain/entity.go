@@ -178,10 +178,10 @@ type Booking struct {
 	// CalendarID    uuid.UUID       `gorm:"type:uuid;not null" json:"calendarId"`
 	// GoogleEventID string         	`gorm:"type:text" json:"google_eventId"` // สำคัญมากสำหรับสถานะ cancelled
 	
-	StartTime     *time.Time      	`gorm:"not null" json:"startTime,omitempty"`
-	EndTime       *time.Time      	`gorm:"not null" json:"endTime,omitempty"`
+	StartTime     *time.Time      `gorm:"not null" json:"startTime,omitempty"`
+	EndTime       *time.Time      `gorm:"not null" json:"endTime,omitempty"`
 	Title					string					`gorm:"unique;default:no_tilte" json:"title,omitempty"`
-	Passcode      string          `gorm:"type:varchar(10);not null" json:"passcode,omitempty"`
+	Passcode      string          `gorm:"type:varchar(10);" json:"passcode,omitempty"`
 	
 	// สถานะ: confirm, cancelled, complete
 	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status,omitempty"`

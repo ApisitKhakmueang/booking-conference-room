@@ -16,7 +16,7 @@ func NewRedisPublisher(rdb *redis.Client) redisRepo.RealtimePublisher {
 	return &redisPub{rdb: rdb}
 }
 
-func (p *redisPub) PublishEvent(ctx context.Context, event string, payload interface{}) error {
+func (p *redisPub) PublishEvent(ctx context.Context, channelName string, event string, payload interface{}) error {
 	// ห่อข้อมูลเป็น JSON
 	// log.Println("enter publish event")
 	data, _ := json.Marshal(map[string]interface{}{
@@ -25,5 +25,5 @@ func (p *redisPub) PublishEvent(ctx context.Context, event string, payload inter
 	})
 	
 	// ส่งเข้า Channel ชื่อ "bookings_realtime"
-	return p.rdb.Publish(ctx, "bookings_realtime", data).Err()
+	return p.rdb.Publish(ctx, channelName, data).Err()
 }

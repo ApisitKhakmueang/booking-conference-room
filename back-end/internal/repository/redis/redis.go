@@ -102,6 +102,92 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 	return bookings, nil
 }
 
+func (r *redisRepository) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
+	cacheKey := "booking:status"
+
+	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
+	if err == nil && len(vals) > 0 {
+		var bookings []domain.Booking
+		for _, val := range vals {
+			var booking domain.Booking
+			if err := json.Unmarshal([]byte(val), &booking); err == nil {
+				bookings = append(bookings, booking)
+			}
+		}
+		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+		return bookings, nil
+	}
+
+	bookings, err := r.postgres.GetBookingStatusDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(bookings) > 0 {
+		// สร้าง Map เพื่อเตรียมข้อมูล (Key = ID, Value = JSON String)
+		hashData := make(map[string]interface{})
+		
+		for _, b := range bookings {
+			jsonBytes, _ := json.Marshal(b)
+			hashData[b.ID.String()] = jsonBytes // เอา ID ของ Booking เป็นชื่อ Field
+		}
+
+		// ใช้ HSet โยน Map เข้าไปทีเดียว! (go-redis v8/v9 รองรับการโยน map ตรงๆ)
+		// มันจะกระจาย Field และ Value ลงไปใน Hash ให้อัตโนมัติ (ไวมากๆ)
+		if err := r.rdb.HSet(ctx, cacheKey, hashData).Err(); err == nil {
+			// ⭐️ สำคัญ: ต้องตั้งเวลาหมดอายุ (TTL) ให้มันด้วย เพื่อไม่ให้ขยะล้น RAM
+			// เช่น ให้ Cache นี้อยู่แค่ 1 ชั่วโมง ถ้าไม่มีใครเรียกใช้เลย
+			r.rdb.Expire(ctx, cacheKey, 7*24*time.Hour) 
+		}
+	}
+
+	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
+	return bookings, nil
+}
+
+func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, error) {
+	cacheKey := "room:details"
+
+	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
+	if err == nil && len(vals) > 0 {
+		var rooms []domain.Room
+		for _, val := range vals {
+			var room domain.Room
+			if err := json.Unmarshal([]byte(val), &room); err == nil {
+				rooms = append(rooms, room)
+			}
+		}
+		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+		return rooms, nil
+	}
+
+	rooms, err := r.postgres.GetRoomDetailsDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rooms) > 0 {
+		// สร้าง Map เพื่อเตรียมข้อมูล (Key = ID, Value = JSON String)
+		hashData := make(map[string]interface{})
+		
+		for _, b := range rooms {
+			jsonBytes, _ := json.Marshal(b)
+			hashData[b.ID.String()] = jsonBytes // เอา ID ของ Booking เป็นชื่อ Field
+		}
+
+		// ใช้ HSet โยน Map เข้าไปทีเดียว! (go-redis v8/v9 รองรับการโยน map ตรงๆ)
+		// มันจะกระจาย Field และ Value ลงไปใน Hash ให้อัตโนมัติ (ไวมากๆ)
+		if err := r.rdb.HSet(ctx, cacheKey, hashData).Err(); err == nil {
+			// ⭐️ สำคัญ: ต้องตั้งเวลาหมดอายุ (TTL) ให้มันด้วย เพื่อไม่ให้ขยะล้น RAM
+			// เช่น ให้ Cache นี้อยู่แค่ 1 ชั่วโมง ถ้าไม่มีใครเรียกใช้เลย
+			r.rdb.Expire(ctx, cacheKey, 7*24*time.Hour) 
+		}
+	}
+
+	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
+	return rooms, nil
+}
+
 func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
 	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
 

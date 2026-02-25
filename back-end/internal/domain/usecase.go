@@ -19,7 +19,11 @@ type BookingUsecase interface {
 	UpdateBooking(ctx context.Context,booking *Booking, roomNumber uint) error
 	DeleteBooking(ctx context.Context,bookingID uuid.UUID) error
 	GetBooking(ctx context.Context,date *Date, roomNumber uint) ([]Booking, error)
+	GetBookingStatus(ctx context.Context) ([]Booking, error)
 	// GetUserBooking(ctx context.Context,userID uuid.UUID) ([]Booking, error)
+	GetRoomDetails(ctx context.Context) ([]Room, error)
 	GetHoliday(ctx context.Context,date *Date) ([]Holiday, error)
+
 	UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error
+	GetBookingByID(ctx context.Context, id uuid.UUID) (*Booking, error)
 }

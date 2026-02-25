@@ -138,6 +138,15 @@ func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 // 	return c.Status(fiber.StatusOK).JSON(bookings)
 // }
 
+func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
+	reponse, err := u.usecase.GetRoomDetails(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.JSON(reponse)
+}
+
 func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	q := new(domain.Date)

@@ -43,9 +43,10 @@ func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid
 		Model(booking).
 		Select("status").
 		Where("id = ? AND status = ?", bookingID, "confirm").
-		Updates(domain.Booking{
-			Status: "cancelled",
-		},
+		Updates(map[string]interface{}{
+			"status":   "cancelled",
+			"passcode": nil, // ส่ง nil เพื่อบังคับให้เป็น NULL ใน Database
+    },
 	)
 	return result.Error
 }
@@ -67,6 +68,25 @@ func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date,
     }).
 		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", date.StartStr, date.EndStr, roomID).
 		Order("start_time desc").
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
+func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+	now := time.Now()
+
+	result := p.db.
+		WithContext(ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, name, capacity, is_active, room_number")
+		}).
+		Where("start_time >= ? AND end_time < ? AND status = ?", now, now, "confirm").
 		Find(&bookings)
 
 	if result.Error != nil {
@@ -104,6 +124,21 @@ func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date,
 
 // 	return bookings, nil
 // }
+
+func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Room, error) {
+	var room []domain.Room
+
+	result := p.db.
+		WithContext(ctx).
+		Select("id, name, capacity, is_active, room_number").
+		Find(&room)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return room, nil
+}
 
 func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
 	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
@@ -166,7 +201,10 @@ func (r *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingI
 		Model(updatedBooking).
 		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
 		Where("id = ? AND status = ?", bookingID, "confirm").
-		Update("status", newStatus)
+		Updates(map[string]interface{}{
+			"status": newStatus,
+			"passcode": nil,
+		})
 
 	if result.Error != nil {
 		return nil, result.Error

@@ -72,3 +72,32 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 		}
 	}
 }
+
+// func (w *WSBookingHandler) GetBookingStatus(c *websocket.Conn) {
+// 	ctx := context.Background()
+
+// 	topic := fmt.Sprintf("booking:status")
+
+// 	w.hub.Register(c, topic)
+// 	defer w.hub.Unregister(c, topic)
+
+// 	response, err := w.usecase.GetBooking(ctx, q, uint(roomNumber))
+
+// 	if err == nil {
+// 		payload := map[string]interface{}{
+// 			"type": "initial_data",
+// 			"data": response,
+// 		}
+// 		if err := c.WriteJSON(payload); err != nil {
+// 			return
+// 		}
+// 	} else {
+// 		c.WriteJSON(map[string]string{"error": err.Error()})
+// 	}
+
+// 	for {
+// 		if _, _, err := c.ReadMessage(); err != nil {
+// 			break
+// 		}
+// 	}
+// }

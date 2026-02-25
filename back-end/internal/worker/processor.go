@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"time"
 
 	// "log"
 
@@ -30,10 +31,23 @@ func (p *BookingProcessor) HandleBookingExpired(ctx context.Context, t *asynq.Ta
 		return err // ถ้า Error, Asynq จะเก็บคิวไว้ลองทำใหม่ (Retry) ให้อัตโนมัติ!
 	}
 
-	// log.Printf("⏰ Time's up! Expiring booking ID: %s for Room: %d", payload.BookingID, payload.RoomNumber)
+	currentBooking, err := p.usecase.GetBookingByID(ctx, payload.BookingID)
+	if err != nil {
+		return err
+	}
+
+	if currentBooking.Status == "cancelled" || currentBooking.Status != "confirm" {
+		log.Printf("Booking %s is already %s. Skipping task.", payload.BookingID, currentBooking.Status)
+		return nil // ข้ามไปเลย ถือว่าจบงาน
+	}
+
+	if time.Now().Before(*currentBooking.EndTime) {
+		log.Printf("Booking %s was extended to %v. Skipping this old 14:00 task.", payload.BookingID, currentBooking.EndTime)
+		return nil // ข้ามไปเลย เดี๋ยวมี Task 15:00 ตื่นมาทำเอง
+	}
 
 	// 2. สั่ง DB ให้อัปเดตสถานะ (เช่น UPDATE bookings SET status = 'completed' WHERE id = ?)
-	err := p.usecase.UpdateBookingStatus(ctx, payload.BookingID)
+	err = p.usecase.UpdateBookingStatus(ctx, payload.BookingID)
 	if err != nil && !errors.Is(err, customError.ErrorNotFound) {
 		log.Println("Custom error occur")
 		return nil // สั่ง Retry ถ้า DB มีปัญหาชั่วคราว
