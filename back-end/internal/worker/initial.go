@@ -36,6 +36,8 @@ func StartAsynqWorker(redisAddr string, bookingUC domain.BookingUsecase) {
 	// สร้าง Processor และผูกชื่องาน
 	processor := NewBookingProcessor(bookingUC)
 	mux.HandleFunc(TypeBookingExpired, processor.HandleBookingExpired)
+	mux.HandleFunc(TypeBookingStart, processor.HandleBookingStart)
+	// Add new handler booking start
 
 	// สตาร์ทแบบ Goroutine
 	go func() {
