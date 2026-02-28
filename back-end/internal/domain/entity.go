@@ -92,11 +92,12 @@ func (d DateRes) Time() time.Time {
 
 // Response
 type WebSocketPayload struct {
-	Type string 				`json:"type"`
+	Type string 						`json:"type"`
 	Data struct {
-		RoomNumber uint 	`json:"room_number"`
-		UserID     string `json:"user_id"`
-	} 									`json:"data"`
+		RoomNumber 	uint 			`json:"room_number"`
+		UserID     	string 		`json:"user_id"`
+		Status			bool			`json:"status"`
+	} 											`json:"data"`
 }
 
 type WSMessage struct {
