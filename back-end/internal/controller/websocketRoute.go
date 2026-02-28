@@ -15,6 +15,7 @@ func InitialWSRoute(router fiber.Router, ws *Websocket.WSBookingHandler, supabas
 	// router.Post("/:id", handler.CreateBooking)
 	// router.Put("/:bookingID", handler.UpdateBooking)
 	// router.Delete("/:bookingID", handler.DeleteBooking)
+	router.Get("/status", websocket.New(ws.GetBookingStatus))
 	router.Get("/:room", websocket.New(middleware.WithWSAuth(supabaseClient, ws.GetBooking)))
 	// router.Get("/:room", handler.GetBooking)
 	// router.Get("/user/:id", handler.GetUserBooking)

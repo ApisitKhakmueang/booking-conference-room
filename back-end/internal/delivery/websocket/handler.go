@@ -44,12 +44,14 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 	q.EndStr = endDate
 	if q.StartStr == "" || q.EndStr == "" {
 		c.WriteJSON(map[string]string{"error": "Please send startDate and endDate"})
+		return 
 	}
 
 	// log.Printf("duration: %s, room: %v", filter.Duration, filter.Room)
 	
 	if roomNumber == 0 {
 		c.WriteJSON(map[string]string{"error": "Please send room number"})
+		return 
 	}
 
 	response, err := w.usecase.GetBooking(ctx, q, uint(roomNumber))
@@ -73,31 +75,31 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 	}
 }
 
-// func (w *WSBookingHandler) GetBookingStatus(c *websocket.Conn) {
-// 	ctx := context.Background()
+func (w *WSBookingHandler) GetBookingStatus(c *websocket.Conn) {
+	ctx := context.Background()
 
-// 	topic := fmt.Sprintf("booking:status")
+	topic := "booking:status"
 
-// 	w.hub.Register(c, topic)
-// 	defer w.hub.Unregister(c, topic)
+	w.hub.Register(c, topic)
+	defer w.hub.Unregister(c, topic)
 
-// 	response, err := w.usecase.GetBooking(ctx, q, uint(roomNumber))
+	response, err := w.usecase.GetBookingStatus(ctx)
 
-// 	if err == nil {
-// 		payload := map[string]interface{}{
-// 			"type": "initial_data",
-// 			"data": response,
-// 		}
-// 		if err := c.WriteJSON(payload); err != nil {
-// 			return
-// 		}
-// 	} else {
-// 		c.WriteJSON(map[string]string{"error": err.Error()})
-// 	}
+	if err == nil {
+		payload := map[string]interface{}{
+			"type": "initial_data",
+			"data": response,
+		}
+		if err := c.WriteJSON(payload); err != nil {
+			return
+		}
+	} else {
+		c.WriteJSON(map[string]string{"error": err.Error()})
+	}
 
-// 	for {
-// 		if _, _, err := c.ReadMessage(); err != nil {
-// 			break
-// 		}
-// 	}
-// }
+	for {
+		if _, _, err := c.ReadMessage(); err != nil {
+			break
+		}
+	}
+}

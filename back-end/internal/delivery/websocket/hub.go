@@ -117,6 +117,8 @@ func (h *Hub) Run(ctx context.Context) {
 					topic = fmt.Sprintf("booking:%d", payload.Data.RoomNumber)
 				} else if payload.Data.UserID != "" {
 					topic = fmt.Sprintf("user:%s", payload.Data.UserID)
+				} else if payload.Data.Status {
+					topic = "booking:status"
 				}
 
 				// 🚀 สั่ง Broadcast!
