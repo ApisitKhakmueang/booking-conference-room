@@ -47,9 +47,9 @@ func NewBookingUsecase(
 }
 
 func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-		return err
-	}
+	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+	// 	return err
+	// }
 
 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
@@ -98,7 +98,18 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 
 	u.PublishEvent("booking_created", roomNumber, completedBooking)
 
-	u.EnqeueEvent(booking, roomNumber)
+	if completedBooking.StartTime != nil {
+		// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
+		nowYear, nowMonth, nowDay := time.Now().Date()
+		bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
+
+		// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
+		if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
+			u.PublishStatus("booking_created", completedBooking)
+		}
+	}
+
+	u.EnqeueEvent(booking)
 
 	// layout := "2006-01-02 15:04:05"
 	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
@@ -140,9 +151,9 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 }
 
 func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-		return err
-	}
+	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+	// 	return err
+	// }
 
 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
@@ -168,7 +179,18 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 
 	u.PublishEvent("booking_updated", roomNumber, completedBooking)
 
-	u.EnqeueEvent(booking, roomNumber)
+	if completedBooking.StartTime != nil {
+		// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
+		nowYear, nowMonth, nowDay := time.Now().Date()
+		bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
+
+		// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
+		if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
+			u.PublishStatus("booking_created", completedBooking)
+		}
+	}
+
+	u.EnqeueEvent(booking)
 
 	// // }
 
@@ -268,6 +290,7 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 	}
 
 	u.PublishEvent("booking_deleted", roomNumber, completedBooking)
+	u.PublishStatus("booking_deleted", completedBooking)
 
 	return nil
 }
@@ -308,11 +331,14 @@ func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomN
 }
 
 func (u *bookingUsecase) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
-	booking, err := u.redis.GetBookingStatus(ctx)
+	timeStart := time.Now().Format("2006-01-02")
+
+	booking, err := u.redis.GetBookingStatus(ctx, timeStart)
 	if err != nil {
 		return nil, err
 	}
 
+	// log.Printf("booking: %v", booking)
 	return booking, nil
 }
 
@@ -451,7 +477,8 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid
 		return err
 	}
 
-	u.PublishEvent("booking_updated", roomNumber, booking)
+	u.PublishEvent("booking_updated_status", roomNumber, booking)
+	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil
 }
@@ -463,6 +490,23 @@ func (u *bookingUsecase) GetBookingByID(ctx context.Context, id uuid.UUID) (*dom
 	}
 
 	return booking, nil
+}
+
+func (u *bookingUsecase) PublishStatus(event string, completedBooking *domain.Booking) {
+	payload := map[string]interface{}{
+		"status":		true,
+		"booking":	completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
+	}
+
+	// log.Printf("Publishing real-time event: %v", payload)
+
+	go func() {
+		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
+		bgCtx := context.Background()
+		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
+			log.Printf("Failed to publish real-time event: %v", pubErr)
+		}
+	}()
 }
 
 // Internal function 
@@ -477,23 +521,33 @@ func (u *bookingUsecase) PublishEvent(event string, roomNumber uint, completedBo
 	go func() {
 		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
 		bgCtx := context.Background()
-		if pubErr := u.publisher.PublishEvent(bgCtx, "bookings_realtime", event, payload); pubErr != nil {
+		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
 			log.Printf("Failed to publish real-time event: %v", pubErr)
 		}
 	}()
 }
 
-func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking, roomNumber uint) {
-	task, err := worker.NewBookingExpiredTask(booking.ID, roomNumber)
-	if err == nil {
+func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
+	endTask, endTaskErr := worker.NewBookingExpiredTask(booking.ID)
+	startTask, startTaskErr := worker.NewBookingStartTask(booking.ID)
+	// Create booking start endTask
+	if endTaskErr == nil || startTaskErr == nil {
 		// Asynq Client จะโยนงานนี้ไปฝากไว้ใน Redis ก่อน
 		// ใช้ `asynq.ProcessAt` เพื่อระบุเวลาเป๊ะๆ ที่จะให้งานนี้ทำงาน!
-		info, err := u.asynqClient.Enqueue(task, asynq.ProcessAt(*booking.EndTime))
+		endInfo, endErr := u.asynqClient.Enqueue(endTask, asynq.ProcessAt(*booking.EndTime))
 		
-		if err != nil {
-			log.Printf("❌ Failed to enqueue task: %v", err)
+		if endErr != nil {
+			log.Printf("❌ Failed to enqueue end task: %v", endErr)
 		} else {
-			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, info.ID)
+			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, endInfo.ID)
+		}
+
+		startInfo, startErr := u.asynqClient.Enqueue(startTask, asynq.ProcessAt(*booking.EndTime))
+		
+		if startErr != nil {
+			log.Printf("❌ Failed to enqueue start task: %v", startErr)
+		} else {
+			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, startInfo.ID)
 		}
 	}
 }
