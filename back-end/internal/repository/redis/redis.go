@@ -102,8 +102,8 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 	return bookings, nil
 }
 
-func (r *redisRepository) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
-	cacheKey := "booking:status"
+func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string) ([]domain.Booking, error) {
+	cacheKey := fmt.Sprintf("booking:status:%s", timeStart)
 
 	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
 	if err == nil && len(vals) > 0 {
@@ -296,15 +296,28 @@ func (r *redisRepository) SetJsonCache(ctx context.Context, cacheKey string, jso
 
 func (r *redisRepository) InsertBookingToCache(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
 	year := booking.StartTime.Year()
-	startDate := fmt.Sprintf("%d-01-01", year)
-	endDate := fmt.Sprintf("%d-12-31", year)
+	startDateOfYear := fmt.Sprintf("%d-01-01", year)
+	endDateOfYear := fmt.Sprintf("%d-12-31", year)
+	startDate := booking.StartTime.Format("2006-01-02")
 
-	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, startDate, endDate)
-	// log.Println("cache key: ", cacheKey)
+	statusCacheKey := fmt.Sprintf("booking:status:%s", startDate)
+	bookingCacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, startDateOfYear, endDateOfYear)
+	// log.Println("cache key: ", bookingCacheKey)
 
-	jsonBytes, _ := json.Marshal(booking)
+	bookingJsonBytes, _ := json.Marshal(booking)
+	statusJsonBytes, _ := json.Marshal(booking)
 
-	return r.rdb.HSet(ctx, cacheKey, booking.ID.String(), jsonBytes).Err()
+	bookingErr := r.rdb.HSet(ctx, bookingCacheKey, booking.ID.String(), bookingJsonBytes).Err()
+	if bookingErr != nil {
+		return bookingErr
+	}
+
+	statusErr := r.rdb.HSet(ctx, statusCacheKey, booking.ID.String(), statusJsonBytes).Err()
+	if statusErr != nil {
+		return statusErr
+	}
+
+	return nil
 }
 
 func (r *redisRepository) DeleteBookingCache(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
