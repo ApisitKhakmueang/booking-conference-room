@@ -26,4 +26,5 @@ type BookingUsecase interface {
 
 	UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*Booking, error)
+	PublishStatus(event string, completedBooking *Booking)
 }
