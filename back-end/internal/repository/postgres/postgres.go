@@ -83,10 +83,9 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 
 	result := p.db.
 		WithContext(ctx).
-		Preload("Room", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, name, capacity, is_active, room_number")
-		}).
-		Where("start_time >= ? AND end_time < ? AND status = ?", now, now, "confirm").
+		Preload("Room").
+		Preload("User").
+		Where("start_time <= ? AND end_time > ? AND status = ?", now, now, "confirm").
 		Find(&bookings)
 
 	if result.Error != nil {
@@ -241,7 +240,8 @@ func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.U
 func (r *postgresRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
 	// ใช้ Preload ดึงข้อมูลตารางที่เกี่ยวข้องมาด้วยให้เหมือนตอน Get ปกติ
-	err := r.db.WithContext(ctx).
+	err := r.db.
+		WithContext(ctx).
 		Preload("Room").
 		Preload("User").
 		First(booking, id).Error
@@ -266,7 +266,6 @@ func (p *postgresRepository) GetRoomID(ctx context.Context, booking *domain.Book
 	return nil
 }
 
-// รับค่า DB, RoomID (สำคัญ), รหัสที่สุ่มได้, และช่วงเวลาที่จะจอง
 func (p *postgresRepository) IsRoomAvailable(ctx context.Context, booking *domain.Booking) bool {
 	var countBooking int64
 	var countRoom int64
