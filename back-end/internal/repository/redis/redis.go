@@ -30,7 +30,7 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 		return err
 	}
 
-	return r.InsertBookingToCache(ctx, booking, roomNumber)
+	return r.DeleteBookingToCache(ctx, roomNumber)
 }
 
 func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
@@ -38,40 +38,43 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 	if err != nil {
 		return err
 	}
-	// log.Println("prev room number: ", prevRoomNumber)
-
-	if err := r.DeleteBookingCache(ctx, booking, prevRoomNumber); err != nil {
-		return err
-	}
 
 	if err := r.postgres.UpdateBookingDB(ctx, booking); err != nil {
 		return err
 	}
 
-	return r.InsertBookingToCache(ctx, booking, roomNumber)
+	// 1. เคลียร์ Cache ของห้องเก่า (ถ้าห้องเปลี่ยน มันจะลบห้องเก่าให้)
+	if err := r.DeleteBookingToCache(ctx, prevRoomNumber); err != nil {
+		return err
+	}
+
+	// 2. เคลียร์ Cache ของห้องใหม่ (ถ้าห้องไม่เปลี่ยน มันก็แค่สั่งลบ Prefix เดิมซ้ำ ซึ่งไม่ Error ปลอดภัยครับ)
+	if prevRoomNumber != roomNumber { // สมมติว่าใน booking มี RoomID ให้เช็ค
+		// หรือถ้า Usecase ส่ง roomNumber ใหม่เข้ามา ก็ใช้ตัวนั้นแทนได้เลย
+		_ = r.DeleteBookingToCache(ctx, roomNumber)
+	}
+
+	return nil
 }
 
 func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
 	if err := r.postgres.DeleteBookingDB(ctx, booking.ID); err != nil {
 		return err
 	}
-
-	return r.DeleteBookingCache(ctx, booking, roomNumber)
+	
+	return r.DeleteBookingToCache(ctx, roomNumber)
 }
 
 func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, dateTime.StartStr, dateTime.EndStr)
 
-	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
-	if err == nil && len(vals) > 0 {
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
 		var bookings []domain.Booking
-		for _, val := range vals {
-			var booking domain.Booking
-			if err := json.Unmarshal([]byte(val), &booking); err == nil {
-				bookings = append(bookings, booking)
-			}
+		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
+			return nil, err
 		}
-		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+
 		return bookings, nil
 	}
 
@@ -80,65 +83,17 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 		return nil, err
 	}
 
-	if len(bookings) > 0 {
-		// สร้าง Map เพื่อเตรียมข้อมูล (Key = ID, Value = JSON String)
-		hashData := make(map[string]interface{})
-		
-		for _, b := range bookings {
-			jsonBytes, _ := json.Marshal(b)
-			hashData[b.ID.String()] = jsonBytes // เอา ID ของ Booking เป็นชื่อ Field
-		}
-
-		// ใช้ HSet โยน Map เข้าไปทีเดียว! (go-redis v8/v9 รองรับการโยน map ตรงๆ)
-		// มันจะกระจาย Field และ Value ลงไปใน Hash ให้อัตโนมัติ (ไวมากๆ)
-		if err := r.rdb.HSet(ctx, cacheKey, hashData).Err(); err == nil {
-			// ⭐️ สำคัญ: ต้องตั้งเวลาหมดอายุ (TTL) ให้มันด้วย เพื่อไม่ให้ขยะล้น RAM
-			// เช่น ให้ Cache นี้อยู่แค่ 1 ชั่วโมง ถ้าไม่มีใครเรียกใช้เลย
-			r.rdb.Expire(ctx, cacheKey, 7*24*time.Hour) 
-		}
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
 	}
 
-	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
 	return bookings, nil
 }
 
 func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string) ([]domain.Booking, error) {
-	cacheKey := fmt.Sprintf("booking:status:%s", timeStart)
-
-	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
-	if err == nil && len(vals) > 0 {
-		var bookings []domain.Booking
-		for _, val := range vals {
-			var booking domain.Booking
-			if err := json.Unmarshal([]byte(val), &booking); err == nil {
-				bookings = append(bookings, booking)
-			}
-		}
-		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
-		return bookings, nil
-	}
-
 	bookings, err := r.postgres.GetBookingStatusDB(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(bookings) > 0 {
-		// สร้าง Map เพื่อเตรียมข้อมูล (Key = ID, Value = JSON String)
-		hashData := make(map[string]interface{})
-		
-		for _, b := range bookings {
-			jsonBytes, _ := json.Marshal(b)
-			hashData[b.ID.String()] = jsonBytes // เอา ID ของ Booking เป็นชื่อ Field
-		}
-
-		// ใช้ HSet โยน Map เข้าไปทีเดียว! (go-redis v8/v9 รองรับการโยน map ตรงๆ)
-		// มันจะกระจาย Field และ Value ลงไปใน Hash ให้อัตโนมัติ (ไวมากๆ)
-		if err := r.rdb.HSet(ctx, cacheKey, hashData).Err(); err == nil {
-			// ⭐️ สำคัญ: ต้องตั้งเวลาหมดอายุ (TTL) ให้มันด้วย เพื่อไม่ให้ขยะล้น RAM
-			// เช่น ให้ Cache นี้อยู่แค่ 1 ชั่วโมง ถ้าไม่มีใครเรียกใช้เลย
-			r.rdb.Expire(ctx, cacheKey, 7*24*time.Hour) 
-		}
 	}
 
 	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
@@ -148,16 +103,13 @@ func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string
 func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, error) {
 	cacheKey := "room:details"
 
-	vals, err := r.rdb.HVals(ctx, cacheKey).Result()
-	if err == nil && len(vals) > 0 {
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
 		var rooms []domain.Room
-		for _, val := range vals {
-			var room domain.Room
-			if err := json.Unmarshal([]byte(val), &room); err == nil {
-				rooms = append(rooms, room)
-			}
+		if err := json.Unmarshal([]byte(vals), &rooms); err != nil {
+			return nil, err
 		}
-		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
+
 		return rooms, nil
 	}
 
@@ -166,22 +118,8 @@ func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, er
 		return nil, err
 	}
 
-	if len(rooms) > 0 {
-		// สร้าง Map เพื่อเตรียมข้อมูล (Key = ID, Value = JSON String)
-		hashData := make(map[string]interface{})
-		
-		for _, b := range rooms {
-			jsonBytes, _ := json.Marshal(b)
-			hashData[b.ID.String()] = jsonBytes // เอา ID ของ Booking เป็นชื่อ Field
-		}
-
-		// ใช้ HSet โยน Map เข้าไปทีเดียว! (go-redis v8/v9 รองรับการโยน map ตรงๆ)
-		// มันจะกระจาย Field และ Value ลงไปใน Hash ให้อัตโนมัติ (ไวมากๆ)
-		if err := r.rdb.HSet(ctx, cacheKey, hashData).Err(); err == nil {
-			// ⭐️ สำคัญ: ต้องตั้งเวลาหมดอายุ (TTL) ให้มันด้วย เพื่อไม่ให้ขยะล้น RAM
-			// เช่น ให้ Cache นี้อยู่แค่ 1 ชั่วโมง ถ้าไม่มีใครเรียกใช้เลย
-			r.rdb.Expire(ctx, cacheKey, 7*24*time.Hour) 
-		}
+	if jsonBytes, err := json.Marshal(rooms); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
 	}
 
 	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
@@ -194,25 +132,22 @@ func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]
 	var holidays []domain.Holiday
 	val, err := r.rdb.Get(ctx, cacheKey).Result()
 	if err == nil {
-		// เจอข้อมูล! (Cache Hit)
-		// log.Println("Cache hit")
-		
-		// แปลง JSON string กลับมาเป็น Struct (Unmarshal)
 		if err := json.Unmarshal([]byte(val), &holidays); err == nil {
-			// log.Println("Cache HIT: Return data from Redis")
 			return holidays, nil
 		}
-		// ถ้า Unmarshal พัง (เช่น struct เปลี่ยน) ให้ไปโหลด DB ใหม่แทน
 	}
 
 	holidays, err = r.postgres.GetHolidayDB(ctx, date)
 
+	if err != nil {
+		return nil, err
+	}
+
 	if jsonBytes, err := json.Marshal(holidays); err == nil {
-		// ตั้ง TTL (เช่น 24 ชั่วโมง เพราะวันหยุดไม่น่าเปลี่ยนบ่อย)
 		r.SetJsonCache(ctx, cacheKey, jsonBytes)
 	}
 
-	return nil, err
+	return holidays, nil
 }
 
 func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
@@ -226,9 +161,7 @@ func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uui
 		return nil, 0, err
 	}
 
-	if err := r.InsertBookingToCache(ctx, updateBooking, roomNumber); err != nil {
-		return nil, 0, err
-	}
+	r.DeleteBookingToCache(ctx, roomNumber)
 
 	return updateBooking, roomNumber, nil
 }
@@ -294,40 +227,9 @@ func (r *redisRepository) SetJsonCache(ctx context.Context, cacheKey string, jso
 	}
 }
 
-func (r *redisRepository) InsertBookingToCache(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
-	year := booking.StartTime.Year()
-	startDateOfYear := fmt.Sprintf("%d-01-01", year)
-	endDateOfYear := fmt.Sprintf("%d-12-31", year)
-	startDate := booking.StartTime.Format("2006-01-02")
-
-	statusCacheKey := fmt.Sprintf("booking:status:%s", startDate)
-	bookingCacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, startDateOfYear, endDateOfYear)
-	// log.Println("cache key: ", bookingCacheKey)
-
-	bookingJsonBytes, _ := json.Marshal(booking)
-	statusJsonBytes, _ := json.Marshal(booking)
-
-	bookingErr := r.rdb.HSet(ctx, bookingCacheKey, booking.ID.String(), bookingJsonBytes).Err()
-	if bookingErr != nil {
-		return bookingErr
-	}
-
-	statusErr := r.rdb.HSet(ctx, statusCacheKey, booking.ID.String(), statusJsonBytes).Err()
-	if statusErr != nil {
-		return statusErr
-	}
-
-	return nil
-}
-
-func (r *redisRepository) DeleteBookingCache(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
-	year := booking.StartTime.Year()
-	startDate := fmt.Sprintf("%d-01-01", year)
-	endDate := fmt.Sprintf("%d-12-31", year)
-
-	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, startDate, endDate)
-	// log.Println("delete cache key: ", cacheKey)
-	// log.Println("booking id: ", booking.ID.String())
-
-	return r.rdb.HDel(ctx, cacheKey, booking.ID.String()).Err()
+func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber uint) error {
+	prefix := fmt.Sprintf("booking:%d:", roomNumber)
+	
+	// ใช้ฟังก์ชันที่คุณเขียนไว้แล้วให้เป็นประโยชน์!
+	return r.ClearCacheByPrefix(ctx, prefix)
 }
