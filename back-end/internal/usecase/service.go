@@ -186,7 +186,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 
 		// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
 		if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
-			u.PublishStatus("booking_created", completedBooking)
+			u.PublishStatus("booking_updated", completedBooking)
 		}
 	}
 
