@@ -20,6 +20,7 @@ type PostgresRepository interface {
 	UpdateBookingStatusDB(ctx context.Context, bookingID uuid.UUID, status string) (*domain.Booking, error)
 
 	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
+	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 
 	// CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
 	// GetEventID(bookingID uuid.UUID) (*Booking, error)
