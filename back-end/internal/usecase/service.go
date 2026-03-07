@@ -51,10 +51,10 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	if err != nil {
-		return err
-	}
+	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
@@ -155,10 +155,10 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	if err != nil {
-		return err
-	}
+	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
