@@ -52,7 +52,7 @@ func WebsocketMiddleware(c *fiber.Ctx) error {
 // func WithWSAuth(client *supabase.Client, next WSHandlerFunc) func(*websocket.Conn) {
 func WithWSAuth(client *supabase.Client, next func(c *websocket.Conn)) func(*websocket.Conn) {
 	return func(c *websocket.Conn) {
-		var userID string
+		// var userID string
 
 		// Loop รับข้อความเริ่มต้นที่นี่
 		var msg domain.WSMessage
@@ -63,19 +63,19 @@ func WithWSAuth(client *supabase.Client, next func(c *websocket.Conn)) func(*web
 
 		// ด่านที่ 1: ตรวจสอบ Auth (ทำครั้งแรกครั้งเดียว)
 		if msg.Type == "auth" {
-			log.Println("token: ", msg.Token)
+			// log.Println("token: ", msg.Token)
 			// หมายเหตุ: ใช้ context.Background() สำหรับยิง API ทั่วไปใน WS
-			user, err := client.Auth.User(context.Background(), msg.Token) 
+			_, err := client.Auth.User(context.Background(), msg.Token) 
 			if err != nil {
 				c.WriteJSON(fiber.Map{"error": "Authentication failed"})
 				c.Close()
 				return
 			}
 			
-			userID = user.ID
+			// userID = user.ID
 			// c.Locals("user_id", user.ID)
 			c.WriteJSON(domain.WSMessage{Type: "system", Data: "Authenticated successfully!"})
-			log.Println("User Authenticated in WS:", userID)
+			// log.Println("User Authenticated in WS:", userID)
 			next(c)
 			return
 		} else {
