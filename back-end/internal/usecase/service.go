@@ -478,6 +478,7 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid
 	}
 
 	u.PublishEvent("booking_updated_status", roomNumber, booking)
+	u.PublishStatus("booking_updated_status", booking)
 	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil
@@ -542,12 +543,12 @@ func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
 			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, endInfo.ID)
 		}
 
-		startInfo, startErr := u.asynqClient.Enqueue(startTask, asynq.ProcessAt(*booking.EndTime))
+		startInfo, startErr := u.asynqClient.Enqueue(startTask, asynq.ProcessAt(*booking.StartTime))
 		
 		if startErr != nil {
 			log.Printf("❌ Failed to enqueue start task: %v", startErr)
 		} else {
-			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, startInfo.ID)
+			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.StartTime, startInfo.ID)
 		}
 	}
 }
