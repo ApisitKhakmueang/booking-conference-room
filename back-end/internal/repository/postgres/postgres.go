@@ -26,13 +26,20 @@ func NewPostgresRepository(db *gorm.DB) *postgresRepository {
 }
 
 func (p *postgresRepository) CreateBookingDB(ctx context.Context, booking *domain.Booking) error {
-	err := p.db.WithContext(ctx).Create(&booking).Error
+	err := p.db.WithContext(ctx).Create(booking).Error
 	return err
 }
 
 func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domain.Booking) error {
-	err := p.db.WithContext(ctx).Model(&booking).Updates(booking).Error
-	return err
+	result := p.db.WithContext(ctx).
+		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
+		Updates(booking)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error {
@@ -188,7 +195,7 @@ func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date
 	return holidays, nil
 }
 
-func (r *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingID uuid.UUID, newStatus string) (*domain.Booking, error) {
+func (p *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingID uuid.UUID, newStatus string) (*domain.Booking, error) {
 	updatedBooking := new(domain.Booking)
 
 	// ⭐️ สั่ง GORM ว่า: 
@@ -196,7 +203,7 @@ func (r *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingI
 	// 2. เติมคำสั่ง RETURNING * ลงไปนะ (clause.Returning{})
 	// 3. หา id นี้
 	// 4. สั่งอัปเดตคอลัมน์ status
-	result := r.db.WithContext(ctx).
+	result := p.db.WithContext(ctx).
 		Model(updatedBooking).
 		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
 		Where("id = ? AND status = ?", bookingID, "confirm").

@@ -30,7 +30,9 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 		return err
 	}
 
-	return r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteBookingToCache(ctx, roomNumber)
+
+	return nil
 }
 
 func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
@@ -44,14 +46,12 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 	}
 
 	// 1. เคลียร์ Cache ของห้องเก่า (ถ้าห้องเปลี่ยน มันจะลบห้องเก่าให้)
-	if err := r.DeleteBookingToCache(ctx, prevRoomNumber); err != nil {
-		return err
-	}
+	r.DeleteBookingToCache(ctx, prevRoomNumber)
 
 	// 2. เคลียร์ Cache ของห้องใหม่ (ถ้าห้องไม่เปลี่ยน มันก็แค่สั่งลบ Prefix เดิมซ้ำ ซึ่งไม่ Error ปลอดภัยครับ)
 	if prevRoomNumber != roomNumber { // สมมติว่าใน booking มี RoomID ให้เช็ค
 		// หรือถ้า Usecase ส่ง roomNumber ใหม่เข้ามา ก็ใช้ตัวนั้นแทนได้เลย
-		_ = r.DeleteBookingToCache(ctx, roomNumber)
+		r.DeleteBookingToCache(ctx, roomNumber)
 	}
 
 	return nil
@@ -61,8 +61,10 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 	if err := r.postgres.DeleteBookingDB(ctx, booking.ID); err != nil {
 		return err
 	}
+
+	r.DeleteBookingToCache(ctx, roomNumber)
 	
-	return r.DeleteBookingToCache(ctx, roomNumber)
+	return nil
 }
 
 func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
@@ -227,9 +229,20 @@ func (r *redisRepository) SetJsonCache(ctx context.Context, cacheKey string, jso
 	}
 }
 
-func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber uint) error {
+func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber uint) {
 	prefix := fmt.Sprintf("booking:%d:", roomNumber)
 	
-	// ใช้ฟังก์ชันที่คุณเขียนไว้แล้วให้เป็นประโยชน์!
-	return r.ClearCacheByPrefix(ctx, prefix)
+	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
+	go func() {
+		// 🚨 ข้อควรระวัง: ต้องสร้าง Context ใหม่ (context.Background())
+		// เพราะถ้าใช้ ctx เดิม พอ HTTP Request จบ Fiber จะทำลาย ctx ตัวนั้นทิ้ง
+		// แล้วทำให้ Redis Scan ตรงนี้พัง (Context Canceled)
+		bgCtx := context.Background() 
+
+		err := r.ClearCacheByPrefix(bgCtx, prefix)
+		if err != nil {
+				// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+				log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+		}
+	}()
 }
