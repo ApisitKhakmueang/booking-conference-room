@@ -56,6 +56,10 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
+	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
+	// 	return err
+	// }
+
 	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
 	}
@@ -91,25 +95,26 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
-	if err != nil {
-		return err
-	}
+	// completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
+	// if err != nil {
+	// 	return err
+	// }
 
-	u.PublishEvent("booking_created", roomNumber, completedBooking)
+	// if completedBooking.StartTime != nil {
+	// 	// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
+	// 	nowYear, nowMonth, nowDay := time.Now().Date()
+	// 	bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
 
-	if completedBooking.StartTime != nil {
-		// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
-		nowYear, nowMonth, nowDay := time.Now().Date()
-		bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
+	// 	// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
+	// 	if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
+	// 		u.PublishStatus("booking_created", completedBooking)
+	// 	}
+	// }
+	u.PublishEvent("booking_created", roomNumber, booking)
 
-		// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
-		if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
-			u.PublishStatus("booking_created", completedBooking)
-		}
-	}
-
-	u.EnqeueEvent(booking)
+	go func(b *domain.Booking) {
+		u.EnqeueEvent(b)
+	}(booking)
 
 	// layout := "2006-01-02 15:04:05"
 	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
@@ -160,6 +165,10 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
+	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
+	// 	return err
+	// }
+
 	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
 	}
@@ -172,25 +181,23 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
-	if err != nil {
-		return err
-	}
+	
+	// if completedBooking.StartTime != nil {
+	// 	// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
+	// 	nowYear, nowMonth, nowDay := time.Now().Date()
+	// 	bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
+	
+	// 	// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
+	// 	if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
+	// 		u.PublishStatus("booking_updated", completedBooking)
+	// 	}
+	// }
+		
+	u.PublishEvent("booking_updated", roomNumber, booking)
 
-	u.PublishEvent("booking_updated", roomNumber, completedBooking)
-
-	if completedBooking.StartTime != nil {
-		// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
-		nowYear, nowMonth, nowDay := time.Now().Date()
-		bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
-
-		// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
-		if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
-			u.PublishStatus("booking_updated", completedBooking)
-		}
-	}
-
-	u.EnqeueEvent(booking)
+	go func(b *domain.Booking) {
+		u.EnqeueEvent(b)
+	}(booking)
 
 	// // }
 
@@ -275,6 +282,10 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 		return err
 	}
 
+	if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
+		return err
+	}
+
 	roomNumber, err := u.helperPostgres.GetRoomNumber(ctx, completedBooking.ID)
 	if err != nil {
 		return err
@@ -290,19 +301,13 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 	}
 
 	u.PublishEvent("booking_deleted", roomNumber, completedBooking)
-	u.PublishStatus("booking_deleted", completedBooking)
+	// u.PublishStatus("booking_deleted", completedBooking)
 
 	return nil
 }
 
 func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
-
-	// DateTime, err := helper.ConvertDateToStr(filter.Duration, date)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	instBooking := new(domain.Booking)
 	if err := u.helperPostgres.GetRoomID(ctx, instBooking, roomNumber); err != nil {
 		return nil, err
@@ -477,8 +482,8 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid
 		return err
 	}
 
-	u.PublishEvent("booking_updated_status", roomNumber, booking)
-	u.PublishStatus("booking_updated_status", booking)
+	u.PublishEvent("booking_end", roomNumber, booking)
+	u.PublishStatus("booking_end", booking)
 	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil

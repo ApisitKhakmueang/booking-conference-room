@@ -82,7 +82,7 @@ func (p *BookingProcessor) HandleBookingStart(ctx context.Context, t *asynq.Task
 	}
 
 	// 2. สั่ง DB ให้อัปเดตสถานะ (เช่น UPDATE bookings SET status = 'completed' WHERE id = ?)
-	p.usecase.PublishStatus("booking_updated_start", currentBooking)
+	p.usecase.PublishStatus("booking_start", currentBooking)
 
 	return nil // Return nil แปลว่างานสำเร็จ Asynq จะลบงานนี้ออกจาก Redis ให้เลย
 }
