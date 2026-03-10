@@ -3,76 +3,12 @@ package helper
 import (
 	// "log"
 	"errors"
-	"fmt"
+	// "fmt"
+	// "fmt"
 	"strings"
 	"time"
-
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
+	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 )
-
-func ConvertDateToStr(duration string, dateInput string) (*domain.Date, error) {
-	DateTime := new(domain.Date)
-	
-	// 1. กำหนด Location (ICT)
-	loc, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-		return nil, err // กรณี Server ไม่มี Timezone นี้ (ควร Handle ให้ดี)
-	}
-
-	var startOfMonth time.Time
-	var endOfMonth time.Time
-
-	// 2. แยก Logic ตาม Duration
-	switch duration {
-	case "month":
-		// --- โหมดเดือน ---
-		// Input: "2026-03"
-		// Start: 2026-03-01
-		// End:   2026-04-01 (+1 เดือน)
-		layout := "2006-01"
-		startOfMonth, err = time.ParseInLocation(layout, dateInput, loc)
-		if err == nil {
-			endOfMonth = startOfMonth.AddDate(0, 1, 0)
-		}
-
-	case "week":
-		// --- โหมดสัปดาห์ ---
-		// Input: "2026-03-15"
-		// Start: 2026-03-15
-		// End:   2026-03-22 (+7 วัน)
-		layout := "2006-01-02"
-		startOfMonth, err = time.ParseInLocation(layout, dateInput, loc)
-		if err == nil {
-			startOfMonth = GetStartDayWeek(startOfMonth)
-			endOfMonth = startOfMonth.AddDate(0, 0, 7)
-		}
-
-	case "day":
-		// --- โหมดวันเดียว ---
-		// Input: "2026-03-15"
-		// Start: 2026-03-15 00:00:00
-		// End:   2026-03-16 00:00:00 (+1 วัน เพื่อให้ครอบคลุมถึง 23:59:59)
-		layout := "2006-01-02"
-		startOfMonth, err = time.ParseInLocation(layout, dateInput, loc)
-		if err == nil {
-			endOfMonth = startOfMonth.AddDate(0, 0, 1)
-		}
-
-	default:
-		return nil, fmt.Errorf("invalid duration mode: %s", duration)
-	}
-
-	// 3. เช็ค Error จากการ Parse
-	if err != nil {
-		return nil, fmt.Errorf("invalid date format for mode '%s': %v", duration, err)
-	}
-
-	// 4. แปลงกลับเป็น String Format สำหรับ Query Database
-	DateTime.StartStr = startOfMonth.Format("2006-01-02 15:04:05")
-	DateTime.EndStr = endOfMonth.Format("2006-01-02 15:04:05")
-	
-	return DateTime, nil
-}
 
 func ParseTimeFormat(layout string, timeStr string) (time.Time, error) {
 	loc, err := time.LoadLocation("Asia/Bangkok")
@@ -185,6 +121,16 @@ func CheckIsDayOff(summary string, description string) bool {
 	// แต่ปกติแค่ Blacklist ก็เพียงพอแล้วสำหรับ Calendar ไทย
 
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
+}
+
+func CheckBeforeOneHour(start time.Time) error {
+	now := time.Now()
+
+	if start.After(now.Add(time.Hour)) {
+		return nil
+	}
+
+	return errors.New("Please operate at least 1 hour in advance.")
 }
 
 // func ParseTime(booking *domain.Booking) (*domain.Date, error) {
