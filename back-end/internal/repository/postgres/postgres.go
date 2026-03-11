@@ -42,12 +42,13 @@ func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domai
 	return nil
 }
 
-func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) error {
+func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, error) {
 	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
-	booking := new(domain.Booking)
+	deletedBooking := new(domain.Booking)
 	result := p.db.
 	  WithContext(ctx).
-		Model(booking).
+		Model(deletedBooking).
+		Clauses(clause.Returning{}).
 		Select("status").
 		Where("id = ? AND status = ?", bookingID, "confirm").
 		Updates(map[string]interface{}{
@@ -55,7 +56,7 @@ func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid
 			"passcode": nil, // ส่ง nil เพื่อบังคับให้เป็น NULL ใน Database
     },
 	)
-	return result.Error
+	return deletedBooking, result.Error
 }
 
 func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {

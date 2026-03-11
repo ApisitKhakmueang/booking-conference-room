@@ -299,16 +299,12 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 		return err
 	}
 
-	if err := u.redis.DeleteBooking(ctx, completedBooking, roomNumber); err != nil {
+	deletedBooking, err := u.redis.DeleteBooking(ctx, completedBooking, roomNumber);
+	if err != nil {
 		return errors.New("Don't have this booking")
 	}
 
-	completedBooking, err = u.helperPostgres.GetBookingByID(ctx, bookingID)
-	if err != nil {
-		return err
-	}
-
-	u.PublishEvent("booking_deleted", roomNumber, completedBooking)
+	u.PublishEvent("booking_deleted", roomNumber, deletedBooking)
 	// u.PublishStatus("booking_deleted", completedBooking)
 
 	return nil

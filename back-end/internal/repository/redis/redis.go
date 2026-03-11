@@ -57,14 +57,15 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 	return nil
 }
 
-func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
-	if err := r.postgres.DeleteBookingDB(ctx, booking.ID); err != nil {
-		return err
+func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
+	deletedBooking, err := r.postgres.DeleteBookingDB(ctx, booking.ID);
+	if err != nil {
+		return nil, err
 	}
 
 	r.DeleteBookingToCache(ctx, roomNumber)
 	
-	return nil
+	return deletedBooking, nil
 }
 
 func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
