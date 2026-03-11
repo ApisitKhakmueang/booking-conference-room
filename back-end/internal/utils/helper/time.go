@@ -133,6 +133,20 @@ func CheckBeforeOneHour(start time.Time) error {
 	return errors.New("Please operate at least 1 hour in advance.")
 }
 
+// เช็คว่าจองล่วงหน้าเกิน 30 วันหรือไม่
+func CheckMaxAdvanceBooking(start time.Time) error {
+	now := time.Now()
+	
+	// คำนวณเวลาปัจจุบัน + 30 วัน
+	maxAllowedDate := now.AddDate(0, 0, 30) 
+
+	if start.After(maxAllowedDate) {
+		return errors.New("Cannot book more than 30 days in advance")
+	}
+
+	return nil
+}
+
 // func ParseTime(booking *domain.Booking) (*domain.Date, error) {
 // 	layout := "2006-01-02 15:04:05"
 // 	start, err := ParseTimeFormat(layout, booking.StartTime)
