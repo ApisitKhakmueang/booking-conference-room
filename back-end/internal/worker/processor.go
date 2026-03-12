@@ -31,6 +31,7 @@ func (p *BookingProcessor) HandleBookingExpired(ctx context.Context, t *asynq.Ta
 		return err // ถ้า Error, Asynq จะเก็บคิวไว้ลองทำใหม่ (Retry) ให้อัตโนมัติ!
 	}
 
+	log.Println("GetBookingByID from HandleBookingExpired")
 	currentBooking, err := p.usecase.GetBookingByID(ctx, payload.BookingID)
 	if err != nil {
 		return err
@@ -63,6 +64,7 @@ func (p *BookingProcessor) HandleBookingStart(ctx context.Context, t *asynq.Task
 		return err // ถ้า Error, Asynq จะเก็บคิวไว้ลองทำใหม่ (Retry) ให้อัตโนมัติ!
 	}
 
+	log.Println("GetBookingByID from HandleBookingExpired")
 	currentBooking, err := p.usecase.GetBookingByID(ctx, payload.BookingID)
 	if err != nil {
 		if errors.Is(err, customError.ErrorNotFound) {

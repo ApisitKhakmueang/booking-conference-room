@@ -285,6 +285,7 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 	// 	return err
 	// }
 
+	log.Println("GetBookingByID from DeleteBooking")
 	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, bookingID)
 	if err != nil {
 		return err
@@ -494,6 +495,7 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid
 }
 
 func (u *bookingUsecase) GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error) {
+	log.Println("GetBookingByID from GetBookingByID in service")
 	booking, err := u.helperPostgres.GetBookingByID(ctx, id)
 	if err != nil {
 		return nil, err
