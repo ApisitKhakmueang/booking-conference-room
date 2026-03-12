@@ -1,4 +1,7 @@
+'use client'
+
 import { MonitorCheck, MonitorX, ToolCase, UserRound } from 'lucide-react';
+import { BookingEvent, RoomResp } from '@/utils/interface/response';
 
 const MOCK_ROOMS = [
   { id: 1, name: "Room A", capacity: 10, status: "available" },
@@ -24,12 +27,13 @@ const STATUS_CONFIG: Record<
   maintenance: { icon: ToolCase, textColor: "text-yellow-400 dark:text-warning" },
 };
 
-export default function RoomsGrid() {
+export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }) {
   return (
     <>
       <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card dark:text-secondary border-light-hover text-violet-900">
-        {MOCK_ROOMS.map((room) => {
-          const StatusIcon = STATUS_CONFIG[room.status].icon;
+        {displayRooms.map((room) => {
+          const currentStatus = (room?.status || 'available') as RoomStatus;
+          const StatusIcon = STATUS_CONFIG[currentStatus].icon;
           
           return (<li key={room.id} className="p-5 dark:hover:bg-hover hover:bg-light-hover hover:text-white transition-duration-300 cursor-pointer group/icons">
             <h2 className="text-xl font-semibold">{room.name}</h2>
@@ -41,10 +45,10 @@ export default function RoomsGrid() {
             <div className='flex xl:flex-row flex-col xl:items-center xl:justify-between gap-2 text-xl font-semibold'>
               <p className="flex items-center text-center text-2xl gap-1">
                 {room.capacity} 
-                <UserRound></UserRound>
+                <UserRound />
               </p>
 
-              <p className={`${STATUS_CONFIG[room.status].textColor} text-lg capitalize group-hover/icons:text-white transition-duration-300`}>
+              <p className={`${STATUS_CONFIG[currentStatus].textColor} text-lg capitalize group-hover/icons:text-white transition-duration-300`}>
                 {room.status}
               </p>
             </div>

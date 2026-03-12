@@ -1,7 +1,7 @@
 import { cn } from '@/utils/utils'
 import { HTMLAttributes } from 'react'
 
-type CardVariant = 'dark-purple' | 'purple'
+export type CardVariant = 'dark-purple' | 'purple'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant
