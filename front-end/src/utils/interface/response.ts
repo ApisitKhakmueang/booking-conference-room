@@ -7,16 +7,25 @@ export interface Holiday {
   source: string;
 }
 
-interface Room {
+export interface RoomResp {
   id: string
+  createdAt?: string
+  updatedAt?: string
   name: string
   roomNumber: number
+  location?: string
+  capacity?: number
+  isActive?: string
+  status?: string
 }
 
 interface User {
   id: string
   email: string
   fullName: string
+  avatarUrl?: string
+  role?: string
+  createdAt?: string
 }
 
 export interface BookingEvent {
@@ -27,5 +36,5 @@ export interface BookingEvent {
   passcode: string
   status: string
   User: User
-  Room: Room
+  Room: RoomResp
 }
