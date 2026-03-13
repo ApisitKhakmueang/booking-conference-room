@@ -1,5 +1,5 @@
 import { BookingEvent } from '@/utils/interface/response';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
 import useSession from './useSession';
@@ -19,12 +19,14 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
   const sessionToken = useSession() 
 
   const url = process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET;
-  const wsUrl = roomNumber && startDate && endDate 
+  const wsUrl = useMemo(() => (
+    sessionToken && roomNumber && startDate && endDate 
     ? `${url as string}/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
-    : null;
+    : null
+  ), [sessionToken, roomNumber, startDate, endDate]);
 
   const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
-    sessionToken ? wsUrl : null, 
+    wsUrl, 
     {
       onOpen: () => {
         console.log('WebSocket Connected!');

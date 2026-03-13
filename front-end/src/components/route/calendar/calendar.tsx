@@ -1,15 +1,21 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react';
+// Libraries
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useResponsive } from '@/hooks/ui/useMediaQuery';
 import {
   format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, parseISO,
 } from 'date-fns';
-import MonthView from './calendarMonthView';
-import TimeGridView from './calendarTimeGridView';
 import axios from 'axios';
 import { Holiday } from '@/utils/interface/response';
 import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
+
+// Components
+import MonthView from './calendarMonthView';
+import TimeGridView from './calendarTimeGridView';
+import RoomSelector, { ArrangeRoom } from './roomSelector';
+import { useRoomStore } from '@/stores/room.store';
+import { useShallow } from 'zustand/shallow';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -18,16 +24,39 @@ type ViewType = 'month' | 'week' | 'day';
 // หมายเหตุ: วันที่ใน mock data ควรแก้วันให้ตรงกับปัจจุบันเพื่อให้เห็นภาพ
 
 export default function Calendar() {
+  const { rawRoom } = useRoomStore(
+    useShallow(((state) => ({
+      rawRoom: state.rooms
+    })))
+  )
+  
+  const rooms = useMemo(() => {
+    // ดักไว้ก่อนว่าถ้าไม่มีข้อมูล ให้ return array เปล่าๆ ออกไป
+    if (!rawRoom) return [];
+
+    // 🌟 แปลงร่างด้วย .map() และต่อด้วย .sort() ได้เลย
+    return rawRoom
+      .map((room) => ({
+        id: room.id,
+        name: room.name,
+        roomNumber: room.roomNumber
+      }))
+      .sort((a, b) => a.roomNumber - b.roomNumber); // เรียงน้อยไปมาก
+  }, [rawRoom])
+
+  const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(undefined);
   const [holiday, setHoliday] = useState<Holiday[] | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
   const { isMobile, isTablet } = useResponsive();
   const [isLoadingHoliday, setIsLoadingHoliday] = useState(true);
+  const [isLoadingRoom, setIsLoadingRoom] = useState(true)
   
   const currentYear = currentDate.getFullYear();
   const startYear = `${currentYear}-01-01`;
   const endYear = `${currentYear}-12-31`;
-  const { bookings, isLoadingBooking } = useBookingWebSocket(1, startYear, endYear)
+  const currentRoomNumber = selectedRoom?.roomNumber ?? 0;
+  const { bookings, isLoadingBooking } = useBookingWebSocket(currentRoomNumber, startYear, endYear)
 
   let availableViews: ViewType[] = ['month', 'week', 'day']; // 1. ตั้งค่า Default ไว้ก่อนเลย (กันเหนียว)
   if (isMobile) {
@@ -80,6 +109,13 @@ export default function Calendar() {
     }
   }, [currentDate.getFullYear()])
 
+  useEffect(() => {
+    if (rooms.length > 0 && !selectedRoom) {
+      setSelectedRoom(rooms[0]);
+      setIsLoadingRoom(false)
+    }
+  }, [rooms, selectedRoom]);
+
 // --- 1. Logic การบังคับเปลี่ยน View (Auto-switch) ---
   useEffect(() => {
     if (isMobile) {
@@ -105,7 +141,7 @@ export default function Calendar() {
     // fetchEvents()
   }, [currentYear])
 
-  const isSyncing = isLoadingBooking || isLoadingHoliday;
+  const isSyncing = isLoadingBooking || isLoadingHoliday || isLoadingRoom;
 
   return (
     <div className="h-full dark:bg-main-background bg-white text-gray-200 font-sans">
@@ -140,13 +176,11 @@ export default function Calendar() {
           </div>
           
           <div className='flex gap-4 items-center'>
-            <div>
-              test
-            </div>
+            <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
             <div className="flex gap-2">
-              <button onClick={prev} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
-              <button onClick={today} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
-              <button onClick={next} className="px-3 py-1 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
+              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
+              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
+              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
             </div>
           </div>
         </div>
