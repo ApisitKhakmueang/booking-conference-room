@@ -1,7 +1,7 @@
 "use client";
 
 // Library
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useShallow } from "zustand/shallow";
 
 // Hook
@@ -14,6 +14,8 @@ import Sidebar from "./sidebar";
 
 // Context
 import { useControlLayoutStore } from "@/stores/control-layout.store";
+import axios from "axios";
+import { useRoomStore } from "@/stores/room.store";
 
 export default function NavigationLayout({
   children,
@@ -27,8 +29,28 @@ export default function NavigationLayout({
       setIsHideNav: state.setIsHideNav
     })))
   )
+
+  const { setRoom } = useRoomStore(
+    useShallow(((state) => ({
+      setRoom: state.setRooms
+    })))
+  )
   // 2. ดึงค่า Media Query มาเก็บใส่ตัวแปร
   const isLargeScreen = useMediaQuery("(max-width: 1024px)")
+
+  const fetchRoom = useCallback(async () => {
+    const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
+    try {
+      const response = await axios.get(`${url as string}/room/details`);
+      setRoom(response.data); // เก็บข้อมูลดิบลง State
+    } catch(error) {
+      console.log('error: ', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRoom();
+  }, [fetchRoom]);
 
   // 3. ✅ ใช้ useEffect เพื่อ Sync ค่า (Side Effect)
   useEffect(() => {

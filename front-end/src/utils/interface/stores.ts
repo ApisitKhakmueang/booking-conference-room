@@ -1,4 +1,5 @@
 import { UserProfile } from "./interface"
+import { RoomResp } from "./response"
 
 export interface AuthState {
   user: UserProfile | null
@@ -17,4 +18,9 @@ export interface ControlLayoutState {
   isOpenNav: boolean
   setIsHideNav: (isHide: boolean) => void
   setIsOpenNav: (isOpen: boolean) => void
+}
+
+export interface RoomState {
+  rooms: RoomResp[] | null
+  setRooms: (newRooms: RoomResp[]) => void
 }
