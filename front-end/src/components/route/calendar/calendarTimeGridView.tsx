@@ -1,38 +1,21 @@
 import { useMemo } from 'react';
 import {
-  format, addDays,
-  startOfWeek, endOfWeek, startOfDay,  eachDayOfInterval,
-  isSameDay, differenceInMinutes, setHours, setMinutes
+  format, startOfWeek, endOfWeek, 
+  startOfDay,  eachDayOfInterval,
+  isSameDay, differenceInMinutes
 } from 'date-fns';
-import { Holiday } from '@/utils/interface/response';
+import { BookingEvent, Holiday } from '@/utils/interface/response';
 
-const TODAY = new Date(); 
-const EVENTS = [
-  { 
-    id: 1, 
-    title: 'Marketing Sync', 
-    start: setMinutes(setHours(TODAY, 9), 0), // วันนี้ 09:00
-    end: setMinutes(setHours(TODAY, 10), 30), // ถึง 10:30
-    color: 'bg-purple-900/60 border-purple-500 text-purple-100' 
-  },
-  { 
-    id: 2, 
-    title: 'Client Meeting', 
-    start: setMinutes(setHours(addDays(TODAY, 1), 13), 0), // พรุ่งนี้ 13:00
-    end: setMinutes(setHours(addDays(TODAY, 1), 14), 0),   // ถึง 14:00
-    color: 'bg-blue-900/60 border-blue-500 text-blue-100' 
-  },
-    { 
-    id: 3, 
-    title: 'Lunch', 
-    start: setMinutes(setHours(TODAY, 12), 0), // วันนี้ 12:00
-    end: setMinutes(setHours(TODAY, 13), 0),   // ถึง 13:00
-    color: 'bg-orange-900/60 border-orange-500 text-orange-100' 
-  },
-];
+interface TimeGridViewProps { 
+  currentDate: Date, 
+  bookingEvents: BookingEvent[] | null, 
+  view: 'week' | 'day', 
+  holiday: Holiday[] | null,
+  isSyncing: boolean
+}
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
-export default function TimeGridView({ currentDate, view, holiday }: { currentDate: Date, view: 'week' | 'day', holiday: Holiday[] | null }) {
+export default function TimeGridView({ currentDate, bookingEvents, view, holiday, isSyncing }: TimeGridViewProps) {
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
     if (view === 'day') return [currentDate];
@@ -48,6 +31,16 @@ export default function TimeGridView({ currentDate, view, holiday }: { currentDa
 
   return (
     <div className="flex h-full overflow-hidden flex-col">
+      {isSyncing && (
+        <div className="absolute top-2 right-4 z-10 text-xs text-blue-500 flex items-center gap-1 bg-white/80 dark:bg-black/80 px-2 py-1 rounded-full shadow">
+          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Updating...
+        </div>
+      )}
+
       {/* Header (แสดงวันที่ด้านบน) */}
       <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover ${view === 'day' ? 'grid-cols-1 pl-0' : 'grid-cols-7 pl-16'}`}>
         {days.map(day => {
@@ -97,15 +90,15 @@ export default function TimeGridView({ currentDate, view, holiday }: { currentDa
                 ))}
 
                 {/* --- Render Events (Absolute Positioning) --- */}
-                {EVENTS.filter(e => isSameDay(e.start, day)).map(evt => {
+                {bookingEvents?.filter(e => isSameDay(e.startTime, day)).map(evt => {
                   // คำนวณตำแหน่ง
-                  const startMin = differenceInMinutes(evt.start, startOfDay(evt.start));
-                  const duration = differenceInMinutes(evt.end, evt.start);
+                  const startMin = differenceInMinutes(evt.startTime, startOfDay(evt.startTime));
+                  const duration = differenceInMinutes(evt.endTime, evt.startTime);
                   
                   return (
                     <div
                       key={evt.id}
-                      className={`absolute left-1 right-1 rounded px-2 py-1 text-xs border-l-[3px] overflow-hidden cursor-pointer hover:brightness-110 hover:z-20 transition-all shadow-sm ${evt.color}`}
+                      className='absolute left-1 right-1 rounded px-2 py-1 text-xs border-l-[3px] overflow-hidden cursor-pointer hover:brightness-110 hover:z-20 transition-all shadow-sm dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-orange-100'
                       style={{
                         top: `${(startMin / 60) * 60}px`, // 60px คือความสูงต่อ 1 ชม.
                         height: `${(duration / 60) * 60}px`
@@ -114,7 +107,7 @@ export default function TimeGridView({ currentDate, view, holiday }: { currentDa
                     >
                       <div className="font-semibold">{evt.title}</div>
                       <div className="opacity-75 text-[10px]">
-                        {format(evt.start, 'HH:mm')} - {format(evt.end, 'HH:mm')}
+                        {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
                       </div>
                     </div>
                   );
