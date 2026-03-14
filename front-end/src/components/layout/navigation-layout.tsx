@@ -22,7 +22,7 @@ export default function NavigationLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isOpenNav, isHideNav, setIsHideNav} = useControlLayoutStore(
+  const { isOpenNav, isHideNav, setIsHideNav } = useControlLayoutStore(
     useShallow(((state) => ({
       isOpenNav: state.isOpenNav,
       isHideNav: state.isHideNav,
