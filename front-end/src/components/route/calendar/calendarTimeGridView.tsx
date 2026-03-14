@@ -42,7 +42,9 @@ export default function TimeGridView({ currentDate, bookingEvents, view, holiday
       )}
 
       {/* Header (แสดงวันที่ด้านบน) */}
-      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover ${view === 'day' ? 'grid-cols-1 pl-0' : 'grid-cols-7 pl-16'}`}>
+      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover 
+        ${view === 'day' ? 'grid-cols-1 pl-0' : 'grid-cols-7 pl-16'}
+        ${isSyncing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
         {days.map(day => {
           const holidays = holiday?.filter(e => isSameDay(e.date, day));
           return (
