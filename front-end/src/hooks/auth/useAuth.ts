@@ -9,39 +9,48 @@ export default function useAuth() {
 
   useEffect(() => {
     // 🌟 2. เปลี่ยนมาใช้ getSession() แทน getUser() เพื่อให้ได้ทั้งข้อมูล User และ access_token พร้อมกัน
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      // เซ็ต Token ทันที
-      setSessionToken(session?.access_token || null)
+    const fetchInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
 
-      if (!session?.user) {
-        setUser(null)
-        return
+        // เซ็ต Token ทันที
+        setSessionToken(session?.access_token || null)
+
+        if (!session?.user) {
+          setUser(null)
+          return
+        }
+
+        const u = session.user
+
+        const { data: profile, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', u.id)
+          .single()
+
+        if (error) {
+          console.log('error:', error)
+          return
+        }
+
+        const userData = {
+          id: u.id,
+          email: u.email!,
+          name: profile?.full_name,
+          avatar: profile?.avatar_url,
+          role: profile?.role,
+        }
+
+        setUser(userData)
+      } catch (err) {
+        console.error('Unexpected error fetching session:', err)
       }
+    }
 
-      const u = session.user
-
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', u.id)
-        .single()
-
-      if (error) {
-        console.log('error:', error)
-        return
-      }
-
-      const userData = {
-        id: u.id,
-        email: u.email!,
-        name: profile?.full_name,
-        avatar: profile?.avatar_url,
-        role: profile?.role,
-      }
-
-      setUser(userData)
-    })
-
+    // 🌟 2. สั่งรันฟังก์ชันที่เราเพิ่งสร้าง
+    fetchInitialSession()
+    
     // ฟัง event login / logout / token refresh
     const {
       data: { subscription },

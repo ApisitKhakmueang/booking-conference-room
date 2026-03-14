@@ -5,7 +5,7 @@ import { AuthState } from '../utils/interface/stores'
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       setUser: (user) => set({ user }),
       sessionToken: null,
