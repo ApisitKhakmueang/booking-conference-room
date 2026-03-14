@@ -3,8 +3,7 @@
 import RoomsGrid from "./room-grid";
 import RoomStatus from "./room-status";
 import useBookingStatusWS from "@/hooks/data/useBookingStatusWS";
-import axios from 'axios';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RoomResp } from '@/utils/interface/response';
 import { useShallow } from "zustand/shallow";
 import { useRoomStore } from "@/stores/room.store";
@@ -55,9 +54,9 @@ export default function Room() {
   }, [rawRoom, bookings]); // คำนวณใหม่เมื่อสองตัวนี้เปลี่ยน
 
   return (
-    <>
+    <div className={`flex flex-col gap-5 transition-opacity duration-300 ${isLoadingBooking ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
       <RoomStatus displayRooms={displayRooms} isLoadingBooking={isLoadingBooking} />
       <RoomsGrid displayRooms={displayRooms} />
-    </>
+    </div>
   )
 }
