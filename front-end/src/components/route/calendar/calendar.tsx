@@ -144,13 +144,14 @@ export default function Calendar() {
   const isSyncing = isLoadingBooking || isLoadingHoliday || isLoadingRoom;
 
   return (
-    <div className="h-full dark:bg-main-background bg-white text-gray-200 font-sans">
-      <div className="flex flex-col h-[80vh] max-w-7xl mx-auto border dark:border-sidebar rounded-lg dark:bg-card border-light-hover shadow-2xl overflow-hidden">
+    <div className="flex-1 dark:bg-main-background bg-white text-gray-200 font-sans pb-3">
+      {/* Edit h-[80vh] for expand to height screen */}
+      <div className="flex flex-col h-[78vh] max-w-7xl mx-auto border dark:border-sidebar rounded-lg dark:bg-card border-light-hover shadow-2xl overflow-hidden">
         
         {/* --- Header Controls --- */}
         <div className="flex sm:flex-row sm:gap-0 gap-2 flex-col items-center justify-between px-6 py-4 border-b dark:border-sidebar dark:bg-sidebar bg-light-hover text-white">
-          <div className="flex md:flex-row flex-col sm:items-start items-center md:gap-4 gap-2">
-            <h2 className="sm:text-start text-center text-2xl font-bold text-white lg:w-64 md:w-full">
+          <div className="flex lg:flex-row flex-col sm:items-start items-center md:gap-4 gap-2">
+            <h2 className="sm:text-start text-center text-2xl font-bold text-white">
               {format(currentDate, view === 'day' ? 'd MMMM yyyy' : 'MMMM yyyy')}
             </h2>
             {!isMobile && (
@@ -175,7 +176,7 @@ export default function Calendar() {
             )}
           </div>
           
-          <div className='flex gap-4 items-center'>
+          <div className='flex sm:flex-row flex-col gap-4 items-center'>
             <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
             <div className="flex gap-2">
               <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>

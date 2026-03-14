@@ -13,7 +13,7 @@ import {
 
 // Components
 import SidebarToggle from "./sidebar-toggle";
-import BackgroundDrop from "./drop-background";
+import DropBackground from "./drop-background";
 import ThemeButton from "../../utils/theme-button";
 import { useShallow } from "zustand/shallow";
 import { useControlLayoutStore } from "@/stores/control-layout.store";
@@ -99,7 +99,7 @@ export default function Sidebar() {
         </nav>
       </aside>
 
-      <BackgroundDrop />
+      <DropBackground />
     </>
   );
 }
