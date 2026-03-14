@@ -150,8 +150,8 @@ export default function Calendar() {
         
         {/* --- Header Controls --- */}
         <div className="flex sm:flex-row sm:gap-0 gap-2 flex-col items-center justify-between px-6 py-4 border-b dark:border-sidebar dark:bg-sidebar bg-light-hover text-white">
-          <div className="flex lg:flex-row flex-col sm:items-start items-center md:gap-4 gap-2">
-            <h2 className="sm:text-start text-center text-2xl font-bold text-white">
+          <div className="flex lg:flex-row flex-col items-center justify-center md:gap-4 gap-2">
+            <h2 className="sm:text-start text-2xl font-bold text-white">
               {format(currentDate, view === 'day' ? 'd MMMM yyyy' : 'MMMM yyyy')}
             </h2>
             {!isMobile && (
