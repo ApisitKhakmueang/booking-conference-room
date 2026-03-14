@@ -4,6 +4,8 @@ import { RoomResp } from "./response"
 export interface AuthState {
   user: UserProfile | null
   setUser: (user: UserProfile | null) => void
+  sessionToken: string | null;
+  setSessionToken: (sessionToken: string | null) => void
 }
 
 type Theme = 'dark' | 'light'

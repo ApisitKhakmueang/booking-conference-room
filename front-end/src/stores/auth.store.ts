@@ -5,12 +5,18 @@ import { AuthState } from '../utils/interface/stores'
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       setUser: (user) => set({ user }),
+      sessionToken: null,
+      setSessionToken: (token) => set({ sessionToken: token })
     }),
     {
       name: 'auth-storage', // ชื่อ localStorage key
+      partialize: (state) => ({ 
+        user: state.user, 
+        sessionToken: state.sessionToken 
+      }),
     }
   )
 )

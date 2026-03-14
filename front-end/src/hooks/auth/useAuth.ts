@@ -4,17 +4,21 @@ import { useAuthStore } from '@/stores/auth.store'
 
 export default function useAuth() {
   const supabase = createClient()
-  const setUser = useAuthStore((s) => s.setUser)
+  const setUser = useAuthStore(((s) => s.setUser))
+  const setSessionToken = useAuthStore((s) => s.setSessionToken)
 
   useEffect(() => {
-    // ดึง user ตอนโหลดครั้งแรก
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) {
+    // 🌟 2. เปลี่ยนมาใช้ getSession() แทน getUser() เพื่อให้ได้ทั้งข้อมูล User และ access_token พร้อมกัน
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      // เซ็ต Token ทันที
+      setSessionToken(session?.access_token || null)
+
+      if (!session?.user) {
         setUser(null)
         return
       }
 
-      const u = data.user
+      const u = session.user
 
       const { data: profile, error } = await supabase
         .from('users')
@@ -38,10 +42,13 @@ export default function useAuth() {
       setUser(userData)
     })
 
-    // ฟัง event login / logout
+    // ฟัง event login / logout / token refresh
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // 🌟 3. อัปเดต Token ใหม่ทุกครั้งที่มีการเปลี่ยนแปลง
+      setSessionToken(session?.access_token || null)
+
       const user = session?.user
       if (!user) {
         setUser(null)
@@ -63,7 +70,6 @@ export default function useAuth() {
         id: user.id,
         email: user.email!,
         name: profile?.full_name,
-        // avatar: profile?.avatar_url,
         avatar: `${profile?.avatar_url}?v=${Date.now()}`,
         role: profile?.role,
       }
@@ -72,5 +78,5 @@ export default function useAuth() {
     })
 
     return () => subscription.unsubscribe()
-  }, [setUser, supabase])
+  }, [setUser, setSessionToken, supabase])
 }
