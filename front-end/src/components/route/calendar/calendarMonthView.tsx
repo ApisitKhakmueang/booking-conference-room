@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   format, addDays,
   startOfWeek, endOfWeek,  eachDayOfInterval,
@@ -33,15 +33,18 @@ const EVENTS = [
   },
 ];
 
+type ViewType = 'month' | 'week' | 'day';
 interface MonthProps { 
   currentDate: Date, 
   bookingEvents: BookingEvent[] | null, 
   holiday: Holiday[] | null 
   isSyncing: boolean
+  setView: (view:ViewType) => void
+  setCurrentDate: (date:Date) => void
 }
 
 // --- Component: Month View (แบบเดิม) ---
-export default function MonthView({ currentDate, bookingEvents, holiday, isSyncing }: MonthProps) {
+export default function MonthView({ currentDate, bookingEvents, holiday, isSyncing, setView, setCurrentDate }: MonthProps) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate));
     const end = endOfWeek(endOfMonth(currentDate));
@@ -99,6 +102,11 @@ export default function MonthView({ currentDate, bookingEvents, holiday, isSynci
     return map;
   }, [holiday]);
 
+  const handleClickDay = useCallback((date: Date) => {
+    setCurrentDate(date)
+    setView('day')
+  }, [])
+
   return (
     <div className="h-full flex flex-col">
       {isSyncing && (
@@ -123,11 +131,15 @@ export default function MonthView({ currentDate, bookingEvents, holiday, isSynci
            const isToday = isSameDay(day, new Date());
           //  const holidays = holiday?.filter(e => isSameDay(e.date, day));
            return (
-            <div key={day.toString()} className={`border-b dark:border-hover border-light-hover p-2 min-h-25 
-            ${day.getDay() !== 6 ? 'border-r' : ''}
-            ${!isSameMonth(day, currentDate) 
-              ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
-              : 'dark:text-white text-violet-900'}`}>
+            <div 
+              key={day.toString()} 
+              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 
+                ${day.getDay() !== 6 ? 'border-r' : ''}
+                ${!isSameMonth(day, currentDate) 
+                  ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
+                  : 'dark:text-white text-violet-900'}`}
+              onClick={() => handleClickDay(day)}
+              >
               <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 text-white' : ''}`}>
                 {format(day, 'd')}
               </div>

@@ -143,6 +143,13 @@ export default function Calendar() {
 
   const isSyncing = isLoadingBooking || isLoadingHoliday || isLoadingRoom;
 
+  const sharedProps = {
+    currentDate: currentDate,
+    bookingEvents: bookings,
+    holiday: holiday,
+    isSyncing: isSyncing
+  };
+
   return (
     <div className="flex-1 dark:bg-main-background bg-white text-gray-200 font-sans pb-3">
       {/* Edit h-[80vh] for expand to height screen */}
@@ -188,8 +195,8 @@ export default function Calendar() {
 
         {/* --- Body: Render ตาม View --- */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          {view === 'month' && <MonthView currentDate={currentDate} bookingEvents={bookings} holiday={holiday} isSyncing={isSyncing} />}
-          {(view === 'week' || view === 'day') && <TimeGridView currentDate={currentDate} bookingEvents={bookings} view={view} holiday={holiday} isSyncing={isSyncing} />}
+          {view === 'month' && <MonthView {...sharedProps} setView={setView} setCurrentDate={setCurrentDate} />}
+          {(view === 'week' || view === 'day') && <TimeGridView {...sharedProps} view={view} />}
         </div>
       </div>
     </div>
