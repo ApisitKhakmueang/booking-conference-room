@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
 import useSession from './useSession';
+import { useAuthStore } from '@/stores/auth.store';
 
 const formatBookingEvent = (event: any): BookingEvent => {
   return {
@@ -15,7 +16,7 @@ const formatBookingEvent = (event: any): BookingEvent => {
 export default function useBookingStatusWS() {
   const [bookings, setBookings] = useState<BookingEvent[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
-  const sessionToken = useSession() 
+  const sessionToken = useAuthStore((state) => state.sessionToken);
 
   const wsUrl = useMemo(() => {
     return sessionToken ? `${process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET}/booking/status` : null;

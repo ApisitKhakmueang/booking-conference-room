@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
 import useSession from './useSession';
+import { useAuthStore } from '@/stores/auth.store';
 
 // 🌟 1. สร้าง Helper function สำหรับแปลง String -> Date Object
 const formatBookingEvent = (event: any): BookingEvent => {
@@ -16,7 +17,7 @@ const formatBookingEvent = (event: any): BookingEvent => {
 export function useBookingWebSocket(roomNumber: number, startDate: string, endDate: string) {
   const [bookings, setBookings] = useState<BookingEvent[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
-  const sessionToken = useSession() 
+  const sessionToken = useAuthStore((state) => state.sessionToken);
 
   const url = process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET;
   const wsUrl = useMemo(() => (
@@ -24,11 +25,11 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
     ? `${url as string}/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
     : null
   ), [sessionToken, roomNumber, startDate, endDate]);
-  // console.log("sessionToken: ", sessionToken)
-  // console.log("roomNumber: ", roomNumber)
-  // console.log("startDate: ", startDate)
-  // console.log("endDate: ", endDate)
-  // console.log("wsUrl: ", wsUrl)
+  console.log("sessionToken: ", sessionToken)
+  console.log("roomNumber: ", roomNumber)
+  console.log("startDate: ", startDate)
+  console.log("endDate: ", endDate)
+  console.log("wsUrl: ", wsUrl)
 
   const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
     wsUrl, 
