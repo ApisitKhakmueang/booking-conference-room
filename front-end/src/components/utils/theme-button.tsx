@@ -1,5 +1,5 @@
 import useTheme from "@/hooks/ui/useTheme";
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 import { useControlLayoutStore } from "@/stores/control-layout.store";
 import {
   Moon,
