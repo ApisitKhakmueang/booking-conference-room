@@ -49,7 +49,7 @@ export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms }: {
         onClick={() => setIsOpen(!isOpen)}
         className={`
           flex items-center justify-between gap-2 min-w-35
-          px-3 py-1 text-sm rounded cursor-pointer transition-colors
+          px-3 py-1 text-sm rounded cursor-pointer
           border border-white dark:border-hover 
           hover:bg-light-card hover:text-white
           dark:hover:bg-hover
@@ -78,13 +78,13 @@ export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms }: {
           bg-white border-light-google/30
           dark:bg-card dark:border-hover
         ">
-          <ul className="max-h-60 overflow-auto py-1 no-scrollbar">
+          <ul className="max-h-60 overflow-auto no-scrollbar">
             {rooms.map((room) => (
               <li key={room.id}>
                 <button
                   onClick={() => handleSelect(room)}
                   className={`
-                    w-full text-left px-3 py-2 text-sm transition-colors
+                    w-full text-left px-3 py-2 text-sm
                     
                     /* Hover Effect: ใช้สีเดียวกับ Hover ของปุ่มหลัก */
                     hover:bg-light-card hover:text-white

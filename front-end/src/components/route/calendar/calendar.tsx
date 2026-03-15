@@ -153,15 +153,18 @@ export default function Calendar() {
             )}
           </div>
           
-          <div className='flex sm:flex-row flex-col gap-4 items-center'>
-            {view === 'month' &&
-              <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Add</button>
-            }
-            <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
+          <div className='flex xl:flex-row flex-col gap-4 items-center'>
+            <div className='flex flex-row gap-2 items-center'>
+              {view === 'month' &&
+                <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm p-1 cursor-pointer rounded">Add Booking</button>
+              }
+              <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
+            </div>
+            
             <div className="flex gap-2">
-              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Prev</button>
-              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Today</button>
-              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Next</button>
+              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
+              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
+              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
             </div>
           </div>
         </div>
