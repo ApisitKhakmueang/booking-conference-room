@@ -2,7 +2,7 @@
 
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useState } from "react"
-import Button from "../ui/button";
+import { Button } from "../ui/button";
 import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
 

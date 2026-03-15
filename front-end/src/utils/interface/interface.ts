@@ -71,3 +71,8 @@ export interface ValidateDetailProps {
 export interface DisplayStrongPasswordProps {
   password: PasswordValidation
 }
+
+export interface ModalProps {
+  isAddModalOpen: boolean
+  setIsAddModalOpen: (status:boolean) => void
+}

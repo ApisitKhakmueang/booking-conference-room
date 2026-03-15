@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
@@ -45,30 +46,24 @@ export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms }: {
       {/* ปุ่ม Trigger: ใช้ Class เดียวกับปุ่ม Prev/Next ของคุณเป๊ะๆ 
          เพิ่ม flex, items-center, justify-between เพื่อจัด icon
       */}
-      <button
+      <Button
         onClick={() => setIsOpen(!isOpen)}
-        className={`
-          flex items-center justify-between gap-2 min-w-35
-          px-3 py-1 text-sm rounded cursor-pointer
-          border border-white dark:border-hover 
-          hover:bg-light-card hover:text-white
-          dark:hover:bg-hover
+        variant="dropdown"
+        className={`py-1.5 hover:bg-light-card hover:text-white dark:hover:bg-hover
           ${isOpen ? 'bg-light-card text-white dark:bg-hover' : ''}
         `}
       >
         <span className="truncate">{selectedRoom?.name}</span>
         
         {/* Icon ลูกศร (Arrow Down) */}
-        {
-          isOpen ? <ChevronUp /> : <ChevronDown />
-        }
+        { isOpen ? <ChevronUp /> : <ChevronDown /> }
         {/* <svg 
             className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
             fill="none" viewBox="0 0 24 24" stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg> */}
-      </button>
+      </Button>
 
       {/* ตัวรายการ Dropdown (Menu List)
          ใช้สีจาก Variable ที่คุณให้มา

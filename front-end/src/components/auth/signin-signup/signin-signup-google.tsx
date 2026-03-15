@@ -1,4 +1,4 @@
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation"
 import { SignInProps } from "@/utils/interface/interface";
 import { useHandleAuth } from "@/hooks/auth/useHandleAuth";

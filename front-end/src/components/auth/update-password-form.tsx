@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import Button from "../ui/button";
+import { Button } from "../ui/button";
 import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
 import ShowPassword from "../utils/show-password";

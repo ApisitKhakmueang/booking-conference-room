@@ -27,7 +27,7 @@ export default function SignIn_SignupForm() {
           />
 
           <div className='relative z-10'>
-            <ThemeButton isOpen={true} className='p-0' />
+            <ThemeButton className='p-0' />
           </div>
         </div>
 
