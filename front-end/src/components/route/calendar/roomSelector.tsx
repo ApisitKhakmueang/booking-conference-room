@@ -1,7 +1,5 @@
-import { useRoomStore } from "@/stores/room.store";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useShallow } from "zustand/shallow";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 // Mock Data สำหรับห้อง
 // const rooms = [

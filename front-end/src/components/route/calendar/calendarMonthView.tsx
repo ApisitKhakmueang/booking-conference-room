@@ -36,7 +36,7 @@ const EVENTS = [
 type ViewType = 'month' | 'week' | 'day';
 interface MonthProps { 
   currentDate: Date, 
-  bookingEvents: BookingEvent[] | null, 
+  bookings: BookingEvent[] | null, 
   holiday: Holiday[] | null 
   isSyncing: boolean
   setView: (view:ViewType) => void
@@ -44,7 +44,7 @@ interface MonthProps {
 }
 
 // --- Component: Month View (แบบเดิม) ---
-export default function MonthView({ currentDate, bookingEvents, holiday, isSyncing, setView, setCurrentDate }: MonthProps) {
+export default function MonthView({ currentDate, bookings, holiday, isSyncing, setView, setCurrentDate }: MonthProps) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate));
     const end = endOfWeek(endOfMonth(currentDate));
@@ -54,8 +54,8 @@ export default function MonthView({ currentDate, bookingEvents, holiday, isSynci
   const groupedEvents = useMemo(() => {
     const map = new Map<string, BookingEvent[]>();
     
-    if (bookingEvents) {
-      bookingEvents.forEach(evt => {
+    if (bookings) {
+      bookings.forEach(evt => {
         try {
           // 1. หา "ทุกวัน" ที่ Event นี้ครอบคลุม (ตั้งแต่ start ถึง end)
           // ใส่ startOfDay และ endOfDay เพื่อป้องกันบั๊กเรื่องเวลาเศษชั่วโมงข้ามวัน
@@ -86,7 +86,7 @@ export default function MonthView({ currentDate, bookingEvents, holiday, isSynci
 
     // console.log("groupedEvents: ", map)
     return map;
-  }, [bookingEvents]);
+  }, [bookings]);
 
   const groupedHolidays = useMemo(() => {
     const map = new Map<string, Holiday[]>();

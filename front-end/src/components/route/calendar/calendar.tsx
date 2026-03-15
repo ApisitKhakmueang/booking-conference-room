@@ -1,21 +1,23 @@
 'use client'
 
-// Libraries
-import { useState, useEffect, useCallback, useMemo } from 'react';
+// Library
+import { useState, useEffect, useMemo } from 'react';
 import { useResponsive } from '@/hooks/ui/useMediaQuery';
 import {
-  format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, parseISO,
+  format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays,
 } from 'date-fns';
-import axios from 'axios';
-import { Holiday } from '@/utils/interface/response';
-import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
 
-// Components
+// Component
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
 import RoomSelector, { ArrangeRoom } from './roomSelector';
+import Modal from '@/components/ui/modal';
+
+// Hook
+import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
 import { useRoomStore } from '@/stores/room.store';
 import { useShallow } from 'zustand/shallow';
+import { useHolidays } from '@/hooks/data/useHolidays';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -45,18 +47,18 @@ export default function Calendar() {
   }, [rawRoom])
 
   const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(undefined);
-  const [holiday, setHoliday] = useState<Holiday[] | null>(null)
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
   const { isMobile, isTablet } = useResponsive();
-  const [isLoadingHoliday, setIsLoadingHoliday] = useState(true);
   const [isLoadingRoom, setIsLoadingRoom] = useState(true)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   
   const currentYear = currentDate.getFullYear();
   const startYear = `${currentYear}-01-01`;
   const endYear = `${currentYear}-12-31`;
   const currentRoomNumber = selectedRoom?.roomNumber ?? 0;
   const { bookings, isLoadingBooking } = useBookingWebSocket(currentRoomNumber, startYear, endYear)
+  const { holiday, isLoadingHoliday } = useHolidays(startYear, endYear);
 
   let availableViews: ViewType[] = ['month', 'week', 'day']; // 1. ตั้งค่า Default ไว้ก่อนเลย (กันเหนียว)
   if (isMobile) {
@@ -81,33 +83,6 @@ export default function Calendar() {
   };
 
   const today = () => setCurrentDate(new Date());
-
-  const fetchHolidays = useCallback(async () => {
-    const url = process.env.NEXT_PUBLIC_BACKEND_HTTP
-    try{
-      setIsLoadingHoliday(true)
-      const response = await axios.get(`${url as string}/holiday?startDate=${startYear}&endDate=${endYear}`)
-      const rawDate = response.data
-      const holidays = rawDate.map((holiday: Holiday) => {
-        return {
-          ...holiday, // copy ค่าเดิมมาทั้งหมด (id, name, isDayOff)
-          
-          // แปลง string '2026-01-01' -> Date Object
-          date: parseISO(holiday.date), 
-          
-          // แปลง string '2026-02-07T...' -> Date Object
-          updatedAt: holiday.updatedAt ? parseISO(holiday.updatedAt) : null 
-        };
-      });
-
-      // console.log("holidays: ", holidays)
-      setHoliday(holidays)
-    } catch(error) {
-      console.log('error: ', error);
-    } finally {
-      setIsLoadingHoliday(false)
-    }
-  }, [currentDate.getFullYear()])
 
   useEffect(() => {
     if (rooms.length > 0 && !selectedRoom) {
@@ -136,18 +111,13 @@ export default function Calendar() {
     
   }, [isMobile, isTablet, view]); // ใส่ view เข้ามาด้วย เพื่อให้เช็คค่าล่าสุดเสมอ
 
-  useEffect(() => {
-    fetchHolidays()
-    // fetchEvents()
-  }, [currentYear])
-
   const isSyncing = isLoadingBooking || isLoadingHoliday || isLoadingRoom;
 
   const sharedProps = {
-    currentDate: currentDate,
-    bookingEvents: bookings,
-    holiday: holiday,
-    isSyncing: isSyncing
+    currentDate,
+    bookings,
+    holiday,
+    isSyncing
   };
 
   return (
@@ -184,11 +154,14 @@ export default function Calendar() {
           </div>
           
           <div className='flex sm:flex-row flex-col gap-4 items-center'>
+            {view === 'month' &&
+              <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Add</button>
+            }
             <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
             <div className="flex gap-2">
-              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
-              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
-              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
+              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Prev</button>
+              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Today</button>
+              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer duration-150">Next</button>
             </div>
           </div>
         </div>
@@ -199,6 +172,8 @@ export default function Calendar() {
           {(view === 'week' || view === 'day') && <TimeGridView {...sharedProps} view={view} />}
         </div>
       </div>
+
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} />
     </div>
   );
 }

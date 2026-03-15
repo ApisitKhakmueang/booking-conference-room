@@ -8,14 +8,14 @@ import { BookingEvent, Holiday } from '@/utils/interface/response';
 
 interface TimeGridViewProps { 
   currentDate: Date, 
-  bookingEvents: BookingEvent[] | null, 
+  bookings: BookingEvent[] | null, 
   view: 'week' | 'day', 
   holiday: Holiday[] | null,
   isSyncing: boolean
 }
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
-export default function TimeGridView({ currentDate, bookingEvents, view, holiday, isSyncing }: TimeGridViewProps) {
+export default function TimeGridView({ currentDate, bookings, view, holiday, isSyncing }: TimeGridViewProps) {
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
     if (view === 'day') return [currentDate];
@@ -92,7 +92,7 @@ export default function TimeGridView({ currentDate, bookingEvents, view, holiday
                 ))}
 
                 {/* --- Render Events (Absolute Positioning) --- */}
-                {bookingEvents?.filter(e => isSameDay(e.startTime, day)).map(evt => {
+                {bookings?.filter(e => isSameDay(e.startTime, day)).map(evt => {
                   // คำนวณตำแหน่ง
                   const startMin = differenceInMinutes(evt.startTime, startOfDay(evt.startTime));
                   const duration = differenceInMinutes(evt.endTime, evt.startTime);
