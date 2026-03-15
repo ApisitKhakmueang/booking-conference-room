@@ -153,7 +153,7 @@ export default function Calendar() {
             )}
           </div>
           
-          <div className='flex xl:flex-row flex-col gap-4 items-center'>
+          <div className='flex xl:flex-row flex-col gap-2 items-center'>
             <div className='flex flex-row gap-2 items-center'>
               {view === 'month' &&
                 <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm p-1 cursor-pointer rounded">Add Booking</button>

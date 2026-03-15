@@ -1,6 +1,6 @@
 'use client'
 
-import Card, { CardVariant } from "@/components/ui/card"
+import { Card, type CardProps } from "@/components/ui/card" // 🌟 Import CardProps มาด้วย
 import { RoomResp } from "@/utils/interface/response"
 import { useMemo } from "react"
 
@@ -18,12 +18,13 @@ export default function RoomStatus({ displayRooms, isLoadingBooking }: { display
     const occupied = displayRooms.filter((room) => room.status === 'occupied').length
     const maintenance = displayRooms.filter((room) => room.status === 'maintenance').length
 
-    return  [
+    const result: { name: string, amount: number, variant: CardProps["variant"] }[] = [
       { name: 'Total', amount: total, variant: 'dark-purple' },
       { name: 'Available', amount: available, variant: 'purple' },
       { name: 'Occupied', amount: occupied, variant: 'purple' },
       { name: 'Maintainance', amount: maintenance, variant: 'purple' },
-    ]
+    ];
+    return result;
   }, [displayRooms])
 
   return (
@@ -40,7 +41,7 @@ export default function RoomStatus({ displayRooms, isLoadingBooking }: { display
 
       <ul className="grid md:grid-cols-4 grid-cols-2 gap-6">
         {countAmountRoom.map((item) => (
-          <Card key={item.name} variant={item.variant as CardVariant} loading={false}>
+          <Card key={item.name} variant={item.variant} loading={false}>
             <li className='flex flex-col gap-5 xl:p-6 p-3'>
               <h1 className={`text-start font-semibold xl:text-3xl sm:text-2xl text-lg`}>
                 {item.name}

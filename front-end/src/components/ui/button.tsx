@@ -23,6 +23,9 @@ const buttonVariants = cva(
         danger: "bg-red-500 text-white hover:bg-red-600",
         "dark-purple": "bg-light-card text-white hover:bg-light-hover",
         slate: "bg-slate-50 text-black hover:bg-slate-300",
+        blue: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer duration-150",
+        transparent: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-transparent dark:text-gray-300 dark:border-gray-600 dark:hover:bg-hover cursor-pointer duration-150",
+        dropdown: "flex items-center justify-between gap-2 min-w-35px-3 text-sm rounded cursor-pointeborder border-white dark:border-hover"
       },
       size: {
         // 🌟 3. เพิ่ม Custom Sizes ของคุณ
