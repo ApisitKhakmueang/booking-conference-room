@@ -25,11 +25,6 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
     ? `${url as string}/booking/${roomNumber}?startDate=${startDate}&endDate=${endDate}` 
     : null
   ), [sessionToken, roomNumber, startDate, endDate]);
-  console.log("sessionToken: ", sessionToken)
-  console.log("roomNumber: ", roomNumber)
-  console.log("startDate: ", startDate)
-  console.log("endDate: ", endDate)
-  console.log("wsUrl: ", wsUrl)
 
   const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
     wsUrl, 
