@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
@@ -16,10 +17,11 @@ export interface ArrangeRoom {
   roomNumber: number
 }
 
-export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms }: { 
+export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms, className }: { 
   selectedRoom: ArrangeRoom | undefined, 
   setSelectedRoom: (room:ArrangeRoom) => void
   rooms: ArrangeRoom[]
+  className?: string
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,9 +51,10 @@ export default function RoomSelector({ selectedRoom, setSelectedRoom, rooms }: {
       <Button
         onClick={() => setIsOpen(!isOpen)}
         variant="dropdown"
-        className={`py-1.5 hover:bg-light-card hover:text-white dark:hover:bg-hover
+        className={cn(`py-1.5 hover:bg-light-card hover:text-white dark:hover:bg-hover w-full
+          ${className}
           ${isOpen ? 'bg-light-card text-white dark:bg-hover' : ''}
-        `}
+        `)}
       >
         <span className="truncate">{selectedRoom?.name}</span>
         
