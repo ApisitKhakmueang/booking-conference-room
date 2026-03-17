@@ -72,7 +72,29 @@ export interface DisplayStrongPasswordProps {
   password: PasswordValidation
 }
 
+type typeOperate = 'add' | 'update'
+
 export interface ModalProps {
   isAddModalOpen: boolean
   setIsAddModalOpen: (status:boolean) => void
+  typeOperate: typeOperate
+}
+
+export interface FormModalProps {
+  setIsAddModalOpen: (status:boolean) => void
+  typeOperate: typeOperate
+  rooms: ArrangeRoom[]
+}
+
+export interface ArrangeRoom {
+  id: string
+  name: string
+  roomNumber: number
+}
+
+export interface RoomSelectorProps {
+  selectedRoom: ArrangeRoom | undefined;
+  setSelectedRoom: (room: ArrangeRoom) => void;
+  rooms: ArrangeRoom[];
+  className?: string;
 }
