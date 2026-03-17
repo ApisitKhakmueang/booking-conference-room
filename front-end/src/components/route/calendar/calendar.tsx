@@ -10,8 +10,9 @@ import {
 // Component
 import MonthView from './calendarMonthView';
 import TimeGridView from './calendarTimeGridView';
-import RoomSelector, { ArrangeRoom } from './roomSelector';
+import RoomSelector from './roomSelector';
 import Modal from '@/components/ui/modal';
+import { ArrangeRoom } from '@/utils/interface/interface';
 
 // Hook
 import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
@@ -156,9 +157,13 @@ export default function Calendar() {
           <div className='flex xl:flex-row flex-col gap-2 items-center'>
             <div className='flex flex-row gap-2 items-center'>
               {view === 'month' &&
-                <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm p-1 cursor-pointer rounded">Add Booking</button>
+                <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm p-1 cursor-pointer rounded whitespace-nowrap">Add Booking</button>
               }
-              <RoomSelector selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} rooms={rooms} />
+              <RoomSelector 
+                selectedRoom={selectedRoom} 
+                setSelectedRoom={setSelectedRoom} 
+                rooms={rooms} 
+                className='px-3 py-1.5 border dark:border-hover border-white rounded text-sm p-1 cursor-pointer duration-0' />
             </div>
             
             <div className="flex gap-2">
@@ -176,7 +181,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} />
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' />
     </div>
   );
 }
