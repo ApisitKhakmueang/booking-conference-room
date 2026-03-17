@@ -88,6 +88,12 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
           );
           break;
 
+        case 'booking_end':
+          setBookings((prevBookings) => 
+            prevBookings.filter((booking) => booking.id !== message.data.booking.id)
+          );
+          break;
+
         default:
           console.warn("⚠️ Unknown message type:", message.type);
       }
