@@ -43,16 +43,17 @@ export default function Modal({ isAddModalOpen, setIsAddModalOpen }: ModalProps)
       .sort((a, b) => a.roomNumber - b.roomNumber); // เรียงน้อยไปมาก
   }, [rawRoom])
 
-  const titleRef = useRef<HTMLInputElement>(null)
-  const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(undefined);
-  const [formData, setFormData] = useState({
+  const defaultFormData = {
     title: "",
     date: startOfDay(new Date()),
     startTime: "",
     endTime: "",
     duration: "",
     room: rooms[0]
-  })
+  }
+  const titleRef = useRef<HTMLInputElement>(null)
+  const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(undefined);
+  const [formData, setFormData] = useState(defaultFormData)
   // const [isOpenCalendar, setIsOpenCalendar] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -236,7 +237,7 @@ export default function Modal({ isAddModalOpen, setIsAddModalOpen }: ModalProps)
                 type="button"
                 onClick={() => {
                   setIsAddModalOpen(false)
-                  // setIsOpenCalendar(false)
+                  setFormData(defaultFormData)
                 }}
                 variant="transparent"
                 >
