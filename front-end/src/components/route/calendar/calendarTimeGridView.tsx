@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   format, startOfWeek, endOfWeek, 
   startOfDay,  eachDayOfInterval,
   isSameDay, differenceInMinutes
 } from 'date-fns';
 import { BookingEvent, Holiday } from '@/utils/interface/response';
+import { Plus } from 'lucide-react';
+import Modal from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 
 interface TimeGridViewProps { 
   currentDate: Date, 
@@ -16,6 +19,8 @@ interface TimeGridViewProps {
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
 export default function TimeGridView({ currentDate, bookings, view, holiday, isSyncing }: TimeGridViewProps) {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
     if (view === 'day') return [currentDate];
@@ -30,7 +35,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
   );
 
   return (
-    <div className="flex h-full overflow-hidden flex-col">
+    <div className="flex h-full overflow-hidden flex-col relative">
       {isSyncing && (
         <div className="absolute top-2 right-4 z-10 text-xs text-blue-500 flex items-center gap-1 bg-white/80 dark:bg-black/80 px-2 py-1 rounded-full shadow">
           <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
@@ -129,6 +134,14 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
           </div>
         </div>
       </div>
+
+      <Button 
+        className='absolute bg-blue-600 hover:bg-blue-700 bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
+        onClick={() => setIsAddModalOpen(true)}>
+        <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
+      </Button>
+
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
     </div>
   );
 }

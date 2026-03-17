@@ -2,9 +2,6 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
 import {
   format,
-  isAfter,
-  isEqual,
-  parseISO,
   startOfDay,
 } from 'date-fns';
 import RoomSelector from "../route/calendar/roomSelector";
@@ -21,10 +18,10 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import axios from 'axios';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate }: FormModalProps) {
   const defaultFormData = {
     title: "",
-    date: startOfDay(new Date()),
+    date: currentDate,
     startTime: "",
     endTime: "",
     duration: "",

@@ -78,12 +78,14 @@ export interface ModalProps {
   isAddModalOpen: boolean
   setIsAddModalOpen: (status:boolean) => void
   typeOperate: typeOperate
+  currentDate: Date
 }
 
 export interface FormModalProps {
   setIsAddModalOpen: (status:boolean) => void
   typeOperate: typeOperate
   rooms: ArrangeRoom[]
+  currentDate: Date
 }
 
 export interface ArrangeRoom {

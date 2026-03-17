@@ -185,7 +185,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' />
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
     </div>
   );
 }
