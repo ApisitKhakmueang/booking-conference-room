@@ -231,7 +231,7 @@ func (r *redisRepository) SetJsonCache(ctx context.Context, cacheKey string, jso
 }
 
 func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber uint) {
-	prefix := fmt.Sprintf("booking:%d:", roomNumber)
+	prefix := fmt.Sprintf("booking:%d", roomNumber)
 	
 	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
 	go func() {
@@ -242,8 +242,8 @@ func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber u
 
 		err := r.ClearCacheByPrefix(bgCtx, prefix)
 		if err != nil {
-				// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
-				log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+			// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+			log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
 		}
 	}()
 }
