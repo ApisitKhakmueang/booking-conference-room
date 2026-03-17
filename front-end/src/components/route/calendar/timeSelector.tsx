@@ -43,12 +43,12 @@ export function TimeSelect({
   return (
     // 🌟 3. ใช้โครงสร้างของ Shadcn UI
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={cn("w-full dark:bg-sidebar dark:border-sidebar dark:text-white", className)}>
+      <SelectTrigger className={cn(" w-full dark:bg-sidebar dark:border-sidebar dark:text-white", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       
       {/* สามารถปรับ max-h-[300px] เพื่อให้ Dropdown ไม่ยาวทะลุจอได้ครับ */}
-      <SelectContent className="dark:bg-sidebar dark:border-sidebar max-h-[250px] text-white">
+      <SelectContent className="w-(--radix-select-trigger-width) dark:bg-sidebar dark:border-sidebar max-h-[250px] text-white">
         {timeSlots.map((time) => (
           <SelectItem 
             key={time} 

@@ -19,6 +19,7 @@ import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
 import { useRoomStore } from '@/stores/room.store';
 import { useShallow } from 'zustand/shallow';
 import { useHolidays } from '@/hooks/data/useHolidays';
+import { Button } from '@/components/ui/button';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -157,19 +158,22 @@ export default function Calendar() {
           <div className='flex xl:flex-row flex-col gap-2 items-center'>
             <div className='flex flex-row gap-2 items-center'>
               {view === 'month' &&
-                <button onClick={() => setIsAddModalOpen(true)} className="px-3 py-1.5 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm p-1 cursor-pointer rounded whitespace-nowrap">Add Booking</button>
+                <Button 
+                  onClick={() => setIsAddModalOpen(true)} 
+                  className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm cursor-pointer rounded whitespace-nowrap"
+                  >Add Booking</Button>
               }
               <RoomSelector 
                 selectedRoom={selectedRoom} 
                 setSelectedRoom={setSelectedRoom} 
-                rooms={rooms} 
-                className='px-3 py-1.5 border dark:border-hover border-white rounded text-sm p-1 cursor-pointer duration-0' />
+                rooms={rooms}
+                className='px-3 py-4.5 border dark:border-hover border-white rounded text-sm cursor-pointer duration-0' />
             </div>
             
             <div className="flex gap-2">
-              <button onClick={prev} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Prev</button>
-              <button onClick={today} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Today</button>
-              <button onClick={next} className="px-3 py-1.5 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card text-sm p-1 cursor-pointer">Next</button>
+              <Button onClick={prev} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Prev</Button>
+              <Button onClick={today} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Today</Button>
+              <Button onClick={next} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Next</Button>
             </div>
           </div>
         </div>
