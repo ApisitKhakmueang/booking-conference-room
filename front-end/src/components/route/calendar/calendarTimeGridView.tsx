@@ -110,11 +110,16 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
                         top: `${(startMin / 60) * 60}px`, // 60px คือความสูงต่อ 1 ชม.
                         height: `${(duration / 60) * 60}px`
                       }}
-                      onClick={() => alert(evt.title)}
+                      // onClick={() => alert(evt.title)}
                     >
                       <div className="font-semibold">{evt.title}</div>
                       <div className="opacity-75 text-[10px]">
-                        {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
+                        <div>
+                          By: {evt.User.fullName}
+                        </div>
+                        <div>
+                          {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
+                        </div>
                       </div>
                     </div>
                   );
