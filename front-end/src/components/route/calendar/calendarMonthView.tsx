@@ -129,11 +129,25 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
       <div className={`grid grid-cols-7 flex-1 auto-rows-fr transition-opacity duration-300 ${isSyncing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
         {days.map((day) => {
            const isToday = isSameDay(day, new Date());
-          //  const holidays = holiday?.filter(e => isSameDay(e.date, day));
+           const dateKey = format(day, 'yyyy-MM-dd');
+           
+           // 1. ดึงข้อมูลวันหยุดและการจองของวันนี้ออกมา
+           const todaysHolidays = groupedHolidays?.get(dateKey) || [];
+           const todaysEvents = groupedEvents?.get(dateKey) || [];
+           
+           // 2. จับมารวมกัน (เอากลุ่มวันหยุดขึ้นก่อน) แล้วนับจำนวนทั้งหมด
+           const allItems = [...todaysHolidays, ...todaysEvents];
+           const totalItems = allItems.length;
+
+           // 3. หั่นเอามาแค่ 3 อันแรกเพื่อแสดงผล
+           const MAX_VISIBLE = 3;
+           const visibleItems = allItems.slice(0, MAX_VISIBLE);
+           const hiddenCount = totalItems - MAX_VISIBLE;
+
            return (
             <div 
               key={day.toString()} 
-              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 
+              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors
                 ${day.getDay() !== 6 ? 'border-r' : ''}
                 ${!isSameMonth(day, currentDate) 
                   ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
@@ -143,18 +157,35 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
               <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 dark:bg-dark-purple text-white' : ''}`}>
                 {format(day, 'd')}
               </div>
+              
+              {/* 🌟 แสดงเฉพาะ Item ที่ถูกหั่นมาแล้ว (สูงสุด 3 อัน) */}
               <div className="space-y-1">
-                {groupedHolidays?.get(format(day, 'yyyy-MM-dd'))?.map(evt => (
-                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100`}>
-                    {evt.name}
-                  </div>
-                ))}
+                {visibleItems.map((item: any, index: number) => {
+                  
+                  // เช็กว่านี่คือ Holiday หรือ BookingEvent (Holiday จะมี name, Booking จะมี title)
+                  const isHoliday = 'name' in item;
+                  
+                  if (isHoliday) {
+                    return (
+                      <div key={`hol-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-white dark:text-green-100 shadow-sm">
+                        {item.name}
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div key={`evt-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-white dark:text-orange-100 shadow-sm">
+                        {item.title}
+                      </div>
+                    )
+                  }
+                })}
 
-                {groupedEvents?.get(format(day, 'yyyy-MM-dd'))?.map(evt => (
-                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-orange-100`}>
-                    {evt.title}
+                {/* 🌟 ถ้ามีมากกว่า 3 อัน ให้แสดงปุ่ม +X More */}
+                {hiddenCount > 0 && (
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 pl-1">
+                    ... +{hiddenCount} more
                   </div>
-                ))}
+                )}
               </div>
             </div>
            );
