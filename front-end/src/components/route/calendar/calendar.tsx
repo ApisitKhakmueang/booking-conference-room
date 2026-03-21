@@ -143,7 +143,7 @@ export default function Calendar() {
                     className={`
                       px-4 py-1 rounded capitalize text-sm font-medium transition-all cursor-pointer
                       ${view === v 
-                        ? 'bg-blue-600 text-white shadow' 
+                        ? 'bg-blue-600 dark:bg-dark-purple text-white shadow' 
                         : 'dark:text-gray-400 dark:hover:bg-hover text-gray-300 hover:text-white hover:bg-light-card'}
                     `}
                   >
@@ -160,7 +160,7 @@ export default function Calendar() {
               {view === 'month' &&
                 <Button 
                   onClick={() => setIsAddModalOpen(true)} 
-                  className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 text-white shadow text-sm cursor-pointer rounded whitespace-nowrap"
+                  className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap"
                   >Add Booking</Button>
               }
               <RoomSelector 

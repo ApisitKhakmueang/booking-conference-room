@@ -56,9 +56,9 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
             <div 
              key={day.toString()}
              className={`flex items-center border-r dark:border-sidebar border-white last:border-0 ${view === 'day' ? 'flex-row' : 'flex-col'}`}>
-              <div className={`py-3 text-center shrink-0 w-16 ${isSameDay(day, new Date()) ? 'dark:text-blue-500 text-violet-900' : 'dark:text-gray-400'}`}>
+              <div className={`py-3 text-center shrink-0 w-16 ${isSameDay(day, new Date()) ? 'dark:text-dark-purple text-violet-900' : 'dark:text-gray-400'}`}>
                 <div className="text-xs uppercase font-bold">{format(day, 'EEE')}</div>
-                <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-blue-600/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
+                <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-dark-purple/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
                     {format(day, 'd')}
                 </div>
               </div>
@@ -136,7 +136,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
       </div>
 
       <Button 
-        className='absolute bg-blue-600 hover:bg-blue-700 bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
+        className='absolute bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
         onClick={() => setIsAddModalOpen(true)}>
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>

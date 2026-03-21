@@ -140,7 +140,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                   : 'dark:text-white text-violet-900'}`}
               onClick={() => handleClickDay(day)}
               >
-              <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 text-white' : ''}`}>
+              <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 dark:bg-dark-purple text-white' : ''}`}>
                 {format(day, 'd')}
               </div>
               <div className="space-y-1">
