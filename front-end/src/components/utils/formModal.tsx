@@ -119,17 +119,17 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       onSubmit={(e) => {
         handleSubmit(e)
       }} 
-      className="relative bg-white dark:bg-card rounded-lg shadow-xl w-full max-w-md transform transition-all">
+      className="relative bg-light-purple dark:bg-card rounded-lg shadow-xl w-full max-w-md transform transition-all">
       
       {/* Modal Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b dark:border-sidebar bg-gray-50 dark:bg-sidebar/80">
-        <h3 className="flex gap-2 items-center text-lg font-bold text-gray-900 dark:text-white">
+      <div className="flex items-center justify-between px-6 py-4 border-b dark:border-sidebar bg-dark-purple dark:bg-sidebar/80">
+        <h3 className="flex gap-2 items-center text-lg font-bold text-white">
           <CalendarIcon />
           {typeOperate === 'add' ? 'New' : 'Update'} Booking
         </h3>
         <button 
           onClick={() => setIsAddModalOpen(false)}
-          className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+          className="text-white dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-300 transition-colors"
         >
           {/* ไอคอนกากบาท (X) หรือใช้คำว่า Close ก็ได้ */}
           <svg className="w-6 h-6 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -137,7 +137,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       </div>
 
       {/* Modal Body (ส่วนฟอร์ม) */}
-      <div className="px-6 py-6 space-y-4">
+      <div className="px-6 py-6 space-y-4 overflow-y-auto max-h-[70vh] no-scrollbar">
           {/* ใส่ฟอร์มของคุณตรงนี้ เช่น Input ชื่อ, เลือกเวลา */}
           {/* <p className="text-gray-500 dark:text-gray-400 text-sm">
             ฟอร์มกรอกข้อมูลการจองจะมาอยู่ตรงนี้...
@@ -152,7 +152,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                   id='title'
                   type="text"
                   ref={titleRef} 
-                  className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white" 
+                  className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white text-gray-700 placeholder:dark:text-gray-700/60" 
                   defaultValue={formData.title}
                   placeholder="Meeting with..."
                 />
@@ -163,7 +163,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                 className="block font-medium text-gray-700 dark:text-gray-300">Date</label>
               <Input 
                 type="text"
-                className="flex justify-between items-center w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light"
+                className="flex justify-between items-center w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light text-gray-700"
                 value={format(formData.date || new Date(), 'd MMMM yyyy')}
                 readOnly
                 // onClick={() => setIsOpenCalendar(true)}
@@ -175,7 +175,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
               </Input>
             </div>
 
-            <div className="flex items-stretch gap-2">
+            <div className="flex sm:flex-row flex-col items-stretch gap-2">
               <Calendar
                 mode="single"
                 selected={formData.date}
@@ -197,7 +197,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                   <TimeSelect 
                     value={formData.startTime}
                     onValueChange={(val) => setFormData(prev => ({ ...prev, startTime: val }))}
-                    className="text-base"
+                    className="text-base border border-gray-300"
                   />
                 </div>
 
@@ -208,7 +208,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                   <TimeSelect 
                     value={formData.endTime}
                     onValueChange={(val) =>  setFormData(prev => ({ ...prev, endTime: val }))}
-                    className="text-base"
+                    className="text-base border border-gray-300"
                   />
                 </div>
 
@@ -219,7 +219,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                   <Input
                       id='duration'
                       type="text" 
-                      className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white" placeholder="Duration..."
+                      className="w-full px-3 py-1.5 dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-gray-700" placeholder="Duration..."
                       value={formData.duration} // ผูกค่า
                       readOnly
                     />
@@ -230,7 +230,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                     htmlFor="room"
                     className="block font-medium text-gray-700 dark:text-gray-300">Room</label>
                   <RoomSelector 
-                    className="px-3 py-1.5 dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white border-none text-base"
+                    className="px-3 py-1.5 dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white text-base border border-gray-300"
                     selectedRoom={selectedRoom} 
                     setSelectedRoom={setSelectedRoom} 
                     rooms={rooms}  />
@@ -242,7 +242,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       </div>
 
       {/* Modal Footer (ปุ่มกดยืนยัน) */}
-      <div className="px-6 py-4 flex justify-end gap-3 border-t dark:border-sidebar bg-gray-50 dark:bg-sidebar/50">
+      <div className="px-6 py-4 flex justify-end gap-3 border-t dark:border-sidebar bg-light-purple dark:bg-sidebar/50">
         <Button 
           type="button"
           onClick={() => {

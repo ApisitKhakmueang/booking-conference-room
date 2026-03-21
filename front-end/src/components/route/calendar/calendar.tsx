@@ -167,7 +167,7 @@ export default function Calendar() {
                 selectedRoom={selectedRoom} 
                 setSelectedRoom={setSelectedRoom} 
                 rooms={rooms}
-                className='px-3 py-4.5 border dark:border-hover border-white rounded text-sm cursor-pointer duration-0' />
+                className='px-3 py-4.5 border dark:border-hover text-white border-white rounded text-sm cursor-pointer duration-0' />
             </div>
             
             <div className="flex gap-2">

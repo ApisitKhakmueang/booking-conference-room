@@ -31,7 +31,8 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
+        // 🌟 แก้ bg-background เป็น bg-dark-purple และเติม text-white
+        "group/calendar bg-dark-purple text-white p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -57,11 +58,13 @@ function Calendar({
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "text-white hover:bg-white/20 hover:text-white", // 🌟 เพิ่มสีปุ่มลูกศร
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "text-white hover:bg-white/20 hover:text-white", // 🌟 เพิ่มสีปุ่มลูกศร
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -90,7 +93,7 @@ function Calendar({
         table: "w-full border-collapse",
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
-          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-muted-foreground select-none",
+          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-white/70 select-none",
           defaultClassNames.weekday
         ),
         week: cn("mt-2 flex w-full", defaultClassNames.week),
@@ -119,15 +122,18 @@ function Calendar({
           defaultClassNames.range_end
         ),
         today: cn(
-          "rounded-(--cell-radius) bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold data-[selected=true]:rounded-full",
+          "rounded-(--cell-radius) bg-blue-200 text-black font-bold data-[selected=true]:rounded-full",
+          // 🌟 !text-black บังคับให้เป็นสีดำ (สำคัญมาก เผื่อมี text-white กวนอยู่)
+          // 🌟 bg-blue-200 คือสีฟ้า/น้ำเงินอ่อน (ถ้าอ่อนไปใช้ 300 หรืออ่อนกว่าใช้ 100)
+          "bg-blue-500 dark:bg-blue-900/40 dark:text-blue-400",
           defaultClassNames.today
         ),
         outside: cn(
-          "text-muted-foreground aria-selected:text-muted-foreground",
+          "text-white/40 aria-selected:text-white/40",
           defaultClassNames.outside
         ),
         disabled: cn(
-          "text-muted-foreground opacity-50",
+          "text-white/30 opacity-50",
           defaultClassNames.disabled
         ),
         hidden: cn("invisible", defaultClassNames.hidden),
@@ -214,7 +220,9 @@ function CalendarDayButton({
         
         "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground", 
 
-        "hover:bg-blue-600/50 hover:text-white dark:hover:bg-blue-600/50 dark:hover:text-white",
+        // 🌟 1. บังคับ text-white เสมอ
+        // 🌟 2. แก้ Hover เป็นสีขาวโปร่งแสง จะได้เข้ากับพื้นหลังสีม่วง
+        "text-white hover:bg-white/20 hover:text-white dark:hover:bg-blue-600/50 dark:hover:text-white",
 
         "data-[selected-single=true]:bg-blue-600 data-[selected-single=true]:text-white data-[selected-single=true]:hover:bg-blue-700 data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
         
