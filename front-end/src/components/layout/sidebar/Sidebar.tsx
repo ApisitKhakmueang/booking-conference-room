@@ -22,7 +22,7 @@ const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Rooms", href: "/rooms", icon: Cuboid },
   { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Booking", href: "/booking", icon: List },
+  { name: "Schedule", href: "/schedule", icon: List },
 ] as const;
 
 export default function Sidebar() {
