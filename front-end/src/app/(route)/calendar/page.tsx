@@ -1,5 +1,5 @@
 import EachPageLayout from "@/components/layout/each-page-layout"
-import Calendar from "@/components/route/calendar/calendar"
+import Calendar from "@/components/route/calendar"
 
 export default function Page() {
   return (
