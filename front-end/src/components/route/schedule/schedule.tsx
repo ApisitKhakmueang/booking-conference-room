@@ -1,30 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { addDays, subDays } from "date-fns";
 import DesktopSidebar from "./desktopSidebar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-
-export interface BookingEvent {
-  id: string;
-  title: string;
-  description: string;
-  startTime: string; // เก็บแค่เวลาเพื่อความง่ายในการโชว์
-  startAmpm: string;
-  endTime: string,
-  endAmpm: string
-  room: string;
-  status: 'Confirmed' | 'Pending';
-  duration: number; // นาที
-  // ข้อมูลเกี่ยวกับ guests อาจจะต้องปรับ structure ตามความเหมาะสม
-  guestsCount?: number; 
-}
+import Modal from "@/components/ui/modal";
+import { Plus } from "lucide-react";
+import CardEvents from "./eventCard";
+import { BookingEvent } from "@/utils/interface/interface";
 
 export const mockEvents: BookingEvent[] = [
   {
     id: "1",
     title: "Executive Board Meeting",
+    date: "2026-03-26T16:20:00+07:00", 
     description: "Quarterly performance review and strategic planning.",
     startTime: "09:00",
     startAmpm: "AM",
@@ -38,6 +28,7 @@ export const mockEvents: BookingEvent[] = [
   {
     id: "2",
     title: "VIP Private Luncheon",
+    date: "2026-03-26T16:20:00+07:00", 
     description: "Host: Sarah Jenkins. Custom catering requirements attached.",
     startTime: "11:30",
     startAmpm: "AM",
@@ -50,6 +41,7 @@ export const mockEvents: BookingEvent[] = [
   {
     id: "3",
     title: "Tech Founders Meetup",
+    date: "2026-03-26T16:20:00+07:00", 
     description: "Informal networking session for local entrepreneurs.",
     startTime: "02:00",
     startAmpm: "PM",
@@ -62,6 +54,60 @@ export const mockEvents: BookingEvent[] = [
   {
     id: "4",
     title: "Design Review: Project Velvet",
+    date: "2026-03-26T16:20:00+07:00", 
+    description: "Presentation of initial UI prototypes and brand strategy.",
+    startTime: "04:30",
+    startAmpm: "PM",
+    endTime: "06:30",
+    endAmpm: "PM",
+    room: "Conference B",
+    status: "Confirmed",
+    duration: 45,
+  },
+  {
+    id: "5",
+    title: "Executive Board Meeting",
+    date: "2026-03-26T16:20:00+07:00", 
+    description: "Quarterly performance review and strategic planning.",
+    startTime: "09:00",
+    startAmpm: "AM",
+    endTime: "11:00",
+    endAmpm: "AM",
+    room: "Conference A",
+    status: "Confirmed",
+    duration: 120,
+    guestsCount: 4, 
+  },
+  {
+    id: "6",
+    title: "VIP Private Luncheon",
+    date: "2026-03-26T16:20:00+07:00", 
+    description: "Host: Sarah Jenkins. Custom catering requirements attached.",
+    startTime: "11:30",
+    startAmpm: "AM",
+    endTime: "01:30",
+    endAmpm: "PM",
+    room: "Suite 402",
+    status: "Confirmed",
+    duration: 90,
+  },
+  {
+    id: "7",
+    title: "Tech Founders Meetup",
+    date: "2026-03-26T16:20:00+07:00", 
+    description: "Informal networking session for local entrepreneurs.",
+    startTime: "02:00",
+    startAmpm: "PM",
+    endTime: "04:00",
+    endAmpm: "PM",
+    room: "Lounge West",
+    status: "Pending",
+    duration: 60,
+  },
+  {
+    id: "8",
+    title: "Design Review: Project Velvet",
+    date: "2026-03-26T16:20:00+07:00", 
     description: "Presentation of initial UI prototypes and brand strategy.",
     startTime: "04:30",
     startAmpm: "PM",
@@ -73,9 +119,38 @@ export const mockEvents: BookingEvent[] = [
   }
 ];
 
-export default function Booking() {
+export default function Schedule() {
   // State สำหรับเปิดปิด Mobile Modal (จำลอง)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const next = () => {
+   setCurrentDate(addDays(currentDate, 1));
+  };
+
+  const prev = () => {
+    const prevDate = subDays(currentDate, 1)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาให้เป็นเที่ยงคืน จะได้เทียบแค่วันที่
+    if (prevDate < today) // ถ้าวันนั้นน้อยกว่าวันนี้ ให้ปิดการใช้งาน
+      return
+    setCurrentDate(prevDate);
+  };
+
+  const today = () => setCurrentDate(new Date());
+
+  const isPrevDisabled = useMemo(() => {
+    const prevDate = subDays(currentDate, 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return prevDate < today;
+  }, [currentDate]);
+
+  useEffect(() => {
+    if (isAddModalOpen) return
+    setCurrentDate(new Date())
+  }, [isAddModalOpen])
 
   return (
     <div className="bg-light-main-background dark:bg-main-background flex">
@@ -86,8 +161,17 @@ export default function Booking() {
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="shrink-0">
-            <p className="text-2xl">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
+          <header className="flex shrink-0 justify-between pr-8">
+            <p className="text-2xl">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
+
+            <div className="flex gap-2">
+              <Button onClick={() => setIsAddModalOpen(true)} className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap">
+                <Plus />&nbsp;Add Booking
+              </Button>
+              <Button onClick={prev} className={`px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer ${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
+              <Button onClick={today} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Today</Button>
+              <Button onClick={next} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Next</Button>
+            </div>
           </header>
 
           {/* Content Area */}
@@ -96,47 +180,20 @@ export default function Booking() {
             {/* Main List Scrollable */}
             <main className="flex-1 space-y-4 overflow-y-auto p-4 md:p-8 no-scrollbar">
               {mockEvents.map((event) => (
-                <div 
-                  key={event.id}
-                  className="group flex gap-6 p-6 rounded-2xl dark:bg-sidebar dark:hover:bg-hover transition-all duration-300">
-                  <div className="w-20 pt-1 text-right border-r border-white/10 pr-6">
-                    <span className="block font-bold text-lg text-neutral-100">{event.startTime}</span>
-                    <span className="block text-[12px] text-stone-500 uppercase">{event.startAmpm}</span>
-                    <span className="block text-[10px] text-stone-500 uppercase">to</span>
-                    <span className="block font-bold text-lg text-neutral-100">{event.endTime}</span>
-                    <span className="block text-[12px] text-stone-500 uppercase">{event.endAmpm}</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-widest">{event.room}</span>
-
-                      <Button className="p-1.5 bg-transparent dark:hover:bg-hover hover:text-gray-500">
-                        <X />
-                      </Button>
-                    </div>
-                    <h3 className="text-xl font-bold text-neutral-100 mb-1">{event.title}</h3>
-                    {/* <p className="text-sm text-stone-400">{event.description}</p> */}
-                    <div className="mt-4 flex items-center gap-4 text-xs">
-                      <span className="flex items-center gap-1 text-purple-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span> {event.status}
-                      </span>
-                      <span className="text-stone-500 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">schedule</span> {event.duration} mins
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <CardEvents key={event.id} event={event} setIsAddModalOpen={setIsAddModalOpen} setCurrentDate={setCurrentDate}  />
               ))}
             </main>
 
           </div>
         </div>
 
-        <div>
-          {/* Desktop Right Sidebar */}
-          <DesktopSidebar />
+        {/* Desktop Right Sidebar */}
+        <div className="w-80">
+          <DesktopSidebar currentDate={currentDate} setCurrentDate={setCurrentDate} />
         </div>
       </div>
+
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
 
       {/* 🌟 Mobile Action Button (FAB) */}
       <button 
