@@ -4,6 +4,7 @@ import {
   format,
   startOfDay,
 } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import RoomSelector from "../route/calendar/roomSelector";
 import Swal from "sweetalert2"
 
@@ -181,6 +182,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                 selected={formData.date}
                 onSelect={(d) => setFormData(prev => ({ ...prev, date: d as Date }))}
                 className="dark:bg-sidebar rounded-md p-3"
+                locale={enUS}
                 
                 // 🌟 เพิ่มเงื่อนไข disabled ตรงนี้ครับ!
                 disabled={(day) => {
