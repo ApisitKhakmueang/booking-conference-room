@@ -125,7 +125,7 @@ function Calendar({
           "rounded-(--cell-radius) bg-blue-200 text-black font-bold data-[selected=true]:rounded-full",
           // 🌟 !text-black บังคับให้เป็นสีดำ (สำคัญมาก เผื่อมี text-white กวนอยู่)
           // 🌟 bg-blue-200 คือสีฟ้า/น้ำเงินอ่อน (ถ้าอ่อนไปใช้ 300 หรืออ่อนกว่าใช้ 100)
-          "bg-blue-500 dark:bg-blue-900/40 dark:text-blue-400",
+          "bg-blue-500 dark:bg-light-google/40",
           defaultClassNames.today
         ),
         outside: cn(
@@ -222,9 +222,9 @@ function CalendarDayButton({
 
         // 🌟 1. บังคับ text-white เสมอ
         // 🌟 2. แก้ Hover เป็นสีขาวโปร่งแสง จะได้เข้ากับพื้นหลังสีม่วง
-        "text-white hover:bg-white/20 hover:text-white dark:hover:bg-blue-600/50 dark:hover:text-white",
+        "text-white hover:bg-white/20 hover:text-white dark:hover:bg-light-card/50 dark:hover:text-white",
 
-        "data-[selected-single=true]:bg-blue-600 data-[selected-single=true]:text-white data-[selected-single=true]:hover:bg-blue-700 data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
+        "data-[selected-single=true]:bg-blue-600 data-[selected-single=true]:hover:bg-blue-700 dark:data-[selected-single=true]:bg-dark-purple/80 dark:data-[selected-single=true]:hover:bg-dark-purple data-[selected-single=true]:text-white data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
         
         "[&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
