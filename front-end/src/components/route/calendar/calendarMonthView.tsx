@@ -167,13 +167,13 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                   
                   if (isHoliday) {
                     return (
-                      <div key={`hol-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-white dark:text-green-100 shadow-sm">
+                      <div key={`hol-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 dark:border-green-500 bg-green-200 border-green-300 text-green-900 dark:text-green-100 shadow-sm">
                         {item.name}
                       </div>
                     )
                   } else {
                     return (
-                      <div key={`evt-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-white dark:text-orange-100 shadow-sm">
+                      <div key={`evt-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 dark:border-orange-500 bg-orange-200 border-orange-300 text-orange-900 dark:text-orange-100 shadow-sm">
                         {item.title}
                       </div>
                     )
