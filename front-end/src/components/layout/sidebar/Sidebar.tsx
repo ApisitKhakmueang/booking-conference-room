@@ -41,7 +41,7 @@ export default function Sidebar() {
         className={`
           h-screen fixed dark:bg-sidebar
           bg-light-sidebar
-          duration-300 z-20
+          duration-300 z-30
           ${isHideNav
               ? isOpenNav
                 ? "translate-x-0 w-64 transition-transform"
