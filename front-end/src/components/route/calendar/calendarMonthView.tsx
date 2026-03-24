@@ -122,7 +122,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
        {/* Week Header */}
        <div className="grid grid-cols-7 border-b dark:border-sidebar border-white">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-          <div key={d} className="py-2 text-center text-sm dark:text-gray-400 text-white border-r dark:border-sidebar dark:bg-sidebar bg-light-hover last:border-0">{d}</div>
+          <div key={d} className="py-2 text-center text-sm dark:text-gray-400 text-white border-r dark:border-sidebar dark:bg-sidebar/70 bg-light-hover/80 last:border-0">{d}</div>
         ))}
       </div>
       {/* Grid */}
@@ -147,7 +147,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
            return (
             <div 
               key={day.toString()} 
-              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors
+              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5
                 ${day.getDay() !== 6 ? 'border-r' : ''}
                 ${!isSameMonth(day, currentDate) 
                   ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
