@@ -72,20 +72,22 @@ export interface DisplayStrongPasswordProps {
   password: PasswordValidation
 }
 
-type typeOperate = 'add' | 'update'
+export type typeOperate = 'add' | 'update';
 
 export interface ModalProps {
   isAddModalOpen: boolean
-  setIsAddModalOpen: (status:boolean) => void
+  setIsAddModalOpen: (status: boolean) => void
   typeOperate: typeOperate
   currentDate: Date
+  selectedEvent?: any // 🌟 เพิ่มบรรทัดนี้ (ถ้ามี interface BookingEvent ให้ใส่แทน any)
 }
 
 export interface FormModalProps {
-  setIsAddModalOpen: (status:boolean) => void
+  setIsAddModalOpen: (status: boolean) => void
   typeOperate: typeOperate
   rooms: ArrangeRoom[]
   currentDate: Date
+  selectedEvent?: any // 🌟 เพิ่มบรรทัดนี้
 }
 
 export interface ArrangeRoom {

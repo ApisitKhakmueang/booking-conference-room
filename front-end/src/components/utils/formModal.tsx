@@ -19,7 +19,7 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import axios from 'axios';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, selectedEvent }: FormModalProps) {
   const defaultFormData = {
     title: "",
     date: currentDate,
@@ -115,6 +115,31 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   //   }
   // }, [rooms, selectedRoom]);
 
+  useEffect(() => {
+    if (typeOperate === 'update' && selectedEvent) {
+      // ค้นหาห้องจากชื่อ room ที่อยู่ใน selectedEvent 
+      // (ระวังถ้าหาไม่เจอให้ใช้ rooms[0] กันเหนียวไว้ก่อน)
+      const foundRoom = rooms.find(r => r.name === selectedEvent.room) || rooms[0];
+
+      setFormData({
+        title: selectedEvent.title,
+        date: new Date(selectedEvent.date), // แปลงกลับเป็น Date object
+        startTime: selectedEvent.startTime,
+        endTime: selectedEvent.endTime,
+        duration: String(selectedEvent.duration),
+        room: foundRoom
+      });
+      // 🌟 อย่าลืมอัปเดต selectedRoom ให้ตรงกับในฟอร์มด้วย
+      setSelectedRoom(foundRoom); 
+
+    } else {
+      // 🌟 โหมด add ให้ดึง defaultFormData (ที่มีค่าครบทุก field แล้ว) มาใช้เคลียร์ฟอร์ม
+      setFormData(defaultFormData);
+      setSelectedRoom(rooms[0]); // รีเซ็ต Dropdown กลับเป็นห้องแรกสุด
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeOperate, selectedEvent, currentDate]);
+
   return (
     <form
       onSubmit={(e) => {
@@ -124,10 +149,9 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       
       {/* Modal Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b dark:border-sidebar bg-dark-purple dark:bg-sidebar/80">
-        <h3 className="flex gap-2 items-center text-lg font-bold text-white">
-          <CalendarIcon />
-          {typeOperate === 'add' ? 'New' : 'Update'} Booking
-        </h3>
+        <h2 className="text-xl font-bold text-white">
+          {typeOperate === 'add' ? 'New Booking' : 'Update Booking'}
+        </h2>
         <button 
           onClick={() => setIsAddModalOpen(false)}
           className="text-white dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-300 transition-colors"
@@ -255,11 +279,8 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           >
           Cancel
         </Button>
-        <Button 
-          type="submit"
-          variant="blue"
-          >
-          Confirm Booking
+        <Button type="submit">
+          {typeOperate === 'add' ? 'Confirm Booking' : 'Save Changes'}
         </Button>
       </div>
 

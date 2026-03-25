@@ -124,6 +124,8 @@ export default function Schedule() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
+  const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
 
   const next = () => {
    setCurrentDate(addDays(currentDate, 1));
@@ -147,6 +149,18 @@ export default function Schedule() {
     return prevDate < today;
   }, [currentDate]);
 
+  const handleAddClick = () => {
+    setTypeOperate('add');
+    setSelectedEvent(undefined); // เคลียร์ข้อมูลเก่า
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditClick = (event: BookingEvent) => {
+    setTypeOperate('update');
+    setSelectedEvent(event); // เก็บข้อมูล event ที่ถูกคลิก
+    setIsAddModalOpen(true);
+  };
+
   useEffect(() => {
     if (isAddModalOpen) return
     setCurrentDate(new Date())
@@ -165,7 +179,7 @@ export default function Schedule() {
             <p className="text-2xl">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2">
-              <Button onClick={() => setIsAddModalOpen(true)} className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap">
+              <Button onClick={handleAddClick} className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap">
                 <Plus />&nbsp;Add Booking
               </Button>
               <Button onClick={prev} className={`px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer ${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
@@ -180,7 +194,9 @@ export default function Schedule() {
             {/* Main List Scrollable */}
             <main className="flex-1 space-y-4 overflow-y-auto p-4 md:p-8 no-scrollbar">
               {mockEvents.map((event) => (
-                <CardEvents key={event.id} event={event} setIsAddModalOpen={setIsAddModalOpen} setCurrentDate={setCurrentDate}  />
+                <div key={event.id} onClick={() => handleEditClick(event)}>
+                  <CardEvents event={event} setIsAddModalOpen={setIsAddModalOpen} setCurrentDate={setCurrentDate} />
+                </div>
               ))}
             </main>
 
@@ -193,7 +209,13 @@ export default function Schedule() {
         </div>
       </div>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
+      <Modal 
+        isAddModalOpen={isAddModalOpen} 
+        setIsAddModalOpen={setIsAddModalOpen} 
+        typeOperate={typeOperate} 
+        currentDate={currentDate}
+        selectedEvent={selectedEvent} 
+      />
 
       {/* 🌟 Mobile Action Button (FAB) */}
       <button 
