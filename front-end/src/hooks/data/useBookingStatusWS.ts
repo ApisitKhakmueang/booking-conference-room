@@ -39,6 +39,23 @@ export default function useBookingStatusWS() {
   );
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      setBookings((prev) => {
+        const filtered = prev.filter(b => {
+          const now = new Date();
+          const endTime = new Date(b.endTime); // แปลงเป็น Date Object
+          
+          return endTime > now
+        });
+        return filtered.length !== prev.length ? filtered : prev;
+      });
+    }, 30000); // เช็คทุก 30 วินาที
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     if (lastJsonMessage !== null) {
       const message = lastJsonMessage as any; 
 
