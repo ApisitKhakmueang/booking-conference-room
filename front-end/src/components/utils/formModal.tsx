@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import axios from 'axios';
+import { bookingService } from '@/service/booking.service';
 
 export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, selectedEvent }: FormModalProps) {
   const defaultFormData = {
@@ -70,10 +71,8 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
     
     const body = bodyBooking(finalDataToSubmit)
 
-    const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
-
     try {
-      const result = await axios.post(`${url}/booking/6d4ac759-dd57-4462-b980-4147b7d18cba?room=${selectedRoom?.roomNumber}`, body)
+      const result = await bookingService.createBooking(selectedRoom?.roomNumber, body)
       
       if (result.status === 200) {
         Swal.fire({

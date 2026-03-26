@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { Holiday } from '@/utils/interface/response';
+import { bookingService } from '@/service/booking.service';
 
 export function useHolidays(startYear: string, endYear: string) {
   const [holiday, setHoliday] = useState<Holiday[] | null>(null);
@@ -11,10 +12,9 @@ export function useHolidays(startYear: string, endYear: string) {
     const fetchHolidays = async () => {
       setIsLoadingHoliday(true);
       try {
-        const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
-        const response = await axios.get(`${url}/holiday?startDate=${startYear}&endDate=${endYear}`);
+        const data = await bookingService.fetchHolidays(startYear, endYear);
         
-        const formattedHolidays = response.data.map((h: any) => ({
+        const formattedHolidays = data.map((h: any) => ({
           ...h,
           date: parseISO(h.date),
           updatedAt: h.updatedAt ? parseISO(h.updatedAt) : null 

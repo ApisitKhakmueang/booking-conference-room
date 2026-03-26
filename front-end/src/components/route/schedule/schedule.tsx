@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, subDays } from "date-fns";
 import DesktopSidebar from "./desktopSidebar";
 import { format } from "date-fns";
@@ -11,6 +11,7 @@ import CardEvents from "./eventCard";
 import { BookingEvent } from "@/utils/interface/interface";
 import { BookingEventResponse } from "@/utils/interface/response";
 import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
+import { bookingService } from "@/service/booking.service";
 
 const mockResp: BookingEventResponse[] = [
   {
@@ -177,25 +178,24 @@ export default function Schedule() {
     setIsAddModalOpen(true);
   };
 
+  const fetchUserBookings = useCallback(async () => {
+    const formattedDate = format(currentDate, 'yyyy-MM-dd');
+    try {
+      const data = await bookingService.fetchUserBookings(formattedDate);
+      const formattedEvents = useMapResponseToEvents(data);
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.log('error: ', error);
+    }
+  }, [currentDate]); // 🌟 ฟังก์ชันนี้จะเปลี่ยนก็ต่อเมื่อ currentDate เปลี่ยนเท่านั้น
+
   useEffect(() => {
     if (isAddModalOpen) return
     setCurrentDate(new Date())
   }, [isAddModalOpen])
 
   useEffect(() => {
-    // 1. จำลองการเรียก API (ของจริงเปลี่ยนเป็น axios.get(...))
-    const fetchBookings = async () => {
-      const apiResponse: BookingEventResponse[] = mockResp; // ข้อมูลที่ได้จาก DB
-      
-      // 2. โยนเข้าเครื่องแปลงข้อมูล!
-      const formattedEvents = useMapResponseToEvents(apiResponse);
-      console.log("events: ", formattedEvents)
-      
-      // 3. เอาไปแสดงผลได้เลย
-      setEvents(formattedEvents);
-    };
-
-    fetchBookings();
+    fetchUserBookings();
   }, []);
 
   return (
@@ -248,7 +248,7 @@ export default function Schedule() {
 
         {/* Desktop Right Sidebar */}
         <div className="w-80">
-          <DesktopSidebar currentDate={currentDate} setCurrentDate={setCurrentDate} />
+          <DesktopSidebar currentDate={currentDate} setCurrentDate={setCurrentDate} events={events} />
         </div>
       </div>
 
