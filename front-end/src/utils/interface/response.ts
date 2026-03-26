@@ -28,7 +28,7 @@ interface User {
   createdAt?: string
 }
 
-export interface BookingEvent {
+export interface BookingEventResponse {
   id: string
   startTime: string
   endTime: string

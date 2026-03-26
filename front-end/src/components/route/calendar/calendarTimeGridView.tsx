@@ -4,14 +4,14 @@ import {
   startOfDay,  eachDayOfInterval,
   isSameDay, differenceInMinutes
 } from 'date-fns';
-import { BookingEvent, Holiday } from '@/utils/interface/response';
+import { BookingEventResponse, Holiday } from '@/utils/interface/response';
 import { Plus } from 'lucide-react';
 import Modal from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 
 interface TimeGridViewProps { 
   currentDate: Date, 
-  bookings: BookingEvent[] | null, 
+  bookings: BookingEventResponse[] | null, 
   view: 'week' | 'day', 
   holiday: Holiday[] | null,
   isSyncing: boolean

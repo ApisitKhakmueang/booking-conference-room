@@ -6,7 +6,7 @@ import {
   startOfDay,
   endOfDay
 } from 'date-fns';
-import { Holiday, BookingEvent } from '@/utils/interface/response';
+import { Holiday, BookingEventResponse } from '@/utils/interface/response';
 
 const TODAY = new Date(); 
 const EVENTS = [
@@ -36,7 +36,7 @@ const EVENTS = [
 type ViewType = 'month' | 'week' | 'day';
 interface MonthProps { 
   currentDate: Date, 
-  bookings: BookingEvent[] | null, 
+  bookings: BookingEventResponse[] | null, 
   holiday: Holiday[] | null 
   isSyncing: boolean
   setView: (view:ViewType) => void
@@ -52,7 +52,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
   }, [currentDate]);
 
   const groupedEvents = useMemo(() => {
-    const map = new Map<string, BookingEvent[]>();
+    const map = new Map<string, BookingEventResponse[]>();
     
     if (bookings) {
       bookings.forEach(evt => {
@@ -93,7 +93,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
     if (holiday) {
       holiday.forEach(evt => {
         // ถ้าระบบวันหยุดมีแค่ evt.date (วันเดียว) ก็ใช้แบบเดิมได้เลย
-        // แต่ถ้ามี evt.startDate และ evt.endDate ให้ใช้ eachDayOfInterval เหมือน BookingEvent ครับ
+        // แต่ถ้ามี evt.startDate และ evt.endDate ให้ใช้ eachDayOfInterval เหมือน BookingEventResponse ครับ
         const dateKey = format(evt.date, 'yyyy-MM-dd'); 
         if (!map.has(dateKey)) map.set(dateKey, []);
         map.get(dateKey)!.push(evt);
@@ -162,7 +162,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
               <div className="space-y-1">
                 {visibleItems.map((item: any, index: number) => {
                   
-                  // เช็กว่านี่คือ Holiday หรือ BookingEvent (Holiday จะมี name, Booking จะมี title)
+                  // เช็กว่านี่คือ Holiday หรือ BookingEventResponse (Holiday จะมี name, Booking จะมี title)
                   const isHoliday = 'name' in item;
                   
                   if (isHoliday) {

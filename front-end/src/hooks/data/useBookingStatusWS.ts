@@ -1,11 +1,11 @@
-import { BookingEvent } from '@/utils/interface/response';
+import { BookingEventResponse } from '@/utils/interface/response';
 import { useState, useEffect, useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { parseISO } from 'date-fns'; // 🌟 อย่าลืม import parseISO
 import useSession from './useSession';
 import { useAuthStore } from '@/stores/auth.store';
 
-const formatBookingEvent = (event: any): BookingEvent => {
+const formatBookingEvent = (event: any): BookingEventResponse => {
   return {
     ...event,
     startTime: parseISO(event.startTime),
@@ -14,7 +14,7 @@ const formatBookingEvent = (event: any): BookingEvent => {
 };
 
 export default function useBookingStatusWS() {
-  const [bookings, setBookings] = useState<BookingEvent[]>([]);
+  const [bookings, setBookings] = useState<BookingEventResponse[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
   const sessionToken = useAuthStore((state) => state.sessionToken);
 

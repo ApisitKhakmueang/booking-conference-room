@@ -1,7 +1,7 @@
 'use client'
 
 import { MonitorCheck, MonitorX, ToolCase, UserRound } from 'lucide-react';
-import { BookingEvent, RoomResp } from '@/utils/interface/response';
+import { RoomResp } from '@/utils/interface/response';
 
 const MOCK_ROOMS = [
   { id: 1, name: "Room A", capacity: 10, status: "available" },
