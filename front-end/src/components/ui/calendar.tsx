@@ -31,10 +31,8 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        // 🌟 แก้ bg-background เป็น bg-dark-purple และเติม text-white
-        "group/calendar bg-dark-purple text-white p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
-        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
-        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+        // 🌟 ปรับสีตัวอักษรหลัก: Light -> text-gray-800, Dark -> text-white
+        "group/calendar bg-white border border-gray-100 shadow-sm text-gray-800 p-2 [--cell-radius:var(--radius-md)] [--cell-size:--spacing(7)] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent dark:bg-dark-purple dark:text-white dark:border-none",
         className
       )}
       captionLayout={captionLayout}
@@ -58,13 +56,13 @@ function Calendar({
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
-          "text-white hover:bg-white/20 hover:text-white", // 🌟 เพิ่มสีปุ่มลูกศร
+          "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
           "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
-          "text-white hover:bg-white/20 hover:text-white", // 🌟 เพิ่มสีปุ่มลูกศร
+          "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-white/20 dark:hover:text-white",
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -93,7 +91,8 @@ function Calendar({
         table: "w-full border-collapse",
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
-          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-normal text-white/70 select-none",
+          // 🌟 ปรับสีหัวตาราง: Light -> text-gray-500, Dark -> text-white/70
+          "flex-1 rounded-(--cell-radius) text-[0.8rem] font-medium text-gray-500 select-none dark:text-white/70 dark:font-normal",
           defaultClassNames.weekday
         ),
         week: cn("mt-2 flex w-full", defaultClassNames.week),
@@ -122,18 +121,17 @@ function Calendar({
           defaultClassNames.range_end
         ),
         today: cn(
-          "rounded-(--cell-radius) bg-blue-200 text-black font-bold data-[selected=true]:rounded-full",
-          // 🌟 !text-black บังคับให้เป็นสีดำ (สำคัญมาก เผื่อมี text-white กวนอยู่)
-          // 🌟 bg-blue-200 คือสีฟ้า/น้ำเงินอ่อน (ถ้าอ่อนไปใช้ 300 หรืออ่อนกว่าใช้ 100)
-          "bg-blue-500 dark:bg-light-google/40",
+          "bg-blue-50 text-blue-700 font-bold data-[selected=true]:rounded-full dark:bg-light-google/40 dark:text-white",
           defaultClassNames.today
         ),
         outside: cn(
-          "text-white/40 aria-selected:text-white/40",
+          // 🌟 ปรับสีวันเดือนอื่น: Light -> text-gray-300, Dark -> text-white/40
+          "text-gray-300 aria-selected:text-gray-300 dark:text-white/40 dark:aria-selected:text-white/40",
           defaultClassNames.outside
         ),
         disabled: cn(
-          "text-white/30 opacity-50",
+          // 🌟 ปรับสีวันที่ถูก disable: Light -> text-gray-300, Dark -> text-white/30
+          "text-gray-300 dark:text-white/30",
           defaultClassNames.disabled
         ),
         hidden: cn("invisible", defaultClassNames.hidden),
@@ -220,9 +218,8 @@ function CalendarDayButton({
         
         "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground", 
 
-        // 🌟 1. บังคับ text-white เสมอ
-        // 🌟 2. แก้ Hover เป็นสีขาวโปร่งแสง จะได้เข้ากับพื้นหลังสีม่วง
-        "text-white hover:bg-white/20 hover:text-white dark:hover:bg-light-card/50 dark:hover:text-white",
+        // 🌟 แก้ไข: ตัวอักษรสีเทาเข้มใน Light, ขาวใน Dark
+        "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-light-card/50 dark:hover:text-white",
 
         "data-[selected-single=true]:bg-blue-600 data-[selected-single=true]:hover:bg-blue-700 dark:data-[selected-single=true]:bg-dark-purple/80 dark:data-[selected-single=true]:hover:bg-dark-purple data-[selected-single=true]:text-white data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
         
