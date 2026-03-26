@@ -21,35 +21,29 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
     )
     
     const rooms = useMemo(() => {
-      // ดักไว้ก่อนว่าถ้าไม่มีข้อมูล ให้ return array เปล่าๆ ออกไป
       if (!rawRoom) return [];
-  
-      // 🌟 แปลงร่างด้วย .map() และต่อด้วย .sort() ได้เลย
       return rawRoom
         .map((room) => ({
           id: room.id,
           name: room.name,
           roomNumber: room.roomNumber
         }))
-        .sort((a, b) => a.roomNumber - b.roomNumber); // เรียงน้อยไปมาก
+        .sort((a, b) => a.roomNumber - b.roomNumber); 
     }, [rawRoom])
 
   const [selectedRooms, setSelectedRooms] = useState<number[]>([])
 
-  // 3. ฟังก์ชันจัดการเมื่อ Checkbox ถูกกด
-  // หมายเหตุ: Checkbox ของ Shadcn/Radix UI มักจะส่งค่า checked กลับมาเป็น boolean หรือ "indeterminate"
   const handleToggle = (value: number, isChecked: boolean | string) => {
     if (isChecked) {
-      // ถ้าติ๊กถูก -> เอาค่าเก่ามา แล้วต่อด้วยค่าใหม่
       setSelectedRooms((prev) => [...prev, value])
     } else {
-      // ถ้าเอาติ๊กออก -> กรองค่าที่ตรงกับที่กดออกไป
       setSelectedRooms((prev) => prev.filter((item) => item !== value))
     }
   }
 
   return (
-    <aside className="fixed w-80 border-l border-white/10 px-8 space-y-10 h-full">
+    // 🌟 1. ลบขอบซ้าย (border-l) ที่ติดมาจาก Dark Mode ออก หรือเปลี่ยนเป็น border-gray-100 สำหรับ Light Mode
+    <aside className="fixed w-80 border-l border-gray-100 dark:border-white/10 px-8 space-y-10 h-full">
       <div>
         <Calendar
           mode="single"
@@ -57,39 +51,35 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
           onSelect={(d) => setCurrentDate(d as Date)}
           className="dark:bg-sidebar rounded-md p-3"
           locale={enUS}
-          
-          // 🌟 เพิ่มเงื่อนไข disabled ตรงนี้ครับ!
           disabled={(day) => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาให้เป็นเที่ยงคืน จะได้เทียบแค่วันที่
-            return day < today; // ถ้าวันนั้นน้อยกว่าวันนี้ ให้ปิดการใช้งาน
+            today.setHours(0, 0, 0, 0); 
+            return day < today; 
           }}/>
       </div>
 
       <div>
-        {/* <h4 className="text-sm font-bold text-stone-300 mb-4 uppercase tracking-widest">Filter Rooms</h4> */}
         <div className="mx-auto w-64 space-y-6">
           <FieldGroup className="gap-6">
-            <h4 className="text-sm font-bold text-black dark:text-stone-300 uppercase tracking-widest">
+            <h4 className="text-sm font-bold text-gray-800 dark:text-stone-300 uppercase tracking-widest">
               Filter Rooms
             </h4>
             
-            {/* 4. ใช้ .map() วนลูปสร้าง Checkbox ตามจำนวน Options */}
             <div className="grid grid-rows-5 grid-flow-col gap-x-8 gap-y-4">     
               {rooms.map((option) => (
                 <Field key={option.id} orientation="horizontal" className="">
                   <Checkbox
                     id={option.id}
                     value={option.roomNumber}
-                    // เช็คว่าค่า value นี้อยู่ใน Array state ของเราไหม ถ้าอยู่ให้ติ๊กถูก
                     checked={selectedRooms.includes(option.roomNumber)}
-                    // ใช้ onCheckedChange (ถ้าเป็น Component ของ Shadcn/Radix UI)
-                    // ถ้าเป็น Checkbox HTML ปกติ ให้ใช้ onChange={(e) => handleToggle(option.value, e.target.checked)}
                     onCheckedChange={(checked) => handleToggle(option.roomNumber, checked)}
+                    // 🌟 2. ปรับสี Checkbox (ถ้า Component รองรับ className)
+                    className="border-gray-300 data-[state=checked]:bg-dark-purple/50 dark:border-gray-600"
                   />
                   <FieldLabel 
                     htmlFor={option.id} 
-                    className="cursor-pointer text-sm text-black hover:text-black/80 dark:text-stone-400 dark:hover:text-neutral-100 transition-colors"
+                    // 🌟 3. ปรับสี Label ให้เป็นสีเทาเข้ม
+                    className="cursor-pointer text-sm text-gray-700 hover:text-gray-900 dark:text-stone-400 dark:hover:text-neutral-100 transition-colors"
                   >
                     {option.name}
                   </FieldLabel>
@@ -97,49 +87,33 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
               ))}
             </div>
           </FieldGroup>
-
-          {/* ส่วนนี้เอาไว้ดูค่า State แบบ Real-time ตอนทดสอบครับ (ลบทิ้งได้เลยตอนใช้งานจริง) */}
-          {/* <div className="mt-4 p-4 bg-neutral-900 rounded-md text-xs text-stone-400">
-            <p className="font-bold mb-2 text-white">Selected Values:</p>
-            <pre>{JSON.stringify(selectedRooms, null, 2)}</pre>
-          </div> */}
         </div>
       </div>
 
       <div className="w-full">
-        <Card variant='dark-purple' loading={false} className="py-0">
+        {/* 🌟 4. ปรับสี Card:
+            - Light Mode: พื้นสีฟ้าอ่อนจัด (bg-blue-50) กรอบฟ้าอ่อน (border-blue-100) ตัวหนังสือสีฟ้าเข้ม (text-blue-900)
+            - Dark Mode: ใช้สีม่วงเดิม (dark:bg-dark-purple dark:text-white) 
+            หมายเหตุ: ถ้า `variant='dark-purple'` ของ Card component คุณมันบังคับคลาสสีไว้ คุณอาจจะต้องเปลี่ยนเป็น variant='outline' หรือค่าเริ่มต้น แล้วใช้ className ควบคุมแทนครับ
+        */}
+        <Card 
+          loading={false} 
+          className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0"
+        >
           <li className='flex flex-col gap-2 p-5'>
-            <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg`}>
+            <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg text-dark-purple dark:text-white/90`}>
               Total Events
             </h1>
 
-            <p className="text-5xl font-semibold text-center">
+            {/* 🌟 ปรับสีตัวเลขให้เด่นขึ้น */}
+            <p className="text-5xl font-bold text-center text-dark-purple dark:text-white py-2">
               {events?.length || 0}
             </p>
 
-            <p className="text-end sm:text-xl text-lg">Events</p>
+            <p className="text-end sm:text-xl text-lg text-dark-purple/80 dark:text-white/80 font-medium">Events</p>
           </li>
         </Card>
       </div>
-
-      {/* <div className="p-6 rounded-2xl bg-neutral-900 border-t border-white/5 relative overflow-hidden group">
-        <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors"></div>
-        
-        <h4 className="text-xs font-bold text-stone-500 mb-4 uppercase tracking-widest relative z-10">Quick Stats</h4>
-        <div className="space-y-6 relative z-10">
-          <div>
-            <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider mb-1">Total Bookings Today</p>
-            <p className="text-3xl font-black text-neutral-100">12</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider mb-1">Busiest Room</p>
-            <p className="text-lg font-bold text-purple-400">Conference A</p>
-            <div className="w-full h-1 bg-neutral-800 rounded-full mt-2 overflow-hidden">
-              <div className="w-3/4 h-full bg-purple-500"></div>
-            </div>
-          </div>
-        </div>
-      </div> */}
 
     </aside>
   );

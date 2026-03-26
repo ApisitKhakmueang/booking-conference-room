@@ -195,7 +195,21 @@ export default function Schedule() {
   }, [isAddModalOpen])
 
   useEffect(() => {
-    fetchUserBookings();
+    // 1. จำลองการเรียก API (ของจริงเปลี่ยนเป็น axios.get(...))
+    const fetchBookings = async () => {
+      const apiResponse: BookingEventResponse[] = mockResp; // ข้อมูลที่ได้จาก DB
+      
+      // 2. โยนเข้าเครื่องแปลงข้อมูล!
+      const formattedEvents = useMapResponseToEvents(apiResponse);
+      console.log("events: ", formattedEvents)
+      
+      // 3. เอาไปแสดงผลได้เลย
+      setEvents(formattedEvents);
+    };
+
+    fetchBookings();
+
+    // fetchUserBookings();
   }, []);
 
   return (
