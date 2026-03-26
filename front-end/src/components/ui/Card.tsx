@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils" // ปรับแก้เป็น "@/utils/u
 // 🌟 1. ย้าย variantStyles มาใส่ใน cva เพื่อให้จัดการ Class ได้ง่ายตามแบบฉบับ Shadcn
 const cardVariants = cva(
   // Base classes (รวมของ Shadcn และของคุณ)
-  "group/card flex flex-col gap-4 overflow-hidden rounded-2xl py-4 text-sm transition-all duration-300 font-medium has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
+  "group/card flex flex-col gap-4 overflow-hidden rounded-2xl text-sm transition-all duration-300 font-medium has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
   {
     variants: {
       variant: {

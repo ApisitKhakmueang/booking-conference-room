@@ -5,7 +5,7 @@ import { RoomResp } from "@/utils/interface/response"
 import { useMemo } from "react"
 
 const ROOM_STATUS = [
-  { name: 'Total', amount: 10, variant: 'dark-purple' },
+  { name: 'Total', amount: 10, variant: 'purple' },
   { name: 'Available', amount: 4, variant: 'purple' },
   { name: 'Occupied', amount: 5, variant: 'purple' },
   { name: 'Maintainance', amount: 1, variant: 'purple' },
@@ -19,7 +19,7 @@ export default function RoomStatus({ displayRooms, isLoadingBooking }: { display
     const maintenance = displayRooms.filter((room) => room.status === 'maintenance').length
 
     const result: { name: string, amount: number, variant: CardProps["variant"] }[] = [
-      { name: 'Total', amount: total, variant: 'dark-purple' },
+      { name: 'Total', amount: total, variant: 'purple' },
       { name: 'Available', amount: available, variant: 'purple' },
       { name: 'Occupied', amount: occupied, variant: 'purple' },
       { name: 'Maintainance', amount: maintenance, variant: 'purple' },

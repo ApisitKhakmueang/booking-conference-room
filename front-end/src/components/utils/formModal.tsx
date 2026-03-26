@@ -147,7 +147,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       className="relative bg-light-purple dark:bg-card rounded-lg shadow-xl w-full max-w-md transform transition-all">
       
       {/* Modal Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b dark:border-sidebar bg-dark-purple dark:bg-sidebar/80">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-none dark:border-sidebar bg-dark-purple dark:bg-sidebar/80">
         <h2 className="text-xl font-bold text-white">
           {typeOperate === 'add' ? 'New Booking' : 'Update Booking'}
         </h2>
@@ -278,7 +278,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           >
           Cancel
         </Button>
-        <Button type="submit" variant='dark-purple' className='rounded-md bg-blue-600 hover:bg-blue-700'>
+        <Button type="submit" variant='dark-purple' className='rounded-md border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow'>
           {typeOperate === 'add' ? 'Confirm Booking' : 'Save Changes'}
         </Button>
       </div>
