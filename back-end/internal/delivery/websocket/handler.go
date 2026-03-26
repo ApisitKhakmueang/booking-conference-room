@@ -35,14 +35,14 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 	w.hub.Register(c, topic)
 	defer w.hub.Unregister(c, topic)
 
-	q := new(domain.Date)
+	date := new(domain.Date)
 
 	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
 	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
 	startDate, endDate := c.Query("startDate"), c.Query("endDate")
-	q.StartStr = startDate
-	q.EndStr = endDate
-	if q.StartStr == "" || q.EndStr == "" {
+	date.StartStr = startDate
+	date.EndStr = endDate
+	if date.StartStr == "" || date.EndStr == "" {
 		c.WriteJSON(map[string]string{"error": "Please send startDate and endDate"})
 		return 
 	}
@@ -54,7 +54,7 @@ func (w *WSBookingHandler) GetBooking(c *websocket.Conn) {
 		return 
 	}
 
-	response, err := w.usecase.GetBooking(ctx, q, uint(roomNumber))
+	response, err := w.usecase.GetBooking(ctx, date, uint(roomNumber))
 	
 	if err == nil {
 		payload := map[string]interface{}{

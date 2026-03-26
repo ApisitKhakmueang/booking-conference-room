@@ -15,5 +15,5 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Delete("/:bookingID", handler.DeleteBooking)
 	// router.Get("/:room", websocket.New(ws.GetBooking))
 	// router.Get("/:room", handler.GetBooking)
-	// router.Get("/user/:id", handler.GetUserBooking)
+	router.Get("/user/:id", handler.GetUserBooking)
 }

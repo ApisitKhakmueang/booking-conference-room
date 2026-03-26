@@ -4,6 +4,7 @@ import (
 	// "log"
 	// "fmt"
 	"strconv"
+	"time"
 	// "time"
 
 	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
@@ -123,20 +124,25 @@ func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
-// func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
-// 	ctx := c.UserContext()
-// 	id, err := uuid.Parse(c.Params("id"))
-// 	if err != nil {
-// 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-// 	}
+func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	userID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
 
-// 	bookings, err := u.usecase.GetUserBooking(ctx, id)
-// 	if err != nil {
-// 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
-// 	}
+	date := c.Query("date", time.Now().Format("2006-01-02"))
+	// if err := c.Query("room", "0"); err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	// }
 
-// 	return c.Status(fiber.StatusOK).JSON(bookings)
-// }
+	bookings, err := u.usecase.GetUserBooking(ctx, userID, date)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(bookings)
+}
 
 func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
 	reponse, err := u.usecase.GetRoomDetails(c.Context())

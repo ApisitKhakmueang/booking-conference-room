@@ -93,6 +93,31 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 	return bookings, nil
 }
 
+func (r *redisRepository) GetUserBooking(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
+	cacheKey := fmt.Sprintf("booking:user:%s:date:%s", userID, date)
+
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var bookings []domain.Booking
+		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
+			return nil, err
+		}
+
+		return bookings, nil
+	}
+
+	bookings, err := r.postgres.GetUserBookingDB(ctx, userID, date)
+	if err != nil {
+		return nil, err
+	}
+
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
+	}
+
+	return bookings, nil
+}
+
 func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string) ([]domain.Booking, error) {
 	bookings, err := r.postgres.GetBookingStatusDB(ctx)
 	if err != nil {

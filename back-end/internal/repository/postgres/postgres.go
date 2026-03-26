@@ -2,11 +2,11 @@ package Postgres
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"errors"
 	"time"
-
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
@@ -103,34 +103,38 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 	return bookings, nil
 }
 
-// func (p *postgresRepository) GetUserBookingDB(ctx context.Context, userID uuid.UUID) ([]domain.Booking, error) {
-// 	cacheKey := fmt.Sprintf("booking:user:%s", userID)
+func (p *postgresRepository) GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
+	layout := "2006-01-02"
+	startTime, err := time.Parse(layout, date)
+	if err != nil {
+			return nil, fmt.Errorf("invalid date format: %v", err)
+	}
 
-// 	bookings, _ := p.rdb.GetBookingRedis(cacheKey)
+	// 2. หาจุดสิ้นสุดของวัน (คือวินาทีแรกของวันถัดไป)
+	endTime := startTime.AddDate(0, 0, 1)
 
-// 	result := p.db.
-// 		WithContext(ctx).
-// 		Preload("Room", func(db *gorm.DB) *gorm.DB {
-// 			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-// 			return db.Select("id, name, room_number") 
-//     }).
-// 		Preload("User", func(db *gorm.DB) *gorm.DB {
-// 			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
-//     }).
-// 		Where("user_id = ?", userID).
-// 		Find(&bookings)
+	var bookings []domain.Booking
 
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
+	result := p.db.
+		WithContext(ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name, room_number") 
+    }).
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
+    }).
+		Where("start_time >= ? AND start_time < ? AND user_id = ? AND status = 'confirm'", 
+				startTime, endTime, userID).
+			Order("start_time asc").
+		Find(&bookings)
 
-// 	if jsonBytes, err := json.Marshal(bookings); err == nil {
-// 		// ใช้ ctx ตัวเดิมส่งให้ Redis ด้วย
-// 		p.rdb.SetJsonCache(cacheKey, jsonBytes)
-// 	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
 
-// 	return bookings, nil
-// }
+	return bookings, nil
+}
 
 func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Room, error) {
 	var room []domain.Room

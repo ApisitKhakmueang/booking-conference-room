@@ -352,14 +352,14 @@ func (u *bookingUsecase) GetBookingStatus(ctx context.Context) ([]domain.Booking
 	return booking, nil
 }
 
-// func (u *bookingUsecase) GetUserBooking(ctx context.Context,userID uuid.UUID) ([]domain.Booking, error) {
-// 	bookings, err := u.helperPostgres.GetUserBookingDB(userID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (u *bookingUsecase) GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
+	bookings, err := u.redis.GetUserBooking(ctx, userID, date)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return bookings, nil
-// }
+	return bookings, nil
+}
 
 func (u *bookingUsecase) GetRoomDetails(ctx context.Context) ([]domain.Room, error) {
 	rooms, err := u.redis.GetRoomDetails(ctx)
