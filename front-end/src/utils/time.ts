@@ -29,3 +29,23 @@ export const calculateDuration = (start: string, end: string) => {
   if (hours > 0) return `${hours}h`; // เช่น 2h
   return `${minutes}m`; // เช่น 30m
 };
+
+export const formatTimeWithSuffix = (timeStr: string) => {
+  if (!timeStr) return { time: '', suffix: '' };
+  
+  // แยกชั่วโมงและนาทีออกา (เช่น "14:30" -> hours: 14, mins: 30)
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  
+  const suffix = hours >= 12 ? 'PM' : 'AM';
+  
+  // แปลงเป็นระบบ 12 ชั่วโมง (เช่น 14 -> 02, 00 -> 12)
+  const hour12 = hours % 12 || 12;
+  
+  // เติมเลข 0 ข้างหน้าถ้าเป็นเลขหลักเดียว
+  const formattedHour = hour12.toString().padStart(2, '0');
+  
+  return {
+    time: `${formattedHour}:${minutes.toString().padStart(2, '0')}`,
+    suffix: suffix
+  };
+};

@@ -9,115 +9,130 @@ import Modal from "@/components/ui/modal";
 import { Plus } from "lucide-react";
 import CardEvents from "./eventCard";
 import { BookingEvent } from "@/utils/interface/interface";
+import { BookingEventResponse } from "@/utils/interface/response";
+import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
 
-export const mockEvents: BookingEvent[] = [
+const mockResp: BookingEventResponse[] = [
   {
-    id: "1",
-    title: "Executive Board Meeting",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Quarterly performance review and strategic planning.",
-    startTime: "09:00",
-    startAmpm: "AM",
-    endTime: "11:00",
-    endAmpm: "AM",
-    room: "Conference A",
-    status: "Confirmed",
-    duration: 120,
-    guestsCount: 4, 
+    id: "87faa1f6-543a-4f93-be6d-98daf40d73d3",
+    startTime: "2026-02-16T04:30:00Z",
+    endTime: "2026-02-16T05:30:00Z",
+    title: "Business conference",
+    passcode: "4979",
+    status: "confirm",
+    Room: {
+      id: "abd444b7-b7e1-4167-984a-5c22ff01ad8e",
+      name: "Room 1",
+      roomNumber: 1
+    },
+    User: {
+      id: "6d4ac759-dd57-4462-b980-4147b7d18cba",
+      email: "guy.apisit2546@gmail.com",
+      fullName: "นายอภิสิทธิ แขกเมือง"
+    }
   },
   {
-    id: "2",
-    title: "VIP Private Luncheon",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Host: Sarah Jenkins. Custom catering requirements attached.",
-    startTime: "11:30",
-    startAmpm: "AM",
-    endTime: "01:30",
-    endAmpm: "PM",
-    room: "Suite 402",
-    status: "Confirmed",
-    duration: 90,
-  },
-  {
-    id: "3",
-    title: "Tech Founders Meetup",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Informal networking session for local entrepreneurs.",
-    startTime: "02:00",
-    startAmpm: "PM",
-    endTime: "04:00",
-    endAmpm: "PM",
-    room: "Lounge West",
-    status: "Pending",
-    duration: 60,
-  },
-  {
-    id: "4",
-    title: "Design Review: Project Velvet",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Presentation of initial UI prototypes and brand strategy.",
-    startTime: "04:30",
-    startAmpm: "PM",
-    endTime: "06:30",
-    endAmpm: "PM",
-    room: "Conference B",
-    status: "Confirmed",
-    duration: 45,
-  },
-  {
-    id: "5",
-    title: "Executive Board Meeting",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Quarterly performance review and strategic planning.",
-    startTime: "09:00",
-    startAmpm: "AM",
-    endTime: "11:00",
-    endAmpm: "AM",
-    room: "Conference A",
-    status: "Confirmed",
-    duration: 120,
-    guestsCount: 4, 
-  },
-  {
-    id: "6",
-    title: "VIP Private Luncheon",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Host: Sarah Jenkins. Custom catering requirements attached.",
-    startTime: "11:30",
-    startAmpm: "AM",
-    endTime: "01:30",
-    endAmpm: "PM",
-    room: "Suite 402",
-    status: "Confirmed",
-    duration: 90,
-  },
-  {
-    id: "7",
-    title: "Tech Founders Meetup",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Informal networking session for local entrepreneurs.",
-    startTime: "02:00",
-    startAmpm: "PM",
-    endTime: "04:00",
-    endAmpm: "PM",
-    room: "Lounge West",
-    status: "Pending",
-    duration: 60,
-  },
-  {
-    id: "8",
-    title: "Design Review: Project Velvet",
-    date: "2026-03-26T16:20:00+07:00", 
-    description: "Presentation of initial UI prototypes and brand strategy.",
-    startTime: "04:30",
-    startAmpm: "PM",
-    endTime: "06:30",
-    endAmpm: "PM",
-    room: "Conference B",
-    status: "Confirmed",
-    duration: 45,
+    id: "88b189db-2914-4d89-b00c-9aa16200f14c",
+    startTime: "2026-02-16T07:30:00Z",
+    endTime: "2026-02-16T08:30:00Z",
+    title: "Business conference",
+    passcode: "6568",
+    status: "confirm",
+    Room: {
+      id: "abd444b7-b7e1-4167-984a-5c22ff01ad8e",
+      name: "Room 1",
+      roomNumber: 1
+    },
+    User: {
+      id: "6d4ac759-dd57-4462-b980-4147b7d18cba",
+      email: "guy.apisit2546@gmail.com",
+      fullName: "นายอภิสิทธิ แขกเมือง"
+    }
   }
-];
+]
+
+// export const mockEvents: BookingEvent[] = [
+//   // {
+//   //   id: "1",
+//   //   title: "VIP Private Luncheon",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: 1,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "2",
+//   //   title: "VIP Private Luncheon",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "3",
+//   //   title: "Tech Founders Meetup",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "4",
+//   //   title: "Design Review: Project Velvet",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "5",
+//   //   title: "Executive Board Meeting",
+//   //   date: "2026-03-26T16:20:00+07:00",
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "6",
+//   //   title: "VIP Private Luncheon",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "7",
+//   //   title: "Tech Founders Meetup",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // },
+//   // {
+//   //   id: "8",
+//   //   title: "Design Review: Project Velvet",
+//   //   date: "2026-03-26T16:20:00+07:00", 
+//   //   startTime: "09:00",
+//   //   endTime: "11:00",
+//   //   duration: "1 h 30 m",
+//   //   room: undefined,
+//   //   status: "Confirmed",
+//   // }
+// ];
 
 export default function Schedule() {
   // State สำหรับเปิดปิด Mobile Modal (จำลอง)
@@ -126,6 +141,7 @@ export default function Schedule() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
+  const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined)
 
   const next = () => {
    setCurrentDate(addDays(currentDate, 1));
@@ -166,6 +182,22 @@ export default function Schedule() {
     setCurrentDate(new Date())
   }, [isAddModalOpen])
 
+  useEffect(() => {
+    // 1. จำลองการเรียก API (ของจริงเปลี่ยนเป็น axios.get(...))
+    const fetchBookings = async () => {
+      const apiResponse: BookingEventResponse[] = mockResp; // ข้อมูลที่ได้จาก DB
+      
+      // 2. โยนเข้าเครื่องแปลงข้อมูล!
+      const formattedEvents = useMapResponseToEvents(apiResponse);
+      console.log("events: ", formattedEvents)
+      
+      // 3. เอาไปแสดงผลได้เลย
+      setEvents(formattedEvents);
+    };
+
+    fetchBookings();
+  }, []);
+
   return (
     <div className="bg-light-main-background dark:bg-main-background flex">
       
@@ -193,11 +225,22 @@ export default function Schedule() {
             
             {/* Main List Scrollable */}
             <main className="flex-1 space-y-4 overflow-y-auto p-4 md:p-8 no-scrollbar">
-              {mockEvents.map((event) => (
-                <div key={event.id} onClick={() => handleEditClick(event)}>
-                  <CardEvents event={event} setIsAddModalOpen={setIsAddModalOpen} setCurrentDate={setCurrentDate} />
+              {events && events.length > 0 ? (
+                events.map((event) => (
+                  <div key={event.id} onClick={() => handleEditClick(event)}>
+                    <CardEvents 
+                      event={event} 
+                      setIsAddModalOpen={setIsAddModalOpen} 
+                      setCurrentDate={setCurrentDate} 
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center h-64 text-stone-500">
+                  <p className="text-lg font-medium">No Content</p>
+                  <p className="text-sm">You don't have any bookings for this period.</p>
                 </div>
-              ))}
+              )}
             </main>
 
           </div>

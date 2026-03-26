@@ -103,20 +103,17 @@ export interface RoomSelectorProps {
   className?: string;
 }
 
+export type BookingStatus = 'Confirmed' | 'Pending'
+
 export interface BookingEvent {
   id: string;
   title: string;
   date: string
-  description: string;
   startTime: string; // เก็บแค่เวลาเพื่อความง่ายในการโชว์
-  startAmpm: string;
-  endTime: string,
-  endAmpm: string
-  room: string;
-  status: 'Confirmed' | 'Pending';
-  duration: number; // นาที
-  // ข้อมูลเกี่ยวกับ guests อาจจะต้องปรับ structure ตามความเหมาะสม
-  guestsCount?: number; 
+  endTime: string
+  duration: string; // นาที
+  room: ArrangeRoom | undefined;
+  status: BookingStatus;
 }
 
 export interface EventCardProps { 
