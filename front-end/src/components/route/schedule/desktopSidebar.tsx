@@ -7,10 +7,12 @@ import { useShallow } from "zustand/shallow";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Card } from "@/components/ui/card";
+import { BookingEvent } from "@/utils/interface/interface";
 
-export default function DesktopSidebar({currentDate, setCurrentDate}: {
+export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
   currentDate: Date,
   setCurrentDate: (date: Date) => void 
+  events: BookingEvent[] | undefined
 }) {
   const { rawRoom } = useRoomStore(
       useShallow(((state) => ({
@@ -47,14 +49,7 @@ export default function DesktopSidebar({currentDate, setCurrentDate}: {
   }
 
   return (
-    <aside className="fixed w-80 border-l border-white/10 px-8 space-y-5 h-full">
-      {/* <Button 
-        onClick={() => setIsAddModalOpen(true)} 
-        className="p-3 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer whitespace-nowrap w-full rounded-full"
-        >
-          <Plus />&nbsp;
-          Add Booking</Button> */}
-
+    <aside className="fixed w-80 border-l border-white/10 px-8 space-y-10 h-full">
       <div>
         <Calendar
           mode="single"
@@ -119,7 +114,7 @@ export default function DesktopSidebar({currentDate, setCurrentDate}: {
             </h1>
 
             <p className="text-5xl font-semibold text-center">
-              10
+              {events?.length || 0}
             </p>
 
             <p className="text-end sm:text-xl text-lg">Events</p>
