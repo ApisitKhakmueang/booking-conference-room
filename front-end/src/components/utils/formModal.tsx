@@ -268,7 +268,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       </div>
 
       {/* Modal Footer (ปุ่มกดยืนยัน) */}
-      <div className="px-6 py-4 flex justify-end gap-3 border-t dark:border-sidebar bg-light-purple dark:bg-sidebar/50">
+      <div className="px-6 py-4 flex justify-end gap-3 border-t border-none dark:border-sidebar bg-light-purple dark:bg-sidebar/50">
         <Button 
           type="button"
           onClick={() => {
@@ -279,7 +279,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           >
           Cancel
         </Button>
-        <Button type="submit">
+        <Button type="submit" variant='dark-purple' className='rounded-md bg-blue-600 hover:bg-blue-700'>
           {typeOperate === 'add' ? 'Confirm Booking' : 'Save Changes'}
         </Button>
       </div>
