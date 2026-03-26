@@ -236,9 +236,9 @@ export default function Schedule() {
                   </div>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-stone-500">
+                <div className="flex flex-col items-center justify-center h-64">
                   <p className="text-lg font-medium">No Content</p>
-                  <p className="text-sm">You don't have any bookings for this period.</p>
+                  <p className="text-sm">You don't have any bookings for this day.</p>
                 </div>
               )}
             </main>
