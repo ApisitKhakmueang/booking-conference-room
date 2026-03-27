@@ -77,17 +77,19 @@ export type typeOperate = 'add' | 'update';
 export interface ModalProps {
   isAddModalOpen: boolean
   setIsAddModalOpen: (status: boolean) => void
-  typeOperate: typeOperate
+  typeOperate: 'add' | 'update'
   currentDate: Date
-  selectedEvent?: any // 🌟 เพิ่มบรรทัดนี้ (ถ้ามี interface BookingEvent ให้ใส่แทน any)
+  selectedEvent?: BookingEvent
+  onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
 }
 
 export interface FormModalProps {
   setIsAddModalOpen: (status: boolean) => void
-  typeOperate: typeOperate
+  typeOperate: 'add' | 'update'
   rooms: ArrangeRoom[]
   currentDate: Date
-  selectedEvent?: any // 🌟 เพิ่มบรรทัดนี้
+  selectedEvent?: BookingEvent
+  onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
 }
 
 export interface ArrangeRoom {

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import FormModal from "../utils/formModal";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 
-export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, selectedEvent }: ModalProps) {
+export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, selectedEvent, onSuccess }: ModalProps) {
   const { rawRoom } = useRoomStore(
     useShallow(((state) => ({
       rawRoom: state.rooms
@@ -44,6 +44,7 @@ export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, 
             rooms={rooms} 
             currentDate={currentDate}
             selectedEvent={selectedEvent} 
+            onSuccess={onSuccess} // 🌟 ส่งต่อลงไปอีกทอด
           />
         </div>
       )}

@@ -8,11 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Card } from "@/components/ui/card";
 import { BookingEvent } from "@/utils/interface/interface";
+import { cn } from "@/lib/utils";
 
-export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
+export default function DesktopSidebar({currentDate, setCurrentDate, events, className, }: {
   currentDate: Date,
   setCurrentDate: (date: Date) => void 
   events: BookingEvent[] | undefined
+  className?: string
 }) {
   const { rawRoom } = useRoomStore(
       useShallow(((state) => ({
@@ -43,8 +45,9 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
 
   return (
     // 🌟 1. ลบขอบซ้าย (border-l) ที่ติดมาจาก Dark Mode ออก หรือเปลี่ยนเป็น border-gray-100 สำหรับ Light Mode
-    <aside className="fixed w-80 border-l border-gray-100 dark:border-white/10 px-8 space-y-10 h-full">
-      <div>
+    // <aside className={cn(`flex flex-col space-y-8 fixed w-80 border-l border-gray-100 dark:border-white/10 h-full`, className)}>
+    <aside className={cn(`flex flex-col space-y-8`, !className ? 'fixed w-80 border-l border-gray-100 dark:border-white/10 h-full px-8' : className)}>
+      <div className="w-full">
         <Calendar
           mode="single"
           selected={currentDate}
@@ -58,14 +61,14 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
           }}/>
       </div>
 
-      <div>
-        <div className="mx-auto w-64 space-y-6">
+      <div className="w-full">
+        <div className="w-full space-y-6">
           <FieldGroup className="gap-6">
             <h4 className="text-sm font-bold text-gray-800 dark:text-stone-300 uppercase tracking-widest">
               Filter Rooms
             </h4>
             
-            <div className="grid grid-rows-5 grid-flow-col gap-x-8 gap-y-4">     
+            <div className="grid grid-rows-5 grid-flow-col gap-x-8 h-full gap-y-4">     
               {rooms.map((option) => (
                 <Field key={option.id} orientation="horizontal" className="">
                   <Checkbox
@@ -79,7 +82,7 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
                   <FieldLabel 
                     htmlFor={option.id} 
                     // 🌟 3. ปรับสี Label ให้เป็นสีเทาเข้ม
-                    className="cursor-pointer text-sm text-gray-700 hover:text-gray-900 dark:text-stone-400 dark:hover:text-neutral-100 transition-colors"
+                    className="cursor-pointer text-sm text-gray-700 hover:text-gray-900 dark:text-stone-400 dark:hover:text-neutral-100 transition-colors whitespace-nowrap"
                   >
                     {option.name}
                   </FieldLabel>
@@ -90,7 +93,7 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
         </div>
       </div>
 
-      <div className="w-full">
+      <div className="w-full xl:flex hidden">
         {/* 🌟 4. ปรับสี Card:
             - Light Mode: พื้นสีฟ้าอ่อนจัด (bg-blue-50) กรอบฟ้าอ่อน (border-blue-100) ตัวหนังสือสีฟ้าเข้ม (text-blue-900)
             - Dark Mode: ใช้สีม่วงเดิม (dark:bg-dark-purple dark:text-white) 
@@ -98,7 +101,7 @@ export default function DesktopSidebar({currentDate, setCurrentDate, events}: {
         */}
         <Card 
           loading={false} 
-          className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0"
+          className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0 w-full"
         >
           <li className='flex flex-col gap-2 p-5'>
             <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg text-dark-purple dark:text-white/90`}>

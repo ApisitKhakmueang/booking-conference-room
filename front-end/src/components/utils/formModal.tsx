@@ -1,8 +1,6 @@
-import { Calendar as CalendarIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from "react";
 import {
   format,
-  startOfDay,
 } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import RoomSelector from "../route/calendar/roomSelector";
@@ -17,10 +15,9 @@ import { ArrangeRoom, FormModalProps } from '@/utils/interface/interface';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
-import axios from 'axios';
 import { bookingService } from '@/service/booking.service';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, selectedEvent }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, selectedEvent, onSuccess }: FormModalProps) {
   const defaultFormData = {
     title: "",
     date: currentDate,
@@ -32,12 +29,6 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   const titleRef = useRef<HTMLInputElement>(null)
   const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(rooms[0]);
   const [formData, setFormData] = useState(defaultFormData)
-  // const [isOpenCalendar, setIsOpenCalendar] = useState(false)
-
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  //   const { id, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [id]: value }));
-  // };
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
@@ -72,7 +63,14 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
     const body = bodyBooking(finalDataToSubmit)
 
     try {
-      const result = await bookingService.createBooking(selectedRoom?.roomNumber, body)
+      let result;
+      if (typeOperate === 'add') {
+        result = await bookingService.createBooking(selectedRoom?.roomNumber, body);
+      } else {
+        // สมมติว่าสร้างฟังก์ชัน updateBooking ไว้ใน service แล้ว
+        // ต้องแนบ ID ของการจองที่จะแก้ไปด้วย (เช่น selectedEvent?.id)
+        result = await bookingService.updateBooking(selectedEvent?.id, selectedRoom?.roomNumber, body); 
+      }
       
       if (result.status === 200) {
         Swal.fire({
@@ -81,6 +79,10 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           icon: 'success',
           timer: 2000
         })
+
+        if (onSuccess) {
+          onSuccess();
+        }
       }
 
       setFormData(defaultFormData)
@@ -94,7 +96,9 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
         icon: 'error',
         timer: 2000
       })
-    } 
+    } finally {
+      setIsAddModalOpen(false);
+    }
   }
 
   // 🌟 ใช้ useEffect เพื่อคำนวณ Duration อัตโนมัติ
@@ -107,18 +111,9 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
     }
   }, [formData.startTime, formData.endTime]); // <--- โค้ดจะทำงานก็ต่อเมื่อ 2 ตัวนี้เปลี่ยน
 
-  // useEffect(() => {
-  //   if (rooms.length > 0 && !selectedRoom) {
-  //     setSelectedRoom(rooms[0]);
-  //     // setIsLoadingRoom(false)
-  //   }
-  // }, [rooms, selectedRoom]);
-
   useEffect(() => {
     if (typeOperate === 'update' && selectedEvent) {
-      // ค้นหาห้องจากชื่อ room ที่อยู่ใน selectedEvent 
-      // (ระวังถ้าหาไม่เจอให้ใช้ rooms[0] กันเหนียวไว้ก่อน)
-      const foundRoom = rooms.find(r => r.name === selectedEvent.room) || rooms[0];
+      const foundRoom = rooms.find(r => r.name === selectedEvent.room?.name) || rooms[0];
 
       setFormData({
         title: selectedEvent.title,

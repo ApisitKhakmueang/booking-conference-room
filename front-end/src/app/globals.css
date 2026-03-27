@@ -54,6 +54,9 @@
   --color-main: #ffffff;
   --color-secondary: #666666;
   --color-muted: #8B8FC7;
+
+  --breakpoint-xs: 425px;
+  --breakpoint-2xs: 375px;
 }
 
 .transition-duration-300 {
