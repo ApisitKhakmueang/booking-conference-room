@@ -4,7 +4,7 @@ import { create } from 'zustand'
 export const useControlLayoutStore = create<ControlLayoutState>()(
   (set) => ({
     isHideNav: false,
-    isOpenNav: true,
+    isOpenNav: false,
     setIsHideNav: (isHide) => set({ isHideNav: isHide }),
     setIsOpenNav: (isOpen) => set({ isOpenNav: isOpen }),
   })
