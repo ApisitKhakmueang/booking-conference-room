@@ -19,7 +19,7 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate } 
       // 🌟 1. ปรับ Background ของ Card:
       // Light: bg-white ขอบเทาอ่อน โฮเวอร์เปลี่ยนเป็นเทาจางๆ
       // Dark: bg-sidebar โฮเวอร์เปลี่ยนเป็น hover
-      className="group flex gap-6 p-6 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 cursor-pointer"
+      className="group flex gap-6 p-4 md:p-6 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 cursor-pointer"
     >
       
       {/* 🌟 2. โซนเวลาด้านซ้าย */}

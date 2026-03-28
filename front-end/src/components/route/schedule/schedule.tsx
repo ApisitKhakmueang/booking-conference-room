@@ -156,7 +156,7 @@ export default function Schedule() {
           <div className="flex-1 overflow-hidden flex">
             
             {/* Main List Scrollable */}
-            <main className="flex-1 space-y-4 overflow-y-auto p-4 md:p-8 no-scrollbar">
+            <main className="flex-1 space-y-4 overflow-y-auto py-4 pr-4 md:py-8 md:pr-8 no-scrollbar">
               {events && events.length > 0 ? (
                 events.map((event) => (
                   <div key={event.id} onClick={() => handleEditClick(event)}>
