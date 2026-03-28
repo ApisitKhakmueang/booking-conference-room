@@ -143,3 +143,49 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
     </div>
   )
 }
+
+export function CardEventsSkeleton() {
+  return (
+    <div className="flex gap-6 p-4 md:p-6 rounded-2xl bg-white border border-gray-100 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar animate-pulse">
+      
+      {/* 🌟 โซนเวลาด้านซ้าย (Skeleton) */}
+      <div className="w-20 pt-1 flex flex-col items-end border-r border-gray-200 dark:border-white/10 pr-6 gap-1">
+        <div className="h-6 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
+        <div className="h-3 w-6 bg-gray-200 dark:bg-white/10 rounded mb-1"></div>
+        <div className="h-2 w-4 bg-gray-200 dark:bg-white/5 rounded my-0.5"></div>
+        <div className="h-6 w-12 bg-gray-200 dark:bg-white/10 rounded mt-1"></div>
+        <div className="h-3 w-6 bg-gray-200 dark:bg-white/10 rounded"></div>
+      </div>
+
+      {/* 🌟 โซนรายละเอียดด้านขวา (Skeleton) */}
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-3">
+          {/* Badge Skeleton */}
+          <div className="h-5 w-16 bg-gray-200 dark:bg-white/10 rounded-full"></div>
+          {/* Button Skeleton */}
+          <div className="h-7 w-7 bg-gray-200 dark:bg-white/10 rounded"></div>
+        </div>
+        
+        {/* Title Skeleton */}
+        <div className="h-6 w-3/4 bg-gray-200 dark:bg-white/10 rounded mb-2"></div>
+        
+        {/* Date Skeleton */}
+        <div className="h-4 w-1/2 bg-gray-200 dark:bg-white/10 rounded"></div>
+        
+        {/* แถบด้านล่าง (Status และ Duration) Skeleton */}
+        <div className="mt-5 flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-gray-200 dark:bg-white/10"></div> 
+            <div className="h-3 w-12 bg-gray-200 dark:bg-white/10 rounded"></div>
+          </div>
+          
+          <div className="flex items-center gap-1.5 border-l border-gray-200 dark:border-white/10 pl-4">
+            <div className="h-4 w-4 bg-gray-200 dark:bg-white/10 rounded-full"></div>
+            <div className="h-3 w-10 bg-gray-200 dark:bg-white/10 rounded"></div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  )
+}

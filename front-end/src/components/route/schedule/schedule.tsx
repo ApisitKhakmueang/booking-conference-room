@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/modal";
 import { Plus } from "lucide-react";
-import CardEvents from "./eventCard";
+import CardEvents, { CardEventsSkeleton } from "./eventCard";
 import { BookingEvent } from "@/utils/interface/interface";
 import { BookingEventResponse } from "@/utils/interface/response";
 import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
@@ -116,7 +116,13 @@ export default function Schedule() {
           <div className="flex-1 overflow-hidden flex">
             <main className="flex-1 space-y-4 overflow-y-auto py-4 pr-4 md:py-8 md:pr-8 no-scrollbar">
               {/* 🌟 3. เปลี่ยนจาก events.map เป็น filteredEvents.map เพื่อแสดงเฉพาะอันที่กรองแล้ว */}
-              {filteredEvents && filteredEvents.length > 0 ? (
+              {events === undefined ? (
+                // ถ้า events ยังเป็น undefined แสดงว่ากำลังโหลด ให้จำลอง Skeleton ขึ้นมา 3 กล่อง
+                Array.from({ length: 3 }).map((_, index) => (
+                  <CardEventsSkeleton key={index} />
+                ))
+              ) : filteredEvents && filteredEvents.length > 0 ? (
+                // ถ้าโหลดเสร็จแล้ว และมีข้อมูล ก็ map การ์ดจริงตามปกติ
                 filteredEvents.map((event) => (
                   <div key={event.id} onClick={() => handleEditClick(event)}>
                     <CardEvents 
@@ -128,6 +134,7 @@ export default function Schedule() {
                   </div>
                 ))
               ) : (
+                // ถ้าโหลดเสร็จแล้ว แต่ไม่มีข้อมูลการจองเลยในวันนั้น
                 <div className="flex flex-col items-center justify-center h-64">
                   <p className="text-lg font-medium">No Content</p>
                   <p className="text-sm whitespace-nowrap">You don't have any bookings for this day.</p>
