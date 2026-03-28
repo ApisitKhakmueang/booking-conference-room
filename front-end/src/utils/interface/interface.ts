@@ -122,4 +122,5 @@ export interface EventCardProps {
   event: BookingEvent 
   setIsAddModalOpen: (status: boolean) => void
   setCurrentDate: (date: Date) => void
+  onDeleteSuccess: () => void
 }

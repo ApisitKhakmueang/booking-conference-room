@@ -1,14 +1,85 @@
 import { Button } from "@/components/ui/button";
+import { bookingService } from "@/service/booking.service";
 import { EventCardProps } from "@/utils/interface/interface";
 import { formatTimeWithSuffix } from "@/utils/time";
 import { format } from "date-fns";
 import { X } from "lucide-react";
+import Swal from "sweetalert2";
 
-export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate } : EventCardProps) {
+export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, onDeleteSuccess } : EventCardProps) {
   const eventDate = new Date(event.date)
   const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // สำคัญมาก! ป้องกันไม่ให้การคลิกทะลุไปเปิด Modal แก้ไข
+
+    const bookingStartTime = new Date(eventDate); // เวลาที่เริ่มจอง
+    const currentTime = new Date(); // เวลาปัจจุบันของเครื่อง
+
+    // 🌟 คำนวณหาความห่างของเวลา (ผลลัพธ์เป็นมิลลิวินาที)
+    const timeDifference = bookingStartTime.getTime() - currentTime.getTime();
+    
+    // 1 ชั่วโมง = 60 นาที * 60 วินาที * 1000 มิลลิวินาที = 3,600,000 มิลลิวินาที
+    const oneHourInMs = 60 * 60 * 1000;
+
+    if (timeDifference <= 0) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot delete an ongoing or past booking.', // แปล: ไม่สามารถลบการจองที่กำลังใช้งานหรือผ่านไปแล้วได้
+        icon: 'error',
+        timer: 2000
+      });
+      return; 
+    }
+
+    // 🌟 2. ดักจับกรณี: "ยังไม่ถึงเวลาจอง แต่เหลือน้อยกว่า 1 ชั่วโมง"
+    if (timeDifference < oneHourInMs) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Please operate at least 1 hour in advance.',
+        icon: 'error',
+        timer: 2000
+      });
+      return; 
+    }
+
+    // ถามเพื่อความแน่ใจก่อนลบ
+    const confirm = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you really want to delete this booking?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#8B8FC7',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        // สมมติว่าใน bookingService ของคุณมีคำสั่ง deleteBooking
+        const result = await bookingService.deleteBooking(event.id);
+        
+        if (result.status === 200) {
+          Swal.fire({
+            title: 'Deleted!',
+            text: 'Your booking has been deleted.',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          });
+
+          // 🌟 ลบเสร็จ สั่งให้ดึงข้อมูลใหม่ทันที
+          if (onDeleteSuccess) {
+            onDeleteSuccess();
+          }
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Failed to delete booking', 'error');
+      }
+    }
+  };
 
   return (
     <div 
@@ -42,7 +113,9 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate } 
             {event?.room?.name}
           </span>
 
-          <Button className="p-1.5 text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-hover hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+          <Button 
+            onClick={handleDelete}
+            className="p-1.5 text-gray-400 bg-transparent hover:bg-gray-100 dark:hover:bg-hover hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             <X className="w-4 h-4" />
           </Button>
         </div>

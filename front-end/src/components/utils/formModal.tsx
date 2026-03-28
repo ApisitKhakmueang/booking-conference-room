@@ -125,22 +125,47 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   }, [formData.startTime, formData.endTime]); // <--- โค้ดจะทำงานก็ต่อเมื่อ 2 ตัวนี้เปลี่ยน
 
   useEffect(() => {
+    // 🌟 1. ฟังก์ชันครอบจักรวาล: สกัดเอาเฉพาะ "HH:mm" ไม่ว่าข้อมูลจะมาหน้าตาแบบไหน
+    const getSafeTime = (timeStr?: string) => {
+      if (!timeStr) return "";
+      try {
+        // กรณีที่ 1: ถ้าเป็นรูปแบบเต็ม ISO (มีตัว T ขั้นกลาง เช่น "2026-03-28T08:30:00Z")
+        if (timeStr.includes("T")) {
+          return format(new Date(timeStr), "HH:mm");
+        }
+        // กรณีที่ 2: ถ้ามาเป็นข้อความเวลา (เช่น "8:30", "08:30:00", "08:30 AM")
+        const parts = timeStr.split(":");
+        if (parts.length >= 2) {
+          const h = parts[0].trim().padStart(2, "0"); // ถ้าเป็น "8" จะถูกเติมศูนย์เป็น "08"
+          const m = parts[1].trim().substring(0, 2);  // เอาแค่นาที 2 ตัวแรก
+          return `${h}:${m}`;
+        }
+        return timeStr;
+      } catch (e) {
+        return "";
+      }
+    };
+
     if (typeOperate === 'update' && selectedEvent) {
       const foundRoom = rooms.find(r => r.name === selectedEvent.room?.name) || rooms[0];
 
       setFormData({
         title: selectedEvent.title,
-        date: new Date(selectedEvent.date), // แปลงกลับเป็น Date object
-        startTime: selectedEvent.startTime,
-        endTime: selectedEvent.endTime,
+        // เผื่อ selectedEvent.date เป็น undefined ให้ไปดึงวันที่จาก startTime แทน
+        date: selectedEvent.date ? new Date(selectedEvent.date) : new Date(selectedEvent.startTime), 
+        
+        // 🌟 2. ใช้ฟังก์ชัน getSafeTime ทำความสะอาดข้อมูลก่อนยัดลง State
+        startTime: getSafeTime(selectedEvent.startTime),
+        endTime: getSafeTime(selectedEvent.endTime),
+        
         duration: String(selectedEvent.duration),
         room: foundRoom
       });
-      // 🌟 อย่าลืมอัปเดต selectedRoom ให้ตรงกับในฟอร์มด้วย
+      // อย่าลืมอัปเดต selectedRoom ให้ตรงกับในฟอร์มด้วย
       setSelectedRoom(foundRoom); 
 
     } else {
-      // 🌟 โหมด add ให้ดึง defaultFormData (ที่มีค่าครบทุก field แล้ว) มาใช้เคลียร์ฟอร์ม
+      // โหมด add ให้ดึง defaultFormData (ที่มีค่าครบทุก field แล้ว) มาใช้เคลียร์ฟอร์ม
       setFormData(defaultFormData);
       setSelectedRoom(rooms[0]); // รีเซ็ต Dropdown กลับเป็นห้องแรกสุด
     }

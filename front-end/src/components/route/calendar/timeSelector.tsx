@@ -40,9 +40,11 @@ export function TimeSelect({
 }: TimeSelectProps) {
   const timeSlots = generateTimeSlots(intervalMinutes);
 
+  const safeValue = value || "";
+
   return (
     // 🌟 3. ใช้โครงสร้างของ Shadcn UI
-    <Select value={value} onValueChange={onValueChange}>
+    <Select key={safeValue} value={safeValue} onValueChange={onValueChange}>
       <SelectTrigger className={cn(" w-full dark:bg-sidebar dark:border-sidebar dark:text-white", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>

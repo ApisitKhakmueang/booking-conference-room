@@ -22,6 +22,10 @@ export const bookingService = {
 
   updateBooking: async (bookingID: string | undefined, roomNumber: number | undefined, body: any) => {
     return await axios.put(`${API_URL}/booking/${bookingID}?room=${roomNumber}`, body)
+  },
+
+  deleteBooking: async (bookingID: string | undefined) => {
+    return await axios.delete(`${API_URL}/booking/${bookingID}`)
   }
   
   // เพิ่ม action อื่นๆ เช่น update, delete ได้ที่นี่

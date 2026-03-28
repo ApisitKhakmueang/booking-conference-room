@@ -13,53 +13,31 @@ import { BookingEventResponse } from "@/utils/interface/response";
 import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
 
-const mockResp: BookingEventResponse[] = [
-  {
-    id: "87faa1f6-543a-4f93-be6d-98daf40d73d3",
-    startTime: "2026-02-16T04:30:00Z",
-    endTime: "2026-02-16T05:30:00Z",
-    title: "Business conference",
-    passcode: "4979",
-    status: "confirm",
-    Room: {
-      id: "abd444b7-b7e1-4167-984a-5c22ff01ad8e",
-      name: "Room 1",
-      roomNumber: 1
-    },
-    User: {
-      id: "6d4ac759-dd57-4462-b980-4147b7d18cba",
-      email: "guy.apisit2546@gmail.com",
-      fullName: "นายอภิสิทธิ แขกเมือง"
-    }
-  },
-  {
-    id: "88b189db-2914-4d89-b00c-9aa16200f14c",
-    startTime: "2026-02-16T07:30:00Z",
-    endTime: "2026-02-16T08:30:00Z",
-    title: "Business conference",
-    passcode: "6568",
-    status: "confirm",
-    Room: {
-      id: "abd444b7-b7e1-4167-984a-5c22ff01ad8e",
-      name: "Room 1",
-      roomNumber: 1
-    },
-    User: {
-      id: "6d4ac759-dd57-4462-b980-4147b7d18cba",
-      email: "guy.apisit2546@gmail.com",
-      fullName: "นายอภิสิทธิ แขกเมือง"
-    }
-  }
-]
 
 export default function Schedule() {
-  // State สำหรับเปิดปิด Mobile Modal (จำลอง)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
-  const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined)
+  const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
+  
+  // 🌟 1. ย้าย State การเลือกห้องมาไว้ที่นี่!
+  const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
+
+  // 🌟 2. สร้างตัวกรองข้อมูล (ถ้าไม่เลือกห้องเลย = แสดงทั้งหมด, ถ้าเลือก = แสดงเฉพาะห้องที่เลือก)
+  const filteredEvents = useMemo(() => {
+    if (!events) return undefined;
+    if (selectedRooms.length === 0) return events; // ถ้าไม่มีการติ๊กเลย ให้แสดงทั้งหมด
+    
+    return events.filter((event) => {
+      // 🌟 1. เช็คก่อนว่ามีข้อมูล roomNumber ไหม ถ้าไม่มีให้ข้ามไปเลย
+      if (event.room?.roomNumber === undefined) return false;
+
+      // 🌟 2. พอผ่านบรรทัดบนมาได้ TypeScript จะรู้ทันทีว่าตรงนี้คือ number แน่นอน 100%
+      return selectedRooms.includes(event.room.roomNumber); 
+    });
+  }, [events, selectedRooms]);
 
   const next = () => {
    setCurrentDate(addDays(currentDate, 1));
@@ -68,8 +46,8 @@ export default function Schedule() {
   const prev = () => {
     const prevDate = subDays(currentDate, 1)
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาให้เป็นเที่ยงคืน จะได้เทียบแค่วันที่
-    if (prevDate < today) // ถ้าวันนั้นน้อยกว่าวันนี้ ให้ปิดการใช้งาน
+    today.setHours(0, 0, 0, 0); 
+    if (prevDate < today) 
       return
     setCurrentDate(prevDate);
   };
@@ -85,13 +63,13 @@ export default function Schedule() {
 
   const handleAddClick = () => {
     setTypeOperate('add');
-    setSelectedEvent(undefined); // เคลียร์ข้อมูลเก่า
+    setSelectedEvent(undefined); 
     setIsAddModalOpen(true);
   };
 
   const handleEditClick = (event: BookingEvent) => {
     setTypeOperate('update');
-    setSelectedEvent(event); // เก็บข้อมูล event ที่ถูกคลิก
+    setSelectedEvent(event); 
     setIsAddModalOpen(true);
   };
 
@@ -104,7 +82,7 @@ export default function Schedule() {
     } catch (error) {
       console.log('error: ', error);
     }
-  }, [currentDate]); // 🌟 ฟังก์ชันนี้จะเปลี่ยนก็ต่อเมื่อ currentDate เปลี่ยนเท่านั้น
+  }, [currentDate]); 
 
   useEffect(() => {
     if (isAddModalOpen) return
@@ -112,29 +90,11 @@ export default function Schedule() {
   }, [isAddModalOpen])
 
   useEffect(() => {
-    // 1. จำลองการเรียก API (ของจริงเปลี่ยนเป็น axios.get(...))
-    const fetchBookings = async () => {
-      const apiResponse: BookingEventResponse[] = mockResp; // ข้อมูลที่ได้จาก DB
-      
-      // 2. โยนเข้าเครื่องแปลงข้อมูล!
-      const formattedEvents = useMapResponseToEvents(apiResponse);
-      console.log("events: ", formattedEvents)
-      
-      // 3. เอาไปแสดงผลได้เลย
-      setEvents(formattedEvents);
-    };
-
-    // fetchBookings();
-
     fetchUserBookings();
-  }, []);
+  }, [fetchUserBookings]); // อย่าลืมใส่ dependency
 
   return (
     <div className="bg-light-main-background dark:bg-main-background flex">
-      
-      {/* 🌟 สมมติว่าด้านซ้ายสุดเป็น Sidebar หลักของระบบคุณ (ที่มีเมนู Calendar, Rooms) */}
-      {/* <MainSystemSidebar /> */}
-
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
@@ -154,16 +114,16 @@ export default function Schedule() {
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex">
-            
-            {/* Main List Scrollable */}
             <main className="flex-1 space-y-4 overflow-y-auto py-4 pr-4 md:py-8 md:pr-8 no-scrollbar">
-              {events && events.length > 0 ? (
-                events.map((event) => (
+              {/* 🌟 3. เปลี่ยนจาก events.map เป็น filteredEvents.map เพื่อแสดงเฉพาะอันที่กรองแล้ว */}
+              {filteredEvents && filteredEvents.length > 0 ? (
+                filteredEvents.map((event) => (
                   <div key={event.id} onClick={() => handleEditClick(event)}>
                     <CardEvents 
                       event={event} 
                       setIsAddModalOpen={setIsAddModalOpen} 
                       setCurrentDate={setCurrentDate} 
+                      onDeleteSuccess={fetchUserBookings}
                     />
                   </div>
                 ))
@@ -174,13 +134,18 @@ export default function Schedule() {
                 </div>
               )}
             </main>
-
           </div>
         </div>
 
         {/* Desktop Right Sidebar */}
         <div className="w-80 xl:block hidden">
-          <DesktopSidebar currentDate={currentDate} setCurrentDate={setCurrentDate} events={events} />
+          <DesktopSidebar 
+            currentDate={currentDate} 
+            setCurrentDate={setCurrentDate} 
+            events={filteredEvents} // 🌟 ส่ง filteredEvents ให้การ์ด Total นับเลขได้ถูกต้อง
+            selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไป
+            setSelectedRooms={setSelectedRooms} // 🌟 ส่งฟังก์ชันแก้ไข State ลงไป
+          />
         </div>
       </div>
 
@@ -190,10 +155,10 @@ export default function Schedule() {
         typeOperate={typeOperate} 
         currentDate={currentDate}
         selectedEvent={selectedEvent} 
-        onSuccess={fetchUserBookings} // 🌟 โยนฟังก์ชันนี้ลงไป!
+        onSuccess={fetchUserBookings} 
       />
 
-      {/* 🌟 Mobile Action Button (FAB) */}
+      {/* Mobile Action Button (FAB) */}
       <Button 
         className='absolute bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all xl:hidden flex'
         onClick={() => setIsAddModalOpen(true)}>
@@ -201,29 +166,26 @@ export default function Schedule() {
       </Button>
 
       {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/50 xl:hidden">
-          {/* 🌟 ปรับความสูงของ Bottom Sheet ให้เกือบเต็มจอ (เช่น max-h-[85vh]) และให้ Flex */}
+        <div className="fixed inset-0 z-100 flex items-end bg-black/50 xl:hidden">
           <div className="w-full max-h-[85vh] flex flex-col bg-light-main-background dark:bg-card rounded-t-3xl p-6 pb-10 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
-            
             <div className="flex justify-between items-center mb-6 shrink-0">
               <h2 className="text-xl font-bold text-light-main dark:text-main uppercase tracking-widest">Filter Rooms</h2>
               <button 
                 className="text-gray-500 hover:text-white"
                 onClick={() => {
                   setIsMobileFilterOpen(false)
-                  setCurrentDate(new Date())
-                  }}
-                >✕</button>
+                  setSelectedRooms([])
+                  }}>✕</button>
             </div>
             
-            {/* 🌟 1. เอา h-80 ออก เปลี่ยนเป็น flex-1 overflow-y-auto เพื่อให้มี Scrollbar */}
             <div className="flex-1 overflow-y-auto no-scrollbar">
-              {/* 🌟 2. โยน prop className ควบคุมให้เต็มจอ แทนการฟิกซ์ 320px (w-80) */}
               <DesktopSidebar 
                 currentDate={currentDate} 
                 setCurrentDate={setCurrentDate} 
-                events={events} 
-                className="flex xs:flex-row flex-col w-full border-none space-y-6 lg:px-60 md:px-40 gap-5" // 🌟 สำคัญ: ลบ w-80 และ fixed ออกเมื่ออยู่ในมือถือ
+                events={filteredEvents} 
+                className="flex xs:flex-row flex-col w-full border-none space-y-6 lg:px-60 md:px-40 gap-5"
+                selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไปใน Mobile ด้วย
+                setSelectedRooms={setSelectedRooms} 
               />
             </div>
 
@@ -235,7 +197,6 @@ export default function Schedule() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
