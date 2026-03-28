@@ -31,6 +31,7 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 	}
 
 	r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteUserToCache(ctx, booking.UserID)
 
 	return nil
 }
@@ -110,6 +111,8 @@ func (r *redisRepository) GetUserBooking(ctx context.Context, userID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("bookings: %v", bookings)
 
 	if jsonBytes, err := json.Marshal(bookings); err == nil {
 		r.SetJsonCache(ctx, cacheKey, jsonBytes)
@@ -272,3 +275,21 @@ func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber u
 		}
 	}()
 }
+
+func (r *redisRepository) DeleteUserToCache(ctx context.Context, userID uuid.UUID) {
+	prefix := fmt.Sprintf("booking:user:%s", userID)
+	
+	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
+	go func() {
+		// 🚨 ข้อควรระวัง: ต้องสร้าง Context ใหม่ (context.Background())
+		// เพราะถ้าใช้ ctx เดิม พอ HTTP Request จบ Fiber จะทำลาย ctx ตัวนั้นทิ้ง
+		// แล้วทำให้ Redis Scan ตรงนี้พัง (Context Canceled)
+		bgCtx := context.Background() 
+
+		err := r.ClearCacheByPrefix(bgCtx, prefix)
+		if err != nil {
+			// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+			log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+		}
+	}()
+} 
