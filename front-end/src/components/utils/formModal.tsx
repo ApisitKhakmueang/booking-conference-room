@@ -62,6 +62,19 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
     
     const body = bodyBooking(finalDataToSubmit)
 
+    const bookingStartTime = new Date(body.startTime); // เวลาที่ผู้ใช้เลือกจอง
+    const currentTime = new Date(); // เวลาปัจจุบันของเครื่อง
+
+    if (bookingStartTime < currentTime) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot book a time in the past.', // แจ้งเตือนว่าจองเวลาอดีตไม่ได้
+        icon: 'error',
+        timer: 2000
+      });
+      return; // หยุดการทำงาน ไม่ให้ยิง API
+    }
+
     try {
       let result;
       if (typeOperate === 'add') {
