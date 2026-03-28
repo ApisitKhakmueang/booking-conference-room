@@ -20,6 +20,7 @@ import { useRoomStore } from '@/stores/room.store';
 import { useShallow } from 'zustand/shallow';
 import { useHolidays } from '@/hooks/data/useHolidays';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/stores/auth.store';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -28,6 +29,8 @@ type ViewType = 'month' | 'week' | 'day';
 // หมายเหตุ: วันที่ใน mock data ควรแก้วันให้ตรงกับปัจจุบันเพื่อให้เห็นภาพ
 
 export default function Calendar() {
+  const currentUser = useAuthStore((state) => state.user);
+
   const { rawRoom } = useRoomStore(
     useShallow(((state) => ({
       rawRoom: state.rooms
@@ -119,7 +122,8 @@ export default function Calendar() {
     currentDate,
     bookings,
     holiday,
-    isSyncing
+    isSyncing,
+    currentUser
   };
 
   return (

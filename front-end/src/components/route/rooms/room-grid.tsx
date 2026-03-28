@@ -20,11 +20,23 @@ type RoomStatus = "available" | "occupied" | "maintenance";
 
 const STATUS_CONFIG: Record<
   RoomStatus,
-  { icon: React.ElementType, textColor: string }
+  { icon: React.ElementType, textColor: string, iconColor: string }
 > = {
-  available: { icon: MonitorCheck, textColor: "text-green-400 dark:text-success" },
-  occupied: { icon: MonitorX, textColor: "text-red-400 dark:text-danger" },
-  maintenance: { icon: ToolCase, textColor: "text-yellow-400 dark:text-warning" },
+  available: { 
+    icon: MonitorCheck, 
+    textColor: "text-emerald-600 dark:text-emerald-400",
+    iconColor: "text-emerald-500 dark:text-emerald-400"
+  },
+  occupied: { 
+    icon: MonitorX, 
+    textColor: "text-rose-600 dark:text-rose-400",
+    iconColor: "text-rose-500 dark:text-rose-400"
+  },
+  maintenance: { 
+    icon: ToolCase, 
+    textColor: "text-amber-600 dark:text-amber-400",
+    iconColor: "text-amber-500 dark:text-amber-400"
+  },
 };
 
 export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }) {
@@ -35,11 +47,12 @@ export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }
           const currentStatus = (room?.status || 'available') as RoomStatus;
           const StatusIcon = STATUS_CONFIG[currentStatus].icon;
           
-          return (<li key={room.id} className="p-5 dark:hover:bg-hover hover:bg-light-hover hover:text-white transition-duration-300 cursor-pointer group/icons">
-            <h2 className="text-xl font-semibold">{room.name}</h2>
+          return (<li key={room.id} className="p-5 dark:hover:bg-hover hover:bg-light-sidebar transition-duration-300 cursor-pointer group">
+            <h2 className="text-xl font-semibold opacity-80 group-hover:opacity-100">{room.name}</h2>
 
-            <div className='flex justify-center py-10'>
-              <StatusIcon size={80} />
+            <div className='flex justify-center py-10 transition-transform duration-300 group-hover:scale-110'>
+              {/* 🌟 4. ดึงสีตาม Status มาใส่ให้ไอคอนตรงกลาง */}
+              <StatusIcon size={80} className={STATUS_CONFIG[currentStatus].iconColor} strokeWidth={1.5} />
             </div>
 
             <div className='flex xl:flex-row flex-col xl:items-center xl:justify-between gap-2 text-xl font-semibold'>
@@ -48,7 +61,7 @@ export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }
                 <UserRound />
               </p>
 
-              <p className={`${STATUS_CONFIG[currentStatus].textColor} text-lg capitalize group-hover/icons:text-white transition-duration-300`}>
+              <p className={`${STATUS_CONFIG[currentStatus].textColor} text-lg capitalize transition-duration-300`}>
                 {room.status}
               </p>
             </div>

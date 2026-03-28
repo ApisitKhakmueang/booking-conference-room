@@ -1,3 +1,5 @@
+import { BookingEventResponse, Holiday } from "./response";
+
 export interface EachPageLayoutProps {
   pageName: string;
   children: React.ReactNode;
@@ -52,7 +54,7 @@ export interface ShowPasswordProps {
 export interface UserButtonProps {
   name: string
   onClick: () => void
-  variant: 'dark-purple' | 'danger'
+  variant: 'purple' | 'danger'
 }
 
 export interface PasswordValidation {
@@ -123,4 +125,24 @@ export interface EventCardProps {
   setIsAddModalOpen: (status: boolean) => void
   setCurrentDate: (date: Date) => void
   onDeleteSuccess: () => void
+}
+
+type ViewType = 'month' | 'week' | 'day';
+export interface MonthProps { 
+  currentDate: Date, 
+  bookings: BookingEventResponse[] | null, 
+  holiday: Holiday[] | null 
+  isSyncing: boolean
+  setView: (view:ViewType) => void
+  setCurrentDate: (date:Date) => void
+  currentUser: UserProfile | null
+}
+
+export interface TimeGridViewProps { 
+  currentDate: Date, 
+  bookings: BookingEventResponse[] | null, 
+  view: 'week' | 'day', 
+  holiday: Holiday[] | null,
+  isSyncing: boolean
+  currentUser: UserProfile | null
 }

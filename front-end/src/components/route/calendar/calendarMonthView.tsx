@@ -7,6 +7,8 @@ import {
   endOfDay
 } from 'date-fns';
 import { Holiday, BookingEventResponse } from '@/utils/interface/response';
+import { MonthProps } from '@/utils/interface/interface';
+import { cn } from '@/lib/utils';
 
 const TODAY = new Date(); 
 const EVENTS = [
@@ -33,18 +35,8 @@ const EVENTS = [
   },
 ];
 
-type ViewType = 'month' | 'week' | 'day';
-interface MonthProps { 
-  currentDate: Date, 
-  bookings: BookingEventResponse[] | null, 
-  holiday: Holiday[] | null 
-  isSyncing: boolean
-  setView: (view:ViewType) => void
-  setCurrentDate: (date:Date) => void
-}
-
 // --- Component: Month View (แบบเดิม) ---
-export default function MonthView({ currentDate, bookings, holiday, isSyncing, setView, setCurrentDate }: MonthProps) {
+export default function MonthView({ currentDate, bookings, holiday, isSyncing, setView, setCurrentDate, currentUser }: MonthProps) {
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate));
     const end = endOfWeek(endOfMonth(currentDate));
@@ -140,7 +132,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
            const totalItems = allItems.length;
 
            // 3. หั่นเอามาแค่ 3 อันแรกเพื่อแสดงผล
-           const MAX_VISIBLE = 3;
+           const MAX_VISIBLE = 2;
            const visibleItems = allItems.slice(0, MAX_VISIBLE);
            const hiddenCount = totalItems - MAX_VISIBLE;
 
@@ -172,8 +164,18 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                       </div>
                     )
                   } else {
+                    const isMine = currentUser && item.User.id === currentUser.id;
+
                     return (
-                      <div key={`evt-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-orange-900/60 dark:border-orange-500 bg-orange-200 border-orange-300 text-orange-900 dark:text-orange-100 shadow-sm">
+                      <div 
+                        key={`evt-${item.id || index}`} 
+                        className={cn(
+                          "text-xs px-1.5 py-0.5 rounded border-l-2 truncate shadow-sm",
+                          isMine
+                            ? "dark:bg-blue-900/60 dark:border-blue-500 bg-blue-200 border-blue-300 text-blue-900 dark:text-blue-100" // สีน้ำเงิน
+                            : "dark:bg-orange-900/60 dark:border-orange-500 bg-orange-200 border-orange-300 text-orange-900 dark:text-orange-100" // สีส้ม
+                        )}
+                      >
                         {item.title}
                       </div>
                     )

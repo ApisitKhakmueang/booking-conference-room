@@ -8,17 +8,11 @@ import { BookingEventResponse, Holiday } from '@/utils/interface/response';
 import { Plus } from 'lucide-react';
 import Modal from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-
-interface TimeGridViewProps { 
-  currentDate: Date, 
-  bookings: BookingEventResponse[] | null, 
-  view: 'week' | 'day', 
-  holiday: Holiday[] | null,
-  isSyncing: boolean
-}
+import { TimeGridViewProps } from '@/utils/interface/interface';
+import { cn } from '@/lib/utils';
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
-export default function TimeGridView({ currentDate, bookings, view, holiday, isSyncing }: TimeGridViewProps) {
+export default function TimeGridView({ currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
@@ -97,29 +91,43 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
                 ))}
 
                 {/* --- Render Events (Absolute Positioning) --- */}
+                {/* --- Render Events (Absolute Positioning) --- */}
                 {bookings?.filter(e => isSameDay(e.startTime, day)).map(evt => {
-                  // คำนวณตำแหน่ง
                   const startMin = differenceInMinutes(evt.startTime, startOfDay(evt.startTime));
                   const duration = differenceInMinutes(evt.endTime, evt.startTime);
                   
+                  // 🌟 เช็กว่าเป็นของ User ปัจจุบันหรือไม่
+                  const isMine = currentUser && String(evt.User.id) === String(currentUser.id);
+
                   return (
                     <div
                       key={evt.id}
-                      className='absolute left-1 right-1 rounded px-2 py-1 text-xs border-l-[3px] overflow-hidden cursor-pointer hover:brightness-110 hover:z-20 transition-all shadow-sm dark:bg-orange-900/60 bg-orange-500 border-orange-500 text-orange-100'
+                      tabIndex={0} 
+                      className="group absolute left-1 right-1 cursor-pointer z-10 hover:z-50 focus:z-50 focus:outline-none"
                       style={{
-                        top: `${(startMin / 60) * 60}px`, // 60px คือความสูงต่อ 1 ชม.
-                        height: `${(duration / 60) * 60}px`
+                        top: `${startMin}px`, 
+                        height: `${duration}px`,
                       }}
-                      // onClick={() => alert(evt.title)}
                     >
-                      <div className="font-semibold">{evt.title}</div>
-                      <div className="opacity-75 text-[10px]">
-                        <div>
-                          By: {evt.User.fullName}
+                      <div className={cn(
+                        "absolute top-0 left-0 right-0 h-full min-h-7 overflow-hidden group-hover:min-h-fit group-focus:min-h-fit group-hover:shadow-xl group-focus:shadow-xl rounded px-2 py-1 text-xs border-l-[3px] transition-all duration-200 flex flex-col",
+                        // 🌟 เงื่อนไขการสลับสี
+                        isMine 
+                          ? "dark:bg-blue-900/95 bg-blue-600 border-blue-400 text-blue-50" // สีน้ำเงินสำหรับของฉัน
+                          : "dark:bg-orange-900/95 bg-orange-500 border-orange-500 text-orange-100" // สีส้มสำหรับของคนอื่น
+                      )}>
+                        
+                        <div className="font-semibold truncate">
+                          {evt.title} {isMine && "(Me)"} 
                         </div>
-                        <div>
-                          {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
+                        
+                        <div className="opacity-80 text-[10px] leading-tight mt-0.5 flex flex-col gap-0.5">
+                          <div className="truncate">By: {isMine ? "You" : evt.User.fullName}</div>
+                          <div className="truncate whitespace-nowrap">
+                            {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
+                          </div>
                         </div>
+                        
                       </div>
                     </div>
                   );
@@ -141,7 +149,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
       </div>
 
       <Button 
-        className='absolute bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
+        className='absolute z-60 bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
         onClick={() => setIsAddModalOpen(true)}>
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>
