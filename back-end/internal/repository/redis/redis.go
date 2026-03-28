@@ -55,6 +55,8 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 		r.DeleteBookingToCache(ctx, roomNumber)
 	}
 
+	r.DeleteUserToCache(ctx, booking.UserID)
+
 	return nil
 }
 
@@ -65,6 +67,7 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 	}
 
 	r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteUserToCache(ctx, booking.UserID)
 	
 	return deletedBooking, nil
 }
@@ -111,8 +114,6 @@ func (r *redisRepository) GetUserBooking(ctx context.Context, userID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("bookings: %v", bookings)
 
 	if jsonBytes, err := json.Marshal(bookings); err == nil {
 		r.SetJsonCache(ctx, cacheKey, jsonBytes)
@@ -193,6 +194,7 @@ func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uui
 	}
 
 	r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteUserToCache(ctx, updateBooking.UserID)
 
 	return updateBooking, roomNumber, nil
 }
