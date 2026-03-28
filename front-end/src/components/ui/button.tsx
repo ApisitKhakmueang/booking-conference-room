@@ -22,6 +22,7 @@ const buttonVariants = cva(
         secondary: "bg-gray-200 text-black hover:bg-gray-300", // (ทับของเดิม Shadcn)
         danger: "bg-red-500 text-white hover:bg-red-600",
         "dark-purple": "bg-light-card text-white hover:bg-light-hover",
+        purple: "bg-light-sidebar hover:bg-dark-purple/50 border dark:bg-sidebar dark:hover:bg-hover border dark:border-hover", 
         slate: "bg-slate-50 text-black hover:bg-slate-300",
         blue: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer duration-150",
         transparent: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-transparent dark:text-gray-300 dark:border-gray-600 dark:hover:bg-hover cursor-pointer duration-150",
