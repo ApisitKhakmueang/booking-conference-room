@@ -8,9 +8,9 @@ import {
 } from 'date-fns';
 
 // Component
-import MonthView from './calendarMonthView';
-import TimeGridView from './calendarTimeGridView';
-import RoomSelector from './roomSelector';
+import MonthView from './calendar-month-view';
+import TimeGridView from './calendar-time-gridView';
+import RoomSelector from './room-selector';
 import Modal from '@/components/ui/modal';
 import { ArrangeRoom } from '@/utils/interface/interface';
 

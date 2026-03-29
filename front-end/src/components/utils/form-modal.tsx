@@ -3,10 +3,10 @@ import {
   format,
 } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import RoomSelector from "../route/calendar/roomSelector";
+import RoomSelector from "../route/calendar/room-selector";
 import Swal from "sweetalert2"
 
-import { TimeSelect } from "../route/calendar/timeSelector";
+import { TimeSelect } from "../route/calendar/time-selector";
 import { calculateDuration } from "@/utils/time";
 import { bodyBooking } from "@/utils/form";
 import { ArrangeRoom, FormModalProps } from '@/utils/interface/interface';

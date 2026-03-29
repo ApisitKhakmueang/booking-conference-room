@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { addDays, subDays } from "date-fns";
-import DesktopSidebar from "./desktopSidebar";
+import DesktopSidebar from "./desktop-sidebar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import Modal from "@/components/ui/modal";
 import { Plus } from "lucide-react";
-import CardEvents, { CardEventsSkeleton } from "./eventCard";
+import CardEvents, { CardEventsSkeleton } from "./event-card";
 import { BookingEvent } from "@/utils/interface/interface";
 import { BookingEventResponse } from "@/utils/interface/response";
 import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";

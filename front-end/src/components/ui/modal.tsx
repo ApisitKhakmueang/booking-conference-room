@@ -2,7 +2,7 @@ import { ModalProps } from "@/utils/interface/interface";
 import { useRoomStore } from "@/stores/room.store";
 import { useShallow } from "zustand/shallow";
 import { useMemo } from "react";
-import FormModal from "../utils/formModal";
+import FormModal from "../utils/form-modal";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, selectedEvent, onSuccess }: ModalProps) {
