@@ -56,14 +56,21 @@ func main() {
 	)
 
 	app := utils.InitialFiber(handleUsecase, websocketHandler)	
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" 
+	}
+
+	// 3. สั่งรัน Server ด้วยพอร์ตนั้น (สังเกตว่าต้องมี ":" นำหน้า)
+	serverAddr := ":" + port
 
 	go func() {
-		if err := app.Listen(":8080"); err != nil {
+		if err := app.Listen(serverAddr); err != nil {
 			log.Printf("Server Error: %v", err)
 		}
 	}()
 
-	log.Println("Server is running on :8080")
+	log.Println("Server is running on " + serverAddr)
 
 	// 8. Wait for Interrupt Signal (รอจนกว่าจะมีการกด Ctrl+C)
 	<-ctx.Done()
