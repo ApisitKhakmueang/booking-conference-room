@@ -9,7 +9,7 @@ import {
 
 // Component
 import MonthView from './calendar-month-view';
-import TimeGridView from './calendar-time-gridView';
+import TimeGridView from './calendar-time-grid-view';
 import RoomSelector from './room-selector';
 import Modal from '@/components/ui/modal';
 import { ArrangeRoom } from '@/utils/interface/interface';
