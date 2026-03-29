@@ -121,7 +121,23 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	supabaseClient := InitialSupabase()
 
 	app := fiber.New()
-	app.Use(cors.New())
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+			// ถ้าไม่มี Env ให้ใช้ localhost เป็นค่าเริ่มต้น
+			frontendURL = "http://localhost:3000"
+	} else {
+			// ถ้ามี Env (เช่น URL ของ Vercel) ให้เพิ่ม localhost เข้าไปเผื่อไว้ด้วย
+			// ใช้เครื่องหมาย , คั่น
+			frontendURL = fmt.Sprintf("%s, http://localhost:3000", frontendURL)
+	}
+
+	// 2. ตั้งค่า CORS แบบเจาะจง
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     frontendURL, // อนุญาตเฉพาะเว็บ Vercel ของเรา (หรือ localhost)
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, HEAD, PUT, DELETE, PATCH",
+		AllowCredentials: true, // สำคัญมาก! ถ้าต้องมีการส่ง Cookie หรือ Token Auth
+	}))
 
 	// 2. Middleware
 	app.Use(fiberLogger.New()) // Log requests
