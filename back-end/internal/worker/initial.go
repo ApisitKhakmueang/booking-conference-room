@@ -11,17 +11,26 @@ import (
 // ========================================================
 // 1. ฟังก์ชันสร้าง Client (คนสั่งงาน)
 // ========================================================
-func NewAsynqClient(redisAddr string) *asynq.Client {
-	redisOpt := asynq.RedisClientOpt{Addr: redisAddr}
-	return asynq.NewClient(redisOpt)
+func NewAsynqClient(redisAddrURL string) *asynq.Client {
+	asynqRedisOpt, err := asynq.ParseRedisURI(redisAddrURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// และนำไปใส่ตอนสร้าง Client ด้วย
+	client := asynq.NewClient(asynqRedisOpt)
+	return client
 }
 
 // ========================================================
 // 2. ฟังก์ชันสตาร์ท Server (คนรับงานไปทำ)
 // ========================================================
 // สังเกตว่าเรารับ bookingUC เข้ามาด้วย เพื่อเอามาผูกกับ Processor
-func StartAsynqWorker(redisAddr string, bookingUC domain.BookingUsecase) {
-	redisOpt := asynq.RedisClientOpt{Addr: redisAddr}
+func StartAsynqWorker(redisAddrURL string, bookingUC domain.BookingUsecase) {
+	redisOpt, err := asynq.ParseRedisURI(redisAddrURL)
+	if err != nil {
+		log.Fatalf("❌ Failed to parse Redis URI for Asynq Worker: %v", err)
+	}
 
 	asynqServer := asynq.NewServer(
 		redisOpt,

@@ -94,28 +94,27 @@ func InitialSupabase() *supabase.Client {
 	return supabaseClient
 }
 
-func InitialRedisConnection(ctx context.Context) (*redis.Client, error) {
-    // 1. ดึงค่าจาก Environment Variable (ตอน Deploy บน Koyeb เราจะตั้งชื่อนี้)
-    redisURL := os.Getenv("REDIS_URL")
-    if redisURL == "" {
-        // เผื่อไว้ใช้ตอนเทสในเครื่องตัวเอง
-        redisURL = "redis://localhost:6379" 
-    }
+func InitialRedisConnection(ctx context.Context, redisURL string) (*redis.Client, error) {
+	// 1. ดึงค่าจาก Environment Variable (ตอน Deploy บน Koyeb เราจะตั้งชื่อนี้)
+	if redisURL == "" {
+		// เผื่อไว้ใช้ตอนเทสในเครื่องตัวเอง
+		redisURL = "redis://localhost:6379" 
+	}
 
-    // 2. ใช้ ParseURL เพราะมันจะจัดการทั้ง Host, Password และ TLS (SSL) ให้โดยอัตโนมัติ
-    opt, err := redis.ParseURL(redisURL)
-    if err != nil {
-        return nil, err
-    }
+	// 2. ใช้ ParseURL เพราะมันจะจัดการทั้ง Host, Password และ TLS (SSL) ให้โดยอัตโนมัติ
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		return nil, err
+	}
 
-    rdb := redis.NewClient(opt)
+	rdb := redis.NewClient(opt)
 
-    // 3. Ping เพื่อเช็ค connection
-    if err := rdb.Ping(ctx).Err(); err != nil {
-        return nil, err
-    }
+	// 3. Ping เพื่อเช็ค connection
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		return nil, err
+	}
 
-    return rdb, nil
+	return rdb, nil
 }
 
 func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) *fiber.App {

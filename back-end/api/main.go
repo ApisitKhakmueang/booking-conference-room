@@ -23,6 +23,7 @@ func main() {
 		// log.Fatal("Can't to load env file")
 		log.Println("Warning: .env file not found, hoping variables are set in environment")
 	}
+	redisAddr := os.Getenv("REDIS_URL")
 
 	db := utils.InitialDBConnection()
 
@@ -31,7 +32,8 @@ func main() {
 		log.Fatal("Can't connect to google calendar")
 	}
 
-	rdb, err := utils.InitialRedisConnection(ctx)
+
+	rdb, err := utils.InitialRedisConnection(ctx, redisAddr)
 	if err != nil {
 		log.Fatalf("Can't connect to Redis: %v", err)
 	}
@@ -39,8 +41,6 @@ func main() {
 
 	bookingWsHub := Websocket.NewHub(rdb, "bookings_realtime")
 	go bookingWsHub.Run(ctx)
-
-	redisAddr := "localhost:6379"
 
 	// 1. สร้าง Asynq Client (ต้องสั่ง defer Close ไว้ที่ main เพื่อปิดคอนเนคชันตอนแอปดับ)
 	asynqClient := worker.NewAsynqClient(redisAddr)
