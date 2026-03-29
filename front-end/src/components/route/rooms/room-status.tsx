@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, type CardProps } from "@/components/ui/card2" // 🌟 Import CardProps มาด้วย
+import { Card, type CardProps } from "@/components/ui/card" // 🌟 Import CardProps มาด้วย
 import { RoomResp } from "@/utils/interface/response"
 import { useMemo } from "react"
 

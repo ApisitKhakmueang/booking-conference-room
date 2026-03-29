@@ -6,7 +6,7 @@ import { useShallow } from "zustand/shallow";
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Card } from "@/components/ui/card2";
+import { Card } from "@/components/ui/card";
 import { BookingEvent } from "@/utils/interface/interface";
 import { cn } from "@/lib/utils";
 
