@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/auth.store'
 
 import CodeDisplay from "./code-display";
 import NotificationComp from "./notification";
-import UserIcon from "./user-icon";
+import { UserIcon, UserIconSkeleton } from "./user-icon";
 import Welcomeback from "./welcome";
 import { useControlLayoutStore } from '@/stores/control-layout.store';
 import { useShallow } from 'zustand/shallow';
@@ -17,7 +17,7 @@ export default function UserBar() {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <div className='fixed w-full z-10'>
+    <div className='fixed w-full z-20'>
       <nav className={`w-full dark:bg-main-background bg-light-main-background flex ${!isHideNav
       ? isOpenNav
         ? "translate-x-70 justify-between"
@@ -32,10 +32,15 @@ export default function UserBar() {
             : "-translate-x-28 justify-between"
           : 'justify-end'}}`}>
           <CodeDisplay />
-
           <NotificationComp />
           
-          <UserIcon user={user} isHideNav={isHideNav} />
+          {!user ? (
+            // ถ้า user ยังเป็น null (กำลังโหลด) ให้โชว์ Skeleton
+            <UserIconSkeleton isHideNav={isHideNav} />
+          ) : (
+            // ถ้า user มีข้อมูลแล้ว ให้โชว์ของจริง
+            <UserIcon user={user} isHideNav={isHideNav} />
+          )}
         </div>
       </nav>
     </div>

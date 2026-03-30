@@ -71,3 +71,34 @@ export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }
     </>
   )
 }
+
+export function RoomGridSkeleton() {
+  // สมมติให้ตอนโหลดโชว์เป็นกรอบเปล่าๆ 10 ห้อง (หรือแก้ตามจำนวนห้องเฉลี่ยที่คุณมีได้เลย)
+  return (
+    <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card border-light-hover">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <li key={index} className="p-5">
+          <div className="animate-pulse flex flex-col h-full">
+            
+            {/* 🌟 Title Skeleton (ชื่อห้อง) */}
+            <div className="h-7 w-24 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+
+            {/* 🌟 Center Icon Skeleton (ไอคอนตรงกลาง) */}
+            <div className="flex justify-center py-10">
+              <div className="w-20 h-20 bg-slate-200 dark:bg-white/10 rounded-2xl"></div>
+            </div>
+
+            {/* 🌟 Footer Skeleton (ความจุ และ สถานะ) */}
+            <div className="flex xl:flex-row flex-col xl:items-center xl:justify-between gap-2 mt-auto">
+              {/* ความจุ (Capacity) */}
+              <div className="h-8 w-16 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+              {/* สถานะ (Status) */}
+              <div className="h-6 w-20 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            </div>
+
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}

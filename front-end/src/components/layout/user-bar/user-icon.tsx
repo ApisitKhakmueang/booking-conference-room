@@ -3,7 +3,7 @@ import UserDetail from "./user-detail";
 import { UserProfile } from "@/utils/interface/interface";
 import Image from "next/image";
 
-export default function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserProfile | null }) {
+export function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserProfile | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -40,11 +40,34 @@ export default function UserIcon({ isHideNav, user }: { isHideNav: boolean; user
 
         {isOpen && (
           <div 
-            className="absolute top-15 right-0">
+            className="absolute z-20 top-15 right-0">
             <UserDetail />
           </div>
         )}
       </div>
     </div>
   )
+}
+
+export function UserIconSkeleton({ isHideNav }: { isHideNav: boolean }) {
+  return (
+    <div className={`border dark:border-none dark:bg-sidebar border-slate-400 rounded-full select-none animate-pulse ${!isHideNav ? 'p-1' : ''}`}>
+      <div className={`flex items-center gap-2 relative ${!isHideNav ? 'pr-5' : 'p-[7px]'}`}>
+        
+        {/* 🌟 Avatar Skeleton */}
+        <div className="w-10 h-10 rounded-full bg-slate-300 dark:bg-white/10 shrink-0"></div>
+
+        {/* 🌟 Text Skeleton 
+            แก้ไข: เติม w-[160px] (หรือปรับตัวเลขเพิ่มลดได้) เพื่อกันกรอบให้กว้างเท่าๆ กับของจริง 
+        */}
+        <div className="lg:flex lg:flex-col lg:items-start hidden gap-1.5 pt-0.5 w-40">
+          {/* ขีดจำลองบรรทัดชื่อ */}
+          <div className="w-20 h-4 bg-slate-300 dark:bg-white/10 rounded-md"></div>
+          {/* ขีดจำลองบรรทัดอีเมล (ให้ยาวเต็มกรอบ w-[160px] ที่เราจองไว้) */}
+          <div className="w-full h-3 bg-slate-300 dark:bg-white/10 rounded-md"></div>
+        </div>
+        
+      </div>
+    </div>
+  );
 }

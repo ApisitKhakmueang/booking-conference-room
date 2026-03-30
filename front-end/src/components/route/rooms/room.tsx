@@ -1,6 +1,6 @@
 'use client'
 
-import RoomsGrid from "./room-grid";
+import RoomsGrid, { RoomGridSkeleton } from "./room-grid";
 import RoomStatus from "./room-status";
 import useBookingStatusWS from "@/hooks/data/useBookingStatusWS";
 import { useMemo } from 'react';
@@ -53,10 +53,16 @@ export default function Room() {
     });
   }, [rawRoom, bookings]); // คำนวณใหม่เมื่อสองตัวนี้เปลี่ยน
 
+  const isInitialLoading = !rawRoom || rawRoom.length === 0;
+
   return (
     <div className={`flex flex-col gap-5 transition-opacity duration-300 ${isLoadingBooking ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
       <RoomStatus displayRooms={displayRooms} isLoadingBooking={isLoadingBooking} />
-      <RoomsGrid displayRooms={displayRooms} />
+      {isInitialLoading ? (
+        <RoomGridSkeleton />
+      ) : (
+        <RoomsGrid displayRooms={displayRooms} />
+      )}
     </div>
   )
 }
