@@ -58,10 +58,11 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
 
     if (confirm.isConfirmed) {
       try {
-        // สมมติว่าใน bookingService ของคุณมีคำสั่ง deleteBooking
         const result = await bookingService.deleteBooking(event.id);
         
-        if (result.status === 200) {
+        // 🌟 1. เปลี่ยนจาก === 200 เป็นเงื่อนไขที่ครอบคลุมความสำเร็จทั้งหมด (200-299)
+        // เพราะบาง API สั่ง Delete สำเร็จจะตอบ 204 No Content
+        if (result.status >= 200 && result.status < 300) {
           Swal.fire({
             title: 'Deleted!',
             text: 'Your booking has been deleted.',
@@ -70,9 +71,12 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
             showConfirmButton: false
           });
 
-          // 🌟 ลบเสร็จ สั่งให้ดึงข้อมูลใหม่ทันที
+          // 🌟 2. เพิ่ม setTimeout หน่วงเวลาสักนิด (เช่น 300ms) 
+          // เพื่อให้ชัวร์ว่า Database ฝั่ง Backend ลบข้อมูลเสร็จแล้วจริงๆ ก่อนที่เราจะขอข้อมูลใหม่
           if (onDeleteSuccess) {
-            onDeleteSuccess();
+            setTimeout(() => {
+              onDeleteSuccess();
+            }, 100); // 0.3 วินาที (เร็วพอที่ผู้ใช้จะไม่รู้สึกว่าช้า แต่มากพอให้ DB ลบเสร็จ)
           }
         }
       } catch (error) {
