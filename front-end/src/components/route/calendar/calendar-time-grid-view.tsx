@@ -12,7 +12,7 @@ import { TimeGridViewProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
-export default function TimeGridView({ currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
+export default function TimeGridView({ setCurrentDate, currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
@@ -97,7 +97,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
                   const duration = differenceInMinutes(evt.endTime, evt.startTime);
                   
                   // 🌟 เช็กว่าเป็นของ User ปัจจุบันหรือไม่
-                  const isMine = currentUser && String(evt.User.id) === String(currentUser.id);
+                  const isMine = currentUser && evt.User?.id && String(evt.User.id) === String(currentUser.id)
 
                   return (
                     <div
@@ -122,7 +122,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
                         </div>
                         
                         <div className="opacity-80 text-[10px] leading-tight mt-0.5 flex flex-col gap-0.5">
-                          <div className="truncate">By: {isMine ? "You" : evt.User.fullName}</div>
+                          <div className="truncate">By: {isMine ? "You" : evt.User?.fullName || "Unknown"}</div>
                           <div className="truncate whitespace-nowrap">
                             {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
                           </div>
@@ -154,7 +154,7 @@ export default function TimeGridView({ currentDate, bookings, view, holiday, isS
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' setCurrentDate={setCurrentDate} currentDate={currentDate} />
     </div>
   );
 }

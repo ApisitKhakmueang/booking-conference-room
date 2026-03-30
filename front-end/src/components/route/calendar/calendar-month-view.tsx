@@ -164,7 +164,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                       </div>
                     )
                   } else {
-                    const isMine = currentUser && item.User.id === currentUser.id;
+                    const isMine = currentUser && item.User?.id && String(item.User.id) === String(currentUser.id)
 
                     return (
                       <div 
