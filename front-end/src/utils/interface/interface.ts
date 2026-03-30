@@ -82,6 +82,7 @@ export interface ModalProps {
   setIsAddModalOpen: (status: boolean) => void
   typeOperate: 'add' | 'update'
   currentDate: Date
+  setCurrentDate: (date: Date) => void
   selectedEvent?: BookingEvent
   onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
 }
@@ -90,6 +91,7 @@ export interface FormModalProps {
   setIsAddModalOpen: (status: boolean) => void
   typeOperate: 'add' | 'update'
   rooms: ArrangeRoom[]
+  setCurrentDate: (date: Date) => void
   currentDate: Date
   selectedEvent?: BookingEvent
   onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
@@ -140,6 +142,7 @@ export interface MonthProps {
 }
 
 export interface TimeGridViewProps { 
+  setCurrentDate: (date: Date) => void
   currentDate: Date, 
   bookings: BookingEventResponse[] | null, 
   view: 'week' | 'day', 

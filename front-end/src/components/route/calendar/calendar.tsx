@@ -119,6 +119,7 @@ export default function Calendar() {
   const isSyncing = isLoadingBooking || isLoadingHoliday || isLoadingRoom;
 
   const sharedProps = {
+    setCurrentDate,
     currentDate,
     bookings,
     holiday,
@@ -184,12 +185,12 @@ export default function Calendar() {
 
         {/* --- Body: Render ตาม View --- */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          {view === 'month' && <MonthView {...sharedProps} setView={setView} setCurrentDate={setCurrentDate} />}
+          {view === 'month' && <MonthView {...sharedProps} setView={setView} />}
           {(view === 'week' || view === 'day') && <TimeGridView {...sharedProps} view={view} />}
         </div>
       </div>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' currentDate={currentDate} />
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' setCurrentDate={setCurrentDate} currentDate={currentDate} />
     </div>
   );
 }

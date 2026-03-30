@@ -17,7 +17,7 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, selectedEvent, onSuccess }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCurrentDate, currentDate, selectedEvent, onSuccess }: FormModalProps) {
   const defaultFormData = {
     title: "",
     date: currentDate,
@@ -32,7 +32,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
-    const { startTime, endTime, duration } = formData
+    const { startTime, endTime, duration, date } = formData
 
     if (!startTime || !endTime || !duration) {
       Swal.fire({
@@ -103,12 +103,17 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           timer: 2000
         })
 
+        // 🌟 3. สั่งเปลี่ยนวันที่ในหน้าหลัก ให้ตรงกับวันที่เพิ่งกรอกในฟอร์มจอง!
+        if (setCurrentDate) {
+          setCurrentDate(formData.date);
+        }
+
         if (onSuccess) {
           onSuccess();
         }
       }
 
-      setFormData(defaultFormData)
+      setFormData({...defaultFormData, date})
       if (titleRef.current) {
         titleRef.current.value = "";
       }
@@ -249,13 +254,13 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                 onSelect={(d) => setFormData(prev => ({ ...prev, date: d as Date }))}
                 className="dark:bg-sidebar rounded-md p-3"
                 locale={enUS}
-                
-                // 🌟 เพิ่มเงื่อนไข disabled ตรงนี้ครับ!
                 disabled={(day) => {
                   const today = new Date();
                   today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาให้เป็นเที่ยงคืน จะได้เทียบแค่วันที่
                   return day < today; // ถ้าวันนั้นน้อยกว่าวันนี้ ให้ปิดการใช้งาน
-                }}/>
+                }}
+                required
+                />
 
               <div className="flex flex-col gap-2">
                 <div className="flex flex-col gap-1">

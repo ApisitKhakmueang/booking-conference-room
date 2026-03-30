@@ -84,11 +84,6 @@ export default function Schedule() {
   }, [currentDate]); 
 
   useEffect(() => {
-    if (isAddModalOpen) return
-    setCurrentDate(new Date())
-  }, [isAddModalOpen])
-
-  useEffect(() => {
     fetchUserBookings();
   }, [fetchUserBookings]); // อย่าลืมใส่ dependency
 
@@ -159,6 +154,7 @@ export default function Schedule() {
         isAddModalOpen={isAddModalOpen} 
         setIsAddModalOpen={setIsAddModalOpen} 
         typeOperate={typeOperate} 
+        setCurrentDate={setCurrentDate}
         currentDate={currentDate}
         selectedEvent={selectedEvent} 
         onSuccess={fetchUserBookings} 
