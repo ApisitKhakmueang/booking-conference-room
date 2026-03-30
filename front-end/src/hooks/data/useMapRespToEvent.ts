@@ -48,8 +48,8 @@ export const useMapResponseToEvents = (responses: BookingEventResponse[]): Booki
       id: resp.id,
       title: resp.title,
       date: resp.startTime, // เก็บ ISO String ตัวเดิมไว้ เผื่อเอาไป sort หรือแยกวัน
-      startTime: startTimeStr,
-      endTime: endTimeStr,
+      startTime: resp.startTime,
+      endTime: resp.endTime,
       duration: durationStr,
       room: mappedRoom, // ดึงชื่อห้องออกมา ถ้าไม่มีจะได้ undefined
       status: formattedStatus as BookingStatus,

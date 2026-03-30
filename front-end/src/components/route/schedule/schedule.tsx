@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { addDays, subDays } from "date-fns";
+import { addDays, isSameDay, subDays } from "date-fns";
 import DesktopSidebar from "./desktop-sidebar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import Modal from "@/components/ui/modal";
 import { Plus } from "lucide-react";
 import CardEvents, { CardEventsSkeleton } from "./event-card";
 import { BookingEvent } from "@/utils/interface/interface";
-import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
+import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
 
 
@@ -28,16 +28,24 @@ export default function Schedule() {
   // 🌟 2. สร้างตัวกรองข้อมูล (ถ้าไม่เลือกห้องเลย = แสดงทั้งหมด, ถ้าเลือก = แสดงเฉพาะห้องที่เลือก)
   const filteredEvents = useMemo(() => {
     if (!events) return undefined;
-    if (selectedRooms.length === 0) return events; // ถ้าไม่มีการติ๊กเลย ให้แสดงทั้งหมด
     
     return events.filter((event) => {
-      // 🌟 1. เช็คก่อนว่ามีข้อมูล roomNumber ไหม ถ้าไม่มีให้ข้ามไปเลย
-      if (event.room?.roomNumber === undefined) return false;
+      // 🌟 1. กรองวันที่: เช็คว่า Event นี้ ตรงกับ currentDate ที่เลือกอยู่ไหม
+      // (ถ้า interface ของคุณเก็บวันที่ไว้ที่ event.date ให้ใช้ event.date แทน event.startTime นะครับ)
+      const eventDate = new Date(event.startTime); 
+      if (!isSameDay(eventDate, currentDate)) {
+        return false; // ถ้าคนละวัน ให้เตะทิ้งไปเลย ไม่ต้องแสดง
+      }
 
-      // 🌟 2. พอผ่านบรรทัดบนมาได้ TypeScript จะรู้ทันทีว่าตรงนี้คือ number แน่นอน 100%
-      return selectedRooms.includes(event.room.roomNumber); 
+      // 🌟 2. กรองห้อง: ถ้ามีการติ๊กเลือกห้องไว้ ค่อยเช็คเงื่อนไข
+      if (selectedRooms.length > 0) {
+        if (event.room?.roomNumber === undefined) return false;
+        if (!selectedRooms.includes(event.room.roomNumber)) return false; 
+      }
+
+      return true; // ผ่านทุกด่าน (วันตรงกัน + ห้องตรงเงื่อนไข) ให้แสดงผลได้!
     });
-  }, [events, selectedRooms]);
+  }, [events, selectedRooms, currentDate]); // 🌟 อย่าลืมเพิ่ม currentDate ลงในก้อน dependency ท้ายสุด
 
   const next = () => {
     setCurrentDate(addDays(currentDate, 1));
@@ -87,7 +95,7 @@ export default function Schedule() {
     } catch (error) {
       console.log('error: ', error);
     }
-  }, [currentDate]); 
+  }, [currentDate.getMonth(), currentDate.getFullYear()]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
 
   useEffect(() => {
     fetchUserBookings();

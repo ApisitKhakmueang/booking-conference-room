@@ -30,7 +30,12 @@ export const calculateDuration = (start: string, end: string) => {
   return `${minutes}m`; // เช่น 30m
 };
 
-export const formatTimeWithSuffix = (timeStr: string) => {
+export const formatTimeWithSuffix = (timeBeforeParse: string) => {
+  // ตั้งค่า locale 'th-TH' หรือ 'en-GB' เพื่อให้ได้ format แบบ 24 ชั่วโมง (09:00)
+  const timeToDate = new Date(timeBeforeParse);
+  const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+  const timeStr = timeToDate.toLocaleTimeString('en-GB', timeOptions);
+  
   if (!timeStr) return { time: '', suffix: '' };
   
   // แยกชั่วโมงและนาทีออกา (เช่น "14:30" -> hours: 14, mins: 30)
