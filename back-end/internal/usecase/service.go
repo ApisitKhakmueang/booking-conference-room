@@ -100,8 +100,6 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	log.Printf("booking: %v", booking)
-
 	// completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
 	// if err != nil {
 	// 	return err
@@ -174,69 +172,6 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	go func(b *domain.Booking) {
 		u.EnqeueEvent(b)
 	}(booking)
-
-	// // }
-
-	// // dateToCheck := t.Format("2006-01-02")
-
-	// // log.Println("after check day off")
-
-	// if err := u.helperPostgres.CheckSameRoom(booking, roomNumber); err != nil {
-	// 	// UpdateNewRoom
-	// 	// log.Println("enter update new room")
-
-	// 	cancelErr := u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID)
-	// 	if cancelErr != nil {
-	// 		return cancelErr
-	// 	}
-
-	// 	// log.Println("After cancel event")
-
-	// 	calendar, err := u.helperPostgres.GetCalendar(roomNumber)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	user, err := u.helperPostgres.GetUser(booking.UserID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	createEvent := &domain.CreateEvent{
-	// 		GoogleCalendarID: calendar.GoogleCalendarID,
-	// 		Title: booking.Title,
-	// 		Email: user.Email,
-	// 	}
-
-	// 	eventID, err := u.gateway.CreateEvent(booking, createEvent)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	booking.CalendarID = calendar.ID
-	// 	booking.GoogleEventID = eventID
-
-	// 	booking.Calendar = nil
-	// 	// log.Println("room id: ", booking.RoomID)
-	// 	// log.Println("calnedarID: ", booking.CalendarID)
-	// 	// log.Println("event id: ", booking.GoogleEventID)
-	// } else {
-	// 	// UpdateSameRoom
-	// 	// log.Println("enter update same room")
-	// 	// log.Printf("title: %v\n", booking.Title)
-	// 	// log.Printf("booking after checksameroom: %v", booking)
-
-	// 	updateErr := u.gateway.UpdateEventSameRoom(booking)
-	// 	if updateErr != nil {
-	// 		return updateErr
-	// 	}
-	// }
-
-	// // log.Println("enter before update in db")
-	// // log.Printf("booking: %v\n", booking)
-	// if err := u.helperPostgres.UpdateBookingDB(booking); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

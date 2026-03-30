@@ -119,14 +119,14 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 }
 
 func (p *postgresRepository) GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
-	layout := "2006-01-02"
+	layout := "2006-01"
 	startTime, err := time.Parse(layout, date)
 	if err != nil {
-			return nil, fmt.Errorf("invalid date format: %v", err)
+		return nil, fmt.Errorf("invalid date format: %v", err)
 	}
 
 	// 2. หาจุดสิ้นสุดของวัน (คือวินาทีแรกของวันถัดไป)
-	endTime := startTime.AddDate(0, 0, 1)
+	endTime := startTime.AddDate(0, 1, 0)
 
 	var bookings []domain.Booking
 

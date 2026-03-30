@@ -131,7 +131,7 @@ func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	date := c.Query("date", time.Now().Format("2006-01-02"))
+	date := c.Query("date", time.Now().Format("2006-01"))
 	// if err := c.Query("room", "0"); err != nil {
 	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	// }
