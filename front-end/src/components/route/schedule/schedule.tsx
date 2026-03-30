@@ -9,7 +9,6 @@ import Modal from "@/components/ui/modal";
 import { Plus } from "lucide-react";
 import CardEvents, { CardEventsSkeleton } from "./event-card";
 import { BookingEvent } from "@/utils/interface/interface";
-import { BookingEventResponse } from "@/utils/interface/response";
 import { useMapResponseToEvents } from "@/hooks/data/ีuseMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
 
@@ -145,7 +144,7 @@ export default function Schedule() {
         </div>
 
         {/* Desktop Right Sidebar */}
-        <div className="w-80 xl:block hidden">
+        <div className="">
           <DesktopSidebar 
             currentDate={currentDate} 
             setCurrentDate={setCurrentDate} 

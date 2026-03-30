@@ -55,7 +55,7 @@ export default function DesktopSidebar({
   }
 
   return (
-    <aside className={cn(`flex flex-col space-y-8`, !className ? 'fixed w-80 border-l border-gray-100 dark:border-white/10 h-full px-8' : className)}>
+    <aside className={cn(`flex flex-col space-y-8`, !className ? 'xl:block hidden border-l border-gray-100 dark:border-white/10 h-full px-8 overflow-y-auto' : className)}>
       {/* ... โค้ดปฏิทิน และการลูปห้อง เหมือนเดิมทุกประการ ไม่ต้องแก้อะไรในส่วนแสดงผล ... */}
       
       {/* (ตัวอย่างส่วนที่เรียกใช้) */}
