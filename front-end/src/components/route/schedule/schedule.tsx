@@ -153,7 +153,7 @@ export default function Schedule() {
         </div>
 
         {/* Desktop Right Sidebar */}
-        <div className="">
+        <div>
           <DesktopSidebar 
             currentDate={currentDate} 
             setCurrentDate={setCurrentDate} 
