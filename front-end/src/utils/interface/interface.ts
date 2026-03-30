@@ -11,7 +11,8 @@ export interface UserProfile {
   email: string
   name?: string
   avatar?: string
-  role: string
+  role: string,
+  isGoogleData?: boolean
 }
 
 export interface UseProfileImageReturn {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
 import { UseEditProfileProps } from '@/utils/interface/interface'
+import { useRouter } from 'next/dist/client/components/navigation'
 
 export const useEditProfile = () => {
   const supabase = createClient()
@@ -9,6 +10,7 @@ export const useEditProfile = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const router = useRouter()
 
   const submit = async (props: UseEditProfileProps) => {
     const { username, profileFile, originalUsername, originalAvatar } = props
@@ -43,7 +45,8 @@ export const useEditProfile = () => {
           .from('avatars')
           .getPublicUrl(fileName)
 
-        avatarUrl = urlData.publicUrl
+        // 🌟 จุดที่แก้ไข 1: เติม ?t=... ท้าย URL เพื่อบังคับให้บราวเซอร์รีเฟรชรูปใหม่ (Cache Busting)
+        avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`
       }
 
       // เตรียมข้อมูลที่จะอัปเดต
@@ -67,7 +70,7 @@ export const useEditProfile = () => {
         return
       }
 
-      // อัปเดต user ใน Supabase
+      // 1. อัปเดต user ในตาราง 'users' (Database)
       const { error: updateError } = await supabase
         .from('users')
         .update(updateData)
@@ -77,7 +80,17 @@ export const useEditProfile = () => {
         throw new Error(`Update failed: ${updateError.message}`)
       }
 
-      // อัปเดต local store
+      // 🌟 จุดที่แก้ไข 2: อัปเดต Auth Token (user_metadata) เพื่อให้ useAuth อ่านข้อมูลใหม่ได้ทันที
+      const { error: authError } = await supabase.auth.updateUser({
+        data: updateData
+      })
+
+      if (authError) {
+        // ใช้แค่ console.error เพราะข้อมูลลง Database ไปแล้ว ไม่จำเป็นต้องทำให้แอปพัง
+        console.error(`Auth update failed: ${authError.message}`) 
+      }
+
+      // 3. อัปเดต local store (Zustand) ให้ UI เปลี่ยนทันที
       const updatedUser = {
         ...user,
         ...(username !== originalUsername && { name: username }),
@@ -86,6 +99,8 @@ export const useEditProfile = () => {
 
       setUser(updatedUser)
       setSuccess(true)
+      
+      router.push('/dashboard') // เปลี่ยนเส้นทางหลังจากอัปเดตสำเร็จ
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSuccess(false)
