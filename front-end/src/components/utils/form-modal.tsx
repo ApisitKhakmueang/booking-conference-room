@@ -17,7 +17,7 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCurrentDate, currentDate, selectedEvent, onSuccess }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess }: FormModalProps) {
   const defaultFormData = {
     title: "",
     date: currentDate,
@@ -29,6 +29,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCu
   const titleRef = useRef<HTMLInputElement>(null)
   const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(rooms[0]);
   const [formData, setFormData] = useState(defaultFormData)
+  const [calendarMonth, setCurrentMonth] = useState(currentDate);
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
@@ -128,6 +129,12 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCu
       setIsAddModalOpen(false);
     }
   }
+
+  useEffect(() => {
+    if (formData.date) {
+      setCurrentMonth(formData.date);
+    }
+  }, [formData.date]);
 
   // 🌟 ใช้ useEffect เพื่อคำนวณ Duration อัตโนมัติ
   useEffect(() => {
@@ -233,18 +240,36 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCu
             <div className="flex flex-col gap-1">
               <label 
                 className="block font-medium text-gray-700 dark:text-gray-300">Date</label>
-              <Input 
+              {/* <Input 
                 type="text"
                 className="flex justify-between items-center w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light text-gray-700"
                 value={format(formData.date || new Date(), 'd MMMM yyyy')}
                 readOnly
                 // onClick={() => setIsOpenCalendar(true)}
                 >
-                {/* <span>
-                  {format(formData.date || new Date(), 'd MMMM yyyy')} 
-                </span> */}
-                {/* { isOpenCalendar ? <ChevronUp /> : <ChevronDown /> } */}
-              </Input>
+              </Input> */}
+              <Input 
+                // 🌟 1. เปลี่ยนจาก text เป็น date
+                type="date" 
+                className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light text-gray-700 [&::-webkit-calendar-picker-indicator]:hidden"
+                
+                // 🌟 2. HTML5 Date Input บังคับให้ value ต้องเป็นฟอร์แมต 'yyyy-MM-dd' เท่านั้น
+                value={format(formData.date || new Date(), 'yyyy-MM-dd')}
+                
+                // 🌟 3. รับค่าจากการพิมพ์ หรือการเลือก แล้วอัปเดตกลับไปที่ State
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  // เช็คว่าผู้ใช้ไม่ได้ลบจนว่างเปล่า
+                  if (inputValue) {
+                    const newDate = new Date(inputValue);
+                    // อัปเดต State (ซึ่งจะไปทำให้ปฏิทินด้านล่างเปลี่ยนตามด้วย!)
+                    setFormData(prev => ({ ...prev, date: newDate }));
+                  }
+                }}
+
+                // 🌟 4. (แถม) ล็อคไม่ให้พิมพ์/เลือก วันที่ในอดีตได้จากตัว Input เลย
+                min={format(new Date(), 'yyyy-MM-dd')} 
+              />
             </div>
 
             <div className="flex sm:flex-row flex-col items-stretch gap-2">
@@ -252,6 +277,8 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, setCu
                 mode="single"
                 selected={formData.date}
                 onSelect={(d) => setFormData(prev => ({ ...prev, date: d as Date }))}
+                month={calendarMonth} 
+                onMonthChange={setCurrentMonth}
                 className="dark:bg-sidebar rounded-md p-3"
                 locale={enUS}
                 disabled={(day) => {
