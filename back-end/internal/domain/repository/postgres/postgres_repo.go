@@ -9,8 +9,8 @@ import (
 )
 
 type PostgresRepository interface {
-	CreateBookingDB(ctx context.Context, booking *domain.Booking) error
-	UpdateBookingDB(ctx context.Context, booking *domain.Booking) error
+	CreateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
+	UpdateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, error)
 	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
 	GetBookingStatusDB(ctx context.Context) ([]domain.Booking, error)

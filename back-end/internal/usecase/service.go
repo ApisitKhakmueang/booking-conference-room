@@ -95,9 +95,12 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	booking.Passcode = finalPasscode
 	booking.ID = uuid.New()
 
-	if err := u.redis.CreateBooking(ctx, booking, roomNumber); err != nil {
+	booking, err := u.redis.CreateBooking(ctx, booking, roomNumber)
+	if err != nil {
 		return err
 	}
+
+	log.Printf("booking: %v", booking)
 
 	// completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
 	// if err != nil {
@@ -119,42 +122,6 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	go func(b *domain.Booking) {
 		u.EnqeueEvent(b)
 	}(booking)
-
-	// layout := "2006-01-02 15:04:05"
-	// t, err := helper.ParseTimeFormat(layout, booking.StartTime)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// dateToCheck := t.Format("2006-01-02")
-
-	// calendar, err := u.helperPostgres.GetCalendar(roomNumber)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// user, err := u.helperPostgres.GetUser(booking.UserID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// booking.CalendarID = calendar.ID
-	// createEvent := &domain.CreateEvent{
-	// 	GoogleCalendarID: calendar.GoogleCalendarID,
-	// 	Title: booking.Title,
-	// 	Email: user.Email,
-	// }
-
-	// eventID, err := u.gateway.CreateEvent(booking, createEvent)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// booking.GoogleEventID = eventID
-
-	// if err = u.helperPostgres.CreateBookingDB(booking); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
@@ -185,7 +152,8 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return errors.New("Room unavailable")
 	}
 
-	if err := u.redis.UpdateBooking(ctx, booking, roomNumber); err != nil {
+	booking, err := u.redis.UpdateBooking(ctx, booking, roomNumber);
+	if  err != nil {
 		return err
 	}
 

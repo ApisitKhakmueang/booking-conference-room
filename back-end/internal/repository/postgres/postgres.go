@@ -25,21 +25,36 @@ func NewPostgresRepository(db *gorm.DB) *postgresRepository {
 	return &postgresRepository{ db: db }
 }
 
-func (p *postgresRepository) CreateBookingDB(ctx context.Context, booking *domain.Booking) error {
-	err := p.db.WithContext(ctx).Create(booking).Error
-	return err
+func (p *postgresRepository) CreateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
+	// 1. สร้างข้อมูล (GORM จะเอา ID มาใส่ในตัวแปร booking ให้)
+	if err := p.db.WithContext(ctx).Create(booking).Error; err != nil {
+		return nil, err
+	}
+
+	// 2. ดึงข้อมูลซ้ำอีกรอบเพื่อเอา Relation (Room, User) ติดมาด้วย
+	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking, booking.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return booking, nil
 }
 
-func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domain.Booking) error {
+func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
+	// 1. สั่ง Update
 	result := p.db.WithContext(ctx).
-		Clauses(clause.Returning{}). // ตัวนี้แหละครับที่เสก RETURNING * ให้
+		Clauses(clause.Returning{}).
 		Updates(booking)
 
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
-	return nil
+	// 2. ดึงข้อมูลซ้ำเพื่อดึง Relation มาแปะ
+	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking, booking.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return booking, nil
 }
 
 func (p *postgresRepository) DeleteBookingDB(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, error) {
@@ -378,6 +393,14 @@ func (r *postgresRepository) BulkUpsertHolidays(ctx context.Context, holidays []
 	}).Create(&holidays)
 
 	return result.Error
+}
+
+// internal function
+// สร้างฟังก์ชัน Helper เล็กๆ ไว้ในไฟล์เดียวกัน
+func preloadBookingRelations(db *gorm.DB) *gorm.DB {
+	return db.
+		Preload("Room", func(db *gorm.DB) *gorm.DB { return db.Select("id, name, room_number") }).
+		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Select("id, email, full_name") })
 }
 
 // func (p *postgresRepository) CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error){

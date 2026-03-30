@@ -25,25 +25,27 @@ func NewRedisRepository(rdb *redis.Client, postgres postgresRepo.PostgresReposit
 	}
 }
 
-func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
-	if err := r.postgres.CreateBookingDB(ctx, booking); err != nil {
-		return err
+func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
+	booking, err := r.postgres.CreateBookingDB(ctx, booking)
+	if err != nil {
+		return nil, err
 	}
 
 	r.DeleteBookingToCache(ctx, roomNumber)
 	r.DeleteUserToCache(ctx, booking.UserID)
 
-	return nil
+	return booking, nil
 }
 
-func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
+func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
 	prevRoomNumber, err := r.postgres.GetRoomNumber(ctx, booking.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := r.postgres.UpdateBookingDB(ctx, booking); err != nil {
-		return err
+	booking, err = r.postgres.UpdateBookingDB(ctx, booking)
+	if err != nil {
+		return nil, err
 	}
 
 	// 1. เคลียร์ Cache ของห้องเก่า (ถ้าห้องเปลี่ยน มันจะลบห้องเก่าให้)
@@ -57,7 +59,7 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 
 	r.DeleteUserToCache(ctx, booking.UserID)
 
-	return nil
+	return booking, nil
 }
 
 func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
