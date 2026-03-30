@@ -123,18 +123,32 @@ export interface BookingEvent {
   status: BookingStatus;
 }
 
-export interface EventCardProps { 
+export interface EventCardScheduleProps { 
   event: BookingEvent 
   setIsAddModalOpen: (status: boolean) => void
   setCurrentDate: (date: Date) => void
   onDeleteSuccess: () => void
 }
 
-export interface DesktopSidebarProps {
+export interface DesktopSidebarScheduleProps {
   currentDate: Date,
   setCurrentDate: (date: Date) => void 
   currentMonth: Date
   setCurrentMonth: (date: Date) => void
+  events: BookingEvent[] | undefined
+  className?: string
+  selectedRooms: number[]
+  setSelectedRooms: React.Dispatch<React.SetStateAction<number[]>>
+}
+
+export interface EventCardHistoryProps { 
+  event: BookingEvent 
+  setCurrentDate: (date: Date) => void
+}
+
+export interface DesktopSidebarHistoryProps {
+  currentDate: Date,
+  setCurrentDate: (date: Date) => void 
   events: BookingEvent[] | undefined
   className?: string
   selectedRooms: number[]

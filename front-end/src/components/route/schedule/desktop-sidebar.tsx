@@ -7,7 +7,7 @@ import { useShallow } from "zustand/shallow";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Card } from "@/components/ui/card";
-import { DesktopSidebarProps } from "@/utils/interface/interface";
+import { DesktopSidebarScheduleProps } from "@/utils/interface/interface";
 import { cn } from "@/lib/utils";
 
 // 🌟 1. เพิ่ม selectedRooms และ setSelectedRooms เข้ามาใน Type ของ Props
@@ -20,7 +20,7 @@ export default function DesktopSidebar({
   className,
   selectedRooms,
   setSelectedRooms 
-}: DesktopSidebarProps) {
+}: DesktopSidebarScheduleProps) {
   const { rawRoom } = useRoomStore(
       useShallow(((state) => ({
         rawRoom: state.rooms
@@ -74,7 +74,12 @@ export default function DesktopSidebar({
       <div className="w-full">
         <div className="w-full space-y-6">
           <FieldGroup className="gap-6">
-            <h4 className="text-sm font-bold text-gray-800 dark:text-stone-300 uppercase tracking-widest">Filter Rooms</h4>
+            <div className="flex items-center gap-8">
+              <h4 className="text-sm font-bold text-gray-800 dark:text-stone-300 uppercase tracking-widest">Filter Rooms</h4>
+              <h4 
+                onClick={() => setSelectedRooms([])}
+                className="cursor-pointer text-sm text-gray-700 hover:text-gray-900 dark:text-stone-400 dark:hover:text-neutral-100 transition-colors whitespace-nowrap">Clear All</h4>
+            </div>
             <div className="grid grid-rows-5 grid-flow-col gap-x-8 h-full gap-y-4">     
               {rooms.map((option) => (
                 <Field key={option.id} orientation="horizontal" className="">

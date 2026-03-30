@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { bookingService } from "@/service/booking.service";
-import { EventCardProps } from "@/utils/interface/interface";
+import { EventCardScheduleProps } from "@/utils/interface/interface";
 import { formatTimeWithSuffix } from "@/utils/time";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import Swal from "sweetalert2";
 
-export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, onDeleteSuccess } : EventCardProps) {
+export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, onDeleteSuccess } : EventCardScheduleProps) {
   const eventDate = new Date(event.date)
   const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
@@ -91,10 +91,7 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
         setIsAddModalOpen(true)
         setCurrentDate(eventDate)
       }}
-      // 🌟 1. ปรับ Background ของ Card:
-      // Light: bg-white ขอบเทาอ่อน โฮเวอร์เปลี่ยนเป็นเทาจางๆ
-      // Dark: bg-sidebar โฮเวอร์เปลี่ยนเป็น hover
-      className="group flex gap-6 p-4 md:p-6 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 cursor-pointer"
+      className="group flex gap-6 md:p-6 p-4 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 cursor-pointer"
     >
       
       {/* 🌟 2. โซนเวลาด้านซ้าย */}
@@ -131,14 +128,14 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
         <p className="text-sm text-gray-500 dark:text-stone-400">{formattedDate}</p>
         
         {/* แถบด้านล่าง: Status และ Duration */}
-        <div className="mt-4 flex items-center gap-4 text-xs">
+        <div className="mt-4 flex xs:flex-row flex-col xs:items-center xs:gap-4 gap-1 text-xs">
           
           <span className="flex items-center gap-1.5 text-success dark:text-purple-400 font-medium">
             <span className="w-2 h-2 rounded-full bg-success dark:bg-purple-400 shadow-[0_0_8px_rgba(65,205,139,0.4)] dark:shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span> 
             <span className="capitalize">{event.status}</span>
           </span>
           
-          <span className="text-gray-500 dark:text-stone-500 flex items-center gap-1 border-l border-gray-200 dark:border-white/10 pl-4">
+          <span className="text-gray-500 dark:text-stone-500 flex items-center gap-1 xs:border-l xs:pl-4 border-gray-200 dark:border-white/10">
             <span className="material-symbols-outlined text-sm">schedule</span> {event.duration}
           </span>
 

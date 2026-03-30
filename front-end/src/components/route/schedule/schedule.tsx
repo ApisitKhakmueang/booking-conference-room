@@ -106,7 +106,7 @@ export default function Schedule() {
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 sm:pr-8">
+          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8">
             <p className="text-2xl">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2">
@@ -122,7 +122,7 @@ export default function Schedule() {
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex">
-            <main className="flex-1 space-y-4 overflow-y-auto py-4 pr-4 md:py-8 md:pr-8 no-scrollbar">
+            <main className="flex-1 space-y-4 overflow-y-auto py-4 md:py-8 xl:pr-8 no-scrollbar">
               {/* 🌟 3. เปลี่ยนจาก events.map เป็น filteredEvents.map เพื่อแสดงเฉพาะอันที่กรองแล้ว */}
               {events === undefined ? (
                 // ถ้า events ยังเป็น undefined แสดงว่ากำลังโหลด ให้จำลอง Skeleton ขึ้นมา 3 กล่อง
@@ -186,13 +186,11 @@ export default function Schedule() {
       {isMobileFilterOpen && (
         <div className="fixed inset-0 z-100 flex items-end bg-black/50 xl:hidden">
           <div className="w-full max-h-[85vh] flex flex-col bg-light-main-background dark:bg-card rounded-t-3xl p-6 pb-10 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
-            <div className="flex justify-between items-center mb-6 shrink-0">
-              <h2 className="text-xl font-bold text-light-main dark:text-main uppercase tracking-widest">Filter Rooms</h2>
+            <div className="flex justify-end items-center mb-6 shrink-0">
               <button 
                 className="text-gray-500 hover:text-white"
                 onClick={() => {
                   setIsMobileFilterOpen(false)
-                  setSelectedRooms([])
                   }}>✕</button>
             </div>
             
