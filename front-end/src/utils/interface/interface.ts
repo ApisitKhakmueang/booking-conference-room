@@ -91,8 +91,8 @@ export interface FormModalProps {
   setIsAddModalOpen: (status: boolean) => void
   typeOperate: 'add' | 'update'
   rooms: ArrangeRoom[]
-  setCurrentDate: (date: Date) => void
   currentDate: Date
+  setCurrentDate: (date: Date) => void
   selectedEvent?: BookingEvent
   onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
 }
@@ -128,6 +128,17 @@ export interface EventCardProps {
   setIsAddModalOpen: (status: boolean) => void
   setCurrentDate: (date: Date) => void
   onDeleteSuccess: () => void
+}
+
+export interface DesktopSidebarProps {
+  currentDate: Date,
+  setCurrentDate: (date: Date) => void 
+  currentMonth: Date
+  setCurrentMonth: (date: Date) => void
+  events: BookingEvent[] | undefined
+  className?: string
+  selectedRooms: number[]
+  setSelectedRooms: React.Dispatch<React.SetStateAction<number[]>>
 }
 
 type ViewType = 'month' | 'week' | 'day';
