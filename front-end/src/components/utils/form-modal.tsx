@@ -54,6 +54,16 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       return;
     }
 
+    if (duration === "Limit 2h") {
+      Swal.fire({
+        title: 'Error',
+        text: 'Limit 2 hours per booking.',
+        icon: 'error',
+        timer: 2000
+      });
+      return;
+    }
+
     const finalTitle = titleRef.current?.value || `Booking ${selectedRoom?.name}`;
     const finalDataToSubmit = {
       ...formData,

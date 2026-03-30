@@ -21,10 +21,10 @@ export const calculateDuration = (start: string, end: string) => {
   const minutes = diffMins % 60;
 
   // จัดฟอร์แมตข้อความให้อ่านง่าย{}
-  if (hours >= 2) {
-    if (minutes > 0) return "Limit 2h"
-    else return `${hours}h`
+  if ((hours >= 2 && minutes > 0) || hours > 2) {
+    return "Limit 2h"
   }
+
   if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`; // เช่น 1h 30m
   if (hours > 0) return `${hours}h`; // เช่น 2h
   return `${minutes}m`; // เช่น 30m
