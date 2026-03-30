@@ -9,6 +9,7 @@ import {
   Cuboid,
   Calendar,
   List,
+  History
 } from "lucide-react";
 
 // Components
@@ -23,6 +24,7 @@ const SIDEBAR_ITEMS = [
   { name: "Rooms", href: "/rooms", icon: Cuboid },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Schedule", href: "/schedule", icon: List },
+  { name: "History", href: "/history", icon: History},
 ] as const;
 
 export default function Sidebar() {
