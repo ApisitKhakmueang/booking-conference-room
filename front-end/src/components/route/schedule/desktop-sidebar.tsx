@@ -1,5 +1,5 @@
 import { Calendar } from "@/components/ui/calendar";
-import { useMemo } from "react"; // 🌟 เอา useState ออก
+import { useEffect, useMemo } from "react"; // 🌟 เอา useState ออก
 import { enUS } from 'date-fns/locale';
 import { useRoomStore } from "@/stores/room.store";
 import { useShallow } from "zustand/shallow";
@@ -60,7 +60,18 @@ export default function DesktopSidebar({
       
       {/* (ตัวอย่างส่วนที่เรียกใช้) */}
       <div className="w-full">
-        <Calendar mode="single" selected={currentDate} onSelect={(d) => setCurrentDate(d as Date)} className="dark:bg-sidebar rounded-md p-3" locale={enUS} disabled={(day) => { const today = new Date(); today.setHours(0, 0, 0, 0); return day < today; }}/>
+        <Calendar 
+          mode="single" 
+          selected={currentDate} 
+          onSelect={(d) => {
+            if (d) {
+              setCurrentDate(d);
+            }
+          }} 
+          className="dark:bg-sidebar rounded-md p-3" 
+          locale={enUS} disabled={(day) => { const today = new Date(); today.setHours(0, 0, 0, 0); return day < today; }}
+          required
+          />
       </div>
 
       <div className="w-full">
