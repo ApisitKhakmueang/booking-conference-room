@@ -16,6 +16,7 @@ import { bookingService } from "@/service/booking.service";
 export default function Schedule() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
@@ -39,7 +40,8 @@ export default function Schedule() {
   }, [events, selectedRooms]);
 
   const next = () => {
-   setCurrentDate(addDays(currentDate, 1));
+    setCurrentDate(addDays(currentDate, 1));
+    setCurrentMonth(addDays(currentDate, 1)); // 🌟 อย่าลืมอัปเดต currentMonth ด้วยนะ!
   };
 
   const prev = () => {
@@ -49,9 +51,13 @@ export default function Schedule() {
     if (prevDate < today) 
       return
     setCurrentDate(prevDate);
+    setCurrentMonth(prevDate)
   };
 
-  const today = () => setCurrentDate(new Date());
+  const today = () => {
+    setCurrentDate(new Date())
+    setCurrentMonth(new Date()) // 🌟 อย่าลืมอัปเดต currentMonth ด้วยนะ!
+  };
 
   const isPrevDisabled = useMemo(() => {
     const prevDate = subDays(currentDate, 1);
@@ -73,7 +79,7 @@ export default function Schedule() {
   };
 
   const fetchUserBookings = useCallback(async () => {
-    const formattedDate = format(currentDate, 'yyyy-MM-dd');
+    const formattedDate = format(currentDate, 'yyyy-MM');
     try {
       const data = await bookingService.fetchUserBookings(formattedDate);
       const formattedEvents = useMapResponseToEvents(data);
@@ -143,6 +149,8 @@ export default function Schedule() {
           <DesktopSidebar 
             currentDate={currentDate} 
             setCurrentDate={setCurrentDate} 
+            currentMonth={currentMonth}
+            setCurrentMonth={setCurrentMonth}
             events={filteredEvents} // 🌟 ส่ง filteredEvents ให้การ์ด Total นับเลขได้ถูกต้อง
             selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไป
             setSelectedRooms={setSelectedRooms} // 🌟 ส่งฟังก์ชันแก้ไข State ลงไป
@@ -154,8 +162,8 @@ export default function Schedule() {
         isAddModalOpen={isAddModalOpen} 
         setIsAddModalOpen={setIsAddModalOpen} 
         typeOperate={typeOperate} 
-        setCurrentDate={setCurrentDate}
         currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
         selectedEvent={selectedEvent} 
         onSuccess={fetchUserBookings} 
       />
@@ -184,6 +192,8 @@ export default function Schedule() {
               <DesktopSidebar 
                 currentDate={currentDate} 
                 setCurrentDate={setCurrentDate} 
+                currentMonth={currentMonth}
+                setCurrentMonth={setCurrentMonth}
                 events={filteredEvents} 
                 className="flex xs:flex-row flex-col w-full border-none space-y-6 lg:px-60 md:px-40 gap-5"
                 selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไปใน Mobile ด้วย

@@ -7,25 +7,20 @@ import { useShallow } from "zustand/shallow";
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Card } from "@/components/ui/card";
-import { BookingEvent } from "@/utils/interface/interface";
+import { DesktopSidebarProps } from "@/utils/interface/interface";
 import { cn } from "@/lib/utils";
 
 // 🌟 1. เพิ่ม selectedRooms และ setSelectedRooms เข้ามาใน Type ของ Props
 export default function DesktopSidebar({
   currentDate, 
   setCurrentDate, 
+  currentMonth,
+  setCurrentMonth,
   events, 
   className,
   selectedRooms,
   setSelectedRooms 
-}: {
-  currentDate: Date,
-  setCurrentDate: (date: Date) => void 
-  events: BookingEvent[] | undefined
-  className?: string
-  selectedRooms: number[]
-  setSelectedRooms: React.Dispatch<React.SetStateAction<number[]>>
-}) {
+}: DesktopSidebarProps) {
   const { rawRoom } = useRoomStore(
       useShallow(((state) => ({
         rawRoom: state.rooms
@@ -68,6 +63,8 @@ export default function DesktopSidebar({
               setCurrentDate(d);
             }
           }} 
+          month={currentMonth}
+          onMonthChange={setCurrentMonth}
           className="dark:bg-sidebar rounded-md p-3" 
           locale={enUS} disabled={(day) => { const today = new Date(); today.setHours(0, 0, 0, 0); return day < today; }}
           required
