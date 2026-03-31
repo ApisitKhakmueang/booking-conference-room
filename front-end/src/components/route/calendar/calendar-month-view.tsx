@@ -100,9 +100,9 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
   }, [])
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-transparent rounded-b-lg">
       {isSyncing && (
-        <div className="absolute top-2 right-4 z-10 text-xs text-blue-500 flex items-center gap-1 bg-white/80 dark:bg-black/80 px-2 py-1 rounded-full shadow">
+        <div className="absolute top-2 right-4 z-10 text-xs text-dark-purple flex items-center gap-1 bg-white/90 dark:bg-black/80 px-3 py-1.5 rounded-full shadow-md border border-gray-100 dark:border-white/10">
           <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -111,27 +111,27 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
         </div>
       )}
 
-       {/* Week Header */}
-       <div className="grid grid-cols-7 border-b dark:border-sidebar border-white">
+       {/* 🌟 1. Week Header: เปลี่ยนพื้นหลังเป็นสีเทาอ่อนสว่างๆ ตัวหนังสือสีเทาเข้ม */}
+       <div className="grid grid-cols-7 border-b border-gray-200 dark:border-sidebar bg-gray-50 dark:bg-sidebar/70">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-          <div key={d} className="py-2 text-center text-sm dark:text-gray-400 text-white border-r dark:border-sidebar dark:bg-sidebar/70 bg-light-hover/80 last:border-0">{d}</div>
+          <div key={d} className="py-2.5 text-center text-sm font-semibold text-light-secondary dark:text-gray-400 border-r border-gray-200 dark:border-sidebar last:border-0">
+            {d}
+          </div>
         ))}
       </div>
+
       {/* Grid */}
       <div className={`grid grid-cols-7 flex-1 auto-rows-fr transition-opacity duration-300 ${isSyncing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
         {days.map((day) => {
            const isToday = isSameDay(day, new Date());
            const dateKey = format(day, 'yyyy-MM-dd');
            
-           // 1. ดึงข้อมูลวันหยุดและการจองของวันนี้ออกมา
            const todaysHolidays = groupedHolidays?.get(dateKey) || [];
            const todaysEvents = groupedEvents?.get(dateKey) || [];
            
-           // 2. จับมารวมกัน (เอากลุ่มวันหยุดขึ้นก่อน) แล้วนับจำนวนทั้งหมด
            const allItems = [...todaysHolidays, ...todaysEvents];
            const totalItems = allItems.length;
 
-           // 3. หั่นเอามาแค่ 3 อันแรกเพื่อแสดงผล
            const MAX_VISIBLE = 2;
            const visibleItems = allItems.slice(0, MAX_VISIBLE);
            const hiddenCount = totalItems - MAX_VISIBLE;
@@ -139,27 +139,32 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
            return (
             <div 
               key={day.toString()} 
-              className={`border-b dark:border-hover border-light-hover p-2 min-h-25 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5
-                ${day.getDay() !== 6 ? 'border-r' : ''}
+              // 🌟 2. Grid Cell: ใช้เส้นขอบสีเทาอ่อน (gray-200) แทนสีม่วง และปรับ hover ให้ซอฟต์ลง
+              className={`border-b border-gray-200 dark:border-hover p-2 min-h-25 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors
+                ${day.getDay() !== 6 ? 'border-r border-gray-200 dark:border-hover' : ''}
                 ${!isSameMonth(day, currentDate) 
-                  ? 'dark:bg-[#181818] bg-light-sidebar text-gray-600' 
-                  : 'dark:text-white text-violet-900'}`}
+                  ? 'bg-gray-50/50 dark:bg-[#181818] text-gray-400 dark:text-gray-600' // วันที่อยู่นอกเดือน
+                  : 'text-gray-800 dark:text-white'}`} // วันที่อยู่ในเดือน
               onClick={() => handleClickDay(day)}
               >
-              <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm mb-1 ${isToday ? 'bg-blue-600 dark:bg-dark-purple text-white' : ''}`}>
-                {format(day, 'd')}
+              
+              {/* 🌟 3. Today Indicator: เปลี่ยนสีน้ำเงินเป็นสีม่วง dark-purple ให้เข้าธีม */}
+              <div className="flex justify-end mb-1">
+                <div className={`w-7 h-7 flex items-center justify-center rounded-full text-sm font-medium
+                  ${isToday ? 'bg-dark-purple text-white shadow-md dark:shadow-none' : ''}`}>
+                  {format(day, 'd')}
+                </div>
               </div>
               
-              {/* 🌟 แสดงเฉพาะ Item ที่ถูกหั่นมาแล้ว (สูงสุด 3 อัน) */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {visibleItems.map((item: any, index: number) => {
                   
-                  // เช็กว่านี่คือ Holiday หรือ BookingEventResponse (Holiday จะมี name, Booking จะมี title)
                   const isHoliday = 'name' in item;
                   
                   if (isHoliday) {
                     return (
-                      <div key={`hol-${item.id || index}`} className="text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 dark:border-green-500 bg-green-200 border-green-300 text-green-900 dark:text-green-100 shadow-sm">
+                      // 🌟 4. Holiday Chip: สีเขียวพาสเทล
+                      <div key={`hol-${item.id || index}`} className="text-[11px] px-2 py-0.5 rounded border-l-2 truncate dark:bg-emerald-900/40 dark:border-emerald-500 bg-emerald-100 border-emerald-300 text-emerald-800 dark:text-emerald-100 font-medium">
                         {item.name}
                       </div>
                     )
@@ -170,10 +175,12 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                       <div 
                         key={`evt-${item.id || index}`} 
                         className={cn(
-                          "text-xs px-1.5 py-0.5 rounded border-l-2 truncate shadow-sm",
+                          "text-[11px] px-2 py-0.5 rounded border-l-2 truncate font-medium",
                           isMine
-                            ? "dark:bg-blue-900/60 dark:border-blue-500 bg-blue-200 border-blue-300 text-blue-900 dark:text-blue-100" // สีน้ำเงิน
-                            : "dark:bg-orange-900/60 dark:border-orange-500 bg-orange-200 border-orange-300 text-orange-900 dark:text-orange-100" // สีส้ม
+                            // 🌟 5. My Booking: ใช้สีม่วงของแบรนด์ (แทนสีน้ำเงินเดิม)
+                            ? "dark:bg-purple-900/40 dark:border-purple-500 bg-purple-100 border-purple-300 text-purple-800 dark:text-purple-100" 
+                            // 🌟 6. Other Booking: ใช้สีส้มพาสเทลให้ดูไม่ก้าวร้าว
+                            : "dark:bg-orange-900/40 dark:border-orange-500 bg-orange-100 border-orange-300 text-orange-800 dark:text-orange-100" 
                         )}
                       >
                         {item.title}
@@ -182,10 +189,9 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
                   }
                 })}
 
-                {/* 🌟 ถ้ามีมากกว่า 3 อัน ให้แสดงปุ่ม +X More */}
                 {hiddenCount > 0 && (
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 pl-1">
-                    ... +{hiddenCount} more
+                  <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 pl-1 mt-1">
+                    +{hiddenCount} more
                   </div>
                 )}
               </div>

@@ -29,9 +29,9 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   );
 
   return (
-    <div className="flex h-full overflow-hidden flex-col relative">
+    <div className="flex h-full overflow-hidden flex-col relative bg-white dark:bg-transparent rounded-b-lg">
       {isSyncing && (
-        <div className="absolute top-2 right-4 z-10 text-xs text-blue-500 flex items-center gap-1 bg-white/80 dark:bg-black/80 px-2 py-1 rounded-full shadow">
+        <div className="absolute top-2 right-4 z-10 text-xs text-dark-purple flex items-center gap-1 bg-white/90 dark:bg-black/80 px-3 py-1.5 rounded-full shadow-md border border-gray-100 dark:border-white/10">
           <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -40,8 +40,8 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
         </div>
       )}
 
-      {/* Header (แสดงวันที่ด้านบน) */}
-      <div className={`grid border-b dark:border-sidebar dark:bg-sidebar bg-light-hover transition-opacity duration-300 
+      {/* 🌟 1. Header: เปลี่ยนพื้นหลังเป็นเทาอ่อนสว่างๆ ขอบสีเทา */}
+      <div className={`grid border-b border-gray-200 dark:border-sidebar bg-gray-50 dark:bg-sidebar/70 transition-opacity duration-300 
         ${view === 'day' ? 'grid-cols-1 pl-0' : 'grid-cols-7 pl-16'}
         ${isSyncing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
         {days.map(day => {
@@ -49,16 +49,20 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
           return (
             <div 
              key={day.toString()}
-             className={`flex items-center border-r dark:border-sidebar border-white last:border-0 ${view === 'day' ? 'flex-row' : 'flex-col'}`}>
-              <div className={`py-3 text-center shrink-0 w-16 ${isSameDay(day, new Date()) ? 'dark:text-dark-purple text-violet-900' : 'dark:text-gray-400'}`}>
-                <div className="text-xs uppercase font-bold">{format(day, 'EEE')}</div>
-                <div className={`text-xl font-light ${isSameDay(day, new Date()) ? 'dark:bg-dark-purple/20 bg-violet-900/20 font-semibold inline-block px-2 rounded-full' : ''}`}>
+             className={`flex items-center border-r border-gray-200 dark:border-sidebar last:border-0 ${view === 'day' ? 'flex-row' : 'flex-col'}`}>
+              
+              {/* 🌟 2. ตัวหนังสือวันที่: ปรับสีและรูปแบบป้ายบอกวันปัจจุบัน (Today) */}
+              <div className={`py-3 text-center shrink-0 w-16 ${isSameDay(day, new Date()) ? 'text-dark-purple dark:text-white' : 'text-light-secondary dark:text-gray-400'}`}>
+                <div className="text-[11px] uppercase font-bold tracking-wider">{format(day, 'EEE')}</div>
+                <div className={`text-xl font-light mt-0.5 ${isSameDay(day, new Date()) ? 'bg-dark-purple text-white shadow-md dark:shadow-none font-semibold inline-block w-8 h-8 leading-8 rounded-full' : 'inline-block w-8 h-8 leading-8'}`}>
                     {format(day, 'd')}
                 </div>
               </div>
-              <div className="py-3 text-center border-r dark:border-sidebar last:border-0 dark:text-gray-400 w-full">
+              
+              <div className="py-2 text-center border-gray-200 dark:border-sidebar last:border-0 w-full flex flex-col gap-1 items-center justify-center">
                 {holidays?.map(evt => (
-                  <div key={evt.id} className={`text-xs px-1.5 py-0.5 rounded border-l-2 truncate dark:bg-green-900/60 bg-green-500 border-green-500 text-orange-100 mx-1`}>
+                  // 🌟 3. Holiday Chip: สีเขียวพาสเทล ให้เข้ากับ MonthView
+                  <div key={evt.id} className="text-[10px] font-medium px-2 py-0.5 rounded border-l-2 truncate w-11/12 bg-emerald-100 border-emerald-300 text-emerald-800 dark:bg-emerald-900/40 dark:border-emerald-500 dark:text-emerald-100 shadow-sm">
                     {evt.name}
                   </div>
                 ))}
@@ -72,31 +76,30 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
       <div className="flex-1 overflow-y-auto no-scrollbar relative">
         <div className="flex relative min-h-360"> {/* 1440px = 60px per hour height */}
           
-          {/* Timeline Labels (แกนซ้าย) */}
-          <div className="w-16 shrink-0 border-r dark:border-sidebar dark:bg-sidebar bg-light-hover z-10 sticky left-0">
+          {/* 🌟 4. Timeline Labels (แกนซ้าย): พื้นหลังสีขาว/เทาอ่อนให้สะอาดตา */}
+          <div className="w-16 shrink-0 border-r border-gray-200 dark:border-sidebar bg-white dark:bg-sidebar z-10 sticky left-0">
             {hours.map(h => (
-              <div key={h} className="h-15 text-xs dark:text-gray-500 text-right pr-2 pt-2 relative -top-2">
+              <div key={h} className="h-15 text-[11px] font-medium text-light-secondary dark:text-gray-500 text-right pr-2 pt-2 relative -top-2">
                 {h}:00
               </div>
             ))}
           </div>
 
           {/* Grid Columns */}
-          <div className={`flex-1 grid ${view === 'day' ? 'grid-cols-1' : 'grid-cols-7'} divide-x dark:divide-sidebar divide-light-hover`}>
+          <div className={`flex-1 grid ${view === 'day' ? 'grid-cols-1' : 'grid-cols-7'} divide-x divide-gray-200 dark:divide-sidebar bg-white dark:bg-transparent`}>
             {days.map(day => (
               <div key={day.toString()} className="relative group">
-                {/* เส้น Grid แนวนอน (Hour lines) */}
+                {/* 🌟 5. เส้น Grid แนวนอน: ปรับให้สีอ่อนลงบางๆ ไม่แย่งซีน */}
                 {hours.map(h => (
-                  <div key={h} className="h-15 border-b dark:border-sidebar/30 border-light-hover/30 w-full box-border"></div>
+                  <div key={h} className="h-15 border-b border-gray-100 dark:border-sidebar/40 w-full box-border"></div>
                 ))}
 
-                {/* --- Render Events (Absolute Positioning) --- */}
                 {/* --- Render Events (Absolute Positioning) --- */}
                 {bookings?.filter(e => isSameDay(e.startTime, day)).map(evt => {
                   const startMin = differenceInMinutes(evt.startTime, startOfDay(evt.startTime));
                   const duration = differenceInMinutes(evt.endTime, evt.startTime);
                   
-                  // 🌟 เช็กว่าเป็นของ User ปัจจุบันหรือไม่
+                  // เช็กว่าเป็นของ User ปัจจุบันหรือไม่
                   const isMine = currentUser && evt.User?.id && String(evt.User.id) === String(currentUser.id)
 
                   return (
@@ -110,11 +113,11 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                       }}
                     >
                       <div className={cn(
-                        "absolute top-0 left-0 right-0 h-full min-h-7 overflow-hidden group-hover:min-h-fit group-focus:min-h-fit group-hover:shadow-xl group-focus:shadow-xl rounded px-2 py-1 text-xs border-l-[3px] transition-all duration-200 flex flex-col",
-                        // 🌟 เงื่อนไขการสลับสี
+                        "absolute top-0 left-0 right-0 h-full min-h-7 overflow-hidden group-hover:min-h-fit group-focus:min-h-fit group-hover:shadow-xl group-focus:shadow-xl rounded px-2 py-1 text-xs border-l-[3px] transition-all duration-200 flex flex-col shadow-sm",
+                        // 🌟 6. สีของการจอง: ใช้ Pastel Purple (เรา) และ Pastel Orange (คนอื่น)
                         isMine 
-                          ? "dark:bg-blue-900/95 bg-blue-600 border-blue-400 text-blue-50" // สีน้ำเงินสำหรับของฉัน
-                          : "dark:bg-orange-900/95 bg-orange-500 border-orange-500 text-orange-100" // สีส้มสำหรับของคนอื่น
+                          ? "bg-purple-100 border-purple-400 text-purple-900 hover:bg-purple-200 dark:bg-purple-900/90 dark:border-purple-500 dark:text-purple-50 dark:hover:bg-purple-800/95" 
+                          : "bg-orange-100 border-orange-400 text-orange-900 hover:bg-orange-200 dark:bg-orange-900/90 dark:border-orange-500 dark:text-orange-50 dark:hover:bg-orange-800/95" 
                       )}>
                         
                         <div className="font-semibold truncate">
@@ -123,7 +126,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                         
                         <div className="opacity-80 text-[10px] leading-tight mt-0.5 flex flex-col gap-0.5">
                           <div className="truncate">By: {isMine ? "You" : evt.User?.fullName || "Unknown"}</div>
-                          <div className="truncate whitespace-nowrap">
+                          <div className="truncate whitespace-nowrap font-medium">
                             {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
                           </div>
                         </div>
@@ -137,9 +140,9 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                 {isSameDay(day, new Date()) && (
                   <div 
                     className="absolute w-full border-t-2 border-red-500 z-10 pointer-events-none"
-                    style={{ top: `${(differenceInMinutes(new Date(), startOfDay(new Date())) / 60) * 60}px` }}
+                    style={{ top: `${differenceInMinutes(new Date(), startOfDay(new Date()))}px` }}
                   >
-                    <div className="w-2 h-2 bg-red-500 rounded-full absolute -left-1 -top-1"></div>
+                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full absolute -left-1.5 -top-[5px] shadow-sm"></div>
                   </div>
                 )}
               </div>
@@ -148,8 +151,9 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
         </div>
       </div>
 
+      {/* 🌟 7. FAB (Add Button): เปลี่ยนสีฟ้าหลงฝูงเป็นสีม่วง dark-purple */}
       <Button 
-        className='absolute z-60 bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all'
+        className='absolute z-60 bg-dark-purple hover:bg-light-hover dark:bg-dark-purple/90 dark:hover:bg-dark-purple bottom-7 right-7 w-14 h-14 rounded-full shadow-xl transition-all hover:scale-105 active:scale-95'
         onClick={() => setIsAddModalOpen(true)}>
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>

@@ -199,138 +199,128 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       onSubmit={(e) => {
         handleSubmit(e)
       }} 
-      className="relative bg-light-purple dark:bg-card rounded-lg shadow-xl w-full max-w-md transform transition-all">
+      // 🌟 1. พื้นหลังฟอร์มใช้สีขาวล้วนในโหมดสว่าง (ลบ bg-light-purple ออก)
+      className="relative bg-white dark:bg-card rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-100 dark:border-white/10 overflow-hidden">
       
-      {/* Modal Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-none dark:border-sidebar bg-dark-purple dark:bg-sidebar/80">
-        <h2 className="text-xl font-bold text-white">
+      {/* 🌟 2. Modal Header: คลีนๆ พื้นขาว ขอบล่างเทา ตัวหนังสือสีเทาเข้ม */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-sidebar bg-light-purple dark:bg-sidebar/80">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
           {typeOperate === 'add' ? 'New Booking' : 'Update Booking'}
         </h2>
         <button 
+          type="button"
           onClick={() => setIsAddModalOpen(false)}
-          className="text-white dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-300 transition-colors"
+          className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-white/5 p-1"
         >
-          {/* ไอคอนกากบาท (X) หรือใช้คำว่า Close ก็ได้ */}
-          <svg className="w-6 h-6 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          <svg className="w-5 h-5 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
       </div>
 
       {/* Modal Body (ส่วนฟอร์ม) */}
       <div className="px-6 py-6 space-y-4 overflow-y-auto max-h-[70vh] no-scrollbar">
-          {/* ใส่ฟอร์มของคุณตรงนี้ เช่น Input ชื่อ, เลือกเวลา */}
-          {/* <p className="text-gray-500 dark:text-gray-400 text-sm">
-            ฟอร์มกรอกข้อมูลการจองจะมาอยู่ตรงนี้...
-          </p> */}
           
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-4">
+            {/* Title Input */}
+            <div className="flex flex-col gap-1.5">
               <label 
                 htmlFor="title"
-                className="block font-medium text-gray-700 dark:text-gray-300">Title</label>
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Title</label>
               <Input
                   id='title'
                   type="text"
                   ref={titleRef} 
-                  className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white text-gray-700 placeholder:dark:text-gray-700/60" 
+                  // 🌟 3. Input: เพิ่ม Focus state สีม่วง
+                  className="w-full px-3 py-2 border border-gray-200 focus:border-dark-purple focus:ring-1 focus:ring-dark-purple outline-none dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-sm" 
                   defaultValue={formData.title}
                   placeholder="Meeting with..."
                 />
             </div>
 
-            <div className="flex flex-col gap-1">
+            {/* Date Input */}
+            <div className="flex flex-col gap-1.5">
               <label 
-                className="block font-medium text-gray-700 dark:text-gray-300">Date</label>
-              {/* <Input 
-                type="text"
-                className="flex justify-between items-center w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light text-gray-700"
-                value={format(formData.date || new Date(), 'd MMMM yyyy')}
-                readOnly
-                // onClick={() => setIsOpenCalendar(true)}
-                >
-              </Input> */}
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Date</label>
               <Input 
-                // 🌟 1. เปลี่ยนจาก text เป็น date
                 type="date" 
-                className="w-full px-3 py-1.5 border dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-base font-light text-gray-700 [&::-webkit-calendar-picker-indicator]:hidden"
-                
-                // 🌟 2. HTML5 Date Input บังคับให้ value ต้องเป็นฟอร์แมต 'yyyy-MM-dd' เท่านั้น
+                className="w-full px-3 py-2 border border-gray-200 focus:border-dark-purple focus:ring-1 focus:ring-dark-purple outline-none dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base font-light text-gray-800 shadow-sm [&::-webkit-calendar-picker-indicator]:hidden"
                 value={format(formData.date || new Date(), 'yyyy-MM-dd')}
-                
-                // 🌟 3. รับค่าจากการพิมพ์ หรือการเลือก แล้วอัปเดตกลับไปที่ State
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  // เช็คว่าผู้ใช้ไม่ได้ลบจนว่างเปล่า
                   if (inputValue) {
                     const newDate = new Date(inputValue);
-                    // อัปเดต State (ซึ่งจะไปทำให้ปฏิทินด้านล่างเปลี่ยนตามด้วย!)
                     setFormData(prev => ({ ...prev, date: newDate }));
                   }
                 }}
-
-                // 🌟 4. (แถม) ล็อคไม่ให้พิมพ์/เลือก วันที่ในอดีตได้จากตัว Input เลย
                 min={format(new Date(), 'yyyy-MM-dd')} 
               />
             </div>
 
-            <div className="flex sm:flex-row flex-col items-stretch gap-2">
+            <div className="flex sm:flex-row flex-col items-stretch gap-4">
+              {/* Calendar */}
               <Calendar
                 mode="single"
                 selected={formData.date}
                 onSelect={(d) => setFormData(prev => ({ ...prev, date: d as Date }))}
                 month={calendarMonth} 
                 onMonthChange={setCurrentMonth}
-                className="dark:bg-sidebar rounded-md p-3"
+                // 🌟 4. Calendar: กรอบเทาอ่อน
+                className="dark:bg-sidebar bg-white border border-gray-200 dark:border-white/10 rounded-lg p-3 shadow-sm"
                 locale={enUS}
                 disabled={(day) => {
                   const today = new Date();
-                  today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาให้เป็นเที่ยงคืน จะได้เทียบแค่วันที่
-                  return day < today; // ถ้าวันนั้นน้อยกว่าวันนี้ ให้ปิดการใช้งาน
+                  today.setHours(0, 0, 0, 0); 
+                  return day < today;
                 }}
                 required
                 />
 
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-3 flex-1">
+                {/* Start Time */}
+                <div className="flex flex-col gap-1.5">
                   <label 
                     htmlFor="startTime"
-                    className="block font-medium text-gray-700 dark:text-gray-300">Start Time</label>
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Start Time</label>
                   <TimeSelect 
                     value={formData.startTime}
                     onValueChange={(val) => setFormData(prev => ({ ...prev, startTime: val }))}
-                    className="text-base border border-gray-300"
+                    className="text-base border border-gray-200 shadow-sm rounded-lg"
                   />
                 </div>
 
-                <div className="flex flex-col gap-1">
+                {/* End Time */}
+                <div className="flex flex-col gap-1.5">
                   <label 
                     htmlFor="endTime"
-                    className="block font-medium text-gray-700 dark:text-gray-300">End Time</label>
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300">End Time</label>
                   <TimeSelect 
                     value={formData.endTime}
                     onValueChange={(val) =>  setFormData(prev => ({ ...prev, endTime: val }))}
-                    className="text-base border border-gray-300"
+                    className="text-base border border-gray-200 shadow-sm rounded-lg"
                   />
                 </div>
 
-                <div className="flex flex-col gap-1">
+                {/* Duration */}
+                <div className="flex flex-col gap-1.5">
                   <label 
                     htmlFor="duration"
-                    className="block font-medium text-gray-700 dark:text-gray-300">Duration</label>
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Duration</label>
                   <Input
                       id='duration'
                       type="text" 
-                      className="w-full px-3 py-1.5 dark:border-sidebar rounded-md dark:bg-sidebar/80 dark:text-white text-gray-700" placeholder="Duration..."
-                      value={formData.duration} // ผูกค่า
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-sidebar rounded-lg bg-gray-50 dark:bg-sidebar/80 dark:text-white text-gray-500 shadow-sm outline-none cursor-not-allowed" 
+                      placeholder="Duration..."
+                      value={formData.duration} 
                       readOnly
                     />
                 </div>
 
-                <div className="flex flex-col gap-1">
+                {/* Room */}
+                <div className="flex flex-col gap-1.5">
                   <label 
                     htmlFor="room"
-                    className="block font-medium text-gray-700 dark:text-gray-300">Room</label>
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Room</label>
                   <RoomSelector 
-                    className="px-3 py-1.5 dark:border-sidebar rounded-md dark:bg-sidebar dark:text-white text-base border border-gray-300"
+                    className="px-3 py-2 dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base border border-gray-200 shadow-sm focus:ring-1 focus:ring-dark-purple"
                     selectedRoom={selectedRoom} 
                     setSelectedRoom={setSelectedRoom} 
                     rooms={rooms}  />
@@ -341,19 +331,24 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           
       </div>
 
-      {/* Modal Footer (ปุ่มกดยืนยัน) */}
-      <div className="px-6 py-4 flex justify-end gap-3 border-t border-none dark:border-sidebar bg-light-purple dark:bg-sidebar/50">
+      {/* 🌟 5. Modal Footer: พื้นหลังสีเทาอ่อน แยกโซนกับฟอร์มชัดเจน */}
+      <div className="px-6 py-4 flex justify-end gap-3 border-t border-gray-100 dark:border-sidebar bg-gray-50 dark:bg-sidebar/50">
         <Button 
           type="button"
           onClick={() => {
             setIsAddModalOpen(false)
             setFormData(defaultFormData)
           }}
-          variant="transparent"
+          className="px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 dark:text-gray-300 dark:bg-transparent dark:border-sidebar dark:hover:bg-white/5 rounded-lg transition-colors shadow-sm"
           >
           Cancel
         </Button>
-        <Button type="submit" variant='dark-purple' className='rounded-md border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow'>
+
+        {/* 🌟 6. ปุ่ม Confirm: เปลี่ยนจากสีน้ำเงินเป็นสีม่วง dark-purple แบรนด์ของคุณ */}
+        <Button 
+          type="submit" 
+          className='px-5 py-2 text-sm font-semibold rounded-lg bg-dark-purple hover:bg-light-hover/90 dark:bg-dark-purple/90 dark:hover:bg-dark-purple text-white shadow-md transition-all'
+        >
           {typeOperate === 'add' ? 'Confirm Booking' : 'Save Changes'}
         </Button>
       </div>
