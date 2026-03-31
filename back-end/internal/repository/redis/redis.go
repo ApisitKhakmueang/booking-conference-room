@@ -70,6 +70,7 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 
 	r.DeleteBookingToCache(ctx, roomNumber)
 	r.DeleteUserToCache(ctx, booking.UserID)
+	r.DeleteHistoryToCache(ctx, booking.UserID)
 	
 	return deletedBooking, nil
 }
@@ -113,6 +114,31 @@ func (r *redisRepository) GetUserBooking(ctx context.Context, userID uuid.UUID, 
 	}
 
 	bookings, err := r.postgres.GetUserBookingDB(ctx, userID, date)
+	if err != nil {
+		return nil, err
+	}
+
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
+	}
+
+	return bookings, nil
+}
+
+func (r *redisRepository) GetUserHistory(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
+	cacheKey := fmt.Sprintf("history:user:%s:date:%s", userID, date)
+
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var bookings []domain.Booking
+		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
+			return nil, err
+		}
+
+		return bookings, nil
+	}
+
+	bookings, err := r.postgres.GetUserHistoryDB(ctx, userID, date)
 	if err != nil {
 		return nil, err
 	}
@@ -197,6 +223,7 @@ func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uui
 
 	r.DeleteBookingToCache(ctx, roomNumber)
 	r.DeleteUserToCache(ctx, updateBooking.UserID)
+	r.DeleteHistoryToCache(ctx, updateBooking.UserID)
 
 	return updateBooking, roomNumber, nil
 }
@@ -282,6 +309,24 @@ func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber u
 
 func (r *redisRepository) DeleteUserToCache(ctx context.Context, userID uuid.UUID) {
 	prefix := fmt.Sprintf("booking:user:%s", userID)
+	
+	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
+	go func() {
+		// 🚨 ข้อควรระวัง: ต้องสร้าง Context ใหม่ (context.Background())
+		// เพราะถ้าใช้ ctx เดิม พอ HTTP Request จบ Fiber จะทำลาย ctx ตัวนั้นทิ้ง
+		// แล้วทำให้ Redis Scan ตรงนี้พัง (Context Canceled)
+		bgCtx := context.Background() 
+
+		err := r.ClearCacheByPrefix(bgCtx, prefix)
+		if err != nil {
+			// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+			log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+		}
+	}()
+} 
+
+func (r *redisRepository) DeleteHistoryToCache(ctx context.Context, userID uuid.UUID) {
+	prefix := fmt.Sprintf("history:user:%s", userID)
 	
 	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
 	go func() {

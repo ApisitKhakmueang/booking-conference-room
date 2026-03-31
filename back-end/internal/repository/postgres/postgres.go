@@ -151,6 +151,39 @@ func (p *postgresRepository) GetUserBookingDB(ctx context.Context, userID uuid.U
 	return bookings, nil
 }
 
+func (p *postgresRepository) GetUserHistoryDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
+	layout := "2006-01"
+	startTime, err := time.Parse(layout, date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %v", err)
+	}
+
+	// 2. หาจุดสิ้นสุดของวัน (คือวินาทีแรกของวันถัดไป)
+	endTime := startTime.AddDate(0, 1, 0)
+
+	var bookings []domain.Booking
+
+	result := p.db.
+		WithContext(ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name, room_number") 
+    }).
+		Preload("User", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, email, full_name") // ต้องมี id ของ User ด้วย
+    }).
+		Where("start_time >= ? AND start_time < ? AND user_id = ? AND status != 'confirm'", 
+				startTime, endTime, userID).
+			Order("start_time asc").
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
 func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Room, error) {
 	var room []domain.Room
 

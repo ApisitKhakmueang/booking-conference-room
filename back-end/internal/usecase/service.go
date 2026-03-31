@@ -264,6 +264,15 @@ func (u *bookingUsecase) GetUserBooking(ctx context.Context,userID uuid.UUID, da
 	return bookings, nil
 }
 
+func (u *bookingUsecase) GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
+	bookings, err := u.redis.GetUserHistory(ctx, userID, date)
+	if err != nil {
+		return nil, err
+	}
+
+	return bookings, nil
+}
+
 func (u *bookingUsecase) GetRoomDetails(ctx context.Context) ([]domain.Room, error) {
 	rooms, err := u.redis.GetRoomDetails(ctx)
 	if err != nil {

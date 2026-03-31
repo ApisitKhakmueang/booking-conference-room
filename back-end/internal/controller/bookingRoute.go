@@ -10,10 +10,11 @@ import (
 
 func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	// กำหนด endpoints
-	router.Post("/:id", handler.CreateBooking)
+	router.Post("/:userID", handler.CreateBooking)
 	router.Put("/:bookingID", handler.UpdateBooking)
 	router.Delete("/:bookingID", handler.DeleteBooking)
 	// router.Get("/:room", websocket.New(ws.GetBooking))
 	// router.Get("/:room", handler.GetBooking)
-	router.Get("/user/:id", handler.GetUserBooking)
+	router.Get("/user/:userID", handler.GetUserBooking)
+	router.Get("/history/:userID", handler.GetUserHistory)
 }
