@@ -1,6 +1,12 @@
 import { ArrangeRoom, BookingEvent, BookingStatus } from "@/utils/interface/interface";
 import { BookingEventResponse } from "@/utils/interface/response";
 
+const statusMap: Record<string, string> = {
+  'confirm': 'Confirmed',
+  'cancelled': 'Cancelled',
+  'complete': 'Completed', // หรือจะใช้คำว่า 'Complete' เฉยๆ ก็ได้ตาม UI
+};
+
 export const useMapResponseToEvents = (responses: BookingEventResponse[]): BookingEvent[] => {
   return responses.map((resp) => {
     // 1. แปลงเวลา (ดึงเฉพาะ HH:mm ตามเวลา Local ของเครื่องผู้ใช้)
@@ -24,7 +30,7 @@ export const useMapResponseToEvents = (responses: BookingEventResponse[]): Booki
 
     // 3. ปรับ Status ให้ตัวแรกเป็นพิมพ์ใหญ่ (Capitalize)
     // หรือถ้ามีหลายสถานะ สามารถใช้ Switch/Case หรือ Object Mapping ได้ครับ
-    const formattedStatus = resp.status + "ed"
+    const formattedStatus = statusMap[resp.status] || 'Pending';
 
     let mappedRoom: ArrangeRoom | undefined = undefined;
 

@@ -130,8 +130,8 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
         {/* แถบด้านล่าง: Status และ Duration */}
         <div className="mt-4 flex xs:flex-row flex-col xs:items-center xs:gap-4 gap-1 text-xs">
           
-          <span className="flex items-center gap-1.5 text-success dark:text-purple-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-success dark:bg-purple-400 shadow-[0_0_8px_rgba(65,205,139,0.4)] dark:shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span> 
+          <span className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 font-medium">
+            <span className={`w-2 h-2 rounded-full bg-purple-600 dark:bg-purple-400 shadow-[0_0_8px_rgba(147,51,234,0.4)] dark:shadow-[0_0_8px_rgba(192,132,252,0.6)]`}></span> 
             <span className="capitalize">{event.status}</span>
           </span>
           

@@ -10,6 +10,11 @@ export const bookingService = {
     return response.data;
   },
 
+  fetchUserHistory: async (date: string) => {
+    const response = await axios.get(`${API_URL}/booking/history/${USER_ID}?date=${date}`);
+    return response.data;
+  },
+
   fetchHolidays: async (startYear:string, endYear: string) => {
     const response = await axios.get(`${API_URL}/holiday?startDate=${startYear}&endDate=${endYear}`)
     return response.data
