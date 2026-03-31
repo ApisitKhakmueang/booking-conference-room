@@ -1,14 +1,12 @@
-import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useMemo } from "react"; // 🌟 เอา useState ออก
-import { enUS } from 'date-fns/locale';
+import { useMemo } from "react"; // 🌟 เอา useState ออก
 import { useRoomStore } from "@/stores/room.store";
 import { useShallow } from "zustand/shallow";
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Card } from "@/components/ui/card";
 import { DesktopSidebarHistoryProps } from "@/utils/interface/interface";
 import { cn } from "@/lib/utils";
+import OverviewCard from "./overview-card";
 
 // 🌟 1. เพิ่ม selectedRooms และ setSelectedRooms เข้ามาใน Type ของ Props
 export default function DesktopSidebar({
@@ -79,23 +77,7 @@ export default function DesktopSidebar({
         </div>
       </div>
 
-      <div className="w-[222px] xl:flex xl:flex-col gap-3 hidden">
-        <Card loading={false} className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0 w-full">
-          <li className='flex flex-col gap-2 p-5'>
-            <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg text-dark-purple dark:text-white/90`}>Completed</h1>
-            <p className="text-5xl font-bold text-center text-dark-purple dark:text-white py-2">{events?.length || 0}</p>
-            <p className="text-end sm:text-xl text-lg text-dark-purple/80 dark:text-white/80 font-medium">Events</p>
-          </li>
-        </Card>
-
-        <Card loading={false} className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0 w-full">
-          <li className='flex flex-col gap-2 p-5'>
-            <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg text-dark-purple dark:text-white/90`}>Cancelled</h1>
-            <p className="text-5xl font-bold text-center text-dark-purple dark:text-white py-2">{events?.length || 0}</p>
-            <p className="text-end sm:text-xl text-lg text-dark-purple/80 dark:text-white/80 font-medium">Events</p>
-          </li>
-        </Card>
-      </div>
+      <OverviewCard events={events} />
 
     </aside>
   );
