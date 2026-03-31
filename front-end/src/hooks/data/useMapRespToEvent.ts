@@ -6,11 +6,6 @@ export const useMapResponseToEvents = (responses: BookingEventResponse[]): Booki
     // 1. แปลงเวลา (ดึงเฉพาะ HH:mm ตามเวลา Local ของเครื่องผู้ใช้)
     const startDate = new Date(resp.startTime);
     const endDate = new Date(resp.endTime);
-    
-    // ตั้งค่า locale 'th-TH' หรือ 'en-GB' เพื่อให้ได้ format แบบ 24 ชั่วโมง (09:00)
-    const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
-    const startTimeStr = startDate.toLocaleTimeString('en-GB', timeOptions);
-    const endTimeStr = endDate.toLocaleTimeString('en-GB', timeOptions);
 
     // 2. คำนวณ Duration (ระยะเวลา)
     const diffMs = endDate.getTime() - startDate.getTime();
@@ -29,9 +24,7 @@ export const useMapResponseToEvents = (responses: BookingEventResponse[]): Booki
 
     // 3. ปรับ Status ให้ตัวแรกเป็นพิมพ์ใหญ่ (Capitalize)
     // หรือถ้ามีหลายสถานะ สามารถใช้ Switch/Case หรือ Object Mapping ได้ครับ
-    const formattedStatus = resp.status === 'confirm' 
-      ? 'Confirmed' 
-      : resp.status.charAt(0).toUpperCase() + resp.status.slice(1);
+    const formattedStatus = resp.status + "ed"
 
     let mappedRoom: ArrangeRoom | undefined = undefined;
 

@@ -14,7 +14,7 @@ export const MOCK_BOOKINGS: BookingEvent[] = [
     date: "2026-03-30T00:00:00Z",
     startTime: "2026-03-30T09:00:00Z", // 09:00 AM
     endTime: "2026-03-30T10:30:00Z",   // 10:30 AM
-    status: "Confirmed",
+    status: "completed",
     duration: "1h 30m",
     room: {
       id: "room-101",
@@ -28,7 +28,7 @@ export const MOCK_BOOKINGS: BookingEvent[] = [
     date: "2026-03-30T00:00:00Z",
     startTime: "2026-03-30T13:00:00Z", // 01:00 PM
     endTime: "2026-03-30T14:00:00Z",   // 02:00 PM
-    status: "Confirmed",
+    status: "cancelled",
     duration: "1h",
     room: {
       id: "room-105",
@@ -42,44 +42,65 @@ export const MOCK_BOOKINGS: BookingEvent[] = [
     date: "2026-03-30T00:00:00Z",
     startTime: "2026-03-30T15:30:00Z", // 03:30 PM
     endTime: "2026-03-30T17:00:00Z",   // 05:00 PM
-    status: "Confirmed",
+    status: "completed",
     duration: "1h 30m",
     room: {
       id: "room-102",
       name: "Room 2",
       roomNumber: 2
     }
+  },
+  {
+    id: "evt-004",
+    title: "Client Presentation",
+    date: "2026-03-30T00:00:00Z",
+    startTime: "2026-03-30T15:30:00Z", // 03:30 PM
+    endTime: "2026-03-30T17:00:00Z",   // 05:00 PM
+    status: "completed",
+    duration: "1h 30m",
+    room: {
+      id: "room-103",
+      name: "Room 3",
+      roomNumber: 3
+    }
   }
 ];
+
+const tabs = ["ALL", "COMPLETED", "CANCELLED"];
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
   const [events, setEvents] = useState<BookingEvent[] | undefined>(MOCK_BOOKINGS);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("ALL");
 
   const filteredEvents = useMemo(() => {
     if (!MOCK_BOOKINGS) return undefined;
     
     return MOCK_BOOKINGS.filter((event) => {
-      // 🌟 1. กรองวันที่: เช็คว่า Event นี้ ตรงกับ currentDate ที่เลือกอยู่ไหม
-      // (ถ้า interface ของคุณเก็บวันที่ไว้ที่ event.date ให้ใช้ event.date แทน event.startTime นะครับ)
+      // 🌟 1. กรองเดือน/ปี (เหมือนเดิม)
       const eventDate = new Date(event.startTime); 
-      console.log("Event Date:", format(eventDate, 'yyyy-MM-dd'));
-      console.log("Current Date:", format(currentDate, 'yyyy-MM-dd'));
-      if (!isSameMonth(eventDate, currentDate)) {
-        return false; // ถ้าคนละวัน ให้เตะทิ้งไปเลย ไม่ต้องแสดง
-      }
+      if (!isSameMonth(eventDate, currentDate)) return false;
 
-      // 🌟 2. กรองห้อง: ถ้ามีการติ๊กเลือกห้องไว้ ค่อยเช็คเงื่อนไข
+      // 🌟 2. กรองห้อง (เหมือนเดิม)
       if (selectedRooms.length > 0) {
         if (event.room?.roomNumber === undefined) return false;
         if (!selectedRooms.includes(event.room.roomNumber)) return false; 
       }
 
-      return true; // ผ่านทุกด่าน (วันตรงกัน + ห้องตรงเงื่อนไข) ให้แสดงผลได้!
+      // 🌟 3. เพิ่มการกรองตาม Tab (เพิ่มใหม่)
+      // ใช้ .toLowerCase() เพื่อให้เปรียบเทียบกับข้อมูลใน Mock ได้โดยไม่มีปัญหาเรื่องตัวพิมพ์ใหญ่
+      if (activeTab !== "ALL") {
+        if (event.status.toLowerCase() !== activeTab.toLowerCase()) {
+          return false;
+        }
+      }
+
+      return true;
     });
-  }, [events, selectedRooms, currentDate]); // 🌟 อย่าลืมเพิ่ม currentDate ลงในก้อน dependency ท้ายสุด
+    // 🌟 อย่าลืมใส่ activeTab ลงใน Dependency Array ด้วยนะครับ
+  }, [events, selectedRooms, currentDate, activeTab]);
 
   const next = () => {
     const nextDate = addMonths(currentDate, 1)
@@ -121,6 +142,27 @@ export default function History() {
             </div>
           </header>
 
+          <div className="flex items-center xs:gap-8 gap-5 border-b border-gray-100 dark:border-white/10 px-4">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`relative py-4 text-sm font-bold tracking-widest transition-all duration-300 cursor-pointer
+                  ${
+                    activeTab === tab
+                      ? "text-purple-400" // สีตอนเลือก (อ้างอิงจากสีม่วงในรูป)
+                      : "hover:text-white" // สีตอนไม่ได้เลือก
+                  }`}
+              >
+                {tab}
+                
+                {activeTab === tab && (
+                  <div className="absolute bottom-0 left-0 h-[3px] w-full bg-purple-400 transition-all duration-300" />
+                )}
+              </button>
+            ))}
+          </div>
+
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex">
             <main className="flex-1 space-y-4 overflow-y-auto py-4 md:py-8 xl:pr-8 no-scrollbar">
@@ -156,7 +198,7 @@ export default function History() {
           <DesktopSidebar 
             currentDate={currentDate} 
             setCurrentDate={setCurrentDate} 
-            events={filteredEvents} // 🌟 ส่ง filteredEvents ให้การ์ด Total นับเลขได้ถูกต้อง
+            events={events} // 🌟 ส่ง filteredEvents ให้การ์ด Total นับเลขได้ถูกต้อง
             selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไป
             setSelectedRooms={setSelectedRooms} // 🌟 ส่งฟังก์ชันแก้ไข State ลงไป
           />

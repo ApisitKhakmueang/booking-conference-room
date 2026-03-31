@@ -101,7 +101,7 @@ export default function DesktopSidebar({
       </div>
 
       <div className="w-full xl:flex hidden">
-        <Card loading={false} className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:dark:bg-card dark:border-transparent dark:text-white duration-0 w-full">
+        <Card loading={false} className="py-0 border bg-light-sidebar border-dark-purple/30 shadow-sm dark:bg-card dark:border-transparent dark:text-white duration-0 w-full">
           <li className='flex flex-col gap-2 p-5'>
             <h1 className={`text-start font-semibold xl:text-2xl sm:text-xl text-lg text-dark-purple dark:text-white/90`}>Total Events</h1>
             <p className="text-5xl font-bold text-center text-dark-purple dark:text-white py-2">{events?.length || 0}</p>

@@ -110,7 +110,7 @@ export interface RoomSelectorProps {
   className?: string;
 }
 
-export type BookingStatus = 'Confirmed' | 'Pending'
+export type BookingStatus = 'confirmed' | 'completed' | 'cancelled';
 
 export interface BookingEvent {
   id: string;

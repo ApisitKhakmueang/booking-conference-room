@@ -10,7 +10,7 @@ export default function CardEvents({ event, setCurrentDate } : EventCardHistoryP
 
   return (
     <div 
-      className="group flex gap-6 md:p-6 p-4 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 cursor-pointer"
+      className="group flex gap-6 md:p-6 p-4 rounded-2xl bg-white border border-gray-100 hover:bg-gray-50 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300"
     >
       
       {/* 🌟 2. โซนเวลาด้านซ้าย */}
