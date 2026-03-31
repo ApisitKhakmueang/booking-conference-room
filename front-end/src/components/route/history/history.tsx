@@ -2,83 +2,27 @@
 
 import { BookingEvent } from "@/utils/interface/interface";
 import { addMonths, format, isSameMonth, subMonths } from "date-fns";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CardEvents, { CardEventsSkeleton } from "./event-card";
 import DesktopSidebar from "./desktop-sidebar";
 import { Button } from "@/components/ui/button";
-
-export const MOCK_BOOKINGS: BookingEvent[] = [
-  {
-    id: "evt-001",
-    title: "Weekly Marketing Sync",
-    date: "2026-03-30T00:00:00Z",
-    startTime: "2026-03-30T09:00:00Z", // 09:00 AM
-    endTime: "2026-03-30T10:30:00Z",   // 10:30 AM
-    status: "completed",
-    duration: "1h 30m",
-    room: {
-      id: "room-101",
-      name: "Room 1",
-      roomNumber: 1
-    }
-  },
-  {
-    id: "evt-002",
-    title: "Project Brainstorming",
-    date: "2026-03-30T00:00:00Z",
-    startTime: "2026-03-30T13:00:00Z", // 01:00 PM
-    endTime: "2026-03-30T14:00:00Z",   // 02:00 PM
-    status: "cancelled",
-    duration: "1h",
-    room: {
-      id: "room-105",
-      name: "Room 5",
-      roomNumber: 5
-    }
-  },
-  {
-    id: "evt-003",
-    title: "Client Presentation",
-    date: "2026-03-30T00:00:00Z",
-    startTime: "2026-03-30T15:30:00Z", // 03:30 PM
-    endTime: "2026-03-30T17:00:00Z",   // 05:00 PM
-    status: "completed",
-    duration: "1h 30m",
-    room: {
-      id: "room-102",
-      name: "Room 2",
-      roomNumber: 2
-    }
-  },
-  {
-    id: "evt-004",
-    title: "Client Presentation",
-    date: "2026-03-30T00:00:00Z",
-    startTime: "2026-03-30T15:30:00Z", // 03:30 PM
-    endTime: "2026-03-30T17:00:00Z",   // 05:00 PM
-    status: "completed",
-    duration: "1h 30m",
-    room: {
-      id: "room-103",
-      name: "Room 3",
-      roomNumber: 3
-    }
-  }
-];
+import MonthYearPicker from "./month-year-picker";
+import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
+import { bookingService } from "@/service/booking.service";
 
 const tabs = ["ALL", "COMPLETED", "CANCELLED"];
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
-  const [events, setEvents] = useState<BookingEvent[] | undefined>(MOCK_BOOKINGS);
+  const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
 
   const filteredEvents = useMemo(() => {
-    if (!MOCK_BOOKINGS) return undefined;
+    if (!events) return undefined;
     
-    return MOCK_BOOKINGS.filter((event) => {
+    return events.filter((event) => {
       // 🌟 1. กรองเดือน/ปี (เหมือนเดิม)
       const eventDate = new Date(event.startTime); 
       if (!isSameMonth(eventDate, currentDate)) return false;
@@ -126,19 +70,40 @@ export default function History() {
     return nextDate > today;
   }, [currentDate]);
 
+  const fetchUserBookings = useCallback(async () => {
+    const formattedDate = format(currentDate, 'yyyy-MM');
+    try {
+      const data = await bookingService.fetchUserHistory(formattedDate);
+      const formattedEvents = useMapResponseToEvents(data);
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.log('error: ', error);
+    }
+  }, [currentDate.getMonth(), currentDate.getFullYear()]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
+
+  useEffect(() => {
+    fetchUserBookings();
+  }, [fetchUserBookings]); // อย่าลืมใส่ dependency
+
   return (
     <div className="bg-light-main-background dark:bg-main-background flex">
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
           <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8">
-            <p className="text-2xl">{format(currentDate, 'MMMM yyyy')}</p>
+            {/* <p className="text-2xl">{format(currentDate, 'MMMM yyyy')}</p> */}
+            <div className="flex items-center gap-4">
+              <MonthYearPicker 
+                currentDate={currentDate} 
+                setCurrentDate={setCurrentDate} 
+              />
+            </div>
 
-            <div className="flex gap-2">
-              <Button onClick={prev} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Prev</Button>
-              <Button onClick={today} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Today</Button>
-              <Button onClick={next} className={`px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer  ${isNextDisabled ? 'opacity-50' : ''}`}>Next</Button>
-              <Button onClick={() => setIsMobileFilterOpen(true)} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer xl:hidden block">Filter</Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={prev} className="h-fit px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Prev</Button>
+              <Button onClick={today} className="h-fit px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Today</Button>
+              <Button onClick={next} className={`h-fit px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer  ${isNextDisabled ? 'opacity-50' : ''}`}>Next</Button>
+              <Button onClick={() => setIsMobileFilterOpen(true)} className="h-fit px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer xl:hidden block">Filter</Button>
             </div>
           </header>
 
