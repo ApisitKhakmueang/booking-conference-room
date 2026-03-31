@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import MonthYearPicker from "./month-year-picker";
 import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
-
-const tabs = ["ALL", "COMPLETED", "CANCELLED"];
+import ActiveTab from "./active-tab";
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -107,26 +106,7 @@ export default function History() {
             </div>
           </header>
 
-          <div className="flex items-center xs:gap-8 gap-5 border-b border-gray-100 dark:border-white/10 px-4">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`relative py-4 text-sm font-bold tracking-widest transition-all duration-300 cursor-pointer
-                  ${
-                    activeTab === tab
-                      ? "text-purple-400" // สีตอนเลือก (อ้างอิงจากสีม่วงในรูป)
-                      : "hover:text-white" // สีตอนไม่ได้เลือก
-                  }`}
-              >
-                {tab}
-                
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 h-[3px] w-full bg-purple-400 transition-all duration-300" />
-                )}
-              </button>
-            ))}
-          </div>
+          <ActiveTab activeTab={activeTab} setActiveTab={setActiveTab} />
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex">
