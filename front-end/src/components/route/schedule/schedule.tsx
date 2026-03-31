@@ -179,7 +179,7 @@ export default function Schedule() {
       {/* Mobile Action Button (FAB) */}
       <Button 
         className='absolute bg-blue-600 hover:bg-blue-700 dark:bg-dark-purple/80 dark:hover:bg-dark-purple bottom-7 right-7 w-12 h-12 rounded-full shadow-lg transition-all xl:hidden flex'
-        onClick={() => setIsAddModalOpen(true)}>
+        onClick={handleAddClick}>
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>
 
