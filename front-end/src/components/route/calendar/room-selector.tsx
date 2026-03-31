@@ -35,7 +35,7 @@ export default function RoomSelector({
       </SelectTrigger>
 
       {/* ป๊อปอัป Dropdown */}
-      <SelectContent className={cn(`w-(--radix-select-trigger-width) dark:bg-sidebar dark:border-sidebar max-h-[250px] text-white ${className}`)}>
+      <SelectContent className={cn(`w-(--radix-select-trigger-width) dark:bg-sidebar dark:border-sidebar max-h-[250px] text-white`)}>
         {rooms.map((room) => (
           <SelectItem 
             key={room.id} 

@@ -133,13 +133,16 @@ export default function Calendar() {
       <div className="flex flex-col h-[78vh] max-w-7xl mx-auto border dark:border-sidebar rounded-lg dark:bg-card border-light-hover shadow-2xl overflow-hidden">
         
         {/* --- Header Controls --- */}
-        <div className="flex sm:flex-row sm:gap-0 gap-2 flex-col items-center justify-between px-6 py-4 border-b dark:border-sidebar dark:bg-sidebar bg-light-hover text-white">
-          <div className="flex lg:flex-row flex-col items-center justify-center md:gap-4 gap-2">
-            <h2 className="sm:text-start text-2xl font-bold text-white">
+        <div className="flex sm:flex-row flex-col items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-sidebar bg-light-main-background dark:bg-sidebar gap-4">
+          
+          {/* 🌟 ฝั่งซ้าย: Navigation & View (รวมไว้ด้วยกัน) */}
+          <div className="flex flex-wrap items-center sm:justify-start justify-center gap-4">
+            <h2 className="text-2xl font-bold text-dark-purple dark:text-white sm:text-start text-center">
               {format(currentDate, view === 'day' ? 'd MMMM yyyy' : 'MMMM yyyy')}
             </h2>
+            
             {!isMobile && (
-              <div className="flex border dark:border-hover rounded-lg p-1">
+              <div className="flex border border-gray-200 dark:border-hover rounded-lg p-1 bg-white dark:bg-transparent">
                 {/* ปุ่มสลับ View */}
                 {availableViews.map((v) => (
                   <button
@@ -148,38 +151,42 @@ export default function Calendar() {
                     className={`
                       px-4 py-1 rounded capitalize text-sm font-medium transition-all cursor-pointer
                       ${view === v 
-                        ? 'bg-blue-600 dark:bg-dark-purple text-white shadow' 
-                        : 'dark:text-gray-400 dark:hover:bg-hover text-gray-300 hover:text-white hover:bg-light-card'}
+                        ? 'bg-dark-purple text-white shadow' 
+                        : 'text-light-secondary dark:text-gray-400 hover:text-dark-purple dark:hover:text-white hover:bg-light-sidebar dark:hover:bg-hover'}
                     `}
                   >
-                    {/* แปลง text ให้สวยงาม (optional) */}
                     {v === 'month' ? 'Month' : v === 'week' ? 'Week' : 'Day'}
                   </button>
                 ))}
               </div>
             )}
+
+            {/* 🌟 ยุบปุ่มเหลือแค่ชุดเดียว ไม่ต้องซ่อนไปมาแล้ว */}
+            <div className="flex gap-2">
+              <Button onClick={prev} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-sidebar dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Prev</Button>
+              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-sidebar dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
+              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-sidebar dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
+            </div>
           </div>
           
-          <div className='flex xl:flex-row flex-col gap-2 items-center'>
-            <div className='flex flex-row gap-2 items-center'>
-              {view === 'month' &&
-                <Button 
-                  onClick={() => setIsAddModalOpen(true)} 
-                  className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap"
-                  >Add Booking</Button>
-              }
-              <RoomSelector 
-                selectedRoom={selectedRoom} 
-                setSelectedRoom={setSelectedRoom} 
-                rooms={rooms}
-                className='px-3 py-4.5 border dark:border-hover text-white border-white rounded text-sm cursor-pointer duration-0' />
-            </div>
+          {/* 🌟 ฝั่งขวา: Filter & Action */}
+          <div className='flex items-center gap-3'>
+            <RoomSelector 
+              selectedRoom={selectedRoom} 
+              setSelectedRoom={setSelectedRoom} 
+              rooms={rooms}
+              // ใส่ w-[120px] ให้ปุ่มไม่กว้างเกินไป (ตามที่แก้เรื่องเครื่องหมายถูก)
+              className='px-3 py-4.5 border border-gray-200 text-dark-purple dark:text-white dark:border-hover bg-white dark:bg-sidebar rounded text-sm cursor-pointer w-[120px]' 
+            />
             
-            <div className="flex gap-2">
-              <Button onClick={prev} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Prev</Button>
-              <Button onClick={today} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Today</Button>
-              <Button onClick={next} className="px-3 py-2 dark:hover:bg-hover border dark:border-hover border-white rounded hover:bg-light-card bg-transparent text-sm cursor-pointer">Next</Button>
-            </div>
+            {view === 'month' &&
+              <Button 
+                onClick={() => setIsAddModalOpen(true)} 
+                className="px-4 py-2 bg-dark-purple hover:bg-light-hover text-white shadow-md text-sm cursor-pointer rounded whitespace-nowrap transition-colors"
+              >
+                Add Booking
+              </Button>
+            }
           </div>
         </div>
 
