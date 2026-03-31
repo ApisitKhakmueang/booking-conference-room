@@ -2,11 +2,25 @@ import { EventCardHistoryProps } from "@/utils/interface/interface";
 import { formatTimeWithSuffix } from "@/utils/time";
 import { format } from "date-fns";
 
+const STATUS_THEME: Record<string, { text: string; bg: string; shadow: string }> = {
+  Completed: {
+    text: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-500 dark:bg-emerald-400",
+    shadow: "shadow-[0_0_8px_rgba(16,185,129,0.4)] dark:shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+  },
+  Cancelled: {
+    text: "text-rose-600 dark:text-rose-400",
+    bg: "bg-rose-500 dark:bg-rose-400",
+    shadow: "shadow-[0_0_8px_rgba(244,63,94,0.4)] dark:shadow-[0_0_8px_rgba(251,113,133,0.6)]"
+  }
+};
+
 export default function CardEvents({ event, setCurrentDate } : EventCardHistoryProps) {
   const eventDate = new Date(event.date)
   const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
+  const theme = STATUS_THEME[event.status] || STATUS_THEME['confirm'];
 
   return (
     <div 
@@ -43,8 +57,8 @@ export default function CardEvents({ event, setCurrentDate } : EventCardHistoryP
         {/* แถบด้านล่าง: Status และ Duration */}
         <div className="mt-4 flex xs:flex-row flex-col xs:items-center xs:gap-4 gap-1 text-xs">
           
-          <span className="flex items-center gap-1.5 text-success dark:text-purple-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-success dark:bg-purple-400 shadow-[0_0_8px_rgba(65,205,139,0.4)] dark:shadow-[0_0_8px_rgba(168,85,247,0.6)]"></span> 
+          <span className={`flex items-center gap-1.5 font-medium ${theme.text}`}>
+            <span className={`w-2 h-2 rounded-full ${theme.bg} ${theme.shadow}`}></span> 
             <span className="capitalize">{event.status}</span>
           </span>
           
