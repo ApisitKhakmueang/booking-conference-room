@@ -1,5 +1,5 @@
 import { EventCardHistoryProps } from "@/utils/interface/interface";
-import { formatTimeWithSuffix } from "@/utils/time";
+import { formatTimeWithSuffix } from "@/lib/time";
 import { format } from "date-fns";
 
 const STATUS_THEME: Record<string, { text: string; bg: string; shadow: string }> = {

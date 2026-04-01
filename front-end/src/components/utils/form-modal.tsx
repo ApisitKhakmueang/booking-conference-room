@@ -7,8 +7,8 @@ import RoomSelector from "../route/calendar/room-selector";
 import Swal from "sweetalert2"
 
 import { TimeSelect } from "../route/calendar/time-selector";
-import { calculateDuration } from "@/utils/time";
-import { bodyBooking } from "@/utils/form";
+import { calculateDuration } from "@/lib/time";
+import { bodyBooking } from "@/lib/form";
 import { ArrangeRoom, FormModalProps } from '@/utils/interface/interface';
 
 // Component

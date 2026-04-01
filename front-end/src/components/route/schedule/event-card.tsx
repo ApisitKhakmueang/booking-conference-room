@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { bookingService } from "@/service/booking.service";
 import { EventCardScheduleProps } from "@/utils/interface/interface";
-import { formatTimeWithSuffix } from "@/utils/time";
+import { formatTimeWithSuffix } from "@/lib/time";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import Swal from "sweetalert2";

@@ -1,4 +1,4 @@
-import api from '@/utils/axiosInstance';
+import api from '@/lib/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 

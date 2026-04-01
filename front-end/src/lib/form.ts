@@ -1,5 +1,6 @@
-import { add, format, startOfDay } from "date-fns"; // 🌟 แน่ใจว่า import startOfDay มาแล้ว
-import { BodyBooking } from "./interface/form";
+import { add, format, parseISO, startOfDay } from "date-fns"; // 🌟 แน่ใจว่า import startOfDay มาแล้ว
+import { BodyBooking } from "../utils/interface/form";
+import { BookingEventResponse } from "../utils/interface/response";
 
 export const bodyBooking = (formData: BodyBooking) => {
   const start = formData.startTime;
@@ -28,3 +29,11 @@ export const bodyBooking = (formData: BodyBooking) => {
     endTime: format(endTime, "yyyy-MM-dd'T'HH:mm:ssXXX"),
   }
 }
+
+export const formatBookingEvent = (event: any): BookingEventResponse => {
+  return {
+    ...event,
+    startTime: parseISO(event.startTime),
+    endTime: parseISO(event.endTime),
+  };
+};

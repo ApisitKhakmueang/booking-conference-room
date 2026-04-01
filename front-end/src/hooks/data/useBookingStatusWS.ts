@@ -2,7 +2,7 @@ import { BookingEventResponse } from '@/utils/interface/response';
 import { useState, useEffect, useMemo } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useAuthStore } from '@/stores/auth.store';
-import { formatBookingEvent } from '@/lib/utils';
+import { formatBookingEvent } from '@/lib/form';
 
 export default function useBookingStatusWS() {
   const [bookings, setBookings] = useState<BookingEventResponse[]>([]);
