@@ -1,32 +1,19 @@
+// hooks/usePasswordUI.ts
+import { getPasswordCriteria } from "@/lib/validation";
 import { useState } from "react";
-import { PasswordValidation } from "@/utils/interface/interface";
 
-export default function useValidatePassword() {
-  const [passwordValidation, setPasswordValidation] = useState<PasswordValidation>({
+export default function usePasswordUI() {
+  const [validation, setValidation] = useState({
     hasUppercase: false,
     hasLowercase: false,
     hasNumber: false,
     hasSpecial: false,
     hasLength: false,
-  })
+  });
 
-  const validatePassword = (password: string) => {
-    setPasswordValidation({
-        hasUppercase: /[A-Z]/.test(password),
-        hasLowercase: /[a-z]/.test(password),
-        hasNumber: /[0-9]/.test(password),
-        hasSpecial: /[@$!%*?&]/.test(password),
-        hasLength: password.length >= 8,
-      })
+  const handleValidation = (password: string) => {
+    setValidation(getPasswordCriteria(password));
+  };
 
-    return
-  }
-
-  const isStrongPassword = (password: string): boolean => {
-    // Check how password strong
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(password);
-  }
-
-  return { validatePassword, isStrongPassword, passwordValidation  }
+  return { validation, handleValidation };
 }
