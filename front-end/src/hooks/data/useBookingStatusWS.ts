@@ -34,7 +34,6 @@ export default function useBookingStatusWS() {
       const now = new Date();
       setBookings((prev) => {
         const filtered = prev.filter(b => {
-          const now = new Date();
           const endTime = new Date(b.endTime); // แปลงเป็น Date Object
           
           return endTime > now
