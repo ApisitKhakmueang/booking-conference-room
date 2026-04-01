@@ -198,9 +198,9 @@ export default function Calendar() {
 
             {/* 🌟 4. ปุ่ม Prev/Today/Next ใช้เส้นขอบสีเทาอ่อน และ hover เป็นสีม่วงอ่อน */}
             <div className="flex gap-2">
-              <Button onClick={prev} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Prev</Button>
-              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
-              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
+              <Button onClick={prev} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Prev</Button>
+              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
+              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
             </div>
           </div>
           
