@@ -1,34 +1,45 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
 
 export default function useAuth() {
-  const supabase = createClient()
+  // 🌟 1. ใช้ useMemo เพื่อป้องกันไม่ให้สร้าง Client ใหม่ทุกครั้งที่ Component (NavigationLayout) re-render
+  const supabase = useMemo(() => createClient(), []);
+  
   const setUser = useAuthStore(((s) => s.setUser))
   const setSessionToken = useAuthStore((s) => s.setSessionToken)
 
   useEffect(() => {
-    // 🌟 1. ฟังก์ชันตัวช่วย: ดึงข้อมูลเบื้องต้นจาก Token ทันที (เพื่อให้โหลดเร็ว)
+    // ฟังก์ชันตัวช่วย: ดึงข้อมูลเบื้องต้นจาก Token ทันที
     const getFastUserData = (session: any) => {
       if (!session?.user) return null;
       const u = session.user;
       return {
         id: u.id,
         email: u.email!,
-        // ดึงจาก user_metadata ของ Google มาก่อน
         name: u.user_metadata?.full_name, 
         avatar: u.user_metadata?.avatar_url,
-        // ดึง role จาก metadata (อาจอยู่ใน app_metadata หรือ user_metadata แล้วแต่คุณตั้งค่า)
         role: u.app_metadata?.role || u.user_metadata?.role, 
-        // 🌟 เพิ่ม Flag เพื่อบอกว่าข้อมูลนี้เป็นข้อมูลจาก Google (เผื่อไว้เช็คสิทธิ์ในอนาคต)
         isGoogleData: true, 
       };
     };
 
-    // 🌟 2. ฟังก์ชันตัวช่วย: แอบไปคิวรี Database เพื่อดูว่ามีชื่อ/รูปที่ผู้ใช้ตั้งเองในแอปไหม (ถ้ามีจะมาทับ Google)
+    // ฟังก์ชันตัวช่วย: ดึงข้อมูลจาก Database
     const updateLocalUserData = async (session: any) => {
       if (!session?.user) return;
       const u = session.user;
+
+      // 🌟🌟🌟 2. คนเฝ้าประตู (THE GATEKEEPER) 🌟🌟🌟
+      // ดึงข้อมูลผู้ใช้ปัจจุบันที่อยู่ใน Zustand Store ออกมาเช็ค
+      const currentUser = useAuthStore.getState().user;
+      
+      // ถ้า: 1. มีข้อมูลใน Store แล้ว
+      // และ: 2. เป็นผู้ใช้คนเดียวกัน (ID ตรงกัน)
+      // และ: 3. ดึงข้อมูลจาก DB มาครบแล้ว (isGoogleData เป็น false)
+      // 👉 ให้ "หยุด" การทำงานทันที (return) ไม่ต้องไปยิง Database ซ้ำ!
+      if (currentUser && currentUser.id === u.id && currentUser.isGoogleData === false) {
+        return; 
+      }
 
       try {
         const { data: profile, error } = await supabase
@@ -43,16 +54,13 @@ export default function useAuth() {
         }
 
         if (profile) {
-          // 🌟 3. ปรับ Logic: "ข้อมูลในแอป (ตาราง users) ใหญ่ที่สุด"
           setUser({
             id: u.id,
             email: u.email!,
-            // ถ้าในตาราง users มีชื่อ/รูป ให้ใช้ชื่อ/รูปที่ตั้งเองในแอป (Local Data)
-            // ถ้าไม่มี (เป็นค่าว่าง) ให้ยึดจาก Google ต่อไป
             name: profile.full_name || u.user_metadata?.full_name, 
             avatar: profile.avatar_url || u.user_metadata?.avatar_url,
             role: profile.role,
-            isGoogleData: false, // 🌟 ปรับ Flag เป็น false เพราะใช้ข้อมูลในแอปแล้ว
+            isGoogleData: false, // บันทึกว่าดึงจาก DB แล้ว Gatekeeper จะได้บล็อกในรอบถัดไป
           });
         }
       } catch (err) {
@@ -71,10 +79,7 @@ export default function useAuth() {
           return
         }
 
-        // 🌟 Step 1: โหลดเร็ว! แสดงชื่อจาก Google ขึ้นมาก่อน
         setUser(getFastUserData(session));
-
-        // 🌟 Step 2: แอบอัปเดต! ไปดึงข้อมูลในแอปมาทับ (ถ้ามี)
         updateLocalUserData(session);
 
       } catch (err) {
@@ -87,7 +92,7 @@ export default function useAuth() {
     // ฟัง event login / logout
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSessionToken(session?.access_token || null)
 
       const user = session?.user
@@ -96,11 +101,12 @@ export default function useAuth() {
         return
       }
 
-      // 🌟 Step 1: โหลดเร็ว! แสดงชื่อจาก Google ขึ้นมาก่อน (เช่น ตอนเพิ่งล็อกอินเสร็จ)
-      setUser(getFastUserData(session));
-
-      // 🌟 Step 2: แอบอัปเดต! ไปดึงข้อมูลในแอปมาทับ (ถ้ามี)
-      updateLocalUserData(session);
+      // 🌟 3. กรอง Event: ไม่จำเป็นต้องทำทุก Event
+      // อัปเดตข้อมูลเฉพาะตอนล็อกอิน (SIGNED_IN) หรือเพิ่งโหลดหน้าจอใหม่ (INITIAL_SESSION)
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+         // ถ้า Gatekeeper ใน updateLocalUserData เห็นว่าข้อมูลครบแล้ว มันจะไม่ยอมให้ยิง API แน่นอน
+         updateLocalUserData(session);
+      }
     })
 
     return () => subscription.unsubscribe()
