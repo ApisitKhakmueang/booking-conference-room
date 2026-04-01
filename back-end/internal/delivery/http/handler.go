@@ -25,7 +25,8 @@ func NewBookingHandler(usecase domain.BookingUsecase) *BookingHandler {
 
 func (u *BookingHandler) CreateBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	userID, err := uuid.Parse(c.Params("userID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
+	// userID, err := uuid.Parse(c.Params("userID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -52,6 +53,7 @@ func (u *BookingHandler) CreateBooking(c *fiber.Ctx) error {
 func (u *BookingHandler) UpdateBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -72,6 +74,7 @@ func (u *BookingHandler) UpdateBooking(c *fiber.Ctx) error {
 	}
 
 	booking.ID = bookingID
+	booking.UserID = userID
 
 	if err := u.usecase.UpdateBooking(ctx, booking, uint(roomNumber)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
@@ -82,12 +85,17 @@ func (u *BookingHandler) UpdateBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandler) DeleteBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	booking := new(domain.Booking)
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	if err := u.usecase.DeleteBooking(ctx, bookingID) ; err != nil {
+	booking.ID = bookingID
+	booking.UserID = userID
+
+	if err := u.usecase.DeleteBooking(ctx, booking) ; err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
