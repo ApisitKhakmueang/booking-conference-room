@@ -1,19 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   format, startOfWeek, endOfWeek, 
   startOfDay,  eachDayOfInterval,
   isSameDay, differenceInMinutes
 } from 'date-fns';
-import { BookingEventResponse, Holiday } from '@/utils/interface/response';
 import { Plus } from 'lucide-react';
 import Modal from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { TimeGridViewProps } from '@/utils/interface/interface';
+import { BookingEvent, TimeGridViewProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
+import { useMapResponseToEvents } from '@/hooks/data/useMapRespToEvent';
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
 export default function TimeGridView({ setCurrentDate, currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
+  const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
+  const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
 
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
@@ -27,6 +30,23 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   const hours = Array.from({ length: 24 }, (_, i) =>
     String(i).padStart(2, '0')
   );
+
+  const handleAddClick = () => {
+    setTypeOperate('add');
+    setSelectedEvent(undefined); 
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditClick = (event: BookingEvent) => {
+    setTypeOperate('update');
+    setSelectedEvent(event); 
+    setIsAddModalOpen(true);
+  };
+
+  useEffect(() => {
+    const formattedEvents = useMapResponseToEvents(bookings || []);
+    setEvents(formattedEvents);
+  }, [bookings]);
 
   return (
     <div className="flex h-full overflow-hidden flex-col relative bg-white dark:bg-transparent rounded-b-lg">
@@ -95,12 +115,12 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                 ))}
 
                 {/* --- Render Events (Absolute Positioning) --- */}
-                {bookings?.filter(e => isSameDay(e.startTime, day)).map(evt => {
+                {events?.filter(e => isSameDay(e.startTime, day)).map(evt => {
                   const startMin = differenceInMinutes(evt.startTime, startOfDay(evt.startTime));
                   const duration = differenceInMinutes(evt.endTime, evt.startTime);
                   
                   // เช็กว่าเป็นของ User ปัจจุบันหรือไม่
-                  const isMine = currentUser && evt.User?.id && String(evt.User.id) === String(currentUser.id)
+                  const isMine = currentUser && evt.user?.id && String(evt.user.id) === String(currentUser.id)
 
                   return (
                     <div
@@ -118,14 +138,23 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                         isMine 
                           ? "bg-purple-100 border-purple-400 text-purple-900 hover:bg-purple-200 dark:bg-purple-900/90 dark:border-purple-500 dark:text-purple-50 dark:hover:bg-purple-800/95" 
                           : "bg-orange-100 border-orange-400 text-orange-900 hover:bg-orange-200 dark:bg-orange-900/90 dark:border-orange-500 dark:text-orange-50 dark:hover:bg-orange-800/95" 
-                      )}>
+                        )}
+                        onClick={() => isMine ? 
+                          handleEditClick({
+                            ...evt, 
+                            startTime: format(evt.startTime, 'HH:mm'), 
+                            endTime: format(evt.endTime, 'HH:mm')
+                          }) 
+                          : undefined
+                        }
+                      >
                         
                         <div className="font-semibold truncate">
                           {evt.title} {isMine && "(Me)"} 
                         </div>
                         
                         <div className="opacity-80 text-[10px] leading-tight mt-0.5 flex flex-col gap-0.5">
-                          <div className="truncate">By: {isMine ? "You" : evt.User?.fullName || "Unknown"}</div>
+                          <div className="truncate">By: {isMine ? "You" : evt.user?.fullName || "Unknown"}</div>
                           <div className="truncate whitespace-nowrap font-medium">
                             {format(evt.startTime, 'HH:mm')} - {format(evt.endTime, 'HH:mm')}
                           </div>
@@ -154,11 +183,11 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
       {/* 🌟 7. FAB (Add Button): เปลี่ยนสีฟ้าหลงฝูงเป็นสีม่วง dark-purple */}
       <Button 
         className='absolute z-60 bg-dark-purple hover:bg-light-hover dark:bg-dark-purple/90 dark:hover:bg-dark-purple bottom-7 right-7 w-14 h-14 rounded-full shadow-xl transition-all hover:scale-105 active:scale-95'
-        onClick={() => setIsAddModalOpen(true)}>
+        onClick={handleAddClick}>
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' setCurrentDate={setCurrentDate} currentDate={currentDate} />
+      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate={typeOperate} selectedEvent={selectedEvent} setCurrentDate={setCurrentDate} currentDate={currentDate} />
     </div>
   );
 }

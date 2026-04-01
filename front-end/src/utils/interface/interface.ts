@@ -1,4 +1,4 @@
-import { BookingEventResponse, Holiday } from "./response";
+import { BookingEventResponse, Holiday, User } from "./response";
 
 export interface EachPageLayoutProps {
   pageName: string;
@@ -121,6 +121,7 @@ export interface BookingEvent {
   duration: string; // นาที
   room: ArrangeRoom | undefined;
   status: BookingStatus;
+  user: User
 }
 
 export interface EventCardScheduleProps { 

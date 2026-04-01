@@ -52,6 +52,7 @@ export const useMapResponseToEvents = (responses: BookingEventResponse[]): Booki
       duration: durationStr,
       room: mappedRoom, // ดึงชื่อห้องออกมา ถ้าไม่มีจะได้ undefined
       status: formattedStatus as BookingStatus,
+      user: resp.User
     };
   });
 };

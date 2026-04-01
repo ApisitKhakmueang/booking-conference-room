@@ -19,7 +19,7 @@ export interface RoomResp {
   status?: string
 }
 
-interface User {
+export interface User {
   id: string
   email: string
   fullName: string
