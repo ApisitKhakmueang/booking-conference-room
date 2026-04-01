@@ -6,14 +6,38 @@ import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
 import ShowPassword from "../utils/show-password";
 import useValidatePassword from "@/hooks/auth/useValidatePassword";
-import useAuthSubmit from "@/hooks/auth/useAuthSubmit";
 import DisplayStrongPassword from "./signin-signup/display-strong-password";
+import { updatePassword } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false)
-  const { validatePassword, passwordValidation } = useValidatePassword()
-  const { submitUpdate, isLoading, error } = useAuthSubmit()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { validation, handleValidation } = useValidatePassword()
+  const router = useRouter()
+
+  const submitUpdate = async (
+    e: React.FormEvent,
+    password: string
+  ) => {
+    e.preventDefault()
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await updatePassword(password)
+      if (result?.error) {
+        throw new Error(result.error); // ถ้ามี error จริงๆ ค่อย throw
+      }
+      router.replace('/dashboard')
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <CardLayout>
@@ -32,14 +56,14 @@ export default function UpdatePasswordForm() {
             required
             onChange={e => {
               setPassword(e.target.value)
-              validatePassword(e.target.value)
+              handleValidation(e.target.value)
             }}
           />
 
           <ShowPassword isShowPassword={isShowPassword} setIsShowPassword={setIsShowPassword} />
         </div>
 
-        <DisplayStrongPassword password={passwordValidation}/>
+        <DisplayStrongPassword password={validation}/>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
         <Button variant="dark-purple" type='submit' disabled={isLoading}>

@@ -1,17 +1,16 @@
 'use client'
 
-import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
 import { useState } from "react"
 import { Button } from "../ui/button";
 import CardLayout from "../layout/card-layout";
 import { Input } from "../ui/input";
+import { forgotPassword } from "@/lib/auth";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { handleForgotPassword } = useHandleAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,8 +18,10 @@ export default function ForgotPasswordForm() {
     setError(null);
 
     try {
-      const error = await handleForgotPassword(email)
-      if (error) throw error;
+      const result = await forgotPassword(email)
+      if (result?.error) {
+        throw new Error(result.error); // ถ้ามี error จริงๆ ค่อย throw
+      }
       setSuccess(true);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")

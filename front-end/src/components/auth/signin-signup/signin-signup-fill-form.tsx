@@ -2,19 +2,71 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import ShowPassword from "../../utils/show-password";
 import { SignInProps } from "@/utils/interface/interface";
-import useAuthSubmit from "@/hooks/auth/useAuthSubmit";
 import { useRouter } from "next/navigation";
 import DisplayStrongPassword from "./display-strong-password";
 import useValidatePassword from "@/hooks/auth/useValidatePassword";
 import { Button } from "@/components/ui/button";
+import { signIn, signUp } from "@/lib/auth";
+import { checkStrongPassword } from "@/lib/validation";
 
 export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isShowPassword, setIsShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter()
-  const { validatePassword, passwordValidation } = useValidatePassword()
-  const { submitSignIn, submitSignUp, isLoading, error } = useAuthSubmit()
+  const { validation, handleValidation } = useValidatePassword()
+
+  const submitSignIn = async (
+    e: React.FormEvent,
+    email: string,
+    password: string
+  ) => {
+    e.preventDefault()
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await signIn(email, password)
+      if (result?.error) {
+        throw new Error(result.error); // ถ้ามี error จริงๆ ค่อย throw
+      }
+      router.replace('/dashboard')
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const submitSignUp = async (
+    e: React.FormEvent,
+    email: string,
+    password: string,
+  ) => {
+    e.preventDefault()
+    setIsLoading(true);
+    setError(null);
+
+    if (!checkStrongPassword(password)) {
+      setError("Password is not strong enough");
+      setIsLoading(false);
+      return
+    }
+
+    try {
+      const result = await signUp(email, password)
+      if (result?.error) {
+        throw new Error(result.error); // ถ้ามี error จริงๆ ค่อย throw
+      }
+      router.replace(`/auth/sign-up-success`)
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <form 
@@ -54,7 +106,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
             required
             onChange={e => {
               setPassword(e.target.value)
-              validatePassword(e.target.value)
+              handleValidation(e.target.value)
             }}
           />
 
@@ -63,7 +115,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
 
         {!isSignIn && (
           <>
-            <DisplayStrongPassword password={passwordValidation} />
+            <DisplayStrongPassword password={validation} />
           </>
         )}
 

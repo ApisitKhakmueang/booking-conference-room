@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation"
 import { SignInProps } from "@/utils/interface/interface";
-import { useHandleAuth } from "@/hooks/auth/useHandleAuth";
+import { signInWithGoogle } from "@/lib/auth";
 
 export default function Google({ isSignIn }: SignInProps) {
-  const { handleSignInWithGoogle } = useHandleAuth()
   const router = useRouter();
+
+  const handleSignInWithGoogle = async () => {
+    const result = await signInWithGoogle()
+    if (result) {
+      alert(result.error)
+    }
+  }
 
   return (
     <div className='flex flex-col mt-5'>

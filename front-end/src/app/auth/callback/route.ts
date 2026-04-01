@@ -1,26 +1,39 @@
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
 import { createClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  // if "next" is in param, use it as the redirect URL
-  let next = searchParams.get('next') ?? '/'
+  let next = searchParams.get('next') ?? '/dashboard'
+
+  // จัดการรูปแบบ URL ให้ปลอดภัย (ป้องกัน Redirect ผิดที่)
   if (!next.startsWith('/')) {
-    // if "next" is not a relative URL, use the default
     next = '/'
   }
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+    
     if (!error) {
-      // Login สำเร็จ → redirect ไป /dashboard ตรง ๆ
-      return NextResponse.redirect(`${origin}/dashboard`)
+      // ✅ แลกโค้ดสำเร็จ ส่งไปหน้าเป้าหมาย
+      return NextResponse.redirect(`${origin}${next}`)
+    } else {
+      // 🚨 ถ้าแลกโค้ดไม่ผ่าน (เช่น โค้ดถูกใช้ไปแล้วจากการโหลดเบิ้ล)
+      // ให้ลองเช็คก่อนว่า เรามี Session อยู่แล้วหรือเปล่า?
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session) {
+        // ถ้าระบบแอบล็อกอินให้แล้ว (Session มีอยู่จริง) ก็ให้ปล่อยผ่านไปเลย!
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+
+      // ถ้าไม่มี Session จริงๆ ให้พ่น Error ของ Supabase ออกมาที่ URL จะได้รู้ว่าพังเพราะอะไร
+      console.error('Supabase Exchange Error:', error.message)
+      return NextResponse.redirect(`${origin}/auth/error?error=${encodeURIComponent(error.message)}`)
     }
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/error?error=Can't to sign in with Google`)
+  // ถ้าไม่มี code ส่งมาตั้งแต่แรก
+  return NextResponse.redirect(`${origin}/auth/error?error=no-code-provided`)
 }

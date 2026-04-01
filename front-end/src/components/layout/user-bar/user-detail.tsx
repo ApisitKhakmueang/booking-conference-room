@@ -1,9 +1,9 @@
 import { useAuthStore } from "@/stores/auth.store"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { handleSignout } from "@/hooks/auth/useSignout"
 import { UserButtonProps } from "@/utils/interface/interface"
 import { Button } from "@/components/ui/button"
+import { signOut } from "@/lib/auth"
 
 export default function UserDetail() {
   const router = useRouter()
@@ -22,7 +22,7 @@ export default function UserDetail() {
     },
     {
       name: 'Sign out',
-      onClick: handleSignout,
+      onClick: signOut,
       variant: 'danger'
     }
   ]
