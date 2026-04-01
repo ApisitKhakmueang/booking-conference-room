@@ -177,17 +177,6 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 }
 
 func (u *bookingUsecase) DeleteBooking(ctx context.Context,booking *domain.Booking) error {
-	// booking, err := u.helperPostgres.GetEventID(bookingID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// // log.Printf("booking: %v", booking)
-	// // log.Printf("booking: %v", booking.GoogleEventID)
-	// if err = u.gateway.CancelEvent(booking.Calendar.GoogleCalendarID, booking.GoogleEventID); err != nil {
-	// 	return err
-	// }
-
 	log.Println("GetBookingByID from DeleteBooking")
 	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
 	if err != nil {

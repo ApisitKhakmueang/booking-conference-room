@@ -12,3 +12,8 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Get("/user/:userID", handler.GetUserBooking)
 	router.Get("/history/:userID", handler.GetUserHistory)
 }
+
+func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
+	router.Get("/holiday", handler.GetHoliday)
+	router.Get("/room/details", handler.GetRoomDetails)
+}
