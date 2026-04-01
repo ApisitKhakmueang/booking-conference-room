@@ -134,7 +134,7 @@ func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	userID, err := uuid.Parse(c.Params("userID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -154,7 +154,7 @@ func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	userID, err := uuid.Parse(c.Params("userID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}

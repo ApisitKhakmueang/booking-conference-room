@@ -6,11 +6,11 @@ import (
 )
 
 func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
-	router.Post("/:userID", handler.CreateBooking)
+	router.Post("/", handler.CreateBooking)
 	router.Put("/:bookingID", handler.UpdateBooking)
 	router.Delete("/:bookingID", handler.DeleteBooking)
-	router.Get("/user/:userID", handler.GetUserBooking)
-	router.Get("/history/:userID", handler.GetUserHistory)
+	router.Get("/user", handler.GetUserBooking)
+	router.Get("/history", handler.GetUserHistory)
 }
 
 func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {

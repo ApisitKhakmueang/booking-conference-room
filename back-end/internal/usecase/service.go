@@ -47,14 +47,14 @@ func NewBookingUsecase(
 }
 
 func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-	// 	return err
-	// }
+	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+		return err
+	}
 
-	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	// if err != nil {
-	// 	return err
-	// }
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	if err != nil {
+		return err
+	}
 
 	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
 	// 	return err
@@ -95,7 +95,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	booking.Passcode = finalPasscode
 	booking.ID = uuid.New()
 
-	booking, err := u.redis.CreateBooking(ctx, booking, roomNumber)
+	booking, err = u.redis.CreateBooking(ctx, booking, roomNumber)
 	if err != nil {
 		return err
 	}
@@ -125,14 +125,14 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 }
 
 func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-	// 	return err
-	// }
+	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+		return err
+	}
 
-	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	// if err != nil {
-	// 	return err
-	// }
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	if err != nil {
+		return err
+	}
 
 	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
 	// 	return err
@@ -150,7 +150,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return errors.New("Room unavailable")
 	}
 
-	booking, err := u.redis.UpdateBooking(ctx, booking, roomNumber);
+	booking, err = u.redis.UpdateBooking(ctx, booking, roomNumber);
 	if  err != nil {
 		return err
 	}
