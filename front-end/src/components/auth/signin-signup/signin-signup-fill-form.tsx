@@ -85,13 +85,13 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
           onChange={e => setEmail(e.target.value)}
         />
 
-        <div className='flex justify-between'>
+        <div className='flex justify-between items-baseline'>
           <label htmlFor="password">Password</label>
           {isSignIn && (
             <p 
-              className='hover:cursor-pointer'
+              className='hover:cursor-pointer text-sm'
               onClick={() => router.push('/auth/forgot-password')}>
-                Forgot password?
+                Forgot password ?
             </p>
           )}
         </div>
