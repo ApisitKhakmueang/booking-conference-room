@@ -1,6 +1,6 @@
 import { BookingEventResponse } from '@/utils/interface/response';
 import { useState, useEffect, useMemo } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import useWebSocket from 'react-use-websocket';
 import { useAuthStore } from '@/stores/auth.store';
 import { formatBookingEvent } from '@/lib/utils';
 
