@@ -1,6 +1,6 @@
+import { hasEnvVars } from "@/lib/utils";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasEnvVars } from "../utils";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -69,6 +69,15 @@ export async function updateSession(request: NextRequest) {
     user &&
     request.nextUrl.pathname.startsWith("/auth")
   ) {
+    // 🌟 1. เพิ่มข้อยกเว้น: ถ้าเป็นหน้า update-password หรือ callback ให้ปล่อยผ่านไปเลย ห้ามเตะ!
+    if (
+      request.nextUrl.pathname.startsWith("/auth/update-password") ||
+      request.nextUrl.pathname.startsWith("/auth/callback")
+    ) {
+      return supabaseResponse; 
+    }
+
+    // 🌟 2. ถ้าเป็นหน้า auth อื่นๆ (เช่น sign-in, sign-up) ให้เตะไป dashboard ตามปกติ
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
