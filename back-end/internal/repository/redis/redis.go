@@ -63,7 +63,7 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 }
 
 func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	deletedBooking, err := r.postgres.DeleteBookingDB(ctx, booking.ID);
+	deletedBooking, err := r.postgres.DeleteBookingDB(ctx, booking);
 	if err != nil {
 		return nil, err
 	}

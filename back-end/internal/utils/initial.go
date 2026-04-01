@@ -149,22 +149,22 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	}))
 	
 	// For test without middleware
-	api := app.Group("/api/booking")
-	controller.InitialBookingRoute(api, handler)
-	apiTest := app.Group("/api")
-	apiTest.Get("/holiday", handler.GetHoliday)
-	apiTest.Get("/room/details", handler.GetRoomDetails)
+	// api := app.Group("/api/booking")
+	// controller.InitialBookingRoute(api, handler)
+	// apiTest := app.Group("/api")
+	// apiTest.Get("/holiday", handler.GetHoliday)
+	// apiTest.Get("/room/details", handler.GetRoomDetails)
 
 	// With middleware
-	// api := app.Group("/api")
-	// bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
+	api := app.Group("/api")
+	bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
 
 	// api.Get("/holiday", handler.GetHoliday)
 
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
 
-	// controller.InitialBookingRoute(bookingAPI, handler)
+	controller.InitialBookingRoute(bookingAPI, handler)
 	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)
 
 	// app.Get("/api/product/:id", handler.TestRedis)
