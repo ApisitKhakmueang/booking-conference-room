@@ -176,7 +176,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	return nil
 }
 
-func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) error {
+func (u *bookingUsecase) DeleteBooking(ctx context.Context,booking *domain.Booking) error {
 	// booking, err := u.helperPostgres.GetEventID(bookingID)
 	// if err != nil {
 	// 	return err
@@ -189,7 +189,7 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 	// }
 
 	log.Println("GetBookingByID from DeleteBooking")
-	completedBooking, err := u.helperPostgres.GetBookingByID(ctx, bookingID)
+	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
 	if err != nil {
 		return err
 	}
@@ -198,18 +198,13 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,bookingID uuid.UUID) 
 		return err
 	}
 
-	roomNumber, err := u.helperPostgres.GetRoomNumber(ctx, completedBooking.ID)
-	if err != nil {
-		return err
-	}
-
-	deletedBooking, err := u.redis.DeleteBooking(ctx, completedBooking, roomNumber);
+	deletedBooking, err := u.redis.DeleteBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
 	if err != nil {
 		return errors.New("Don't have this booking")
 	}
 
-	u.PublishEvent("booking_deleted", roomNumber, deletedBooking)
-	// u.PublishStatus("booking_deleted", completedBooking)
+	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
+	u.PublishStatus("booking_deleted", completedBooking)
 
 	return nil
 }
@@ -371,26 +366,6 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 
 // 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 }
-
-// func (u *bookingUsecase) CheckTimeUpdated(startDate string, endDate string) (*time.Time, error) {
-// 	// คำนวณวันเริ่มต้นและสิ้นสุดของเดือน (ใช้สำหรับ Filter ใน DB)
-// 	// loc := time.FixedZone("ICT", 7*60*60)
-// 	// startDate := time.Date(int(year), time.Month(month), 1, 0, 0, 0, 0, loc)
-// 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
-
-// 	lastUpdated, err := u.helperPostgres.CheckLatestUpdateHoliday(startDate, endDate)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// กรณีเดือนนั้นไม่มีวันหยุดเลย หรือยังไม่เคยแก้ ให้ใช้วันที่ปัจจุบันแทน เพื่อให้มี ETag สักค่าหนึ่ง
-// 	checkTime := time.Now()
-// 	if lastUpdated != nil {
-// 		checkTime = *lastUpdated
-// 	}
-
-// 	return &checkTime, nil
-// }
 
 // Helper function
 func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error {
