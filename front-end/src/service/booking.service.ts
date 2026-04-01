@@ -1,17 +1,16 @@
 import api from '@/utils/axiosInstance';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
-const USER_ID = "6d4ac759-dd57-4462-b980-4147b7d18cba"; // ในอนาคตควรดึงจาก Auth context
 
 export const bookingService = {
   // ดึงข้อมูลการจองตามวันที่
   fetchUserBookings: async (date: string) => {
-    const response = await api.get(`${API_URL}/booking/user/${USER_ID}?date=${date}`);
+    const response = await api.get(`${API_URL}/booking/user?date=${date}`);
     return response.data;
   },
 
   fetchUserHistory: async (date: string) => {
-    const response = await api.get(`${API_URL}/booking/history/${USER_ID}?date=${date}`);
+    const response = await api.get(`${API_URL}/booking/history?date=${date}`);
     return response.data;
   },
 
@@ -22,7 +21,7 @@ export const bookingService = {
 
   // สร้างการจองใหม่
   createBooking: async (roomNumber: number | undefined, body: any) => {
-    return await api.post(`${API_URL}/booking/${USER_ID}?room=${roomNumber}`, body);
+    return await api.post(`${API_URL}/booking?room=${roomNumber}`, body);
   },
 
   updateBooking: async (bookingID: string | undefined, roomNumber: number | undefined, body: any) => {
