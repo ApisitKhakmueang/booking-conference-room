@@ -123,14 +123,14 @@ func CheckIsDayOff(summary string, description string) bool {
 	return true // ถ้าไม่เข้าเงื่อนไขข้างบนเลย ให้ถือว่าเป็นวันหยุดไว้ก่อน
 }
 
-func CheckBeforeOneHour(start time.Time) error {
+func CheckBeforeNow(start time.Time) error {
 	now := time.Now()
 
-	if start.After(now.Add(time.Hour)) {
+	if start.After(now) {
 		return nil
 	}
 
-	return errors.New("Please operate at least 1 hour in advance.")
+	return errors.New("Can't book in the past.")
 }
 
 // เช็คว่าจองล่วงหน้าเกิน 30 วันหรือไม่

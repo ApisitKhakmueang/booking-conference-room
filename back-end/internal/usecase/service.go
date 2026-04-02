@@ -56,9 +56,9 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
-	// 	return err
-	// }
+	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
+		return err
+	}
 
 	if err := helper.CheckMaxAdvanceBooking(*booking.StartTime); err != nil {
 		return err
@@ -134,9 +134,9 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	// if err := helper.CheckBeforeOneHour(*booking.StartTime); err != nil {
-	// 	return err
-	// }
+	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
+		return err
+	}
 
 	if err := helper.CheckMaxAdvanceBooking(*booking.StartTime); err != nil {
 		return err
