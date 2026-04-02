@@ -22,7 +22,7 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
     const timeDifference = bookingStartTime.getTime() - currentTime.getTime();
     
     // 1 ชั่วโมง = 60 นาที * 60 วินาที * 1000 มิลลิวินาที = 3,600,000 มิลลิวินาที
-    const oneHourInMs = 60 * 60 * 1000;
+    // const oneHourInMs = 60 * 60 * 1000;
 
     if (timeDifference <= 0) {
       Swal.fire({
@@ -35,15 +35,15 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
     }
 
     // 🌟 2. ดักจับกรณี: "ยังไม่ถึงเวลาจอง แต่เหลือน้อยกว่า 1 ชั่วโมง"
-    if (timeDifference < oneHourInMs) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Please operate at least 1 hour in advance.',
-        icon: 'error',
-        timer: 2000
-      });
-      return; 
-    }
+    // if (timeDifference < oneHourInMs) {
+    //   Swal.fire({
+    //     title: 'Error',
+    //     text: 'Please operate at least 1 hour in advance.',
+    //     icon: 'error',
+    //     timer: 2000
+    //   });
+    //   return; 
+    // }
 
     // ถามเพื่อความแน่ใจก่อนลบ
     const confirm = await Swal.fire({

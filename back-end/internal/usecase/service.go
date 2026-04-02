@@ -183,9 +183,9 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
-		return err
-	}
+	// if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
+	// 	return err
+	// }
 
 	deletedBooking, err := u.redis.DeleteBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
 	if err != nil {
