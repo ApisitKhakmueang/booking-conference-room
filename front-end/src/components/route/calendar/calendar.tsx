@@ -11,7 +11,7 @@ import {
 import MonthView from './calendar-month-view';
 import TimeGridView from './calendar-time-grid-view';
 import RoomSelector from './room-selector';
-import Modal from '@/components/ui/modal';
+import BookingModal from '@/components/utils/booking-modal';
 import { ArrangeRoom } from '@/utils/interface/interface';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronDown } from 'lucide-react';
@@ -233,7 +233,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' setCurrentDate={setCurrentDate} currentDate={currentDate} />
+      <BookingModal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate='add' setCurrentDate={setCurrentDate} currentDate={currentDate} preselectedRoomNumber={currentRoomNumber} />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { addDays, isSameDay, subDays } from "date-fns";
 import DesktopSidebar from "./desktop-sidebar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import Modal from "@/components/ui/modal";
+import BookingModal from "@/components/utils/booking-modal";
 import { Plus } from "lucide-react";
 import CardEvents, { CardEventsSkeleton } from "./event-card";
 import { BookingEvent } from "@/utils/interface/interface";
@@ -166,7 +166,7 @@ export default function Schedule() {
         </div>
       </div>
 
-      <Modal 
+      <BookingModal 
         isAddModalOpen={isAddModalOpen} 
         setIsAddModalOpen={setIsAddModalOpen} 
         typeOperate={typeOperate} 

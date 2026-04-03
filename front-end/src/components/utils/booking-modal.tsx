@@ -1,11 +1,11 @@
-import { ModalProps } from "@/utils/interface/interface";
+import { BookingModalProps } from "@/utils/interface/interface";
 import { useRoomStore } from "@/stores/room.store";
 import { useShallow } from "zustand/shallow";
 import { useMemo } from "react";
-import FormModal from "../utils/form-modal";
+import FormModal from "./form-modal";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 
-export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, setCurrentDate, selectedEvent, onSuccess }: ModalProps) {
+export default function BookingModal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: BookingModalProps) {
   const { rawRoom } = useRoomStore(
     useShallow(((state) => ({
       rawRoom: state.rooms
@@ -46,6 +46,7 @@ export default function Modal({ isAddModalOpen, setIsAddModalOpen, typeOperate, 
             setCurrentDate={setCurrentDate}
             selectedEvent={selectedEvent} 
             onSuccess={onSuccess} // 🌟 ส่งต่อลงไปอีกทอด
+            preselectedRoomNumber={preselectedRoomNumber}
           />
         </div>
       )}

@@ -77,7 +77,7 @@ export interface DisplayStrongPasswordProps {
 
 export type typeOperate = 'add' | 'update';
 
-export interface ModalProps {
+export interface BookingModalProps {
   isAddModalOpen: boolean
   setIsAddModalOpen: (status: boolean) => void
   typeOperate: 'add' | 'update'
@@ -85,6 +85,7 @@ export interface ModalProps {
   setCurrentDate: (date: Date) => void
   selectedEvent?: BookingEvent
   onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
+  preselectedRoomNumber?: number | null;
 }
 
 export interface FormModalProps {
@@ -95,6 +96,7 @@ export interface FormModalProps {
   setCurrentDate: (date: Date) => void
   selectedEvent?: BookingEvent
   onSuccess?: () => void // 🌟 เพิ่มบรรทัดนี้
+  preselectedRoomNumber?: number | null;
 }
 
 export interface ArrangeRoom {

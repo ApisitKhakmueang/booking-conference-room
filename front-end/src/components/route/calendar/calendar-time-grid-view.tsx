@@ -5,7 +5,7 @@ import {
   isSameDay, differenceInMinutes
 } from 'date-fns';
 import { Plus } from 'lucide-react';
-import Modal from '@/components/ui/modal';
+import BookingModal from '@/components/utils/booking-modal';
 import { Button } from '@/components/ui/button';
 import { BookingEvent, TimeGridViewProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
@@ -187,7 +187,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
         <Plus className='w-8! h-8! text-white stroke-[2.5px]'/>
       </Button>
 
-      <Modal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate={typeOperate} selectedEvent={selectedEvent} setCurrentDate={setCurrentDate} currentDate={currentDate} />
+      <BookingModal isAddModalOpen={isAddModalOpen} setIsAddModalOpen={setIsAddModalOpen} typeOperate={typeOperate} selectedEvent={selectedEvent} setCurrentDate={setCurrentDate} currentDate={currentDate} />
     </div>
   );
 }
