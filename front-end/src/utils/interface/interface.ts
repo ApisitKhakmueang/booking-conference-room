@@ -126,6 +126,16 @@ export interface BookingEvent {
   user: User
 }
 
+export interface RenderEventGroupProps { 
+  title: string;
+  groupEvents: BookingEvent[];
+  titleColor: string;
+  handleEditClick: (event: BookingEvent) => void;
+  setIsAddModalOpen: (status: boolean) => void;
+  setCurrentDate: (date: Date) => void;
+  fetchUserBookings: () => void;
+}
+
 export interface EventCardScheduleProps { 
   event: BookingEvent 
   setIsAddModalOpen: (status: boolean) => void

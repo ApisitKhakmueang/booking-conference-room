@@ -74,6 +74,12 @@ export default function useBookingStatusWS() {
           );
           break;
 
+        case 'booking_deleted':
+          setBookings((prevBookings) => 
+            prevBookings.filter((booking) => booking.id !== message.data.booking.id)
+          );
+          break;
+
         default:
           console.warn("⚠️ Unknown message type:", message.type);
       }

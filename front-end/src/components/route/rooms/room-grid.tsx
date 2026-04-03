@@ -1,7 +1,10 @@
 'use client'
 
 import { MonitorCheck, MonitorX, ToolCase, UserRound } from 'lucide-react';
-import { RoomResp } from '@/utils/interface/response';
+import { BookingEventResponse, RoomResp } from '@/utils/interface/response';
+import BookingModal from '@/components/utils/booking-modal';
+import { useState } from 'react';
+import OccupyModal from './occupy-modal';
 
 const MOCK_ROOMS = [
   { id: 1, name: "Room A", capacity: 10, status: "available" },
@@ -39,15 +42,50 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }) {
+export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: RoomResp[], bookings: BookingEventResponse[] }) {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedRoomNumber, setSelectedRoomNumber] = useState<number | null>(null)
+
+  const [isOccupyModalOpen, setIsOccupyModalOpen] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<BookingEventResponse | null>(null)
+
   return (
     <>
-      <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card dark:text-secondary border-light-hover text-violet-900">
+      <ul className="grid md:grid-cols-5 grid-cols-2 rounded-4xl overflow-hidden border dark:border-card dark:text-stone-400 border-light-hover text-violet-900">
         {displayRooms.map((room) => {
           const currentStatus = (room?.status || 'available') as RoomStatus;
           const StatusIcon = STATUS_CONFIG[currentStatus].icon;
           
-          return (<li key={room.id} className="p-5 dark:hover:bg-hover hover:bg-light-sidebar transition-duration-300 cursor-pointer group">
+          return (
+          <li 
+            key={room.id} 
+            className="p-5 dark:hover:bg-hover hover:bg-light-sidebar transition-duration-300 cursor-pointer group"
+            onClick={() => {
+              // 🌟 2. แยกพฤติกรรมการคลิกตามสถานะห้อง
+              if (currentStatus === 'occupied') {
+                // หา Booking ที่กำลังใช้งานห้องนี้อยู่
+                // (สมมติว่าเช็คจาก ID ห้อง และสถานะ confirm)
+                const activeBooking = bookings.find(
+                  (b) => b.Room.id === room.id && b.status === 'confirm'
+                );
+                
+                if (activeBooking) {
+                  setSelectedBooking(activeBooking);
+                  setIsOccupyModalOpen(true); // เปิด Modal รายละเอียด
+                }
+              } 
+              else if (currentStatus === 'available') {
+                // ถ้าห้องว่าง เปิด Modal จองปกติ
+                setSelectedRoomNumber(room.roomNumber);
+                setIsAddModalOpen(true);
+              }
+              else {
+                // ถ้าเป็น maintenance อาจจะแจ้งเตือนว่าปิดปรับปรุง
+                alert("This room is currently under maintenance.");
+              }
+            }}
+            >
             <h2 className="text-xl font-semibold opacity-80 group-hover:opacity-100">{room.name}</h2>
 
             <div className='flex justify-center py-10 transition-transform duration-300 group-hover:scale-110'>
@@ -68,6 +106,22 @@ export default function RoomsGrid({ displayRooms }: { displayRooms: RoomResp[] }
           </li>)
         })}
       </ul>
+
+      <BookingModal 
+        isAddModalOpen={isAddModalOpen} 
+        setIsAddModalOpen={(val) => {
+          setIsAddModalOpen(val);
+          if (!val) setSelectedRoomNumber(null); // เคลียร์ค่าทิ้งตอนปิด Modal
+        }} 
+        typeOperate='add' 
+        setCurrentDate={setCurrentDate} 
+        currentDate={currentDate} 
+        preselectedRoomNumber={selectedRoomNumber}
+        />
+
+      {isOccupyModalOpen && selectedBooking && (
+        <OccupyModal setIsOccupyModalOpen={setIsOccupyModalOpen} selectedBooking={selectedBooking} />
+      )}
     </>
   )
 }

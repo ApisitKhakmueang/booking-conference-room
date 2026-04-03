@@ -50,7 +50,7 @@ export default function Room() {
 
       // 2.5 ถ้าไม่เจอใน bookings แปลว่าห้องว่าง
       return { ...room, status: 'available' };
-    });
+    }).sort((a, b) => a.roomNumber - b.roomNumber);
   }, [rawRoom, bookings]); // คำนวณใหม่เมื่อสองตัวนี้เปลี่ยน
 
   const isInitialLoading = !rawRoom || rawRoom.length === 0;
@@ -61,7 +61,7 @@ export default function Room() {
       {isInitialLoading ? (
         <RoomGridSkeleton />
       ) : (
-        <RoomsGrid displayRooms={displayRooms} />
+        <RoomsGrid displayRooms={displayRooms} bookings={bookings} />
       )}
     </div>
   )

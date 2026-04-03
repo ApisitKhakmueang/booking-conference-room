@@ -17,7 +17,7 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
 
-export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess }: FormModalProps) {
+export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: FormModalProps) {
   const defaultFormData = {
     title: "",
     date: currentDate,
@@ -187,12 +187,21 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       setSelectedRoom(foundRoom); 
 
     } else {
-      // โหมด add ให้ดึง defaultFormData (ที่มีค่าครบทุก field แล้ว) มาใช้เคลียร์ฟอร์ม
-      setFormData(defaultFormData);
-      setSelectedRoom(rooms[0]); // รีเซ็ต Dropdown กลับเป็นห้องแรกสุด
+      // 🌟 2. โหมด Add: เอา preselectedRoomId มาหาห้อง
+      // ใช้ String() ครอบเพื่อป้องกันบั๊ก Type ไม่ตรงกันเป๊ะๆ (เช่น 1 === "1")
+      const targetRoom = preselectedRoomNumber 
+        ? rooms.find(r => r.roomNumber === preselectedRoomNumber) || rooms[0]
+        : rooms[0];
+
+      // ยัดห้องที่เจอ (หรือห้องแรกถ้าไม่เจอ) ใส่เข้าไปเป็นค่าเริ่มต้น
+      setFormData({
+        ...defaultFormData,
+        room: targetRoom
+      });
+      setSelectedRoom(targetRoom); 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeOperate, selectedEvent, currentDate]);
+  }, [typeOperate, selectedEvent, currentDate, preselectedRoomNumber]);
 
   return (
     <form

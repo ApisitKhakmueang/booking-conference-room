@@ -1,7 +1,78 @@
+import { Button } from "@/components/ui/button";
+import { bookingService } from "@/service/booking.service";
+import { useAuthStore } from "@/stores/auth.store";
 import { OccupyModalProps } from "@/utils/interface/interface";
 import { MonitorX } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function OccupyModal({ setIsOccupyModalOpen, selectedBooking }: OccupyModalProps) {
+  const user = useAuthStore((state) => state.user)
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // สำคัญมาก! ป้องกันไม่ให้การคลิกทะลุไปเปิด Modal แก้ไข
+
+    const bookingStartTime = new Date(selectedBooking.endTime); // เวลาที่เริ่มจอง
+    const currentTime = new Date(); // เวลาปัจจุบันของเครื่อง
+
+    // 🌟 คำนวณหาความห่างของเวลา (ผลลัพธ์เป็นมิลลิวินาที)
+    const timeDifference = bookingStartTime.getTime() - currentTime.getTime();
+    
+    // 1 ชั่วโมง = 60 นาที * 60 วินาที * 1000 มิลลิวินาที = 3,600,000 มิลลิวินาที
+    // const oneHourInMs = 60 * 60 * 1000;
+
+    if (timeDifference <= 0) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot delete an ongoing or past booking.', // แปล: ไม่สามารถลบการจองที่กำลังใช้งานหรือผ่านไปแล้วได้
+        icon: 'error',
+        timer: 2000
+      });
+      return; 
+    }
+
+    // 🌟 2. ดักจับกรณี: "ยังไม่ถึงเวลาจอง แต่เหลือน้อยกว่า 1 ชั่วโมง"
+    // if (timeDifference < oneHourInMs) {
+    //   Swal.fire({
+    //     title: 'Error',
+    //     text: 'Please operate at least 1 hour in advance.',
+    //     icon: 'error',
+    //     timer: 2000
+    //   });
+    //   return; 
+    // }
+
+    // ถามเพื่อความแน่ใจก่อนลบ
+    const confirm = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you really want to delete this booking?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#8B8FC7',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        const result = await bookingService.checkoutBooking(selectedBooking.id);
+        
+        // 🌟 1. เปลี่ยนจาก === 200 เป็นเงื่อนไขที่ครอบคลุมความสำเร็จทั้งหมด (200-299)
+        // เพราะบาง API สั่ง Delete สำเร็จจะตอบ 204 No Content
+        if (result.status >= 200 && result.status < 300) {
+          Swal.fire({
+            title: 'Deleted!',
+            text: 'Your booking has been deleted.',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Failed to delete booking', 'error');
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* พื้นหลังเบลอ */}
@@ -52,12 +123,26 @@ export default function OccupyModal({ setIsOccupyModalOpen, selectedBooking }: O
         </div>
 
         <div className="px-6 py-4 bg-gray-50 dark:bg-sidebar/50 border-t dark:border-sidebar flex justify-end">
-          <button 
+          <Button 
             onClick={() => setIsOccupyModalOpen(false)}
-            className="px-4 py-2 bg-gray-200 dark:bg-sidebar hover:bg-gray-300 dark:hover:bg-white/10 rounded-lg font-medium transition-colors cursor-pointer"
+            className="px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 dark:text-gray-300 dark:bg-transparent dark:border-sidebar dark:hover:bg-white/5 rounded-lg transition-colors shadow-sm"
           >
             Close
-          </button>
+          </Button>
+
+          {/* 🌟 ปุ่ม End สีแดงเด่นชัด */}
+          {user?.id === selectedBooking.User?.id && (
+            <Button 
+              onClick={(e) => {
+                // ใส่ฟังก์ชัน End Booking ตรงนี้
+                setIsOccupyModalOpen(false);
+                handleDelete(e)
+              }}
+              className="px-4 py-2 text-sm font-semibold text-white bg-rose-500 hover:bg-rose-600 rounded-lg shadow-md transition-all ml-2"
+            >
+              End This Booking
+            </Button>
+          )}
         </div>
       </div>
     </div>
