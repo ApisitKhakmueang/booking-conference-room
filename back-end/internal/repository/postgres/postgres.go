@@ -65,7 +65,6 @@ func (p *postgresRepository) DeleteBookingDB(ctx context.Context, booking *domai
 	  WithContext(ctx).
 		Model(deletedBooking).
 		Clauses(clause.Returning{}).
-		Select("status").
 		Where("id = ? AND status = ? AND user_id = ?", booking.ID, "confirm", booking.UserID).
 		Updates(map[string]interface{}{
 			"status":   "cancelled",

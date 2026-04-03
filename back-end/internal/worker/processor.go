@@ -37,8 +37,8 @@ func (p *BookingProcessor) HandleBookingExpired(ctx context.Context, t *asynq.Ta
 		return err
 	}
 
-	if currentBooking.Status == "cancelled" || currentBooking.Status != "confirm" {
-		log.Printf("Booking %s is already %s. Skipping task.", payload.BookingID, currentBooking.Status)
+	if *currentBooking.Status == "cancelled" || *currentBooking.Status != "confirm" {
+		log.Printf("Booking %s is already %s. Skipping task.", payload.BookingID, *currentBooking.Status)
 		return nil // ข้ามไปเลย ถือว่าจบงาน
 	}
 
@@ -73,7 +73,7 @@ func (p *BookingProcessor) HandleBookingStart(ctx context.Context, t *asynq.Task
 		return err
 	}
 
-	if currentBooking.Status == "cancelled" {
+	if *currentBooking.Status == "cancelled" {
 		log.Printf("Booking %s is cancelled. Skipping start task.", payload.BookingID)
 		return nil
 	}

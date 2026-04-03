@@ -184,8 +184,9 @@ type Booking struct {
 	Title					string					`gorm:"unique;default:no_tilte" json:"title,omitempty"`
 	Passcode      string          `gorm:"type:varchar(10);" json:"passcode,omitempty"`
 	
-	// สถานะ: confirm, cancelled, complete
-	Status        string         	`gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete')" json:"status,omitempty"`
+	// สถานะ: confirm, cancelled, complete, expired
+	Status        *string         `gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete', 'expired')" json:"status,omitempty"`
+	CheckedInAt 	*time.Time 			`json:"checkedInAt,omitempty"`
 
 	// Relations
 	Room     			*Room     			`gorm:"foreignKey:RoomID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"Room,omitempty"`
