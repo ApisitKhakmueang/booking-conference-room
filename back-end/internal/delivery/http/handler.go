@@ -114,11 +114,11 @@ func (u *BookingHandler) CheckoutBooking(c *fiber.Ctx) error {
 	booking.ID = bookingID
 	booking.UserID = userID
 
-	if err := u.usecase.DeleteBooking(ctx, booking) ; err != nil {
+	if err := u.usecase.CheckoutBooking(ctx, booking) ; err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
+	return c.Status(fiber.StatusOK).SendString("Checkout booking successfully !")
 }
 
 func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
