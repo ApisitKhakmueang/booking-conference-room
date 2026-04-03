@@ -98,36 +98,45 @@ func (h *Hub) Broadcast(topic string, message []byte) {
 }
 
 func (h *Hub) Run(ctx context.Context) {
-	pubsub := h.rdb.Subscribe(ctx, h.redisChannel)
-	defer pubsub.Close()
-	ch := pubsub.Channel()
+  pubsub := h.rdb.Subscribe(ctx, h.redisChannel)
+  defer pubsub.Close()
+  ch := pubsub.Channel()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case msg := <-ch:
-			// สมมติโครงสร้าง Payload มีทั้ง RoomNumber (จองห้อง) หรือ UserID (แจ้งเตือน)
-			var payload domain.WebSocketPayload
-			
-			if err := json.Unmarshal([]byte(msg.Payload), &payload); err == nil {
-				// เช็คว่ามันคือข้อมูลของอันไหน แล้วประกอบชื่อ Topic ให้ตรงกัน
-				var topic string
-				if payload.Data.RoomNumber != 0 {
-					topic = fmt.Sprintf("booking:%d", payload.Data.RoomNumber)
-				} else if payload.Data.UserID != "" {
-					topic = fmt.Sprintf("user:%s", payload.Data.UserID)
-				} else if payload.Data.Status {
-					topic = "booking:status"
-				}
+  for {
+    select {
+    case <-ctx.Done():
+      return
+    case msg := <-ch:
+      var payload domain.WebSocketPayload
+      
+      if err := json.Unmarshal([]byte(msg.Payload), &payload); err == nil {
+        
+        // ⭐️ เปลี่ยนจาก if-else เป็นการเก็บ Array ของ Topic ที่ต้องส่ง
+        var topicsToNotify []string
 
-				// 🚀 สั่ง Broadcast!
-				if topic != "" {
-					h.Broadcast(topic, []byte(msg.Payload))
-				}
-			}
-		}
-	}
+        // 1. ถ้ามีห้อง ให้แจ้งเตือนห้องนั้น
+        if payload.Data.RoomNumber != 0 {
+          topicsToNotify = append(topicsToNotify, fmt.Sprintf("booking:%d", payload.Data.RoomNumber))
+        }
+        
+        // 2. ถ้ามี User ให้แจ้งเตือน User คนนั้น (เช่น แจ้งเตือนส่วนตัว)
+        if payload.Data.UserID != "" {
+          topicsToNotify = append(topicsToNotify, fmt.Sprintf("user:%s", payload.Data.UserID))
+        }
+        
+        // 3. แจ้งเตือนหน้า Status รวม (คุณอาจจะต้องเช็คว่า Event นี้เกี่ยวกับหน้า Status ไหม)
+        // หมายเหตุ: เช็ค type ของ payload.Data.Status ด้วยนะครับว่าเป็น string หรือ bool
+        if payload.Data.Status { // สมมติว่าเป็น String ("confirm", "cancelled")
+          topicsToNotify = append(topicsToNotify, "booking:status")
+        }
+
+        // 🚀 สั่ง Broadcast ไปยังทุก Topic ที่เกี่ยวข้อง
+        for _, topic := range topicsToNotify {
+          h.Broadcast(topic, []byte(msg.Payload))
+        }
+      }
+    }
+  }
 }
 
 // type Hub struct {
