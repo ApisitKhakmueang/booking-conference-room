@@ -153,7 +153,7 @@ export default function Schedule() {
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4 md:pt-8 pl-4 md:pl-8">
+          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4 md:pt-8">
             <p className="text-2xl font-semibold">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2 pr-4 md:pr-0">
@@ -169,7 +169,7 @@ export default function Schedule() {
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden flex">
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 xl:pr-8 no-scrollbar pb-24">
+            <main className="flex-1 overflow-y-auto py-4 md:py-8 xl:pr-8 no-scrollbar pb-24">
               {events === undefined ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, index) => <CardEventsSkeleton key={index} />)}

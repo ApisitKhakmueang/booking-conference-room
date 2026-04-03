@@ -14,7 +14,7 @@ export function RenderEventGroup({ title, groupEvents, titleColor, handleEditCli
           {groupEvents.length}
         </span>
         
-        <div className="flex-1 h-px bg-gray-200 dark:bg-white/5"></div>
+        {/* <div className="flex-1 h-px bg-gray-200 dark:bg-white/10"></div> */}
       </div>
       <div className="space-y-4">
         {groupEvents.map(event => (
