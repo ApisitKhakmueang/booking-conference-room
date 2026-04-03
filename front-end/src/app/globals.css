@@ -64,7 +64,7 @@
 }
 
 .text-slate {
-  @apply text-slate-500 dark:text-secondary
+  @apply text-slate-500 dark:text-stone-400
 }
 
 /* :root {

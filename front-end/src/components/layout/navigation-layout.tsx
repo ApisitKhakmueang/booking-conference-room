@@ -62,7 +62,7 @@ export default function NavigationLayout({
   
   return (
     <div>
-      <div className="flex flex-col dark:bg-main-background bg-light-main-background dark:text-secondary text-black min-h-screen">
+      <div className="flex flex-col dark:bg-main-background bg-light-main-background dark:dark:text-stone-400 text-black min-h-screen">
         <Sidebar />
 
         <UserBar />
