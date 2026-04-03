@@ -8,7 +8,8 @@ import (
 func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Post("/", handler.CreateBooking)
 	router.Put("/:bookingID", handler.UpdateBooking)
-	router.Delete("/:bookingID", handler.DeleteBooking)
+	router.Delete("/delete/:bookingID", handler.DeleteBooking)
+	router.Delete("/checkout/:bookingID", handler.CheckoutBooking)
 	router.Get("/user", handler.GetUserBooking)
 	router.Get("/history", handler.GetUserHistory)
 }

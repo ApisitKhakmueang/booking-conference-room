@@ -75,6 +75,19 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 	return deletedBooking, nil
 }
 
+func (r *redisRepository) CheckoutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
+	deletedBooking, err := r.postgres.CheckoutBookingDB(ctx, booking);
+	if err != nil {
+		return nil, err
+	}
+
+	r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteUserToCache(ctx, booking.UserID)
+	r.DeleteHistoryToCache(ctx, booking.UserID)
+	
+	return deletedBooking, nil
+}
+
 func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, dateTime.StartStr, dateTime.EndStr)
 

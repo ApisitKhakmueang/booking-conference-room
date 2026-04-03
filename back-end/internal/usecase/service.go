@@ -198,6 +198,28 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,booking *domain.Booki
 	return nil
 }
 
+func (u *bookingUsecase) CheckoutBooking(ctx context.Context,booking *domain.Booking) error {
+	log.Println("GetBookingByID from CheckoutBooking")
+	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
+	if err != nil {
+		return err
+	}
+
+	// if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
+	// 	return err
+	// }
+
+	deletedBooking, err := u.redis.CheckoutBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
+	if err != nil {
+		return errors.New("Don't have this booking")
+	}
+
+	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
+	u.PublishStatus("booking_deleted", completedBooking)
+
+	return nil
+}
+
 func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
 	instBooking := new(domain.Booking)

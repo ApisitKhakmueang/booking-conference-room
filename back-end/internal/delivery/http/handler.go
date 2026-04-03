@@ -102,6 +102,25 @@ func (u *BookingHandler) DeleteBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
 }
 
+func (u *BookingHandler) CheckoutBooking(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	booking := new(domain.Booking)
+	bookingID, err := uuid.Parse(c.Params("bookingID"))
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	booking.ID = bookingID
+	booking.UserID = userID
+
+	if err := u.usecase.DeleteBooking(ctx, booking) ; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
+}
+
 func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	room, err := strconv.Atoi(c.Params("room"))

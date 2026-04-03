@@ -75,6 +75,27 @@ func (p *postgresRepository) DeleteBookingDB(ctx context.Context, booking *domai
 	return deletedBooking, result.Error
 }
 
+func (p *postgresRepository) CheckoutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
+	checkedOutBooking := new(domain.Booking)
+    
+	// เวลาปัจจุบันที่กดคืนห้อง
+	now := time.Now()
+
+	result := p.db.
+		WithContext(ctx).
+		Model(checkedOutBooking).
+		Clauses(clause.Returning{}).
+		Where("id = ? AND user_id = ? AND status = 'confirm'", booking.ID, booking.UserID).
+		// ⭐️ จุดต่าง: เปลี่ยนสถานะเป็น complete และหั่นเวลาจบ
+		Updates(map[string]interface{}{
+				"status":   "complete",
+				"end_time": now,
+				"passcode": nil, // ลบ Passcode ทิ้งเพื่อความปลอดภัย
+		})
+
+	return checkedOutBooking, result.Error
+}
+
 func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
 	var bookings []domain.Booking
 
