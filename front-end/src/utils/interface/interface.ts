@@ -178,3 +178,8 @@ export interface TimeGridViewProps {
   isSyncing: boolean
   currentUser: UserProfile | null
 }
+
+export interface OccupyModalProps { 
+  setIsOccupyModalOpen: (val: boolean) => void, 
+  selectedBooking: BookingEventResponse
+}
