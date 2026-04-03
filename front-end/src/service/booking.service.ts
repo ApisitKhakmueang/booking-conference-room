@@ -29,7 +29,11 @@ export const bookingService = {
   },
 
   deleteBooking: async (bookingID: string | undefined) => {
-    return await api.delete(`${API_URL}/booking/${bookingID}`)
+    return await api.delete(`${API_URL}/booking/delete/${bookingID}`)
+  },
+
+  checkoutBooking: async (bookingID: string | undefined) => {
+    return await api.delete(`${API_URL}/booking/checkout/${bookingID}`)
   }
   
   // เพิ่ม action อื่นๆ เช่น update, delete ได้ที่นี่
