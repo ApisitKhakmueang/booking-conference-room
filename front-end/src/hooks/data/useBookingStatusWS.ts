@@ -73,6 +73,12 @@ export default function useBookingStatusWS() {
             prevBookings.filter((booking) => booking.id !== message.data.booking.id)
           );
           break;
+        
+        case 'booking_noshow':
+          setBookings((prevBookings) => 
+            prevBookings.filter((booking) => booking.id !== message.data.booking.id)
+          );
+          break;
 
         case 'booking_deleted':
           setBookings((prevBookings) => 

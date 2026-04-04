@@ -88,13 +88,19 @@ export function useBookingWebSocket(roomNumber: number, startDate: string, endDa
           );
           break;
 
-        case 'booking_deleted':
+        case 'booking_end':
           setBookings((prevBookings) => 
             prevBookings.filter((booking) => booking.id !== message.data.booking.id)
           );
           break;
 
-        case 'booking_end':
+        case 'booking_noshow':
+          setBookings((prevBookings) => 
+            prevBookings.filter((booking) => booking.id !== message.data.booking.id)
+          );
+          break;
+
+        case 'booking_deleted':
           setBookings((prevBookings) => 
             prevBookings.filter((booking) => booking.id !== message.data.booking.id)
           );

@@ -190,7 +190,6 @@ export default function Schedule() {
 
               ) : (
                 <div className="flex flex-col items-center justify-center h-full min-h-[60vh] opacity-70">
-                  <span className="material-symbols-outlined text-6xl mb-4">event_busy</span>
                   <p className="text-lg font-medium">No Content</p>
                   <p className="text-sm text-center">You don't have any bookings matching the criteria.</p>
                 </div>
