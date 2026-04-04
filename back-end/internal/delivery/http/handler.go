@@ -38,7 +38,7 @@ func (u *BookingHandler) CreateBooking(c *fiber.Ctx) error {
 	
 	booking := new(domain.Booking)
 	if err := c.BodyParser(booking); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	booking.UserID = userID
@@ -70,7 +70,7 @@ func (u *BookingHandler) UpdateBooking(c *fiber.Ctx) error {
 
 	booking := new(domain.Booking)
 	if err := c.BodyParser(booking); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	booking.ID = bookingID
@@ -102,7 +102,7 @@ func (u *BookingHandler) DeleteBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Delete booking successfully !")
 }
 
-func (u *BookingHandler) CheckoutBooking(c *fiber.Ctx) error {
+func (u *BookingHandler) CheckOutBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	booking := new(domain.Booking)
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
@@ -114,11 +114,39 @@ func (u *BookingHandler) CheckoutBooking(c *fiber.Ctx) error {
 	booking.ID = bookingID
 	booking.UserID = userID
 
-	if err := u.usecase.CheckoutBooking(ctx, booking) ; err != nil {
+	if err := u.usecase.CheckOutBooking(ctx, booking) ; err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
 	return c.Status(fiber.StatusOK).SendString("Checkout booking successfully !")
+}
+
+func (u *BookingHandler) CheckInBooking(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	roomID, err := uuid.Parse(c.Params("roomID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	// ⭐️ สร้าง Struct เฉพาะกิจมารับ JSON แค่ฟิลด์เดียว
+	var req struct {
+		Passcode string `json:"passcode"`
+	}
+	
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	if req.Passcode == "" {
+		return c.Status(fiber.StatusBadRequest).SendString("Passcode is required")
+	}
+
+	// ส่ง req.Passcode (ที่เป็น string ธรรมดา) ไปได้เลย ปลอดภัย 100%
+	if err := u.usecase.CheckInBooking(ctx, roomID, req.Passcode); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Checkin booking successfully!")
 }
 
 func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {

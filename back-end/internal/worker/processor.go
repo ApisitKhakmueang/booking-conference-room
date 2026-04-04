@@ -110,7 +110,7 @@ func (p *BookingProcessor) HandleBookingNoShowTask(ctx context.Context, t *asynq
 		return err
 	}
 
-	realNoShowTime := (*currentBooking.StartTime).Add(15 * time.Minute)
+	realNoShowTime := (*currentBooking.StartTime).Add(2 * time.Minute)
 	if time.Now().Before(realNoShowTime) {
 		log.Printf("Booking %s was rescheduled. Real no-show time is %v. Skipping this old task.", payload.BookingID, realNoShowTime)
 		return nil

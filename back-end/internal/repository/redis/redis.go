@@ -75,8 +75,8 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 	return deletedBooking, nil
 }
 
-func (r *redisRepository) CheckoutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	deletedBooking, err := r.postgres.CheckoutBookingDB(ctx, booking);
+func (r *redisRepository) CheckOutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
+	deletedBooking, err := r.postgres.CheckOutBookingDB(ctx, booking);
 	if err != nil {
 		return nil, err
 	}

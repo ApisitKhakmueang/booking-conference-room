@@ -12,7 +12,7 @@ type PostgresRepository interface {
 	CreateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	UpdateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	DeleteBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
-	CheckoutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
+	CheckOutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
 	GetBookingStatusDB(ctx context.Context) ([]domain.Booking, error)
 	GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error)
@@ -32,6 +32,7 @@ type PostgresRepository interface {
 }
 
 type HelperPostgresRepository interface {
+	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 	GetRoomID(ctx context.Context, booking *domain.Booking, roomNumber uint) error
 	IsRoomAvailable(ctx context.Context, booking *domain.Booking) bool

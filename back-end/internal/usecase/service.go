@@ -51,10 +51,10 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	if err != nil {
-		return err
-	}
+	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
 		return err
@@ -95,7 +95,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	booking.Passcode = &finalPasscode
 	booking.ID = uuid.New()
 
-	booking, err = u.redis.CreateBooking(ctx, booking, roomNumber)
+	booking, err := u.redis.CreateBooking(ctx, booking, roomNumber)
 	if err != nil {
 		return err
 	}
@@ -129,10 +129,10 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	if err != nil {
-		return err
-	}
+	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
 		return err
@@ -150,7 +150,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return errors.New("Room unavailable")
 	}
 
-	booking, err = u.redis.UpdateBooking(ctx, booking, roomNumber);
+	booking, err := u.redis.UpdateBooking(ctx, booking, roomNumber);
 	if  err != nil {
 		return err
 	}
@@ -198,8 +198,8 @@ func (u *bookingUsecase) DeleteBooking(ctx context.Context,booking *domain.Booki
 	return nil
 }
 
-func (u *bookingUsecase) CheckoutBooking(ctx context.Context,booking *domain.Booking) error {
-	log.Println("GetBookingByID from CheckoutBooking")
+func (u *bookingUsecase) CheckOutBooking(ctx context.Context,booking *domain.Booking) error {
+	log.Println("GetBookingByID from CheckOutBooking")
 	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
 	if err != nil {
 		return err
@@ -209,13 +209,21 @@ func (u *bookingUsecase) CheckoutBooking(ctx context.Context,booking *domain.Boo
 	// 	return err
 	// }
 
-	deletedBooking, err := u.redis.CheckoutBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
+	deletedBooking, err := u.redis.CheckOutBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
 	if err != nil {
 		return errors.New("Don't have this booking")
 	}
 
 	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
 	u.PublishStatus("booking_deleted", completedBooking)
+
+	return nil
+}
+
+func (u *bookingUsecase) CheckInBooking(ctx context.Context,roomID uuid.UUID, passcode string) error {
+	if err := u.helperPostgres.CheckInBooking(ctx, roomID, passcode); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -477,7 +485,7 @@ func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
 	// ---------------------------------------------------
 	noshowTask, err := worker.NewBookingNoShowTask(booking.ID)
 	if err == nil {
-		noshowTime := (*booking.StartTime).Add(15 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
+		noshowTime := (*booking.StartTime).Add(2 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
 		info, err := u.asynqClient.Enqueue(noshowTask, asynq.ProcessAt(noshowTime))
 		if err != nil {
 			log.Printf("❌ Failed to enqueue noshow task: %v", err)

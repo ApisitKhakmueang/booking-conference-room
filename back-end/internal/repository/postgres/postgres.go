@@ -74,7 +74,7 @@ func (p *postgresRepository) DeleteBookingDB(ctx context.Context, booking *domai
 	return deletedBooking, result.Error
 }
 
-func (p *postgresRepository) CheckoutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
+func (p *postgresRepository) CheckOutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
 	checkedOutBooking := new(domain.Booking)
     
 	// เวลาปัจจุบันที่กดคืนห้อง
@@ -221,35 +221,7 @@ func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Roo
 }
 
 func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
-	// B. ดึงข้อมูลวันหยุดจาก DB (DB Logic)
-	// sDate := startDate.Format("2006-01-02")
-	// eDate := endDate.Format("2006-01-02")
-
-	// log.Printf("start: %v, end: %v", sDate, eDate)
-
-	// var holidays []domain.Holiday
-	// // SQL: SELECT * FROM holidays WHERE date ...
-	// result := p.db.Where("date >= ? AND date <= ?", startDate, endDate).Order("date ASC").Find(&holidays)
-	// if result.Error != nil {
-	// 	return nil, result.Error
-	// }
-
-	// return holidays, nil
-
-	// ---------------------------------------------------------
-	// STEP 1: สร้าง Key สำหรับ Redis
-	// ---------------------------------------------------------
-	// key ควรจะไม่ซ้ำกันตามช่วงเวลา เช่น "holidays:2023-01-01:2023-01-31"
-
-	// ---------------------------------------------------------
-	// STEP 2: ลองดึงจาก Redis ก่อน (Cache Hit)
-	// ---------------------------------------------------------
 	var holidays []domain.Holiday
-
-	// ---------------------------------------------------------
-	// STEP 3: ถ้าไม่เจอ หรือ Redis Error ให้ดึงจาก DB (Cache Miss)
-	// ---------------------------------------------------------
-	// log.Println("Cache MISS: Fetching from DB...")
 	
 	result := p.db.
 		WithContext(ctx). // อย่าลืมใส่ WithContext
@@ -260,11 +232,6 @@ func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date
 	if result.Error != nil {
 		return nil, result.Error
 	}
-
-	// ---------------------------------------------------------
-	// STEP 4: บันทึกลง Redis (Set Cache) เพื่อใช้รอบหน้า
-	// ---------------------------------------------------------
-	// แปลง Struct เป็น JSON (Marshal)
 
 	return holidays, nil
 }
@@ -318,10 +285,36 @@ func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.U
 }
 
 // helper function
-func (r *postgresRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error) {
+func (p *postgresRepository) CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error {
+	now := time.Now()
+	// ⭐️ อนุญาตให้เช็คอินก่อนเวลาเริ่มได้ 15 นาที
+	allowEarlyCheckInTime := now.Add(15 * time.Minute) 
+
+	result := p.db.WithContext(ctx).
+		Model(&domain.Booking{}).
+		// เช็คเงื่อนไขพื้นฐาน
+		Where("room_id = ? AND passcode = ? AND status = ? AND checked_in_at IS NULL", roomID, passcode, "confirm").
+		// ⭐️ start_time ต้องน้อยกว่า (เวลาปัจจุบัน + 15 นาที) และ end_time ต้องมากกว่าเวลาปัจจุบัน
+		Where("start_time <= ? AND end_time > ?", allowEarlyCheckInTime, now).
+		Updates(map[string]interface{}{
+			"checked_in_at": now, 
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("Wrong passcode or room, or it's not time to check in yet")
+	}
+
+	return nil
+}
+
+func (p *postgresRepository) GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking)
 	// ใช้ Preload ดึงข้อมูลตารางที่เกี่ยวข้องมาด้วยให้เหมือนตอน Get ปกติ
-	err := r.db.
+	err := p.db.
 		WithContext(ctx).
 		Preload("Room").
 		Preload("User").

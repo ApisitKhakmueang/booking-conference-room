@@ -11,7 +11,7 @@ type RedisRepository interface {
 	CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) (*domain.Booking, error)
 	UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) (*domain.Booking, error)
 	DeleteBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) (*domain.Booking, error)
-	CheckoutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error)
+	CheckOutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error)
 	GetBooking(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error)
 	GetBookingStatus(ctx context.Context, timeStart string) ([]domain.Booking, error)
 	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error)
