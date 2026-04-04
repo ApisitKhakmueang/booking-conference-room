@@ -10,6 +10,7 @@ import (
 // 1. ตั้งชื่องาน
 const TypeBookingExpired = "booking:expired"
 const TypeBookingStart = "booking:start"
+const TypeBookingNoShow = "booking:noshow"
 // Create booking start
 
 // 2. ข้อมูลที่ต้องฝากไว้ในคิว (เก็บแค่ ID ก็พอ เพราะถึงเวลาเราจะไปดึงของสดใหม่จาก DB)
@@ -44,4 +45,14 @@ func NewBookingStartTask(bookingID uuid.UUID) (*asynq.Task, error) {
 	
 	// สร้าง Task พร้อมแนบ Payload
 	return asynq.NewTask(TypeBookingStart, payload), nil
+}
+
+func NewBookingNoShowTask(bookingID uuid.UUID) (*asynq.Task, error) {
+  payload, err := json.Marshal(BookingStatusPayload{
+    BookingID:  bookingID,
+  })
+  if err != nil {
+    return nil, err
+  }
+  return asynq.NewTask(TypeBookingNoShow, payload), nil
 }

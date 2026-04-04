@@ -26,7 +26,8 @@ type BookingUsecase interface {
 	GetRoomDetails(ctx context.Context) ([]Room, error)
 	GetHoliday(ctx context.Context,date *Date) ([]Holiday, error)
 
-	UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error
+	UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error
+	UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*Booking, error)
 	PublishStatus(event string, completedBooking *Booking)
 }

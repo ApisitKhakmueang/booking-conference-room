@@ -47,9 +47,9 @@ func NewBookingUsecase(
 }
 
 func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-		return err
-	}
+	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+	// 	return err
+	// }
 
 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
@@ -92,7 +92,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		// ถ้าไม่ว่าง (Else): มันจะวนกลับไปสุ่มเลขใหม่เอง ("5678" -> เช็คใหม่)
 	}
 
-	booking.Passcode = finalPasscode
+	booking.Passcode = &finalPasscode
 	booking.ID = uuid.New()
 
 	booking, err = u.redis.CreateBooking(ctx, booking, roomNumber)
@@ -125,9 +125,9 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 }
 
 func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-		return err
-	}
+	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+	// 	return err
+	// }
 
 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
 	if err != nil {
@@ -379,14 +379,27 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 }
 
 // Helper function
-func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) error {
-	booking, roomNumber, err := u.redis.UpdateBookingStatus(ctx, bookingID);
+func (u *bookingUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error {
+	booking, roomNumber, err := u.redis.UpdateBookingEndStatus(ctx, bookingID);
 	if err != nil {
 		return err
 	}
 
 	u.PublishEvent("booking_end", roomNumber, booking)
 	u.PublishStatus("booking_end", booking)
+	// u.PublishStatus("booking_updated_status", booking)
+
+	return nil
+}
+
+func (u *bookingUsecase) UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) error {
+	booking, roomNumber, err := u.redis.UpdateBookingNoshowStatus(ctx, bookingID);
+	if err != nil {
+		return err
+	}
+
+	u.PublishEvent("booking_noshow", roomNumber, booking)
+	u.PublishStatus("booking_noshow", booking)
 	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil
@@ -438,26 +451,55 @@ func (u *bookingUsecase) PublishEvent(event string, roomNumber uint, completedBo
 }
 
 func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
-	endTask, endTaskErr := worker.NewBookingExpiredTask(booking.ID)
-	startTask, startTaskErr := worker.NewBookingStartTask(booking.ID)
-	// Create booking start endTask
-	if endTaskErr == nil || startTaskErr == nil {
-		// Asynq Client จะโยนงานนี้ไปฝากไว้ใน Redis ก่อน
-		// ใช้ `asynq.ProcessAt` เพื่อระบุเวลาเป๊ะๆ ที่จะให้งานนี้ทำงาน!
-		endInfo, endErr := u.asynqClient.Enqueue(endTask, asynq.ProcessAt(*booking.EndTime))
-		
-		if endErr != nil {
-			log.Printf("❌ Failed to enqueue end task: %v", endErr)
-		} else {
-			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.EndTime, endInfo.ID)
-		}
+	// ป้องกันเหนียวไว้ก่อน: เช็คว่าเวลาไม่เป็น nil แน่ๆ ป้องกันระบบ Panic
+	if booking.StartTime == nil || booking.EndTime == nil {
+		log.Println("❌ Error: StartTime or EndTime is nil. Cannot enqueue tasks.")
+		return
+	}
 
-		startInfo, startErr := u.asynqClient.Enqueue(startTask, asynq.ProcessAt(*booking.StartTime))
-		
-		if startErr != nil {
-			log.Printf("❌ Failed to enqueue start task: %v", startErr)
+	// ---------------------------------------------------
+	// 1. งานเริ่มต้น (Start Task)
+	// ---------------------------------------------------
+	startTask, err := worker.NewBookingStartTask(booking.ID)
+	if err == nil {
+		info, err := u.asynqClient.Enqueue(startTask, asynq.ProcessAt(*booking.StartTime))
+		if err != nil {
+			log.Printf("❌ Failed to enqueue start task: %v", err)
 		} else {
-			log.Printf("✅ Task enqueued! Will execute at: %v (ID: %s)", booking.StartTime, startInfo.ID)
+			log.Printf("✅ Start Task enqueued! Will execute at: %v (ID: %s)", *booking.StartTime, info.ID)
 		}
+	} else {
+		log.Printf("❌ Failed to create start task: %v", err)
+	}
+
+	// ---------------------------------------------------
+	// 2. งานเช็คคนไม่มา (No-Show Task) -> StartTime + 15 นาที
+	// ---------------------------------------------------
+	noshowTask, err := worker.NewBookingNoShowTask(booking.ID)
+	if err == nil {
+		noshowTime := (*booking.StartTime).Add(15 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
+		info, err := u.asynqClient.Enqueue(noshowTask, asynq.ProcessAt(noshowTime))
+		if err != nil {
+			log.Printf("❌ Failed to enqueue noshow task: %v", err)
+		} else {
+			log.Printf("✅ No-Show Task enqueued! Will execute at: %v (ID: %s)", noshowTime, info.ID)
+		}
+	} else {
+		log.Printf("❌ Failed to create noshow task: %v", err)
+	}
+
+	// ---------------------------------------------------
+	// 3. งานหมดเวลา (Expired/End Task)
+	// ---------------------------------------------------
+	endTask, err := worker.NewBookingExpiredTask(booking.ID)
+	if err == nil {
+		info, err := u.asynqClient.Enqueue(endTask, asynq.ProcessAt(*booking.EndTime))
+		if err != nil {
+			log.Printf("❌ Failed to enqueue end task: %v", err)
+		} else {
+			log.Printf("✅ End Task enqueued! Will execute at: %v (ID: %s)", *booking.EndTime, info.ID)
+		}
+	} else {
+		log.Printf("❌ Failed to create end task: %v", err)
 	}
 }

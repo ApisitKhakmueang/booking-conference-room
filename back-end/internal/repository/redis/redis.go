@@ -223,13 +223,31 @@ func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]
 	return holidays, nil
 }
 
-func (r *redisRepository) UpdateBookingStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
+func (r *redisRepository) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
 	roomNumber, err := r.postgres.GetRoomNumber(ctx, bookingID)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	updateBooking, err := r.postgres.UpdateBookingStatusDB(ctx, bookingID, "complete")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	r.DeleteBookingToCache(ctx, roomNumber)
+	r.DeleteUserToCache(ctx, updateBooking.UserID)
+	r.DeleteHistoryToCache(ctx, updateBooking.UserID)
+
+	return updateBooking, roomNumber, nil
+}
+
+func (r *redisRepository) UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
+	roomNumber, err := r.postgres.GetRoomNumber(ctx, bookingID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	updateBooking, err := r.postgres.UpdateBookingStatusDB(ctx, bookingID, "no_show")
 	if err != nil {
 		return nil, 0, err
 	}

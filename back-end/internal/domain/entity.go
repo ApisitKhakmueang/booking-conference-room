@@ -182,10 +182,10 @@ type Booking struct {
 	StartTime     *time.Time      `gorm:"not null" json:"startTime,omitempty"`
 	EndTime       *time.Time      `gorm:"not null" json:"endTime,omitempty"`
 	Title					string					`gorm:"unique;default:no_tilte" json:"title,omitempty"`
-	Passcode      string          `gorm:"type:varchar(10);" json:"passcode,omitempty"`
+	Passcode      *string          `gorm:"type:varchar(10);" json:"passcode,omitempty"`
 	
 	// สถานะ: confirm, cancelled, complete, expired
-	Status        *string         `gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete', 'expired')" json:"status,omitempty"`
+	Status        *string         `gorm:"type:varchar(20);default:'confirm';check:status IN ('confirm', 'cancelled', 'complete', 'no_show')" json:"status,omitempty"`
 	CheckedInAt 	*time.Time 			`json:"checkedInAt,omitempty"`
 
 	// Relations
