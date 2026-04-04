@@ -15,7 +15,7 @@ export const bookingService = {
   },
 
   fetchHolidays: async (startYear:string, endYear: string) => {
-    const response = await api.get(`${API_URL}/holiday?startDate=${startYear}&endDate=${endYear}`)
+    const response = await api.get(`${API_URL}/holidays?startDate=${startYear}&endDate=${endYear}`)
     return response.data
   },
 

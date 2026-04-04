@@ -41,7 +41,7 @@ export default function NavigationLayout({
   const fetchRoom = useCallback(async () => {
     const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
     try {
-      const response = await axios.get(`${url as string}/room/details`);
+      const response = await axios.get(`${url as string}/rooms/details`);
       setRoom(response.data); // เก็บข้อมูลดิบลง State
     } catch(error) {
       console.log('error: ', error);
