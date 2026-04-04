@@ -6,15 +6,22 @@ import (
 )
 
 func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
-	router.Post("/", handler.CreateBooking)
-	router.Put("/:bookingID", handler.UpdateBooking)
-	router.Delete("/delete/:bookingID", handler.DeleteBooking)
-	router.Delete("/checkout/:bookingID", handler.CheckoutBooking)
-	router.Get("/user", handler.GetUserBooking)
-	router.Get("/history", handler.GetUserHistory)
+	// CRUD พื้นฐาน
+	router.Post("/", handler.CreateBooking)             // POST   /bookings/
+	router.Put("/:bookingID", handler.UpdateBooking)    // PUT    /bookings/:id
+	router.Delete("/:bookingID", handler.DeleteBooking) // DELETE /bookings/:id (ลบคำว่า /delete ออก)
+
+	// Action เฉพาะกิจ (อิงตาม ID)
+	router.Patch("/:bookingID/checkout", handler.CheckOutBooking) // PATCH /bookings/:id/checkout (เปลี่ยนมาใช้ Patch/Post)
+	
+	// ข้อมูลส่วนตัวของคนที่ Login
+	router.Get("/me", handler.GetUserBooking)           // GET /bookings/me
+	router.Get("/me/history", handler.GetUserHistory)   // GET /bookings/me/history
 }
 
 func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
-	router.Get("/holiday", handler.GetHoliday)
-	router.Get("/room/details", handler.GetRoomDetails)
+	// มาตรฐานมักจะใช้เป็นพหูพจน์ (Plural)
+	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin
+	router.Get("/holidays", handler.GetHoliday) 
+	router.Get("/rooms/details", handler.GetRoomDetails) 
 }

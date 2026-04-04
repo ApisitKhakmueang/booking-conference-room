@@ -5,12 +5,12 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 export const bookingService = {
   // ดึงข้อมูลการจองตามวันที่
   fetchUserBookings: async (date: string) => {
-    const response = await api.get(`${API_URL}/booking/user?date=${date}`);
+    const response = await api.get(`${API_URL}/booking/me?date=${date}`);
     return response.data;
   },
 
   fetchUserHistory: async (date: string) => {
-    const response = await api.get(`${API_URL}/booking/history?date=${date}`);
+    const response = await api.get(`${API_URL}/booking/me/history?date=${date}`);
     return response.data;
   },
 
@@ -29,11 +29,11 @@ export const bookingService = {
   },
 
   deleteBooking: async (bookingID: string | undefined) => {
-    return await api.delete(`${API_URL}/booking/delete/${bookingID}`)
+    return await api.delete(`${API_URL}/booking/${bookingID}`)
   },
 
   checkoutBooking: async (bookingID: string | undefined) => {
-    return await api.delete(`${API_URL}/booking/checkout/${bookingID}`)
+    return await api.patch(`${API_URL}/booking/${bookingID}/checkout`)
   }
   
   // เพิ่ม action อื่นๆ เช่น update, delete ได้ที่นี่
