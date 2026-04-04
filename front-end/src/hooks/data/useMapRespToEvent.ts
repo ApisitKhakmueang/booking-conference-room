@@ -4,6 +4,7 @@ import { BookingEventResponse } from "@/utils/interface/response";
 const statusMap: Record<string, string> = {
   'confirm': 'Confirmed',
   'cancelled': 'Cancelled',
+  'no_show' : 'No Show',
   'complete': 'Completed', // หรือจะใช้คำว่า 'Complete' เฉยๆ ก็ได้ตาม UI
 };
 

@@ -1,4 +1,4 @@
-const tabs = ["ALL", "COMPLETED", "CANCELLED"];
+const tabs = ["ALL", "COMPLETED", "CANCELLED", "NO SHOW"];
 
 export default function ActiveTab({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) {
   return (

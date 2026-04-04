@@ -112,7 +112,7 @@ export interface RoomSelectorProps {
   className?: string;
 }
 
-export type BookingStatus = 'Confirmed' | 'Completed' | 'Cancelled';
+export type BookingStatus = 'Confirmed' | 'Completed' | 'Cancelled' | 'No Show';
 
 export interface BookingEvent {
   id: string;
@@ -156,7 +156,6 @@ export interface DesktopSidebarScheduleProps {
 
 export interface EventCardHistoryProps { 
   event: BookingEvent 
-  setCurrentDate: (date: Date) => void
 }
 
 export interface DesktopSidebarHistoryProps {

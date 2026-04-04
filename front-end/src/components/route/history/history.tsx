@@ -122,10 +122,7 @@ export default function History() {
                 // ถ้าโหลดเสร็จแล้ว และมีข้อมูล ก็ map การ์ดจริงตามปกติ
                 filteredEvents.map((event) => (
                   <div key={event.id}>
-                    <CardEvents 
-                      event={event} 
-                      setCurrentDate={setCurrentDate} 
-                    />
+                    <CardEvents event={event} />
                   </div>
                 ))
               ) : (

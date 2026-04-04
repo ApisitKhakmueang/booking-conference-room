@@ -12,15 +12,21 @@ const STATUS_THEME: Record<string, { text: string; bg: string; shadow: string }>
     text: "text-rose-600 dark:text-rose-400",
     bg: "bg-rose-500 dark:bg-rose-400",
     shadow: "shadow-[0_0_8px_rgba(244,63,94,0.4)] dark:shadow-[0_0_8px_rgba(251,113,133,0.6)]"
+  },
+  'No Show': {
+    text: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-500 dark:bg-orange-400",
+    shadow: "shadow-[0_0_8px_rgba(244,63,94,0.4)] dark:shadow-[0_0_8px_rgba(251,113,133,0.6)]"
   }
 };
 
-export default function CardEvents({ event, setCurrentDate } : EventCardHistoryProps) {
+export default function CardEvents({ event } : EventCardHistoryProps) {
   const eventDate = new Date(event.date)
   const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
   const theme = STATUS_THEME[event.status] || STATUS_THEME['confirm'];
+  console.log("event: ", event)
 
   return (
     <div 

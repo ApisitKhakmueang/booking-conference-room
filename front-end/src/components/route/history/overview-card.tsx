@@ -55,6 +55,23 @@ export default function OverviewCard({ events } : { events?: BookingEvent[]}) {
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-end text-[11px] font-bold uppercase tracking-wider">
+                <span className="text-orange-600 dark:text-orange-400">No Show</span>
+                <span className="text-dark-purple dark:text-white">
+                  {events?.filter(e => e.status === 'No Show').length} 
+                  ({events && events.length > 0 ? Math.round((events.filter(e => e.status === 'No Show').length / events.length) * 100) : 0}%)
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-dark-purple/10 dark:bg-white/5 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-orange-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.4)]" 
+                  style={{ width: events && events.length > 0 ? `${(events.filter(e => e.status === 'No Show').length / events.length) * 100}%` : '0%' }} 
+                />
+              </div>
+            </div>
+
+
           </div>
 
           {/* 3. Footer Hint */}
