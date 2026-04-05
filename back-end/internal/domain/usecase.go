@@ -22,7 +22,7 @@ type BookingUsecase interface {
 	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) (error)
 	GetBooking(ctx context.Context,date *Date, roomNumber uint) ([]Booking, error)
 	GetBookingStatus(ctx context.Context) ([]Booking, error)
-	GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*Booking, error)
+	GetSingleBookingStatus(ctx context.Context, roomNumber int) (*Booking, error)
 	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
 	GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
 	GetRoomDetails(ctx context.Context) ([]Room, error)

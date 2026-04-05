@@ -139,18 +139,28 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 	return bookings, nil
 }
 
-func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking := new(domain.Booking)
+func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomNumber int) (*domain.Booking, error) {
+	log.Println("roomNumber: ", roomNumber)
+
+	booking := new(domain.Booking) // เป็น Pointer อยู่แล้ว
 	now := time.Now()
 
 	result := p.db.
 		WithContext(ctx).
-		Preload("Room").
-		Preload("User").
-		Where("start_time <= ? AND end_time > ? AND status = ?", now, now, "confirm").
-		First(&booking)
+		Preload("User"). // User ใช้ Preload ปกติเพราะเราไม่ได้เอามากรองข้อมูล
+		Preload("Room"). // ยังต้องใส่ไว้ เพื่อให้ GORM ยัดข้อมูล Room ลงใน Struct ให้ตอนส่งกลับ
+		// ⭐️ 1. สั่ง JOIN ตาราง rooms เข้ากับ bookings
+		Joins("JOIN rooms ON rooms.id = bookings.room_id").
+		// ⭐️ 2. เติมชื่อตารางนำหน้าคอลัมน์ เพื่อป้องกัน Database สับสน
+		Where("bookings.start_time <= ? AND bookings.end_time > ? AND bookings.status = ? AND rooms.room_number = ?", 
+            now, now, "confirm", roomNumber).
+		First(booking) // เอา & ออกได้เลยครับ เพราะ booking เป็น new() ที่เป็น Pointer อยู่แล้ว
 
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, result.Error
 	}
 

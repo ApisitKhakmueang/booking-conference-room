@@ -267,8 +267,8 @@ func (u *bookingUsecase) GetBookingStatus(ctx context.Context) ([]domain.Booking
 	return booking, nil
 }
 
-func (u *bookingUsecase) GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking, err := u.redis.GetSingleBookingStatus(ctx, roomID)
+func (u *bookingUsecase) GetSingleBookingStatus(ctx context.Context, roomNumber int) (*domain.Booking, error) {
+	booking, err := u.redis.GetSingleBookingStatus(ctx, roomNumber)
 	if err != nil {
 		return nil, err
 	}

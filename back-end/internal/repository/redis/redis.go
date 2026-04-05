@@ -173,8 +173,8 @@ func (r *redisRepository) GetBookingStatus(ctx context.Context) ([]domain.Bookin
 	return bookings, nil
 }
 
-func (r *redisRepository) GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking, err := r.postgres.GetSingleBookingStatusDB(ctx, roomID)
+func (r *redisRepository) GetSingleBookingStatus(ctx context.Context, roomNumber int) (*domain.Booking, error) {
+	booking, err := r.postgres.GetSingleBookingStatusDB(ctx, roomNumber)
 	if err != nil {
 		return nil, err
 	}
