@@ -139,6 +139,24 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 	return bookings, nil
 }
 
+func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+	booking := new(domain.Booking)
+	now := time.Now()
+
+	result := p.db.
+		WithContext(ctx).
+		Preload("Room").
+		Preload("User").
+		Where("start_time <= ? AND end_time > ? AND status = ?", now, now, "confirm").
+		First(&booking)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return booking, nil
+}
+
 func (p *postgresRepository) GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
 	layout := "2006-01"
 	startTime, err := time.Parse(layout, date)

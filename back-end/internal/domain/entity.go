@@ -94,6 +94,7 @@ func (d DateRes) Time() time.Time {
 type WebSocketPayload struct {
 	Type string 						`json:"type"`
 	Data struct {
+		RoomID 			uuid.UUID `json:"room_id"`
 		RoomNumber 	uint 			`json:"room_number"`
 		UserID     	string 		`json:"user_id"`
 		Status			bool			`json:"status"`

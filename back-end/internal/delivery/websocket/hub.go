@@ -3,12 +3,14 @@ package Websocket
 import (
 	"context"
 	"encoding/json"
+
 	// "log"
-	"sync"
 	"fmt"
+	"sync"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/websocket/v2"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -126,6 +128,10 @@ func (h *Hub) Run(ctx context.Context) {
         
         // 3. แจ้งเตือนหน้า Status รวม (คุณอาจจะต้องเช็คว่า Event นี้เกี่ยวกับหน้า Status ไหม)
         // หมายเหตุ: เช็ค type ของ payload.Data.Status ด้วยนะครับว่าเป็น string หรือ bool
+				if payload.Data.RoomID != uuid.Nil {
+					topicsToNotify = append(topicsToNotify, fmt.Sprintf("booking:status:%s", payload.Data.RoomID))
+				}
+				
         if payload.Data.Status { // สมมติว่าเป็น String ("confirm", "cancelled")
           topicsToNotify = append(topicsToNotify, "booking:status")
         }

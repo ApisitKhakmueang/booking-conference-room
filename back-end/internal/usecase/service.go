@@ -258,9 +258,17 @@ func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomN
 }
 
 func (u *bookingUsecase) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
-	timeStart := time.Now().Format("2006-01-02")
+	booking, err := u.redis.GetBookingStatus(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	booking, err := u.redis.GetBookingStatus(ctx, timeStart)
+	// log.Printf("booking: %v", booking)
+	return booking, nil
+}
+
+func (u *bookingUsecase) GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+	booking, err := u.redis.GetSingleBookingStatus(ctx, roomID)
 	if err != nil {
 		return nil, err
 	}
@@ -404,6 +412,7 @@ func (u *bookingUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID u
 
 	u.PublishEvent("booking_end", roomNumber, booking)
 	u.PublishStatus("booking_end", booking)
+	u.PublishRoomStatus("booking_end", booking)
 	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil
@@ -417,6 +426,7 @@ func (u *bookingUsecase) UpdateBookingNoshowStatus(ctx context.Context, bookingI
 
 	u.PublishEvent("booking_noshow", roomNumber, booking)
 	u.PublishStatus("booking_noshow", booking)
+	u.PublishRoomStatus("booking_noshow", booking)
 	// u.PublishStatus("booking_updated_status", booking)
 
 	return nil
@@ -430,6 +440,23 @@ func (u *bookingUsecase) GetBookingByID(ctx context.Context, id uuid.UUID) (*dom
 	}
 
 	return booking, nil
+}
+
+func (u *bookingUsecase) PublishRoomStatus(event string, completedBooking *domain.Booking) {
+	payload := map[string]interface{}{
+		"room_id":	completedBooking.RoomID,
+		"booking":	completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
+	}
+
+	// log.Printf("Publishing real-time event: %v", payload)
+
+	go func() {
+		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
+		bgCtx := context.Background()
+		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
+			log.Printf("Failed to publish real-time event: %v", pubErr)
+		}
+	}()
 }
 
 func (u *bookingUsecase) PublishStatus(event string, completedBooking *domain.Booking) {
@@ -494,7 +521,7 @@ func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
 	// ---------------------------------------------------
 	noshowTask, err := worker.NewBookingNoShowTask(booking.ID)
 	if err == nil {
-		noshowTime := (*booking.StartTime).Add(2 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
+		noshowTime := (*booking.StartTime).Add(15 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
 		info, err := u.asynqClient.Enqueue(noshowTask, asynq.ProcessAt(noshowTime))
 		if err != nil {
 			log.Printf("❌ Failed to enqueue noshow task: %v", err)

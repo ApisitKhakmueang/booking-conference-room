@@ -163,7 +163,7 @@ func (r *redisRepository) GetUserHistory(ctx context.Context, userID uuid.UUID, 
 	return bookings, nil
 }
 
-func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string) ([]domain.Booking, error) {
+func (r *redisRepository) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
 	bookings, err := r.postgres.GetBookingStatusDB(ctx)
 	if err != nil {
 		return nil, err
@@ -171,6 +171,16 @@ func (r *redisRepository) GetBookingStatus(ctx context.Context, timeStart string
 
 	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
 	return bookings, nil
+}
+
+func (r *redisRepository) GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+	booking, err := r.postgres.GetSingleBookingStatusDB(ctx, roomID)
+	if err != nil {
+		return nil, err
+	}
+
+	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
+	return booking, nil
 }
 
 func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, error) {

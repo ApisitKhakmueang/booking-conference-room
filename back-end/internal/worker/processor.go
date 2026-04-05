@@ -90,6 +90,7 @@ func (p *BookingProcessor) HandleBookingStartTask(ctx context.Context, t *asynq.
 
 	// 2. สั่ง DB ให้อัปเดตสถานะ (เช่น UPDATE bookings SET status = 'completed' WHERE id = ?)
 	p.usecase.PublishStatus("booking_start", currentBooking)
+	p.usecase.PublishRoomStatus("booking_start", currentBooking)
 
 	return nil // Return nil แปลว่างานสำเร็จ Asynq จะลบงานนี้ออกจาก Redis ให้เลย
 }
@@ -110,7 +111,7 @@ func (p *BookingProcessor) HandleBookingNoShowTask(ctx context.Context, t *asynq
 		return err
 	}
 
-	realNoShowTime := (*currentBooking.StartTime).Add(2 * time.Minute)
+	realNoShowTime := (*currentBooking.StartTime).Add(15 * time.Minute)
 	if time.Now().Before(realNoShowTime) {
 		log.Printf("Booking %s was rescheduled. Real no-show time is %v. Skipping this old task.", payload.BookingID, realNoShowTime)
 		return nil

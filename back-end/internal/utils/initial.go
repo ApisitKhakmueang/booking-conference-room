@@ -163,10 +163,13 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
+
+	wsWithoutBooking := wsGroup.Group("/", middleware.WebsocketMiddleware)
 	
 	controller.InitialHelperRoute(api, handler) // Route ที่ไม่ต้องการ Auth
 	controller.InitialBookingRoute(bookingAPI, handler)
 	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)
+	controller.InitialWSRoute(wsWithoutBooking, ws, supabaseClient)
 
 	// app.Get("/api/product/:id", handler.TestRedis)
 
