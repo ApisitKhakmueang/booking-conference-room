@@ -7,6 +7,7 @@ import (
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/websocket/v2"
+	"github.com/google/uuid"
 )
 
 // สร้าง Struct เก็บ Dependency ที่จำเป็น
@@ -106,17 +107,17 @@ func (w *WSBookingHandler) GetBookingStatus(c *websocket.Conn) {
 
 func (w *WSBookingHandler) GetSingleBookingStatus(c *websocket.Conn) {
 	ctx := context.Background()
-	room, err := strconv.Atoi(c.Params("room"))
+	roomID, err := uuid.Parse(c.Params("roomID"))
 	if err != nil {
 		c.WriteJSON(map[string]string{"error": err.Error()})
 	}
 
-	topic := fmt.Sprintf("booking:status:%d", room)
+	topic := fmt.Sprintf("booking:status:%d", roomID)
 
 	w.hub.Register(c, topic)
 	defer w.hub.Unregister(c, topic)
 
-	response, err := w.usecase.GetSingleBookingStatus(ctx, room)
+	response, err := w.usecase.GetSingleBookingStatus(ctx, roomID)
 
 	if err == nil {
 		payload := map[string]interface{}{

@@ -15,7 +15,7 @@ type PostgresRepository interface {
 	CheckOutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
 	GetBookingStatusDB(ctx context.Context) ([]domain.Booking, error)
-	GetSingleBookingStatusDB(ctx context.Context, roomNumber int) (*domain.Booking, error)
+	GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error)
 	GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error)
 	GetUserHistoryDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error)
 	GetRoomDetailsDB(ctx context.Context) ([]domain.Room, error)

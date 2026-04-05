@@ -59,19 +59,31 @@ func (p *postgresRepository) UpdateBookingDB(ctx context.Context, booking *domai
 }
 
 func (p *postgresRepository) DeleteBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
-	// อัปเดตเฉพาะชื่อและอายุ (Name, Age)
 	deletedBooking := new(domain.Booking)
+	now := time.Now()
+
 	result := p.db.
-	  WithContext(ctx).
+		WithContext(ctx).
 		Model(deletedBooking).
 		Clauses(clause.Returning{}).
-		Where("id = ? AND status = ? AND user_id = ?", booking.ID, "confirm", booking.UserID).
+		// ⭐️ ไฮไลท์: ต้องยังไม่เช็คอิน (IS NULL) และ เวลาปัจจุบันต้องยังไม่ถึงเวลาเริ่ม (start_time > now)
+		Where("id = ? AND status = ? AND user_id = ? AND checked_in_at IS NULL AND start_time > ?", 
+			booking.ID, "confirm", booking.UserID, now).
 		Updates(map[string]interface{}{
 			"status":   "cancelled",
-			"passcode": nil, // ส่ง nil เพื่อบังคับให้เป็น NULL ใน Database
-    },
-	)
-	return deletedBooking, result.Error
+			"passcode": nil,
+		})
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		// แจ้ง Error ให้ชัดเจนว่าทำไมถึงยกเลิกไม่ได้
+		return nil, errors.New("cannot cancel: booking already started, checked in, or not found")
+	}
+
+	return deletedBooking, nil
 }
 
 func (p *postgresRepository) CheckOutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error) {
@@ -139,8 +151,8 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 	return bookings, nil
 }
 
-func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomNumber int) (*domain.Booking, error) {
-	log.Println("roomNumber: ", roomNumber)
+func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+	log.Println("roomNumber: ", roomID)
 
 	booking := new(domain.Booking) // เป็น Pointer อยู่แล้ว
 	now := time.Now()
@@ -149,11 +161,7 @@ func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomN
 		WithContext(ctx).
 		Preload("User"). // User ใช้ Preload ปกติเพราะเราไม่ได้เอามากรองข้อมูล
 		Preload("Room"). // ยังต้องใส่ไว้ เพื่อให้ GORM ยัดข้อมูล Room ลงใน Struct ให้ตอนส่งกลับ
-		// ⭐️ 1. สั่ง JOIN ตาราง rooms เข้ากับ bookings
-		Joins("JOIN rooms ON rooms.id = bookings.room_id").
-		// ⭐️ 2. เติมชื่อตารางนำหน้าคอลัมน์ เพื่อป้องกัน Database สับสน
-		Where("bookings.start_time <= ? AND bookings.end_time > ? AND bookings.status = ? AND rooms.room_number = ?", 
-            now, now, "confirm", roomNumber).
+		Where("start_time <= ? AND end_time > ? AND status = ? AND room_id = ?", now, now, "confirm", roomID).
 		First(booking) // เอา & ออกได้เลยครับ เพราะ booking เป็น new() ที่เป็น Pointer อยู่แล้ว
 
 	if result.Error != nil {
