@@ -73,14 +73,12 @@ export default function Schedule() {
       inProgress: [],
       upcoming: [],
       normal: [],
-      completed: []
     };
 
     filteredEvents.forEach(event => {
       const status = getLiveStatus(event.startTime, event.endTime);
       if (status === 'in-progress') groups.inProgress.push(event);
       else if (status === 'upcoming') groups.upcoming.push(event);
-      else if (status === 'completed') groups.completed.push(event);
       else groups.normal.push(event);
     });
 
@@ -153,7 +151,7 @@ export default function Schedule() {
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4 md:pt-8">
+          <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4">
             <p className="text-2xl font-semibold">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2 pr-4 md:pr-0">
