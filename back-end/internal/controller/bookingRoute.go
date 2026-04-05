@@ -24,4 +24,5 @@ func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin
 	router.Get("/holidays", handler.GetHoliday) 
 	router.Get("/rooms/details", handler.GetRoomDetails) 
+	router.Get("/room/:room", handler.GetSingleRoomDetails) // GET   /bookings/room/:id
 }

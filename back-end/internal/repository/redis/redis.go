@@ -199,6 +199,32 @@ func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, er
 	return rooms, nil
 }
 
+func (r *redisRepository) GetSingleRoomDetails(ctx context.Context, roomNumber int) (*domain.Room, error) {
+	cacheKey := fmt.Sprintf("room:details:%d", roomNumber)
+
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		room := new(domain.Room)
+		if err := json.Unmarshal([]byte(vals), &room); err != nil {
+			return nil, err
+		}
+
+		return room, nil
+	}
+
+	room, err := r.postgres.GetSingleRoomDetailsDB(ctx, roomNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	if jsonBytes, err := json.Marshal(room); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
+	}
+
+	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
+	return room, nil
+}
+
 func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
 	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
 

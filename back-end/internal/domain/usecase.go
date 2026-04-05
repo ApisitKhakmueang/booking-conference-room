@@ -25,6 +25,7 @@ type BookingUsecase interface {
 	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
 	GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
 	GetRoomDetails(ctx context.Context) ([]Room, error)
+	GetSingleRoomDetails(ctx context.Context, roomNumber int) (*Room, error)
 	GetHoliday(ctx context.Context,date *Date) ([]Holiday, error)
 
 	UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error

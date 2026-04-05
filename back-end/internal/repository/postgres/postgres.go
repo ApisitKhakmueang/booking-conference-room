@@ -220,6 +220,22 @@ func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Roo
 	return room, nil
 }
 
+func (p *postgresRepository) GetSingleRoomDetailsDB(ctx context.Context, roomNumber int) (*domain.Room, error) {
+	room := new(domain.Room)
+
+	result := p.db.
+		WithContext(ctx).
+		Where("room_number = ?", roomNumber).
+		Select("id, name, capacity, is_active, room_number").
+		First(&room)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return room, nil
+}
+
 func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
 	var holidays []domain.Holiday
 	

@@ -296,6 +296,15 @@ func (u *bookingUsecase) GetRoomDetails(ctx context.Context) ([]domain.Room, err
 	return rooms, nil
 }
 
+func (u *bookingUsecase) GetSingleRoomDetails(ctx context.Context, roomNumber int) (*domain.Room, error) {
+	room, err := u.redis.GetSingleRoomDetails(ctx, roomNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return room, nil
+}
+
 func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]domain.Holiday, error) {
 // 	// loc := time.FixedZone("ICT", 7*60*60)
 // 	// startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)

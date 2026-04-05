@@ -219,7 +219,6 @@ func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(bookings)
 }
 
-
 func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
 	reponse, err := u.usecase.GetRoomDetails(c.Context())
 	if err != nil {
@@ -227,6 +226,20 @@ func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(reponse)
+}
+
+func (u *BookingHandler) GetSingleRoomDetails(c *fiber.Ctx) error {
+	roomNumber, err := strconv.Atoi(c.Params("room"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	room, err := u.usecase.GetSingleRoomDetails(c.Context(), roomNumber)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.JSON(room)
 }
 
 func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
