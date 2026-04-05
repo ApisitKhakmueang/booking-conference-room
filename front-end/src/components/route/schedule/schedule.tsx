@@ -13,6 +13,7 @@ import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
 import MobileFilter from "./mobile-filter";
 import { RenderEventGroup } from "./event-group";
+import Swal from "sweetalert2";
 
 export default function Schedule() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -129,8 +130,27 @@ export default function Schedule() {
       const data = await bookingService.fetchUserBookings(formattedDate);
       const formattedEvents = useMapResponseToEvents(data);
       setEvents(formattedEvents);
-    } catch (error) {
-      console.log('error: ', error);
+    } catch (error: any) {
+      console.error("Error fetching room data:", error);
+
+      // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
+      if (error.response?.status === 404) {
+        Swal.fire({
+          title: 'Room Not Found',
+          text: "Not found the events",
+          icon: 'warning',
+          confirmButtonColor: '#8370ff', // สีม่วงเข้มให้เข้าธีมเว็บ
+        })
+        return;
+      }
+
+      // 🌟 ดักเคส: Error อื่นๆ (เช่น เซิร์ฟเวอร์ล่ม, เน็ตหลุด)
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#8370ff',
+      });
     }
   }, [currentDate.getMonth(), currentDate.getFullYear()]);
 

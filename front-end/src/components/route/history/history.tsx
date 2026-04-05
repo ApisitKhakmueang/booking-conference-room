@@ -11,6 +11,7 @@ import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
 import { bookingService } from "@/service/booking.service";
 import ActiveTab from "./active-tab";
 import MobileFilter from "./mobile-filter";
+import Swal from "sweetalert2";
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -76,8 +77,27 @@ export default function History() {
       const data = await bookingService.fetchUserHistory(formattedDate);
       const formattedEvents = useMapResponseToEvents(data);
       setEvents(formattedEvents);
-    } catch (error) {
-      console.log('error: ', error);
+    } catch (error: any) {
+      console.error("Error fetching room data:", error);
+
+      // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
+      if (error.response?.status === 404) {
+        Swal.fire({
+          title: 'Room Not Found',
+          text: "Not found the evnts",
+          icon: 'warning',
+          confirmButtonColor: '#8370ff', // สีม่วงเข้มให้เข้าธีมเว็บ
+        })
+        return;
+      }
+
+      // 🌟 ดักเคส: Error อื่นๆ (เช่น เซิร์ฟเวอร์ล่ม, เน็ตหลุด)
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#8370ff',
+      });
     }
   }, [currentDate.getMonth(), currentDate.getFullYear()]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
 

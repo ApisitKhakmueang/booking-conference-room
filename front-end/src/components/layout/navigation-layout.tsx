@@ -16,6 +16,8 @@ import Sidebar from "./sidebar";
 import { useControlLayoutStore } from "@/stores/control-layout.store";
 import axios from "axios";
 import { useRoomStore } from "@/stores/room.store";
+import { bookingService } from "@/service/booking.service";
+import Swal from "sweetalert2";
 
 export default function NavigationLayout({
   children,
@@ -41,10 +43,29 @@ export default function NavigationLayout({
   const fetchRoom = useCallback(async () => {
     const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
     try {
-      const response = await axios.get(`${url as string}/rooms/details`);
-      setRoom(response.data); // เก็บข้อมูลดิบลง State
-    } catch(error) {
-      console.log('error: ', error);
+      const response = await bookingService.fetchRoomDetails();
+      setRoom(response); // เก็บข้อมูลดิบลง State
+    } catch(error: any) {
+      console.error("Error fetching room data:", error);
+
+      // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
+      if (error.response?.status === 404) {
+        Swal.fire({
+          title: 'Room Not Found',
+          text: "Not found this room",
+          icon: 'warning',
+          confirmButtonColor: '#8370ff', // สีม่วงเข้มให้เข้าธีมเว็บ
+        })
+        return;
+      }
+
+      // 🌟 ดักเคส: Error อื่นๆ (เช่น เซิร์ฟเวอร์ล่ม, เน็ตหลุด)
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#8370ff',
+      });
     }
   }, []);
 
