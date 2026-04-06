@@ -1,7 +1,9 @@
 'use client'
 
+import { Button } from "@/components/ui/button"
 import { Card, type CardProps } from "@/components/ui/card" // 🌟 Import CardProps มาด้วย
 import { RoomResp } from "@/utils/interface/response"
+import { CalendarDays } from "lucide-react"
 import { useMemo } from "react"
 
 const ROOM_STATUS = [
@@ -39,10 +41,19 @@ export default function RoomStatus({ displayRooms, isLoadingBooking }: { display
         </div>
       )}
 
+      <div className="flex justify-end pb-5">
+        <Button  
+          className="p-2 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+        >
+          <CalendarDays className="w-4 h-4" />
+          Timeline View
+        </Button>
+      </div>
+
       <ul className="grid md:grid-cols-4 grid-cols-2 gap-6">
         {countAmountRoom.map((item) => (
           <Card key={item.name} variant={item.variant} loading={false}>
-            <li className='flex flex-col gap-5 xl:p-6 p-3'>
+            <li className='flex flex-col gap-3 xl:p-6 p-3'>
               <h1 className={`text-start font-semibold xl:text-3xl sm:text-2xl text-lg`}>
                 {item.name}
               </h1>

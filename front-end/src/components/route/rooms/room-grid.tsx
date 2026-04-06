@@ -88,7 +88,7 @@ export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: Ro
             >
             <h2 className="text-xl font-semibold opacity-80 group-hover:opacity-100">{room.name}</h2>
 
-            <div className='flex justify-center py-10 transition-transform duration-300 group-hover:scale-110'>
+            <div className='flex justify-center py-8 transition-transform duration-300 group-hover:scale-110'>
               {/* 🌟 4. ดึงสีตาม Status มาใส่ให้ไอคอนตรงกลาง */}
               <StatusIcon size={80} className={STATUS_CONFIG[currentStatus].iconColor} strokeWidth={1.5} />
             </div>
