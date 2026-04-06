@@ -48,7 +48,7 @@ export default function OccupyModal({ setIsOccupyModalOpen, selectedBooking }: O
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#8B8FC7',
+      cancelButtonColor: '#8370ff',
       confirmButtonText: 'Yes, delete it!'
     });
 
