@@ -3,15 +3,17 @@
 import RoomsGrid, { RoomGridSkeleton } from "./room-grid";
 import RoomStatus from "./room-status";
 import useBookingStatusWS from "@/hooks/data/useBookingStatusWS";
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { RoomResp } from '@/utils/interface/response';
 import { useShallow } from "zustand/shallow";
 import { useRoomStore } from "@/stores/room.store";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, LayoutGrid } from "lucide-react";
+import RoomTimeline from "./room-timeline";
 
 export default function Room() {
-  // 🌟 1. เปลี่ยนชื่อ State เพื่อให้รู้ว่านี่คือ "ข้อมูลดิบ" จาก Database
-  
   const { bookings, isLoadingBooking } = useBookingStatusWS();
+  const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
 
   const { rawRoom } = useRoomStore(
     useShallow(((state) => ({
@@ -56,12 +58,40 @@ export default function Room() {
   const isInitialLoading = !rawRoom || rawRoom.length === 0;
 
   return (
-    <div className={`flex flex-col gap-5 transition-opacity duration-300 ${isLoadingBooking ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-      <RoomStatus displayRooms={displayRooms} isLoadingBooking={isLoadingBooking} />
-      {isInitialLoading ? (
-        <RoomGridSkeleton />
+    <div className={`flex flex-col gap-4 transition-opacity duration-300 ${isLoadingBooking ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+      {/* 🌟 3. Header ปุ่มสลับมุมมอง (วางไว้บนสุด หรือแทรกในหน้า Page.tsx ก็ได้) */}
+      <div className="flex justify-end pb-4 border-b border-white/5">
+        <Button  
+          onClick={() => setViewMode(viewMode === 'grid' ? 'timeline' : 'grid')}
+          className="p-2 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+        >
+          {viewMode === 'grid' ? (
+            <><CalendarDays className="w-4 h-4" /> Timeline View</>
+          ) : (
+            <><LayoutGrid className="w-4 h-4" /> Grid View</>
+          )}
+        </Button>
+      </div>
+
+      {viewMode === 'grid' ? (
+        // 🌟 4. โหมดเดิม (Grid)
+        <div className="flex flex-col gap-4">
+          <RoomStatus displayRooms={displayRooms} isLoadingBooking={isLoadingBooking} />
+          {isInitialLoading ? (
+            <RoomGridSkeleton />
+          ) : (
+            <RoomsGrid displayRooms={displayRooms} bookings={bookings} />
+          )}
+        </div>
       ) : (
-        <RoomsGrid displayRooms={displayRooms} bookings={bookings} />
+        // 🌟 5. โหมดใหม่ (Timeline)
+        <div className="flex-1 min-h-[500px]">
+          {isInitialLoading ? (
+            <div className="flex items-center justify-center h-64 text-gray-400 animate-pulse">Loading Timeline...</div>
+          ) : (
+            <RoomTimeline rooms={displayRooms} bookings={bookings} />
+          )}
+        </div>
       )}
     </div>
   )
