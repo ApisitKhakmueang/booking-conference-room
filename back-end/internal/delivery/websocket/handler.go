@@ -112,7 +112,7 @@ func (w *WSBookingHandler) GetSingleBookingStatus(c *websocket.Conn) {
 		c.WriteJSON(map[string]string{"error": err.Error()})
 	}
 
-	topic := fmt.Sprintf("booking:status:%d", roomID)
+	topic := fmt.Sprintf("booking:status:%s", roomID)
 
 	w.hub.Register(c, topic)
 	defer w.hub.Unregister(c, topic)

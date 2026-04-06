@@ -152,8 +152,6 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 }
 
 func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	log.Println("roomNumber: ", roomID)
-
 	booking := new(domain.Booking) // เป็น Pointer อยู่แล้ว
 	now := time.Now()
 
