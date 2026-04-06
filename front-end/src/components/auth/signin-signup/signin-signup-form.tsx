@@ -14,7 +14,7 @@ export default function SignIn_SignupForm() {
   const subTitle = isSignIn ? 'Sign in to your account' : 'Create your account'
 
   return (
-    <main className={`flex min-h-screen bg-light-sidebar dark:bg-sidebar dark:text-secondary overflow-auto`}>
+    <main className={`flex min-h-screen bg-light-sidebar dark:bg-main-background dark:text-secondary overflow-auto`}>
       <div className='relative flex flex-col xl:w-3/5 w-full h-screen'>
         <div className='flex justify-between items-center xs:p-5 p-3'>
           <Image 

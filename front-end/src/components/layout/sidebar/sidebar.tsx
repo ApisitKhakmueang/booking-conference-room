@@ -96,8 +96,6 @@ export default function Sidebar() {
               );
             })}
           </ul>
-
-          <ThemeButton />
         </nav>
       </aside>
 
