@@ -6,6 +6,7 @@ import { UserIcon, UserIconSkeleton } from "./user-icon";
 import Welcomeback from "./welcome";
 import { useControlLayoutStore } from '@/stores/control-layout.store';
 import { useShallow } from 'zustand/shallow';
+import ThemeButton from '@/components/utils/theme-button';
 
 export default function UserBar() {
   const { isOpenNav, isHideNav } = useControlLayoutStore(
@@ -31,8 +32,8 @@ export default function UserBar() {
             ? "-translate-x-75 justify-between"
             : "-translate-x-28 justify-between"
           : 'justify-end'}}`}>
-          <CodeDisplay />
-          <NotificationComp />
+
+          <ThemeButton className='p-0' />
           
           {!user ? (
             // ถ้า user ยังเป็น null (กำลังโหลด) ให้โชว์ Skeleton
