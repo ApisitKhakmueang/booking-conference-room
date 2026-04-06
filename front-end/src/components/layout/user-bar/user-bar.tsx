@@ -18,7 +18,7 @@ export default function UserBar() {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <div className='fixed w-full z-20'>
+    <div className='fixed w-full z-30'>
       <nav className={`w-full dark:bg-main-background bg-light-main-background flex ${!isHideNav
       ? isOpenNav
         ? "translate-x-70 justify-between"
