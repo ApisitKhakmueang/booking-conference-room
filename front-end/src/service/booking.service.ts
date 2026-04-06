@@ -1,20 +1,31 @@
 import api from '@/lib/axiosInstance';
+import { BookingEventResponse, Holiday, RoomResp } from '@/utils/interface/response';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 
 export const bookingService = {
   // ดึงข้อมูลการจองตามวันที่
-  fetchUserBookings: async (date: string) => {
+  fetchRoomDetails: async ():Promise<RoomResp[]> => {
+    const response = await api.get(`${API_URL}/rooms/details`);
+    return response.data;
+  },
+
+  fetchSingleRoomDetail: async (roomNumber: string):Promise<RoomResp> => {
+    const response = await api.get(`${API_URL}/room/${roomNumber}`);
+    return response.data;
+  },
+
+  fetchUserBookings: async (date: string):Promise<BookingEventResponse[]> => {
     const response = await api.get(`${API_URL}/booking/me?date=${date}`);
     return response.data;
   },
 
-  fetchUserHistory: async (date: string) => {
+  fetchUserHistory: async (date: string):Promise<BookingEventResponse[]> => {
     const response = await api.get(`${API_URL}/booking/me/history?date=${date}`);
     return response.data;
   },
 
-  fetchHolidays: async (startYear:string, endYear: string) => {
+  fetchHolidays: async (startYear:string, endYear: string):Promise<Holiday[]> => {
     const response = await api.get(`${API_URL}/holidays?startDate=${startYear}&endDate=${endYear}`)
     return response.data
   },
@@ -34,6 +45,10 @@ export const bookingService = {
 
   checkoutBooking: async (bookingID: string | undefined) => {
     return await api.patch(`${API_URL}/booking/${bookingID}/checkout`)
+  },
+
+  checkinBooking: async (roomID: string, body: any) => {
+    return await api.post(`${API_URL}/room/${roomID}/checkin`, body)
   }
   
   // เพิ่ม action อื่นๆ เช่น update, delete ได้ที่นี่
