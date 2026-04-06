@@ -23,7 +23,7 @@ export function useHolidays(startYear: string, endYear: string) {
         
         setHoliday(formattedHolidays);
       } catch (error: any) {
-        console.error("Error fetching room data:", error);
+        // console.error("Error fetching room data:", error);
 
         // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
         if (error.response?.status === 404) {
