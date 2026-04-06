@@ -26,7 +26,6 @@ export default function CardEvents({ event } : EventCardHistoryProps) {
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
   const theme = STATUS_THEME[event.status] || STATUS_THEME['confirm'];
-  console.log("event: ", event)
 
   return (
     <div 

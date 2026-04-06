@@ -9,7 +9,7 @@ import BookingModal from '@/components/utils/booking-modal';
 import { Button } from '@/components/ui/button';
 import { BookingEvent, TimeGridViewProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
-import { useMapResponseToEvents } from '@/hooks/data/useMapRespToEvent';
+import { mapBookingEvents } from '@/lib/map-resp-event';
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
 export default function TimeGridView({ setCurrentDate, currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
@@ -44,7 +44,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   };
 
   useEffect(() => {
-    const formattedEvents = useMapResponseToEvents(bookings || []);
+    const formattedEvents = mapBookingEvents(bookings || []);
     setEvents(formattedEvents);
   }, [bookings]);
 

@@ -7,11 +7,12 @@ import CardEvents, { CardEventsSkeleton } from "./event-card";
 import DesktopSidebar from "./desktop-sidebar";
 import { Button } from "@/components/ui/button";
 import MonthYearPicker from "./month-year-picker";
-import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
+import { mapBookingEvents } from "@/lib/map-resp-event";
 import { bookingService } from "@/service/booking.service";
 import ActiveTab from "./active-tab";
 import MobileFilter from "./mobile-filter";
 import Swal from "sweetalert2";
+import { BookingEventResponse } from "@/utils/interface/response";
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -75,10 +76,10 @@ export default function History() {
     const formattedDate = format(currentDate, 'yyyy-MM');
     try {
       const data = await bookingService.fetchUserHistory(formattedDate);
-      const formattedEvents = useMapResponseToEvents(data);
+      const formattedEvents = mapBookingEvents(data);
       setEvents(formattedEvents);
     } catch (error: any) {
-      console.error("Error fetching room data:", error);
+      // console.error("Error fetching room data:", error);
 
       // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
       if (error.response?.status === 404) {

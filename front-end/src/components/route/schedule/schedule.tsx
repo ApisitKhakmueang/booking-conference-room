@@ -9,7 +9,7 @@ import BookingModal from "@/components/utils/booking-modal";
 import { Plus } from "lucide-react";
 import { CardEventsSkeleton } from "./event-card";
 import { BookingEvent, RenderEventGroupProps } from "@/utils/interface/interface";
-import { useMapResponseToEvents } from "@/hooks/data/useMapRespToEvent";
+import { mapBookingEvents } from "@/lib/map-resp-event";
 import { bookingService } from "@/service/booking.service";
 import MobileFilter from "./mobile-filter";
 import { RenderEventGroup } from "./event-group";
@@ -128,10 +128,10 @@ export default function Schedule() {
     const formattedDate = format(currentDate, 'yyyy-MM');
     try {
       const data = await bookingService.fetchUserBookings(formattedDate);
-      const formattedEvents = useMapResponseToEvents(data);
+      const formattedEvents = mapBookingEvents(data);
       setEvents(formattedEvents);
     } catch (error: any) {
-      console.error("Error fetching room data:", error);
+      // console.error("Error fetching room data:", error);
 
       // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
       if (error.response?.status === 404) {
