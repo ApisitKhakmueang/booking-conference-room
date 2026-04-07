@@ -1,15 +1,10 @@
 package http
 
 import (
-	// "log"
-	// "fmt"
 	"strconv"
 	"time"
-	// "time"
 
-	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	// "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -147,6 +142,18 @@ func (u *BookingHandler) CheckInBooking(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).SendString("Checkin booking successfully!")
+}
+
+func (u *BookingHandler) GetBookingOneDay(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	date := c.Params("date")
+
+	bookings, err := u.usecase.GetBookingOneDay(ctx, date)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(bookings)
 }
 
 func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {

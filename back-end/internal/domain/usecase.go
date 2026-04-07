@@ -20,6 +20,7 @@ type BookingUsecase interface {
 	DeleteBooking(ctx context.Context,booking *Booking) error
 	CheckOutBooking(ctx context.Context,booking *Booking) error
 	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) (error)
+	GetBookingOneDay(ctx context.Context, DateStr string) ([]Booking, error)
 	GetBooking(ctx context.Context,date *Date, roomNumber uint) ([]Booking, error)
 	GetBookingStatus(ctx context.Context) ([]Booking, error)
 	GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*Booking, error)

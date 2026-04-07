@@ -88,6 +88,15 @@ func (r *redisRepository) CheckOutBooking(ctx context.Context, booking *domain.B
 	return deletedBooking, nil
 }
 
+func (r *redisRepository) GetBookingOneDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+	bookings, err := r.postgres.GetBookingOneDayDB(ctx, date)
+	if err != nil {
+		return nil, err
+	}
+
+	return bookings, nil
+}
+
 func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, dateTime.StartStr, dateTime.EndStr)
 

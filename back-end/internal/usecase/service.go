@@ -228,6 +228,26 @@ func (u *bookingUsecase) CheckInBooking(ctx context.Context,roomID uuid.UUID, pa
 	return nil
 }
 
+func (u *bookingUsecase) GetBookingOneDay(ctx context.Context, DateStr string) ([]domain.Booking, error) {
+	layout := "2006-01-02"
+	startTime, err := helper.ParseTimeFormat(layout, DateStr)
+	if err != nil {
+		return nil, err
+	}
+
+	endTime := startTime.AddDate(0, 0, 1)
+	var date domain.Date
+	date.StartStr = startTime.Format(layout)
+	date.EndStr = endTime.Format(layout)
+	
+	bookings, err := u.redis.GetBookingOneDay(ctx, &date)
+	if err != nil {
+		return nil, err
+	}
+	
+	return bookings, nil
+}
+
 func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
 	instBooking := new(domain.Booking)

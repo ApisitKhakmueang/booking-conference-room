@@ -107,6 +107,24 @@ func (p *postgresRepository) CheckOutBookingDB(ctx context.Context, booking *dom
 	return checkedOutBooking, result.Error
 }
 
+func (p *postgresRepository) GetBookingOneDayDB(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+	var bookings []domain.Booking // แนะนำให้เติม s เป็น bookings เพราะข้อมูลมาเป็น Array ครับ
+
+	result := p.db.
+		WithContext(ctx).
+		Preload("User").
+		Preload("Room").
+		// ⭐️ แก้ลอจิก: ต้อง "มากกว่าหรือเท่ากับ" เช้าวันนี้ และ "น้อยกว่า" เช้าพรุ่งนี้
+		Where("start_time >= ? AND start_time < ? AND status = ?", date.StartStr, date.EndStr, "confirm").
+		Find(&bookings) // ⭐️ อย่าลืมใส่ & ตรงนี้ครับ
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
 func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
 	var bookings []domain.Booking
 
