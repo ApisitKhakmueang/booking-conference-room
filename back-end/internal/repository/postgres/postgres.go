@@ -107,7 +107,7 @@ func (p *postgresRepository) CheckOutBookingDB(ctx context.Context, booking *dom
 	return checkedOutBooking, result.Error
 }
 
-func (p *postgresRepository) GetBookingOneDayDB(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+func (p *postgresRepository) GetBookingByDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
 	var bookings []domain.Booking // แนะนำให้เติม s เป็น bookings เพราะข้อมูลมาเป็น Array ครับ
 
 	result := p.db.

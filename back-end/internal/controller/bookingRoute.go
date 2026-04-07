@@ -15,7 +15,7 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Patch("/:bookingID/checkout", handler.CheckOutBooking) // PATCH /bookings/:id/checkout (เปลี่ยนมาใช้ Patch/Post)
 	
 	// ข้อมูลส่วนตัวของคนที่ Login
-	router.Get("/oneDay/:date", handler.GetBookingOneDay)
+	router.Get("/oneDay/:date", handler.GetBookingByDay)
 	router.Get("/me", handler.GetUserBooking)           // GET /bookings/me
 	router.Get("/me/history", handler.GetUserHistory)   // GET /bookings/me/history
 }

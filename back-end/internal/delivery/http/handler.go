@@ -144,11 +144,11 @@ func (u *BookingHandler) CheckInBooking(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Checkin booking successfully!")
 }
 
-func (u *BookingHandler) GetBookingOneDay(c *fiber.Ctx) error {
+func (u *BookingHandler) GetBookingByDay(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	date := c.Params("date")
 
-	bookings, err := u.usecase.GetBookingOneDay(ctx, date)
+	bookings, err := u.usecase.GetBookingByDay(ctx, date)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

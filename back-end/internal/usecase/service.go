@@ -228,7 +228,7 @@ func (u *bookingUsecase) CheckInBooking(ctx context.Context,roomID uuid.UUID, pa
 	return nil
 }
 
-func (u *bookingUsecase) GetBookingOneDay(ctx context.Context, DateStr string) ([]domain.Booking, error) {
+func (u *bookingUsecase) GetBookingByDay(ctx context.Context, DateStr string) ([]domain.Booking, error) {
 	layout := "2006-01-02"
 	startTime, err := helper.ParseTimeFormat(layout, DateStr)
 	if err != nil {
@@ -240,7 +240,7 @@ func (u *bookingUsecase) GetBookingOneDay(ctx context.Context, DateStr string) (
 	date.StartStr = startTime.Format(layout)
 	date.EndStr = endTime.Format(layout)
 	
-	bookings, err := u.redis.GetBookingOneDay(ctx, &date)
+	bookings, err := u.redis.GetBookingByDay(ctx, &date)
 	if err != nil {
 		return nil, err
 	}

@@ -88,8 +88,8 @@ func (r *redisRepository) CheckOutBooking(ctx context.Context, booking *domain.B
 	return deletedBooking, nil
 }
 
-func (r *redisRepository) GetBookingOneDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
-	bookings, err := r.postgres.GetBookingOneDayDB(ctx, date)
+func (r *redisRepository) GetBookingByDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+	bookings, err := r.postgres.GetBookingByDayDB(ctx, date)
 	if err != nil {
 		return nil, err
 	}

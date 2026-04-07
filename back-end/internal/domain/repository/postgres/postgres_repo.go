@@ -13,7 +13,7 @@ type PostgresRepository interface {
 	UpdateBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	DeleteBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
 	CheckOutBookingDB(ctx context.Context, booking *domain.Booking) (*domain.Booking, error)
-	GetBookingOneDayDB(ctx context.Context, date *domain.Date) ([]domain.Booking, error)
+	GetBookingByDayDB(ctx context.Context, date *domain.Date) ([]domain.Booking, error)
 	GetBookingDB(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID) ([]domain.Booking, error)
 	GetBookingStatusDB(ctx context.Context) ([]domain.Booking, error)
 	GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error)
