@@ -89,7 +89,7 @@ export default function Room() {
           {isInitialLoading ? (
             <div className="flex items-center justify-center h-64 text-gray-400 animate-pulse">Loading Timeline...</div>
           ) : (
-            <RoomTimeline rooms={displayRooms} bookings={bookings} />
+            <RoomTimeline rooms={displayRooms} />
           )}
         </div>
       )}

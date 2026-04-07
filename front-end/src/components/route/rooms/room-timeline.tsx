@@ -1,12 +1,13 @@
 'use client';
 
+import { bookingService } from '@/service/booking.service';
 import { BookingEventResponse, RoomResp } from '@/utils/interface/response';
 import { format, parseISO, differenceInMinutes, startOfDay, addHours } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import useSWR from 'swr';
 
 interface RoomTimelineProps {
   rooms: RoomResp[];
-  bookings: BookingEventResponse[] | null;
 }
 
 // 🌟 ตั้งค่าเวลาเริ่มและจบการทำงาน (08:00 - 20:00)
@@ -43,33 +44,19 @@ const calculatePosition = (startTimeIso: string, endTimeIso: string) => {
   };
 };
 
-const generateMockBookings = (rooms: RoomResp[]): BookingEventResponse[] => {
-  if (!rooms || rooms.length === 0) return [];
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
-
-  // จำลองข้อมูล User 4 คน
-  const mockUsers = [
-    { id: 'usr-101', fullName: 'Alexander Sterling', email: 'alexander.s@company.com' },
-    { id: 'usr-102', fullName: 'Sarah Connor', email: 'sarah.c@company.com' },
-    { id: 'usr-103', fullName: 'Michael Chen', email: 'michael.c@company.com' },
-    { id: 'usr-104', fullName: 'Emily Davis', email: 'emily.d@company.com' },
-  ];
-
-  return [
-    { id: 'mock-1', Room: { id: rooms[0]?.id }, title: 'Quarterly Review', startTime: `${todayStr}T09:00:00`, endTime: `${todayStr}T11:30:00`, status: 'confirm', User: mockUsers[0] } as any,
-    { id: 'mock-2', Room: { id: rooms[1]?.id }, title: 'Design Sprint', startTime: `${todayStr}T10:00:00`, endTime: `${todayStr}T12:00:00`, status: 'confirm', User: mockUsers[1] } as any,
-    { id: 'mock-3', Room: { id: rooms[1]?.id }, title: 'Client Pitch', startTime: `${todayStr}T14:00:00`, endTime: `${todayStr}T15:30:00`, status: 'confirm', User: mockUsers[2] } as any,
-    { id: 'mock-4', Room: { id: rooms[2]?.id }, title: 'Daily Standup', startTime: `${todayStr}T08:30:00`, endTime: `${todayStr}T09:00:00`, status: 'confirm', User: mockUsers[3] } as any,
-    { id: 'mock-5', Room: { id: rooms[3]?.id }, title: 'Town Hall', startTime: `${todayStr}T13:00:00`, endTime: `${todayStr}T16:00:00`, status: 'confirm', User: mockUsers[0] } as any,
-    { id: 'mock-6', Room: { id: rooms[5]?.id }, title: 'Interview: Frontend', startTime: `${todayStr}T11:00:00`, endTime: `${todayStr}T12:00:00`, status: 'confirm', User: mockUsers[1] } as any,
-    { id: 'mock-7', Room: { id: rooms[7]?.id }, title: 'Budget Planning', startTime: `${todayStr}T15:00:00`, endTime: `${todayStr}T17:00:00`, status: 'confirm', User: mockUsers[2] } as any,
-    { id: 'mock-8', Room: { id: rooms[8]?.id }, title: 'Evening Sync', startTime: `${todayStr}T18:00:00`, endTime: `${todayStr}T19:30:00`, status: 'confirm', User: mockUsers[3] } as any,
-  ];
-};
-
-export default function RoomTimeline({ rooms, bookings }: RoomTimelineProps) {
+export default function RoomTimeline({ rooms }: RoomTimelineProps) {
+  const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
   const timeSlots = generateTimeSlots();
   const [currentTimePos, setCurrentTimePos] = useState<number | null>(null);
+
+  const { data: bookings, error, isLoading } = useSWR(
+    ['bookings', todayStr], 
+    ([, dateStr]) => bookingService.fetchAllBookingsByDate(dateStr), 
+    {
+      refreshInterval: 60000, // อัปเดตเงียบๆ ทุก 1 นาที
+      revalidateOnFocus: true, 
+    }
+  );
 
   useEffect(() => {
     const updateTimeLine = () => {
@@ -87,8 +74,6 @@ export default function RoomTimeline({ rooms, bookings }: RoomTimelineProps) {
     const interval = setInterval(updateTimeLine, 60000); 
     return () => clearInterval(interval);
   }, []);
-
-  const displayBookings = (bookings && bookings.length > 0) ? bookings : generateMockBookings(rooms);
 
   const colors = [
     "bg-checkin text-white", 
@@ -148,7 +133,7 @@ export default function RoomTimeline({ rooms, bookings }: RoomTimelineProps) {
                     ))}
                   </div>
 
-                  {displayBookings
+                  {bookings
                     ?.filter(booking => booking.Room.id === room.id && booking.status === 'confirm')
                     .map((booking, index) => {
                       const { left, width } = calculatePosition(booking.startTime, booking.endTime);

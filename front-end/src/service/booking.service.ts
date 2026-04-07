@@ -5,12 +5,18 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 
 export const bookingService = {
   // ดึงข้อมูลการจองตามวันที่
+  fetchAllBookingsByDate: async (dateStr: string): Promise<BookingEventResponse[]> => {
+    // ระวัง: ตรงนี้ใช้ API_URL ตามที่คุณตั้งค่าไว้
+    const response = await api.get(`${API_URL}/booking/date/${dateStr}`); 
+    return response.data;
+  },
+
   fetchRoomDetails: async ():Promise<RoomResp[]> => {
     const response = await api.get(`${API_URL}/rooms/details`);
     return response.data;
   },
 
-  fetchSingleRoomDetail: async (roomNumber: string):Promise<RoomResp> => {
+  fetchRoomByRoomNumber: async (roomNumber: string):Promise<RoomResp> => {
     const response = await api.get(`${API_URL}/room/${roomNumber}`);
     return response.data;
   },
