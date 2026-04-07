@@ -10,7 +10,7 @@ import BookingCard from "./booking-card";
 import Numpad from "./numpad";
 import { BookingEvent, BookingStatus } from "@/utils/interface/interface";
 import { mapBookingEvents } from "@/lib/map-resp-event";
-import useSingleBookingStatusWS from "@/hooks/data/useSingleBookingStatusWS";
+import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS";
 
 // const mapEvent:BookingEvent | undefined = 
 // // undefined
@@ -37,11 +37,11 @@ import useSingleBookingStatusWS from "@/hooks/data/useSingleBookingStatusWS";
 
 export default function CheckIn({ roomNumber }: { roomNumber: string }) {
   const [roomData, setRoomData] = useState<RoomResp | null>(null);
-  const { booking, isLoadingBooking } = useSingleBookingStatusWS(roomData?.id)
+  const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
 
   const fetchRoomData = async () => {
     try {
-      const response = await bookingService.fetchSingleRoomDetail(roomNumber);
+      const response = await bookingService.fetchRoomByRoomNumber(roomNumber);
       setRoomData(response);
     } catch (error: any) {
       // console.error("Error fetching room data:", error);

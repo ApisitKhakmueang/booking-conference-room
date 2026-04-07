@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { formatBookingEvent } from '@/lib/form';
 
 // 🌟 1. แก้ไขรับค่าเป็น String ธรรมดา ไม่ต้องใส่ { }
-export default function useSingleBookingStatusWS(roomID: string | undefined) {
+export default function useBookingStatusByRoomIDWS(roomID: string | undefined) {
   const [booking, setBooking] = useState<BookingEventResponse | undefined>(undefined);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
   const sessionToken = useAuthStore((state) => state.sessionToken);
