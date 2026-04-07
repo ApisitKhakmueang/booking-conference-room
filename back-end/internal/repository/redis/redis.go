@@ -182,8 +182,8 @@ func (r *redisRepository) GetBookingStatus(ctx context.Context) ([]domain.Bookin
 	return bookings, nil
 }
 
-func (r *redisRepository) GetSingleBookingStatus(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking, err := r.postgres.GetSingleBookingStatusDB(ctx, roomID)
+func (r *redisRepository) GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+	booking, err := r.postgres.GetBookingStatusByRoomID_DB(ctx, roomID)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (r *redisRepository) GetRoomDetails(ctx context.Context) ([]domain.Room, er
 	return rooms, nil
 }
 
-func (r *redisRepository) GetSingleRoomDetails(ctx context.Context, roomNumber int) (*domain.Room, error) {
+func (r *redisRepository) GetRoomByRoomNumber(ctx context.Context, roomNumber int) (*domain.Room, error) {
 	cacheKey := fmt.Sprintf("room:details:%d", roomNumber)
 
 	vals, err := r.rdb.Get(ctx, cacheKey).Result()
@@ -231,7 +231,7 @@ func (r *redisRepository) GetSingleRoomDetails(ctx context.Context, roomNumber i
 		return room, nil
 	}
 
-	room, err := r.postgres.GetSingleRoomDetailsDB(ctx, roomNumber)
+	room, err := r.postgres.GetRoomByRoomNumberDB(ctx, roomNumber)
 	if err != nil {
 		return nil, err
 	}

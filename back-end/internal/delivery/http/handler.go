@@ -235,13 +235,13 @@ func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
 	return c.JSON(reponse)
 }
 
-func (u *BookingHandler) GetSingleRoomDetails(c *fiber.Ctx) error {
+func (u *BookingHandler) GetRoomByRoomNumber(c *fiber.Ctx) error {
 	roomNumber, err := strconv.Atoi(c.Params("room"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	room, err := u.usecase.GetSingleRoomDetails(c.Context(), roomNumber)
+	room, err := u.usecase.GetRoomByRoomNumber(c.Context(), roomNumber)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

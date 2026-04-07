@@ -105,7 +105,7 @@ func (w *WSBookingHandler) GetBookingStatus(c *websocket.Conn) {
 	}
 }
 
-func (w *WSBookingHandler) GetSingleBookingStatus(c *websocket.Conn) {
+func (w *WSBookingHandler) GetBookingStatusByRoomID(c *websocket.Conn) {
 	ctx := context.Background()
 	roomID, err := uuid.Parse(c.Params("roomID"))
 	if err != nil {
@@ -117,7 +117,7 @@ func (w *WSBookingHandler) GetSingleBookingStatus(c *websocket.Conn) {
 	w.hub.Register(c, topic)
 	defer w.hub.Unregister(c, topic)
 
-	response, err := w.usecase.GetSingleBookingStatus(ctx, roomID)
+	response, err := w.usecase.GetBookingStatusByRoomID(ctx, roomID)
 
 	if err == nil {
 		payload := map[string]interface{}{

@@ -107,7 +107,7 @@ func (p *postgresRepository) CheckOutBookingDB(ctx context.Context, booking *dom
 	return checkedOutBooking, result.Error
 }
 
-func (p *postgresRepository) GetBookingByDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+func (p *postgresRepository) GetBookingByDayDB(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
 	var bookings []domain.Booking // แนะนำให้เติม s เป็น bookings เพราะข้อมูลมาเป็น Array ครับ
 
 	result := p.db.
@@ -169,7 +169,7 @@ func (p *postgresRepository) GetBookingStatusDB(ctx context.Context) ([]domain.B
 	return bookings, nil
 }
 
-func (p *postgresRepository) GetSingleBookingStatusDB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
+func (p *postgresRepository) GetBookingStatusByRoomID_DB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
 	booking := new(domain.Booking) // เป็น Pointer อยู่แล้ว
 	now := time.Now()
 
@@ -272,7 +272,7 @@ func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Roo
 	return room, nil
 }
 
-func (p *postgresRepository) GetSingleRoomDetailsDB(ctx context.Context, roomNumber int) (*domain.Room, error) {
+func (p *postgresRepository) GetRoomByRoomNumberDB(ctx context.Context, roomNumber int) (*domain.Room, error) {
 	room := new(domain.Room)
 
 	result := p.db.

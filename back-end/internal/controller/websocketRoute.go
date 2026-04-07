@@ -13,7 +13,7 @@ import (
 
 func InitialWSRoute(router fiber.Router, ws *Websocket.WSBookingHandler, supabaseClient *supabase.Client) {
 	// For usecase with middleware
-	router.Get("/room/:roomID", websocket.New(ws.GetSingleBookingStatus))
+	router.Get("/room/:roomID", websocket.New(ws.GetBookingStatusByRoomID))
 	router.Get("/status", websocket.New(middleware.WithWSAuth(supabaseClient, ws.GetBookingStatus)))
 	router.Get("/:room", websocket.New(middleware.WithWSAuth(supabaseClient, ws.GetBooking)))
 	
