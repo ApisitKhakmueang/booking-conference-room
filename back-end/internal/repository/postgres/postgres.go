@@ -116,6 +116,7 @@ func (p *postgresRepository) GetBookingByDayDB(ctx context.Context, date *domain
 		Preload("Room").
 		// ⭐️ แก้ลอจิก: ต้อง "มากกว่าหรือเท่ากับ" เช้าวันนี้ และ "น้อยกว่า" เช้าพรุ่งนี้
 		Where("start_time >= ? AND start_time < ? AND status = ?", date.StartStr, date.EndStr, "confirm").
+		Order("start_time asc"). // เรียงจากเช้าสุดไปเย็นสุด
 		Find(&bookings) // ⭐️ อย่าลืมใส่ & ตรงนี้ครับ
 
 	if result.Error != nil {
@@ -123,6 +124,33 @@ func (p *postgresRepository) GetBookingByDayDB(ctx context.Context, date *domain
 	}
 
 	return bookings, nil
+}
+
+func (p *postgresRepository) GetUpNextBookingDB(ctx context.Context, endOfDay time.Time) (*domain.Booking, error) {
+	// ตัวแปรรับผลลัพธ์เป็นตัวเดียว (ไม่ต้องเติม s)
+	booking := new(domain.Booking)
+	
+	// ใช้เวลา "ณ วินาทีนี้" เป็นจุดเริ่มต้น
+	now := time.Now() 
+
+	result := p.db.
+		WithContext(ctx).
+		Preload("User").
+		Preload("Room").
+		// ⭐️ ลอจิก: "เริ่มหลังจากวินาทีนี้" และ "ก่อนหมดวัน"
+		Where("start_time >= ? AND start_time < ? AND status = ?", now, endOfDay, "confirm").
+		Order("start_time asc"). // เรียงจากเวลาใกล้ตัวที่สุดไปหาดึกสุด
+		First(booking) // หยิบตัวแรกสุดมา
+
+	if result.Error != nil {
+		// ถ้าเป็น Error หาไม่เจอ (แปลว่าวันนี้ไม่มีคิวเหลือแล้ว) คืนค่า nil ได้เลย
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil 
+		}
+		return nil, result.Error
+	}
+
+	return booking, nil
 }
 
 func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date, roomID uuid.UUID) ([]domain.Booking, error) {
@@ -141,6 +169,29 @@ func (p *postgresRepository) GetBookingDB(ctx context.Context,date *domain.Date,
         return db.Select("id, email, full_name")
     }).
 		Where("start_time >= ? AND start_time < ? AND room_id = ? AND status = 'confirm'", date.StartStr, date.EndStr, roomID).
+		Order("start_time desc").
+		Find(&bookings)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return bookings, nil
+}
+
+func (p *postgresRepository) GetAnalyticBookingDB(ctx context.Context,date *domain.Date) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+
+	// start_time >= 2026-01-01 00:00:00 AND start_time < 2026-02-01 00:00:00
+	// การใช้ < (น้อยกว่า) เดือนหน้า จะครอบคลุมถึงวินาทีสุดท้ายของเดือนนี้ (31 ม.ค. 23:59:59) พอดี
+	// log.Println("Cache miss")
+	result := p.db.
+		WithContext(ctx).
+		Preload("Room", func(db *gorm.DB) *gorm.DB {
+			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
+			return db.Select("id, name, room_number") 
+    }).
+		Where("start_time >= ? AND start_time < ?", date.StartStr, date.EndStr).
 		Order("start_time desc").
 		Find(&bookings)
 

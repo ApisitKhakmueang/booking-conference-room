@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	"context"
 	"log"
+	"sort"
 	"time"
 
 	"errors"
@@ -248,6 +249,22 @@ func (u *bookingUsecase) GetBookingByDay(ctx context.Context, DateStr string) ([
 	return bookings, nil
 }
 
+func (u *bookingUsecase) GetUpNextBooking(ctx context.Context, date string) (*domain.Booking, error) {
+	layout := "2006-01-02"
+	startTime, err := helper.ParseTimeFormat(layout, date)
+	if err != nil {
+		return nil, err
+	}
+
+	endTime := startTime.AddDate(0, 0, 1)
+	booking, err := u.redis.GetUpNextBooking(ctx, endTime)
+	if err != nil {
+		return nil, err
+	}
+
+	return booking, nil
+}
+
 func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
 	instBooking := new(domain.Booking)
@@ -275,6 +292,95 @@ func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomN
 	// log.Printf("response: %v", response)
 
 	return response, nil
+}
+
+// แนะนำให้แก้ Return Type เป็น Object เดียว (pointer) ครับ
+func (u bookingUsecase) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
+	bookings, err := u.redis.GetAnalyticBooking(ctx, date)
+	if err != nil {
+		return nil, err
+	}
+
+	totalBookings := len(bookings)
+
+	// ⭐️ ป้องกันบั๊ก: ถ้าไม่มีการจองเลย ให้ส่งค่าว่างกลับไปทันที ไม่งั้นตอนหาร % โปรแกรมจะพัง (Divide by zero)
+	if totalBookings == 0 {
+		return &domain.UpNextBookingResponse{}, nil
+	}
+
+	var health domain.AttendanceHealth
+	
+	// ใช้ Struct ชั่วคราวเพื่อเก็บข้อมูลห้องพร้อมยอด Count
+	type roomStat struct {
+		ID 					uuid.UUID
+		RoomNumber 	uint
+		Name       	string
+		Count      	int
+	}
+	
+	// ใช้ RoomNumber (int) เป็น Key ของ Map
+	mapPopularRooms := make(map[uint]*roomStat)
+
+	// 1. วนลูปเพื่อนับจำนวนต่างๆ (Loop ครั้งเดียวได้ครบทุกอย่าง)
+	for _, booking := range bookings {
+		
+		// --- คำนวณ Attendance Health ---
+		if booking.Status != nil {
+			switch *booking.Status {
+			case "complete":
+				health.Completed++
+			case "cancelled":
+				health.Cancelled++
+			case "no_show":
+				health.NoShow++
+			}
+		}
+
+		// --- รวบรวม Popular Rooms ---
+		if booking.Room != nil {
+			roomNum := booking.Room.RoomNumber
+			if stat, exists := mapPopularRooms[roomNum]; exists {
+				stat.Count++ // ถัามีห้องนี้ใน map แล้ว ให้นับเพิ่ม
+			} else {
+				// ถ้ายังไม่มี ให้สร้างใหม่
+				mapPopularRooms[roomNum] = &roomStat{
+					ID:         booking.Room.ID,
+					RoomNumber: roomNum,
+					Name:       booking.Room.Name,
+					Count:      1,
+				}
+			}
+		}
+	}
+
+	// 2. คำนวณเปอร์เซ็นต์ของ Attendance Health (ปัดเศษทิ้งเป็นจำนวนเต็ม)
+	health.CompletionRate = (health.Completed * 100) / totalBookings
+	health.CanCelledRate = (health.Cancelled * 100) / totalBookings
+	health.NoShowRate = (health.NoShow * 100) / totalBookings
+
+	// 3. แปลง Map ของห้อง กลับไปเป็น Array (Slice) และคำนวณเปอร์เซ็นต์ความนิยม
+	var popularRooms []domain.PopularRoom
+	for _, stat := range mapPopularRooms {
+		popularRooms = append(popularRooms, domain.PopularRoom{
+			ID:         stat.ID,
+			RoomNumber: stat.RoomNumber,
+			Name:       stat.Name,
+			Percentage: (stat.Count * 100) / totalBookings,
+		})
+	}
+
+	// 4. เรียงลำดับ (Sort) ห้องที่ป๊อปปูล่าที่สุด (เปอร์เซ็นต์มากสุด) ให้อยู่ข้างบนเสมอ
+	sort.Slice(popularRooms, func(i, j int) bool {
+		return popularRooms[i].Percentage > popularRooms[j].Percentage
+	})
+
+	// 5. ประกอบร่างเป็น Response และส่งกลับ
+	response := domain.UpNextBookingResponse{
+		AttendanceHealth: health,
+		PopularRooms:     popularRooms[:3],
+	}
+
+	return &response, nil
 }
 
 func (u *bookingUsecase) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {

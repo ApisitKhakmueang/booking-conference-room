@@ -16,6 +16,8 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	
 	// ข้อมูลส่วนตัวของคนที่ Login
 	router.Get("/date/:date", handler.GetBookingByDay)
+	router.Get("/up-next/:date", handler.GetUpNextBooking)
+	router.Get("/analytic", handler.GetAnalyticBooking)
 	router.Get("/me", handler.GetUserBooking)           // GET /bookings/me
 	router.Get("/me/history", handler.GetUserHistory)   // GET /bookings/me/history
 }

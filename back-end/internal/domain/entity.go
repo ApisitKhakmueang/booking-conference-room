@@ -124,6 +124,26 @@ type Date struct {
 	EndStr 		string		`query:"endDate"`
 }
 
+type AttendanceHealth struct {
+	Completed 			int 	`json:"completed"`
+	Cancelled 			int 	`json:"cancelled"`
+	NoShow 					int 	`json:"noShow"`
+	CompletionRate 	int 	`json:"completionRate"`
+	CanCelledRate 	int 	`json:"cancelledRate"`
+	NoShowRate 			int 	`json:"noShowRate"`
+}
+
+type PopularRoom struct {
+	ID 					uuid.UUID 		`json:"id"`
+	RoomNumber  uint 					`json:"roomNumber"`
+	Name 				string 				`json:"name"`
+	Percentage 	int 					`json:"percentage"`
+}
+
+type UpNextBookingResponse struct {
+	AttendanceHealth  AttendanceHealth 		`json:"attendanceHealth"`
+	PopularRooms      []PopularRoom     	`json:"popularRooms"`
+}
 
 // Schema
 type Holiday struct {

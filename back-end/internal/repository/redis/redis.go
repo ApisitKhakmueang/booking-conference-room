@@ -97,7 +97,16 @@ func (r *redisRepository) GetBookingByDay(ctx context.Context, date *domain.Date
 	return bookings, nil
 }
 
-func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
+func (r *redisRepository) GetUpNextBooking(ctx context.Context, endOfDay time.Time) (*domain.Booking, error) {
+	booking, err := r.postgres.GetUpNextBookingDB(ctx, endOfDay)
+	if err != nil {
+		return nil, err
+	}
+
+	return booking, nil
+}
+
+func (r *redisRepository) GetBooking(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, dateTime.StartStr, dateTime.EndStr)
 
 	vals, err := r.rdb.Get(ctx, cacheKey).Result()
@@ -111,6 +120,31 @@ func (r *redisRepository) GetBooking(ctx context.Context,dateTime *domain.Date, 
 	}
 
 	bookings, err := r.postgres.GetBookingDB(ctx, dateTime, roomID)
+	if err != nil {
+		return nil, err
+	}
+
+	if jsonBytes, err := json.Marshal(bookings); err == nil {
+		r.SetJsonCache(ctx, cacheKey, jsonBytes)
+	}
+
+	return bookings, nil
+}
+
+func (r *redisRepository) GetAnalyticBooking(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
+	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
+
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var bookings []domain.Booking
+		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
+			return nil, err
+		}
+
+		return bookings, nil
+	}
+
+	bookings, err := r.postgres.GetAnalyticBookingDB(ctx, date)
 	if err != nil {
 		return nil, err
 	}

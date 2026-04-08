@@ -156,6 +156,18 @@ func (u *BookingHandler) GetBookingByDay(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(bookings)
 }
 
+func (u *BookingHandler) GetUpNextBooking(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	date := c.Params("date")
+
+	booking, err := u.usecase.GetUpNextBooking(ctx, date)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(booking)
+}
+
 func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	room, err := strconv.Atoi(c.Params("room"))
@@ -178,6 +190,26 @@ func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 	}
 
 	response, err := u.usecase.GetBooking(ctx, q, uint(room))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+	// log.Printf("res: %v", response)
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (u *BookingHandler) GetAnalyticBooking(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+
+	q := new(domain.Date)
+
+	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
+	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
+	if err := c.QueryParser(q); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	response, err := u.usecase.GetAnalyticBooking(ctx, q)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

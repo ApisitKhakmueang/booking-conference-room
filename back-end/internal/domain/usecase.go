@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 )
+
 // "github.com/gofiber/fiber/v2"
 
 type BookingUsecase interface {
@@ -21,7 +22,9 @@ type BookingUsecase interface {
 	CheckOutBooking(ctx context.Context,booking *Booking) error
 	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) (error)
 	GetBookingByDay(ctx context.Context, DateStr string) ([]Booking, error)
+	GetUpNextBooking(ctx context.Context, date string) (*Booking, error)
 	GetBooking(ctx context.Context,date *Date, roomNumber uint) ([]Booking, error)
+	GetAnalyticBooking(ctx context.Context, date *Date) (*UpNextBookingResponse, error)
 	GetBookingStatus(ctx context.Context) ([]Booking, error)
 	GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*Booking, error)
 	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
