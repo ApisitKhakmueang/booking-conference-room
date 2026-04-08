@@ -12,6 +12,7 @@ import { CalendarDays, LayoutGrid } from "lucide-react";
 import RoomTimeline from "./room-timeline";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { DisplayRooms } from "@/lib/booking-status";
 
 export default function Room() {
   const router = useRouter()
@@ -27,35 +28,7 @@ export default function Room() {
   // 🌟 2. ใช้ useMemo ผสมร่างข้อมูลแทนการใช้ useEffect -> setRoom
   // มันจะคำนวณใหม่ให้อัตโนมัติ เฉพาะตอนที่ rawRooms หรือ bookings มีการเปลี่ยนแปลงเท่านั้น
   const displayRooms:RoomResp[] = useMemo(() => {
-    if (!rawRoom || rawRoom.length === 0) return [];
-
-    return rawRoom.map((room) => {
-      // 2.1 เช็คสถานะปิดปรับปรุงก่อน
-      if (room.isActive === 'maintenance') {
-        return { ...room, status: 'maintenance' };
-      }
-
-      // 2.2 ถ้ายังไม่มี bookings (หรือโหลดไม่เสร็จ) ให้ถือว่าห้องว่างไปก่อน
-      if (!bookings || bookings.length === 0) {
-        return { ...room, status: 'available' };
-      }
-
-      // 2.3 หา booking ที่ตรงกับห้องนี้
-      const activeBooking = bookings.find(
-        (booking) => booking.Room.id === room.id
-      );
-
-      // 2.4 ผสมสถานะลงไปแล้ว Return กลับ
-      if (activeBooking) {
-        return {
-          ...room,
-          status: activeBooking.status === 'confirm' ? 'occupied' : 'available',
-        };
-      }
-
-      // 2.5 ถ้าไม่เจอใน bookings แปลว่าห้องว่าง
-      return { ...room, status: 'available' };
-    }).sort((a, b) => a.roomNumber - b.roomNumber);
+    return DisplayRooms(rawRoom, bookings)
   }, [rawRoom, bookings]); // คำนวณใหม่เมื่อสองตัวนี้เปลี่ยน
 
   const isInitialLoading = !rawRoom || rawRoom.length === 0;

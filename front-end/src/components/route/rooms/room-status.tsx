@@ -1,9 +1,8 @@
 'use client'
 
-import { Button } from "@/components/ui/button"
 import { Card, type CardProps } from "@/components/ui/card" // 🌟 Import CardProps มาด้วย
+import { BookingStatus } from "@/lib/booking-status"
 import { RoomResp } from "@/utils/interface/response"
-import { CalendarDays } from "lucide-react"
 import { useMemo } from "react"
 
 const ROOM_STATUS = [
@@ -15,18 +14,7 @@ const ROOM_STATUS = [
 
 export default function RoomStatus({ displayRooms, isLoadingBooking }: { displayRooms: RoomResp[], isLoadingBooking: boolean }) {
   const countAmountRoom = useMemo(() => {
-    const total = displayRooms.length
-    const available = displayRooms.filter((room) => room.status === 'available').length
-    const occupied = displayRooms.filter((room) => room.status === 'occupied').length
-    const maintenance = displayRooms.filter((room) => room.status === 'maintenance').length
-
-    const result: { name: string, amount: number, variant: CardProps["variant"] }[] = [
-      { name: 'Total', amount: total, variant: 'purple' },
-      { name: 'Available', amount: available, variant: 'purple' },
-      { name: 'Occupied', amount: occupied, variant: 'purple' },
-      { name: 'Maintainance', amount: maintenance, variant: 'purple' },
-    ];
-    return result;
+    return BookingStatus(displayRooms);
   }, [displayRooms])
 
   return (
