@@ -38,15 +38,46 @@ export default function RoomStatusCard({ rooms }: {rooms: RoomResp[]}) {
 
   return (
     <div className="flex-3 bg-card border border-white/5 rounded-2xl p-6 shadow-lg">
+      {/* 🌟 Header ไม่ต้องกระพริบ ให้แสดงรอไว้เลยจะได้ดูแอปโหลดไว */}
       <div className="flex justify-between items-center mb-8">
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Room status</h3>
-        <span className="text-[10px] text-emerald-400 flex items-center gap-1 bg-emerald-400/10 px-2 py-1 rounded-full"><span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Status</span>
+        <span className="text-[10px] text-emerald-400 flex items-center gap-1 bg-emerald-400/10 px-2 py-1 rounded-full">
+          <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Status
+        </span>
       </div>
       
       <div className="flex justify-between items-center px-4">
-        {countedAmoutRoom.map((item) => (
-          <CircleChart key={item.name} value={item.amount} total={countedAmoutRoom[0]?.amount} label={item.name} colorClass="text-white" strokeClass={item.name === 'Total' ? 'stroke-white' : 'stroke-dark-purple'} />
-        ))}
+        {/* ⏳ เช็คสถานะ Loading */}
+        {isInitialLoading ? (
+          
+          /* แสดง Skeleton 4 วง (Total, Available, Occupied, Maintenance) */
+          [1, 2, 3, 4].map((i) => (
+            <div key={`skeleton-${i}`} className="flex flex-col items-center animate-pulse">
+              {/* วงแหวนจำลอง (ใช้ border ความหนาเท่า strokeWidth=6) */}
+              <div className="w-24 h-24 rounded-full border-[6px] border-white/10 flex items-center justify-center">
+                {/* ตัวเลขตรงกลางจำลอง */}
+                <div className="w-6 h-6 bg-white/10 rounded-md"></div>
+              </div>
+              {/* ข้อความ Label ด้านล่างจำลอง */}
+              <div className="h-2.5 w-16 bg-white/10 rounded mt-3"></div>
+            </div>
+          ))
+
+        ) : (
+          
+          /* ✅ แสดงข้อมูลจริงเมื่อโหลดเสร็จ */
+          countedAmoutRoom.map((item) => (
+            <CircleChart 
+              key={item.name} 
+              value={item.amount} 
+              total={countedAmoutRoom[0]?.amount} 
+              label={item.name} 
+              colorClass="text-white" 
+              strokeClass={item.name === 'Total' ? 'stroke-white' : 'stroke-dark-purple'} 
+            />
+          ))
+          
+        )}
       </div>
     </div>
   )

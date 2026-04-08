@@ -38,3 +38,22 @@ export interface BookingEventResponse {
   User: User
   Room: RoomResp
 }
+
+export interface AttendanceHealthResponse {
+  completed: number;
+  cancelled: number;
+  noShow: number;
+  completionRate: number;
+}
+
+export interface PopularRoomResponse {
+  id: number;
+  roomNumber: string;
+  name: string;
+  percentage: number;
+}
+
+export interface DashboardAnalyticsResponse {
+  attendanceHealth: AttendanceHealthResponse;
+  popularRooms: PopularRoomResponse[];
+}
