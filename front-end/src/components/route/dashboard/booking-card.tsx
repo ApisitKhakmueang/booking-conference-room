@@ -41,7 +41,7 @@ export default function BookingCard({ booking }: { booking: BookingEventResponse
         <p className="text-xs font-bold text-white mb-0.5">
           {getEndsInText(booking.endTime)}
         </p>
-        <p className="text-[10px] text-gray-500">{start.time} {start.suffix} to {end.time} {end.suffix}</p>
+        <p className="text-[10px] text-gray-500">{start.time} {start.suffix === end.suffix ? '' : `${start.suffix} `}to {end.time} {end.suffix}</p>
       </div>
     </div>
   )
