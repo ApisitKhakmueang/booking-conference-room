@@ -1,18 +1,10 @@
-import { createClient } from '@/utils/supabase/server'
+import EachPageLayout from "@/components/layout/each-page-layout";
+import Dashboard from "@/components/route/dashboard";
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data } = await supabase.auth.getClaims()
-  const { user_metadata } = data?.claims ?? {}
- 
+export default async function Page() {
   return (
-    <div>
-      <h1>Dashboard</h1>
-
-      <div></div>
-
-      <pre>{JSON.stringify(data?.claims, null, 2)}</pre>
-      <img src={user_metadata?.avatar_url} />
-    </div>
+    <EachPageLayout pageName="Dashboard">
+      <Dashboard />
+    </EachPageLayout>
   )
 }
