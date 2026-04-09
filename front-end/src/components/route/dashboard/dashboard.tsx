@@ -19,6 +19,7 @@ export default function DashboardPage() {
     setSelectedEvent(undefined); 
     setIsAddModalOpen(true);
   };
+  
   const handleEditClick = (event: BookingEvent) => {
     console.log("event: ", event)
     setTypeOperate('update');

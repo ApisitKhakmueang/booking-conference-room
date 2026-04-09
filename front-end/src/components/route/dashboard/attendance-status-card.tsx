@@ -15,14 +15,15 @@ export default function AttendanceStatusCard({ attendanceHealth, percentageData 
       {/* Completed */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Completed</span>
+          {/* 🌟 ใช้สี text-success จาก Theme */}
+          <CheckCircle2 className="w-4 h-4 text-success" />
+          <span className="text-[10px] font-bold text-success uppercase tracking-widest">Completed</span>
         </div>
-        {/* ⏳ เช็ค Loading */}
+        {/* ⏳ Skeleton: สีเทา (Light) / ขาวโปร่ง (Dark) */}
         {isLoading ? (
-          <div className="h-10 w-24 bg-white/10 rounded-lg animate-pulse"></div>
+          <div className="h-10 w-24 bg-gray-200 dark:bg-white/10 rounded-lg animate-pulse"></div>
         ) : (
-          <p className="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">
+          <p className="text-4xl font-extrabold text-success drop-shadow-sm">
             {percentageData.completed > 0 ? `${percentageData.completed.toFixed(1)}%` : `${attendanceHealth?.completed || 0}`}
           </p>
         )}
@@ -31,13 +32,14 @@ export default function AttendanceStatusCard({ attendanceHealth, percentageData 
       {/* Cancelled */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-          <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Cancelled</span>
+          {/* 🌟 ใช้สี text-danger จาก Theme */}
+          <XCircle className="w-4 h-4 text-danger" />
+          <span className="text-[10px] font-bold text-danger uppercase tracking-widest">Cancelled</span>
         </div>
         {isLoading ? (
-          <div className="h-10 w-24 bg-white/10 rounded-lg animate-pulse"></div>
+          <div className="h-10 w-24 bg-gray-200 dark:bg-white/10 rounded-lg animate-pulse"></div>
         ) : (
-          <p className="text-4xl font-extrabold text-rose-600 dark:text-rose-400">
+          <p className="text-4xl font-extrabold text-danger drop-shadow-sm">
             {percentageData.cancelled > 0 ? `${percentageData.cancelled.toFixed(1)}%` : `${attendanceHealth?.cancelled || 0}`}
           </p>
         )}
@@ -46,13 +48,14 @@ export default function AttendanceStatusCard({ attendanceHealth, percentageData 
       {/* No Show */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-          <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest">No Show</span>
+          {/* 🌟 ใช้สี text-warning จาก Theme */}
+          <AlertCircle className="w-4 h-4 text-warning" />
+          <span className="text-[10px] font-bold text-warning uppercase tracking-widest">No Show</span>
         </div>
         {isLoading ? (
-          <div className="h-10 w-24 bg-white/10 rounded-lg animate-pulse"></div>
+          <div className="h-10 w-24 bg-gray-200 dark:bg-white/10 rounded-lg animate-pulse"></div>
         ) : (
-          <p className="text-4xl font-extrabold text-orange-600 dark:text-orange-400">
+          <p className="text-4xl font-extrabold text-warning drop-shadow-sm">
             {percentageData.noShow > 0 ? `${percentageData.noShow.toFixed(1)}%` : `${attendanceHealth?.noShow || 0}`}
           </p>
         )}
