@@ -44,6 +44,8 @@ export interface AttendanceHealthResponse {
   cancelled: number;
   noShow: number;
   completionRate: number;
+  canCelledRate: number
+	noShowRate: number
 }
 
 export interface PopularRoomResponse {
