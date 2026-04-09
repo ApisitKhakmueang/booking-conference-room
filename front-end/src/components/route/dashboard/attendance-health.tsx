@@ -1,13 +1,13 @@
 import { AttendanceHealthResponse } from '@/utils/interface/response';
 import AttendanceStatusCard from './attendance-status-card';
 
-export default function AttendanceHealth({ attendanceHealth }: { attendanceHealth: AttendanceHealthResponse }) {
+export default function AttendanceHealth({ attendanceHealth }: { attendanceHealth?: AttendanceHealthResponse }) {
   
   // 🌟 คำนวณเปอร์เซ็นต์สำหรับกราฟ Stacked Bar (ถ้าข้อมูลมาครบ)
   const total = (attendanceHealth?.completed || 0) + (attendanceHealth?.cancelled || 0) + (attendanceHealth?.noShow || 0);
-  const completedPct = total > 0 ? (attendanceHealth.completed / total) * 100 : 0;
-  const cancelledPct = total > 0 ? (attendanceHealth.cancelled / total) * 100 : 0;
-  const noShowPct = total > 0 ? (attendanceHealth.noShow / total) * 100 : 0;
+  const completedPct = total > 0 ? ((attendanceHealth?.completed || 0) / total) * 100 : 0;
+  const cancelledPct = total > 0 ? ((attendanceHealth?.cancelled || 0) / total) * 100 : 0;
+  const noShowPct = total > 0 ? ((attendanceHealth?.noShow || 0) / total) * 100 : 0;
 
   const percentageData = {
     completed: completedPct,

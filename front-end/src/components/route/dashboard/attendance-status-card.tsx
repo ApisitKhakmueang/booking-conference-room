@@ -7,7 +7,7 @@ interface PercentageData {
   noShow: number;
 };
 
-export default function AttendanceStatusCard({ attendanceHealth, percentageData }: { attendanceHealth: AttendanceHealthResponse, percentageData: PercentageData }) {
+export default function AttendanceStatusCard({ attendanceHealth, percentageData }: { attendanceHealth?: AttendanceHealthResponse, percentageData: PercentageData }) {
   const isLoading = attendanceHealth === undefined || percentageData === undefined;
 
   return (

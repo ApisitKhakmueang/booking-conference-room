@@ -1,7 +1,7 @@
 import { PopularRoomResponse } from "@/utils/interface/response";
 import { RoomRankCard, RoomRankCardSkeleton } from "./room-rank-card";
 
-export default function PopularRanking({ popularRooms } : { popularRooms: PopularRoomResponse[] }) {
+export default function PopularRanking({ popularRooms } : { popularRooms?: PopularRoomResponse[] }) {
   const isLoading = !popularRooms || popularRooms.length === 0; // สมมติว่า ถ้า popularRooms ยังไม่มีข้อมูล หรือเป็น array ว่าง แสดงว่าอยู่ในสถานะ loading
 
   return (
