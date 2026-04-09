@@ -1,7 +1,7 @@
 import { RenderEventGroupProps } from "@/utils/interface/interface";
 import CardEvents from "./event-card";
 
-export function RenderEventGroup({ title, groupEvents, titleColor, handleEditClick, setIsAddModalOpen, setCurrentDate, fetchUserBookings }: RenderEventGroupProps) {
+export function EventGroup({ title, groupEvents, titleColor, handleEditClick, setIsAddModalOpen, setCurrentDate, fetchUserBookings }: RenderEventGroupProps) {
   if (groupEvents.length === 0) return null;
   return (
     <div className="mb-8">

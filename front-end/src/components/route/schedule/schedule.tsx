@@ -12,7 +12,7 @@ import { BookingEvent, RenderEventGroupProps } from "@/utils/interface/interface
 import { mapBookingEvents } from "@/lib/map-resp-event";
 import { bookingService } from "@/service/booking.service";
 import MobileFilter from "./mobile-filter";
-import { RenderEventGroup } from "./event-group";
+import { EventGroup } from "./event-group";
 import Swal from "sweetalert2";
 
 export default function Schedule() {
@@ -197,13 +197,13 @@ export default function Schedule() {
                 // 🌟 5. Render กลุ่มต่างๆ เรียงลำดับความสำคัญ
                 <div>
                   {/* กำลังใช้งาน (In Progress) */}
-                  <RenderEventGroup {...renderEventGroupProps} title="In Progress" groupEvents={groupedEvents.inProgress} titleColor="text-red-500 dark:text-red-400" />
+                  <EventGroup {...renderEventGroupProps} title="In Progress" groupEvents={groupedEvents.inProgress} titleColor="text-red-500 dark:text-red-400" />
                   
                   {/* กำลังจะเริ่ม (Upcoming) */}
-                  <RenderEventGroup {...renderEventGroupProps} title="Upcoming" groupEvents={groupedEvents.upcoming} titleColor="text-amber-500 dark:text-amber-400" />
+                  <EventGroup {...renderEventGroupProps} title="Upcoming" groupEvents={groupedEvents.upcoming} titleColor="text-amber-500 dark:text-amber-400" />
                   
                   {/* จองปกติ (Normal Bookings) */}
-                  <RenderEventGroup {...renderEventGroupProps} title="Scheduled Bookings" groupEvents={groupedEvents.normal} titleColor="text-blue-600 dark:text-blue-400" />
+                  <EventGroup {...renderEventGroupProps} title="Scheduled Bookings" groupEvents={groupedEvents.normal} titleColor="text-blue-600 dark:text-blue-400" />
                 </div>
 
               ) : (
