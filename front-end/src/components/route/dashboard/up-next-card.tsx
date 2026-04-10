@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { 
   CalendarClock, MapPin, Clock, Info
 } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
@@ -60,10 +61,18 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
     <div className="flex-2 bg-light-main-background dark:bg-linear-to-br dark:from-[#1e1e24] dark:to-[#121215] border border-gray-200 dark:border-white/5 rounded-2xl p-8 shadow-lg relative overflow-hidden group min-h-[250px] flex flex-col justify-center transition-colors">
       
       {/* 🌟 2. เอฟเฟกต์แสงมุมขวา: Light ใช้สีม่วงอ่อนๆ / Dark ใช้สี Indigo */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-dark-purple/10 dark:from-indigo-500/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-dark-purple/50 dark:from-indigo-500/10 to-transparent pointer-events-none" />
       
       {/* 🌟 3. ลายน้ำ Icon พื้นหลัง */}
-      <CalendarClock className="absolute -bottom-10 -right-10 w-64 h-64 text-dark-purple/5 dark:text-white/2 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+      {/* <CalendarClock className="absolute -bottom-10 -right-10 w-64 h-64 text-dark-purple/5 dark:text-white/2 pointer-events-none group-hover:scale-110 transition-transform duration-700" /> */}
+
+      <Image
+        src='/logo/logoEE-White.png'
+        alt="logo"
+        width={256}
+        height={256}
+        className='absolute right-0 opacity-50 dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700'
+      />
       
       <span className="text-xs font-bold text-light-muted dark:text-gray-500 uppercase tracking-widest mb-2 block relative z-10">Up Next</span>
 
