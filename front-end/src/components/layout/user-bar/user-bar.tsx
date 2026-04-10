@@ -37,10 +37,10 @@ export default function UserBar() {
           
           {!user ? (
             // ถ้า user ยังเป็น null (กำลังโหลด) ให้โชว์ Skeleton
-            <UserIconSkeleton isHideNav={isHideNav} />
+            <UserIconSkeleton />
           ) : (
             // ถ้า user มีข้อมูลแล้ว ให้โชว์ของจริง
-            <UserIcon user={user} isHideNav={isHideNav} />
+            <UserIcon user={user} />
           )}
         </div>
       </nav>

@@ -3,7 +3,7 @@ import UserDetail from "./user-detail";
 import { UserProfile } from "@/utils/interface/interface";
 import Image from "next/image";
 
-export function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserProfile | null }) {
+export function UserIcon({ user }: { user: UserProfile | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -49,10 +49,10 @@ export function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserPr
   )
 }
 
-export function UserIconSkeleton({ isHideNav }: { isHideNav: boolean }) {
+export function UserIconSkeleton() {
   return (
-    <div className={`border dark:border-none dark:bg-sidebar border-slate-400 rounded-full select-none animate-pulse ${!isHideNav ? 'p-1' : ''}`}>
-      <div className={`flex items-center gap-2 relative ${!isHideNav ? 'pr-5' : 'p-[7px]'}`}>
+    <div className={`border dark:border-none dark:bg-sidebar border-slate-400 rounded-full select-none animate-pulse lg:p-[5px]`}>
+      <div className={`flex items-center gap-2 relative lg:pr-5 lg:p-0 p-[7px]`}>
         
         {/* 🌟 Avatar Skeleton */}
         <div className="w-10 h-10 rounded-full bg-slate-300 dark:bg-white/10 shrink-0"></div>
