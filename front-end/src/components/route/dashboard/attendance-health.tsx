@@ -20,12 +20,12 @@ export default function AttendanceHealth({ attendanceHealth }: { attendanceHealt
     <div className="flex-3 bg-light-main-background dark:bg-card border border-gray-200 dark:border-white/5 rounded-2xl p-8 shadow-lg flex flex-col justify-between transition-colors">
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex md:flex-row flex-col justify-between md:items-center items-start gap-2 md:mb-8 mb-5">
         {/* 🌟 หัวข้อ: สีเทากลาง (Light) / สีเทาอ่อน (Dark) */}
         <h3 className="text-sm font-bold text-light-muted dark:text-gray-400 uppercase tracking-widest">Attendance Health</h3>
         
         {/* 🌟 Legend (คำอธิบายสี) */}
-        <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider text-light-secondary dark:text-gray-500">
+        <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-wider text-light-secondary dark:text-gray-500">
           {/* 🌟 ใช้สี Status จาก Theme: bg-success, bg-danger, bg-warning */}
           <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-success"></span> Completed</span>
           <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-danger"></span> Cancelled</span>
@@ -49,7 +49,7 @@ export default function AttendanceHealth({ attendanceHealth }: { attendanceHealt
         {/* 🌟 ข้อความด้านล่าง: สีเทาเข้ม (Light) / สีเทาอ่อน (Dark) */}
         <div className="flex justify-between text-[10px] font-bold text-light-secondary dark:text-gray-500 uppercase tracking-wider">
           <span>{attendanceHealth?.completionRate || 0}% Completion Rate</span>
-          <span>Weekly Target: 95%</span>
+          {/* <span>Weekly Target: 95%</span> */}
         </div>
       </div>
 

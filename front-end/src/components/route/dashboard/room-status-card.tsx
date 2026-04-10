@@ -49,7 +49,7 @@ export default function RoomStatusCard({ rooms }: {rooms: RoomResp[]}) {
         </span>
       </div>
       
-      <div className="flex justify-between items-center px-4">
+      <div className="grid md:grid-cols-4 grid-cols-2 items-center px-4">
         {isInitialLoading ? (
           
           /* ⏳ Skeleton: ใช้สีเทา (Light) / ขาวโปร่ง (Dark) */
