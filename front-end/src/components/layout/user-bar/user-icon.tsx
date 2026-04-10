@@ -20,11 +20,11 @@ export function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserPr
   
   return (
     <div 
-      className={`border dark:border-none dark:bg-sidebar dark:hover:bg-hover border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-transform duration-300 rounded-full cursor-pointer  select-none ${!isHideNav ? 'p-1' : ''}`}
+      className={`border dark:border-none dark:bg-sidebar dark:hover:bg-hover border-slate-400 hover:bg-slate-100 hover:-translate-y-1 transition-transform duration-300 rounded-full cursor-pointer select-none lg:p-[5px]`}
       onClick={() => setIsOpen(v => !v)}
       ref={profileRef}
       >
-      <div className={`flex items-center gap-2 relative ${!isHideNav ? 'pr-5' : 'p-[7px]'}`}>
+      <div className={`flex items-center gap-2 relative lg:pr-5 lg:p-0 p-[7px]`}>
         <div className="w-10 h-10 relative flex">
           <Image 
             src={user?.avatar || '/user/profile.jpg'}
