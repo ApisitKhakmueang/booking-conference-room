@@ -41,7 +41,6 @@ export default function NavigationLayout({
   const isLargeScreen = useMediaQuery("(max-width: 1024px)")
 
   const fetchRoom = useCallback(async () => {
-    const url = process.env.NEXT_PUBLIC_BACKEND_HTTP;
     try {
       const response = await bookingService.fetchRoomDetails();
       setRoom(response); // เก็บข้อมูลดิบลง State
