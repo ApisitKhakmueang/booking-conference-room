@@ -40,7 +40,7 @@ export function UserIcon({ isHideNav, user }: { isHideNav: boolean; user: UserPr
 
         {isOpen && (
           <div 
-            className="absolute z-30 top-15 right-0">
+            className="absolute z-60 top-15 right-0">
             <UserDetail />
           </div>
         )}

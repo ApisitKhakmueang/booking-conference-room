@@ -14,7 +14,7 @@ export default function DropBackground() {
     <div>
       {isOpenNav && isHideNav && (
         <div 
-          className="fixed inset-0 bg-black opacity-50 z-50"
+          className="fixed inset-0 bg-black opacity-50 z-80"
           onClick={() => setIsOpenNav(false)}>
         </div>
       )}
