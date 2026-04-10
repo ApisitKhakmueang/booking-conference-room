@@ -6,12 +6,6 @@ import BookingCard from './booking-card';
 
 export default function CurrentlyActiveList({ bookings, isLoadingBooking }: { bookings: BookingEventResponse[], isLoadingBooking: boolean }) {
   const router = useRouter()
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     // 🌟 พื้นหลังการ์ด

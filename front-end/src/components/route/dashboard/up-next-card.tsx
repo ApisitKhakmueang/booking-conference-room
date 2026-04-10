@@ -10,6 +10,7 @@ import {
   CalendarClock, MapPin, Clock, Info
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 
 export default function UpNextCard({ handleEditClick }: { handleEditClick: (event: BookingEvent) => void }) {
   const [event, setEvent] = useState<BookingEvent | null>(null);
@@ -27,8 +28,23 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
       } else {
         setEvent(null);
       }
-    } catch (error) {
-      console.log("error: ", error);
+    } catch (error: any) {
+      if (error.response?.status === 500) {
+        Swal.fire({
+          title: 'Error',
+          text: "Date format is invalid or missing",
+          icon: 'warning',
+          confirmButtonColor: '#b495ff', 
+        })
+        return;
+      }
+
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#b495ff',
+      });
       setEvent(null);
     } finally {
       setIsLoading(false);
