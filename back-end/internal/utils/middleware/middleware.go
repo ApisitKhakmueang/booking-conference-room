@@ -2,30 +2,61 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/nedpals/supabase-go"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthMiddleware(client *supabase.Client) fiber.Handler {
+func AuthMiddleware() fiber.Handler {
+	var jwtSecret = []byte(os.Getenv("SUPABASE_JWT_SECRET"))
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 		}
 
-		token := strings.TrimPrefix(authHeader, "Bearer ")
-		user, err := client.Auth.User(c.Context(), token)
-		if err != nil {
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		
+		// 🌟 แกะ Token โดยตรงด้วย JWT Secret
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method")
+			}
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 		}
-		
-		c.Locals("user_id", user.ID)
-		return c.Next()
+
+		// 🌟 ดึงข้อมูลจาก Payload โดยตรง
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			// ดึง User ID
+			userID := claims["sub"].(string)
+			
+			// ดึง app_metadata ออกมาดูเลย!
+			if appMetadata, ok := claims["app_metadata"].(map[string]interface{}); ok {
+				// log.Printf("AppMetadata ที่แกะได้: %v", appMetadata)
+				
+				if role, exists := appMetadata["role"]; exists {
+					// log.Printf("Role ของคนนี้คือ: %v", role)
+					c.Locals("role", role) // เก็บ role ไว้ใช้ต่อใน API
+				}
+			}
+
+			c.Locals("user_id", userID)
+			return c.Next()
+		}
+
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid claims"})
 	}
 }
 

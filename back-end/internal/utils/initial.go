@@ -157,7 +157,7 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 
 	// With middleware
 	api := app.Group("/api")
-	bookingAPI := api.Group("/booking", middleware.AuthMiddleware(supabaseClient))
+	bookingAPI := api.Group("/booking", middleware.AuthMiddleware())
 	
 	// api.Get("/holiday", handler.GetHoliday)
 	
