@@ -12,7 +12,6 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 
 	"github.com/google/uuid"
-	// "github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -308,37 +307,6 @@ func (p *postgresRepository) GetUserHistoryDB(ctx context.Context, userID uuid.U
 	return bookings, nil
 }
 
-func (p *postgresRepository) GetRoomDetailsDB(ctx context.Context) ([]domain.Room, error) {
-	var room []domain.Room
-
-	result := p.db.
-		WithContext(ctx).
-		Select("id, name, capacity, is_active, room_number").
-		Find(&room)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return room, nil
-}
-
-func (p *postgresRepository) GetRoomByRoomNumberDB(ctx context.Context, roomNumber int) (*domain.Room, error) {
-	room := new(domain.Room)
-
-	result := p.db.
-		WithContext(ctx).
-		Where("room_number = ?", roomNumber).
-		Select("id, name, capacity, is_active, room_number").
-		First(&room)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return room, nil
-}
-
 func (p *postgresRepository) GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
 	var holidays []domain.Holiday
 	
@@ -384,6 +352,37 @@ func (p *postgresRepository) UpdateBookingStatusDB(ctx context.Context, bookingI
 
 	// updatedBooking จะถูกเติมข้อมูลใหม่ครบทุกฟิลด์เรียบร้อย
 	return updatedBooking, nil
+}
+
+func (p *postgresRepository) GetRoomDB(ctx context.Context) ([]domain.Room, error) {
+	var room []domain.Room
+
+	result := p.db.
+		WithContext(ctx).
+		Select("id, name, capacity, is_active, room_number").
+		Find(&room)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return room, nil
+}
+
+func (p *postgresRepository) GetRoomByRoomNumberDB(ctx context.Context, roomNumber int) (*domain.Room, error) {
+	room := new(domain.Room)
+
+	result := p.db.
+		WithContext(ctx).
+		Where("room_number = ?", roomNumber).
+		Select("id, name, capacity, is_active, room_number").
+		First(&room)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return room, nil
 }
 
 func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error) {
@@ -568,106 +567,3 @@ func preloadBookingRelations(db *gorm.DB) *gorm.DB {
 		Preload("Room", func(db *gorm.DB) *gorm.DB { return db.Select("id, name, room_number") }).
 		Preload("User", func(db *gorm.DB) *gorm.DB { return db.Select("id, email, full_name") })
 }
-
-// func (p *postgresRepository) CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error){
-// 	// 1. ใช้ sql.NullTime เพื่อรับค่าที่อาจเป็น NULL ได้อย่างปลอดภัย 100%
-// 	// sDate := startDate.Format("2006-01-02")
-// 	// eDate := endDate.Format("2006-01-02")
-
-// 	var result sql.NullTime
-
-// 	err := p.db.Model(&domain.Holiday{}).
-// 		Select("MAX(updated_at)").
-// 		Where("date >= ? AND date <= ?", startDate, endDate).
-// 		Scan(&result).Error // Scan เข้า sql.NullTime
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// 2. เช็คว่ามีค่าจริงไหม (Valid = true แปลว่าไม่ NULL)
-// 	if result.Valid {
-// 		// ดึงค่าเวลาออกมา แล้วคืนกลับเป็น Pointer
-// 		return &result.Time, nil
-// 	}
-
-// 	// 3. ถ้า Valid = false แปลว่าได้ NULL (ไม่มีวันหยุดในช่วงนั้น)
-// 	return nil, nil
-// }
-
-// func (p *postgresRepository) GetEventID(bookingID uuid.UUID) (*domain.Booking, error) {
-// 	booking := new(domain.Booking)
-// 	result := p.db.Preload("Calendar", func(db *gorm.DB) *gorm.DB {
-// 			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-// 			return db.Select("id, google_calendar_id") 
-//     }).
-//     // 2. ส่วนของตาราง Booking (ตารางหลัก)
-//     // ต้อง Select calendar_id (FK) ด้วย เพื่อให้รู้ว่าต้องไปดึง Calendar อันไหน
-//     Select("google_event_id, calendar_id"). 
-//     First(booking, bookingID)
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-
-// 	return booking, result.Error
-// }
-
-// func (p *postgresRepository) GetCalendar(roomNumber uint) (*domain.Calendar, error) {
-// 	calendar := new(domain.Calendar)
-// 	result := p.db.Preload("Room", func(db *gorm.DB) *gorm.DB {
-// 			// ต้อง Select ID (PK) ของ Calendar ด้วย เพื่อให้ GORM จับคู่ถูก
-// 			return db.Select("id, name") 
-//     }).
-// 		Select("id, room_id, google_calendar_id").
-// 		Where("calendar_number = ?", roomNumber).
-// 		First(calendar)
-//   if result.Error != nil {
-//     return nil, result.Error
-//   }
-
-// 	return calendar, result.Error
-// }
-
-// func (p *postgresRepository) GetUser(userID uuid.UUID) (*domain.User, error) {
-// 	user := new(domain.User)
-// 	result := p.db.First(user, userID)
-// 	if result.Error != nil {
-// 		return nil, result.Error
-// 	}
-
-// 	return user, nil
-// }
-
-// func (p *postgresRepository) CheckSameRoom(booking *domain.Booking, roomNumber uint) error {
-// 	room := new(domain.Room)
-// 	result := p.db.Select("id").Where("room_number = ?", roomNumber).First(room)
-// 	if result.Error != nil {
-// 		return result.Error
-// 	}
-	
-// 	currentBooking := new(domain.Booking)
-// 	result = p.db.Preload("Calendar").First(currentBooking, booking.ID)
-// 	if result.Error != nil {
-// 		return result.Error
-// 	}
-	
-// 	// log.Printf("currentBooking: %v", currentBooking)
-// 	currentBooking.StartTime = booking.StartTime
-// 	currentBooking.EndTime = booking.EndTime
-// 	currentBooking.Title = booking.Title
-
-// 	*booking = *currentBooking
-
-// 	// log.Println("enter check same room")
-
-// 	// log.Println("room ID: ", room.ID)
-// 	// log.Println("room ID: ", booking.RoomID)
-// 	// log.Printf("booking db: %v", booking)
-
-// 	if room.ID != booking.RoomID {
-// 		booking.RoomID = room.ID
-// 		return errors.New("New room")
-// 	}
-
-// 	return nil
-// }

@@ -26,6 +26,6 @@ func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 	// มาตรฐานมักจะใช้เป็นพหูพจน์ (Plural)
 	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin
 	router.Get("/holidays", handler.GetHoliday) 
-	router.Get("/rooms/details", handler.GetRoomDetails) 
+	router.Get("/rooms/details", handler.GetRoom) 
 	router.Get("/room/:room", handler.GetRoomByRoomNumber) // GET   /bookings/room/:id
 }

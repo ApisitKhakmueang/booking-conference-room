@@ -258,8 +258,8 @@ func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(bookings)
 }
 
-func (u *BookingHandler) GetRoomDetails(c *fiber.Ctx) error {
-	reponse, err := u.usecase.GetRoomDetails(c.Context())
+func (u *BookingHandler) GetRoom(c *fiber.Ctx) error {
+	reponse, err := u.usecase.GetRoom(c.Context())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
