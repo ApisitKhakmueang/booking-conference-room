@@ -45,17 +45,6 @@ type Product struct {
 	Desc  string  `json:"description"`
 }
 
-func mockDBFetch(id string) (Product, error) {
-	time.Sleep(1 * time.Second) // จำลองความช้า
-	if id == "1" {
-		return Product{ID: "1", Name: "Gaming Mouse", Price: 1500.00, Desc: "High DPI mouse"}, nil
-	}
-	if id == "2" {
-		return Product{ID: "2", Name: "Mechanical Keyboard", Price: 3200.00, Desc: "Blue switches"}, nil
-	}
-	return Product{}, fmt.Errorf("not found")
-}
-
 func InitialDBConnection() *gorm.DB {
 	// ใช้ Connection String จากหน้าเมนู Settings > Database ใน Supabase
 	dsn := os.Getenv("DATABASE_URL")
@@ -156,7 +145,7 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	// apiTest.Get("/room/details", handler.GetRoomDetails)
 
 	// With middleware
-	api := app.Group("/api")
+	api := app.Group("/api/v1")
 	bookingAPI := api.Group("/booking", middleware.AuthMiddleware())
 	
 	// api.Get("/holiday", handler.GetHoliday)
