@@ -258,6 +258,57 @@ func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(bookings)
 }
 
+func (u *BookingHandler) CreateRoom(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+
+	room := new(domain.Room)
+	if err := c.BodyParser(room); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := u.usecase.CreateRoom(ctx, room) ; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Create room successfully !")
+}
+
+func (u *BookingHandler) UpdateRoom(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	roomID, err := uuid.Parse(c.Params("roomID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+
+	room := new(domain.Room)
+	if err := c.BodyParser(room); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	room.ID = roomID
+
+	if err := u.usecase.UpdateRoom(ctx, room); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	} 
+
+	return c.Status(fiber.StatusOK).SendString("Update room successfully")
+}
+
+func (u *BookingHandler) DeleteRoom(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	roomID, err := uuid.Parse(c.Params("roomID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := u.usecase.DeleteRoom(ctx, roomID) ; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Delete room successfully !")
+}
+
 func (u *BookingHandler) GetRoom(c *fiber.Ctx) error {
 	reponse, err := u.usecase.GetRoom(c.Context())
 	if err != nil {
@@ -267,13 +318,13 @@ func (u *BookingHandler) GetRoom(c *fiber.Ctx) error {
 	return c.JSON(reponse)
 }
 
-func (u *BookingHandler) GetRoomByRoomNumber(c *fiber.Ctx) error {
-	roomNumber, err := strconv.Atoi(c.Params("room"))
+func (u *BookingHandler) GetRoomByID(c *fiber.Ctx) error {
+	roomID, err := uuid.Parse(c.Params("room"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	room, err := u.usecase.GetRoomByRoomNumber(c.Context(), roomNumber)
+	room, err := u.usecase.GetRoomByID(c.Context(), roomID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}

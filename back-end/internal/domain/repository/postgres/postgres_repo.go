@@ -21,11 +21,14 @@ type PostgresRepository interface {
 	GetBookingStatusByRoomID_DB(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error)
 	GetUserBookingDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error)
 	GetUserHistoryDB(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error)
-	GetRoomDB(ctx context.Context) ([]domain.Room, error)
-	GetRoomByRoomNumberDB(ctx context.Context, roomNumber int) (*domain.Room, error)
 	GetHolidayDB(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
 	UpdateBookingStatusDB(ctx context.Context, bookingID uuid.UUID, status string) (*domain.Booking, error)
-
+	
+	CreateRoomDB(ctx context.Context, room *domain.Room) error
+	UpdateRoomDB(ctx context.Context, room *domain.Room) error
+	DeleteRoomDB(ctx context.Context, roomID uuid.UUID) error
+	GetRoomDB(ctx context.Context) ([]domain.Room, error)
+	GetRoomByID_DB(ctx context.Context, roomID uuid.UUID) (*domain.Room, error)
 	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 

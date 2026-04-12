@@ -20,6 +20,10 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Get("/analytic", handler.GetAnalyticBooking)
 	router.Get("/me", handler.GetUserBooking)           // GET /bookings/me
 	router.Get("/me/history", handler.GetUserHistory)   // GET /bookings/me/history
+
+	router.Post("/room", handler.CreateRoom)
+	router.Put("/room/:roomID", handler.UpdateRoom)
+	router.Delete("/room/:roomID", handler.DeleteRoom)
 }
 
 func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
@@ -27,5 +31,5 @@ func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin
 	router.Get("/holidays", handler.GetHoliday) 
 	router.Get("/rooms/details", handler.GetRoom) 
-	router.Get("/room/:room", handler.GetRoomByRoomNumber) // GET   /bookings/room/:id
+	router.Get("/room/:room", handler.GetRoomByID) // GET   /bookings/room/:id
 }

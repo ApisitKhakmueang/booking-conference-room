@@ -421,6 +421,30 @@ func (u *bookingUsecase) GetUserHistory(ctx context.Context,userID uuid.UUID, da
 	return bookings, nil
 }
 
+func (u *bookingUsecase) CreateRoom(ctx context.Context, room *domain.Room) error {
+	if err := u.redis.CreateRoom(ctx, room); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *bookingUsecase) UpdateRoom(ctx context.Context, room *domain.Room) error {
+	if err := u.redis.UpdateRoom(ctx, room); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *bookingUsecase) DeleteRoom(ctx context.Context, roomID uuid.UUID) error {
+	if err := u.redis.DeleteRoom(ctx, roomID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *bookingUsecase) GetRoom(ctx context.Context) ([]domain.Room, error) {
 	rooms, err := u.redis.GetRoom(ctx)
 	if err != nil {
@@ -430,8 +454,8 @@ func (u *bookingUsecase) GetRoom(ctx context.Context) ([]domain.Room, error) {
 	return rooms, nil
 }
 
-func (u *bookingUsecase) GetRoomByRoomNumber(ctx context.Context, roomNumber int) (*domain.Room, error) {
-	room, err := u.redis.GetRoomByRoomNumber(ctx, roomNumber)
+func (u *bookingUsecase) GetRoomByID(ctx context.Context, roomID uuid.UUID) (*domain.Room, error) {
+	room, err := u.redis.GetRoomByID(ctx, roomID)
 	if err != nil {
 		return nil, err
 	}

@@ -21,11 +21,15 @@ type RedisRepository interface {
 	GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error)
 	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error)
 	GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error)
-	GetRoom(ctx context.Context) ([]domain.Room, error)
-	GetRoomByRoomNumber(ctx context.Context, roomNumber int) (*domain.Room, error)
 	GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error)
 	UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error)
 	UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error)
+
+	CreateRoom(ctx context.Context, room *domain.Room) error
+	UpdateRoom(ctx context.Context, room *domain.Room) error
+	DeleteRoom(ctx context.Context, roomID uuid.UUID) error
+	GetRoom(ctx context.Context) ([]domain.Room, error)
+	GetRoomByID(ctx context.Context, roomID uuid.UUID) (*domain.Room, error)
 }
 
 type HelperRedisRepository interface {

@@ -31,8 +31,8 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 		return nil, err
 	}
 
-	r.DeleteBookingToCache(ctx, roomNumber)
-	r.DeleteUserToCache(ctx, booking.UserID)
+	r.DeleteBookingCache(ctx, roomNumber)
+	r.DeleteUserCache(ctx, booking.UserID)
 
 	return booking, nil
 }
@@ -48,16 +48,14 @@ func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Boo
 		return nil, err
 	}
 
-	// 1. เคลียร์ Cache ของห้องเก่า (ถ้าห้องเปลี่ยน มันจะลบห้องเก่าให้)
-	r.DeleteBookingToCache(ctx, prevRoomNumber)
+	// 1. ลบ Cache ห้องเก่า (เพื่อให้ข้อมูลที่ย้ายออกหายไป)
+	r.DeleteBookingCache(ctx, prevRoomNumber)
 
-	// 2. เคลียร์ Cache ของห้องใหม่ (ถ้าห้องไม่เปลี่ยน มันก็แค่สั่งลบ Prefix เดิมซ้ำ ซึ่งไม่ Error ปลอดภัยครับ)
-	if prevRoomNumber != roomNumber { // สมมติว่าใน booking มี RoomID ให้เช็ค
-		// หรือถ้า Usecase ส่ง roomNumber ใหม่เข้ามา ก็ใช้ตัวนั้นแทนได้เลย
-		r.DeleteBookingToCache(ctx, roomNumber)
-	}
+	// 2. ลบ Cache ห้องใหม่ (เพื่อให้ข้อมูลที่ย้ายเข้าอัปเดต)
+	// ต่อให้ห้องจะเป็นห้องเดิม การสั่ง Delete ซ้ำที่ Key เดิมใน Redis ไม่ทำให้เกิด Error ครับ
+	r.DeleteBookingCache(ctx, roomNumber)
 
-	r.DeleteUserToCache(ctx, booking.UserID)
+	r.DeleteUserCache(ctx, booking.UserID)
 
 	return booking, nil
 }
@@ -68,9 +66,9 @@ func (r *redisRepository) DeleteBooking(ctx context.Context, booking *domain.Boo
 		return nil, err
 	}
 
-	r.DeleteBookingToCache(ctx, roomNumber)
-	r.DeleteUserToCache(ctx, booking.UserID)
-	r.DeleteHistoryToCache(ctx, booking.UserID)
+	r.DeleteBookingCache(ctx, roomNumber)
+	r.DeleteUserCache(ctx, booking.UserID)
+	r.DeleteHistoryCache(ctx, booking.UserID)
 	
 	return deletedBooking, nil
 }
@@ -81,9 +79,9 @@ func (r *redisRepository) CheckOutBooking(ctx context.Context, booking *domain.B
 		return nil, err
 	}
 
-	r.DeleteBookingToCache(ctx, roomNumber)
-	r.DeleteUserToCache(ctx, booking.UserID)
-	r.DeleteHistoryToCache(ctx, booking.UserID)
+	r.DeleteBookingCache(ctx, roomNumber)
+	r.DeleteUserCache(ctx, booking.UserID)
+	r.DeleteHistoryCache(ctx, booking.UserID)
 	
 	return deletedBooking, nil
 }
@@ -261,9 +259,9 @@ func (r *redisRepository) UpdateBookingEndStatus(ctx context.Context, bookingID 
 		return nil, 0, err
 	}
 
-	r.DeleteBookingToCache(ctx, roomNumber)
-	r.DeleteUserToCache(ctx, updateBooking.UserID)
-	r.DeleteHistoryToCache(ctx, updateBooking.UserID)
+	r.DeleteBookingCache(ctx, roomNumber)
+	r.DeleteUserCache(ctx, updateBooking.UserID)
+	r.DeleteHistoryCache(ctx, updateBooking.UserID)
 
 	return updateBooking, roomNumber, nil
 }
@@ -279,11 +277,44 @@ func (r *redisRepository) UpdateBookingNoshowStatus(ctx context.Context, booking
 		return nil, 0, err
 	}
 
-	r.DeleteBookingToCache(ctx, roomNumber)
-	r.DeleteUserToCache(ctx, updateBooking.UserID)
-	r.DeleteHistoryToCache(ctx, updateBooking.UserID)
+	r.DeleteBookingCache(ctx, roomNumber)
+	r.DeleteUserCache(ctx, updateBooking.UserID)
+	r.DeleteHistoryCache(ctx, updateBooking.UserID)
 
 	return updateBooking, roomNumber, nil
+}
+
+func (r *redisRepository) CreateRoom(ctx context.Context, room *domain.Room) error {
+	if err := r.postgres.CreateRoomDB(ctx, room); err != nil {
+		return err
+	}
+
+	r.DeleteRoomDetailsCache(ctx)
+
+	return nil
+}
+
+func (r *redisRepository) UpdateRoom(ctx context.Context, room *domain.Room) error {
+	if err := r.postgres.UpdateRoomDB(ctx, room); err != nil {
+		return err
+	}
+
+	// 1. เคลียร์ Cache ของห้องเก่า (ถ้าห้องเปลี่ยน มันจะลบห้องเก่าให้)
+	r.DeleteSpecificRoomCache(ctx, room.ID)
+	r.DeleteRoomDetailsCache(ctx)
+
+	return nil
+}
+
+func (r *redisRepository) DeleteRoom(ctx context.Context, roomID uuid.UUID) error {
+	if err := r.postgres.DeleteRoomDB(ctx, roomID);err != nil {
+		return err
+	}
+
+	r.DeleteSpecificRoomCache(ctx, roomID)
+	r.DeleteRoomDetailsCache(ctx)
+	
+	return nil
 }
 
 func (r *redisRepository) GetRoom(ctx context.Context) ([]domain.Room, error) {
@@ -312,8 +343,8 @@ func (r *redisRepository) GetRoom(ctx context.Context) ([]domain.Room, error) {
 	return rooms, nil
 }
 
-func (r *redisRepository) GetRoomByRoomNumber(ctx context.Context, roomNumber int) (*domain.Room, error) {
-	cacheKey := fmt.Sprintf("room:details:%d", roomNumber)
+func (r *redisRepository) GetRoomByID(ctx context.Context, roomID uuid.UUID) (*domain.Room, error) {
+	cacheKey := fmt.Sprintf("room:%s", roomID)
 
 	vals, err := r.rdb.Get(ctx, cacheKey).Result()
 	if err == nil {
@@ -325,7 +356,7 @@ func (r *redisRepository) GetRoomByRoomNumber(ctx context.Context, roomNumber in
 		return room, nil
 	}
 
-	room, err := r.postgres.GetRoomByRoomNumberDB(ctx, roomNumber)
+	room, err := r.postgres.GetRoomByID_DB(ctx, roomID)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +430,7 @@ func (r *redisRepository) SetJsonCache(ctx context.Context, cacheKey string, jso
 	}
 }
 
-func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber uint) {
+func (r *redisRepository) DeleteBookingCache(ctx context.Context, roomNumber uint) {
 	prefix := fmt.Sprintf("booking:%d", roomNumber)
 	
 	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
@@ -417,7 +448,7 @@ func (r *redisRepository) DeleteBookingToCache(ctx context.Context, roomNumber u
 	}()
 }
 
-func (r *redisRepository) DeleteUserToCache(ctx context.Context, userID uuid.UUID) {
+func (r *redisRepository) DeleteUserCache(ctx context.Context, userID uuid.UUID) {
 	prefix := fmt.Sprintf("booking:user:%s", userID)
 	
 	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
@@ -435,7 +466,7 @@ func (r *redisRepository) DeleteUserToCache(ctx context.Context, userID uuid.UUI
 	}()
 } 
 
-func (r *redisRepository) DeleteHistoryToCache(ctx context.Context, userID uuid.UUID) {
+func (r *redisRepository) DeleteHistoryCache(ctx context.Context, userID uuid.UUID) {
 	prefix := fmt.Sprintf("history:user:%s", userID)
 	
 	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
@@ -452,3 +483,39 @@ func (r *redisRepository) DeleteHistoryToCache(ctx context.Context, userID uuid.
 		}
 	}()
 } 
+
+func (r *redisRepository) DeleteSpecificRoomCache(ctx context.Context, roomID uuid.UUID) {
+	prefix := fmt.Sprintf("room:%s", roomID)
+	
+	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
+	go func() {
+		// 🚨 ข้อควรระวัง: ต้องสร้าง Context ใหม่ (context.Background())
+		// เพราะถ้าใช้ ctx เดิม พอ HTTP Request จบ Fiber จะทำลาย ctx ตัวนั้นทิ้ง
+		// แล้วทำให้ Redis Scan ตรงนี้พัง (Context Canceled)
+		bgCtx := context.Background() 
+
+		err := r.ClearCacheByPrefix(bgCtx, prefix)
+		if err != nil {
+			// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+			log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+		}
+	}()
+}
+
+func (r *redisRepository) DeleteRoomDetailsCache(ctx context.Context) {
+	prefix := "room:details"
+	
+	// ⭐️ ใช้ Goroutine แตก Thread ไปทำงานหลังบ้าน
+	go func() {
+		// 🚨 ข้อควรระวัง: ต้องสร้าง Context ใหม่ (context.Background())
+		// เพราะถ้าใช้ ctx เดิม พอ HTTP Request จบ Fiber จะทำลาย ctx ตัวนั้นทิ้ง
+		// แล้วทำให้ Redis Scan ตรงนี้พัง (Context Canceled)
+		bgCtx := context.Background() 
+
+		err := r.ClearCacheByPrefix(bgCtx, prefix)
+		if err != nil {
+			// แค่ Print Log ไว้ตรวจสอบ ไม่ต้อง Return Error ให้หน้าบ้านรันช้า
+			log.Printf("Failed to clear cache in background for prefix %s: %v", prefix, err)
+		}
+	}()
+}
