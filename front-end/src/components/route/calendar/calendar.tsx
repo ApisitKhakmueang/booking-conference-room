@@ -20,10 +20,9 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 // Hook
 import { useBookingWebSocket } from '@/hooks/data/useBookingWebsocket';
-import { useRoomStore } from '@/stores/room.store';
-import { useShallow } from 'zustand/shallow';
 import { useHolidays } from '@/hooks/data/useHolidays';
 import { useAuthStore } from '@/stores/auth.store';
+import { useRoomData } from '@/hooks/data/useRoomData';
 
 // --- 1. Types & Mock Data ---
 type ViewType = 'month' | 'week' | 'day';
@@ -34,11 +33,7 @@ type ViewType = 'month' | 'week' | 'day';
 export default function Calendar() {
   const currentUser = useAuthStore((state) => state.user);
 
-  const { rawRoom } = useRoomStore(
-    useShallow(((state) => ({
-      rawRoom: state.rooms
-    })))
-  )
+  const { room: rawRoom, isLoading, isError } = useRoomData();
   
   const rooms = useMemo(() => {
     // ดักไว้ก่อนว่าถ้าไม่มีข้อมูล ให้ return array เปล่าๆ ออกไป

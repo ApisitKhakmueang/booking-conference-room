@@ -5,25 +5,20 @@ import RoomStatus from "./room-status";
 import useBookingStatusWS from "@/hooks/data/useBookingStatusWS";
 import { useMemo, useState } from 'react';
 import { RoomResp } from '@/utils/interface/response';
-import { useShallow } from "zustand/shallow";
-import { useRoomStore } from "@/stores/room.store";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, LayoutGrid } from "lucide-react";
 import RoomTimeline from "./room-timeline";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { DisplayRooms } from "@/lib/booking-status";
+import { useRoomData } from "@/hooks/data/useRoomData";
 
 export default function Room() {
   const router = useRouter()
   const { bookings, isLoadingBooking } = useBookingStatusWS();
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
 
-  const { rawRoom } = useRoomStore(
-    useShallow(((state) => ({
-      rawRoom: state.rooms
-    })))
-  )
+  const { room: rawRoom, isLoading, isError } = useRoomData();
 
   // 🌟 2. ใช้ useMemo ผสมร่างข้อมูลแทนการใช้ useEffect -> setRoom
   // มันจะคำนวณใหม่ให้อัตโนมัติ เฉพาะตอนที่ rawRooms หรือ bookings มีการเปลี่ยนแปลงเท่านั้น

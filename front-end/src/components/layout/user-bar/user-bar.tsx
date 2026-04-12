@@ -1,7 +1,5 @@
 import { useAuthStore } from '@/stores/auth.store'
 
-import CodeDisplay from "./code-display";
-import NotificationComp from "./notification";
 import { UserIcon, UserIconSkeleton } from "./user-icon";
 import Welcomeback from "./welcome";
 import { useControlLayoutStore } from '@/stores/control-layout.store';

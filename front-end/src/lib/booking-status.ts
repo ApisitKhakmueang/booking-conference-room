@@ -16,7 +16,7 @@ export function BookingStatus(rooms: RoomResp[]) {
   return result;
 }
 
-export function DisplayRooms(rooms: RoomResp[] | null, bookings: BookingEventResponse[]) {
+export function DisplayRooms(rooms: RoomResp[] | undefined, bookings: BookingEventResponse[]) {
   if (!rooms || rooms.length === 0) return [];
 
   return rooms.map((room) => {

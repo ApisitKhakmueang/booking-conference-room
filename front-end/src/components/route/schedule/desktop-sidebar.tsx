@@ -1,14 +1,13 @@
 import { Calendar } from "@/components/ui/calendar";
-import { useEffect, useMemo } from "react"; // 🌟 เอา useState ออก
+import { useMemo } from "react"; // 🌟 เอา useState ออก
 import { enUS } from 'date-fns/locale';
-import { useRoomStore } from "@/stores/room.store";
-import { useShallow } from "zustand/shallow";
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Card } from "@/components/ui/card";
 import { DesktopSidebarScheduleProps } from "@/utils/interface/interface";
 import { cn } from "@/lib/utils";
+import { useRoomData } from "@/hooks/data/useRoomData";
 
 // 🌟 1. เพิ่ม selectedRooms และ setSelectedRooms เข้ามาใน Type ของ Props
 export default function DesktopSidebar({
@@ -21,22 +20,18 @@ export default function DesktopSidebar({
   selectedRooms,
   setSelectedRooms 
 }: DesktopSidebarScheduleProps) {
-  const { rawRoom } = useRoomStore(
-      useShallow(((state) => ({
-        rawRoom: state.rooms
-      })))
-    )
+  const { room: rawRoom, isLoading, isError } = useRoomData();
     
-    const rooms = useMemo(() => {
-      if (!rawRoom) return [];
-      return rawRoom
-        .map((room) => ({
-          id: room.id,
-          name: room.name,
-          roomNumber: room.roomNumber
-        }))
-        .sort((a, b) => a.roomNumber - b.roomNumber); 
-    }, [rawRoom])
+  const rooms = useMemo(() => {
+    if (!rawRoom) return [];
+    return rawRoom
+      .map((room) => ({
+        id: room.id,
+        name: room.name,
+        roomNumber: room.roomNumber
+      }))
+      .sort((a, b) => a.roomNumber - b.roomNumber); 
+  }, [rawRoom])
 
   // 🌟 2. ลบ const [selectedRooms, setSelectedRooms] ทิ้งไปเลย! (เพราะเรารับมาจาก Props แล้ว)
 
