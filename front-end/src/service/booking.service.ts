@@ -26,8 +26,8 @@ export const bookingService = {
     return response.data;
   },
 
-  fetchRoomByRoomNumber: async (roomNumber: string):Promise<RoomResp> => {
-    const response = await api.get(`${API_URL}/room/${roomNumber}`);
+  fetchRoomByID: async (roomID: string):Promise<RoomResp> => {
+    const response = await api.get(`${API_URL}/room/${roomID}`);
     return response.data;
   },
 

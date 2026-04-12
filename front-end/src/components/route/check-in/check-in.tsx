@@ -35,13 +35,13 @@ import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS"
 //   }
 // }
 
-export default function CheckIn({ roomNumber }: { roomNumber: string }) {
+export default function CheckIn({ roomID }: { roomID: string }) {
   const [roomData, setRoomData] = useState<RoomResp | null>(null);
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
 
   const fetchRoomData = async () => {
     try {
-      const response = await bookingService.fetchRoomByRoomNumber(roomNumber);
+      const response = await bookingService.fetchRoomByID(roomID);
       setRoomData(response);
     } catch (error: any) {
       // console.error("Error fetching room data:", error);
