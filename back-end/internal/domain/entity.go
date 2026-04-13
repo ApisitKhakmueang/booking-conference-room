@@ -161,8 +161,8 @@ type Room struct {
 	UpdatedAt 	*time.Time				`json:"updatedAt,omitempty"`
 	DeletedAt 	*gorm.DeletedAt 	`gorm:"index" json:"deletedAt,omitempty"`
 	
-	Name 				string 					`gorm:"unique" json:"name,omitempty"`
-	RoomNumber  uint						`json:"roomNumber,omitempty"`
+	Name 				string 					`gorm:"not null" json:"name,omitempty"`
+	RoomNumber  uint						`gorm:"not null" json:"roomNumber,omitempty"`
 	Location 		string					`json:"location,omitempty"`
 	Capacity 		uint						`json:"capacity,omitempty"`
 	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive,omitempty"`
@@ -192,8 +192,8 @@ type User struct {
 
 type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id,omitempty"`
-	CreatedAt 		*time.Time				`json:"-"`
-	UpdatedAt 		*time.Time				`json:"-"`
+	CreatedAt 		*time.Time			`json:"-"`
+	UpdatedAt 		*time.Time			`json:"-"`
 
 	RoomID        uuid.UUID       `gorm:"type:uuid;not null" json:"-"`
 	UserID        uuid.UUID       `gorm:"type:uuid;not null" json:"-"`

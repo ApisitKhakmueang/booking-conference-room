@@ -422,6 +422,7 @@ func (u *bookingUsecase) GetUserHistory(ctx context.Context,userID uuid.UUID, da
 }
 
 func (u *bookingUsecase) CreateRoom(ctx context.Context, room *domain.Room) error {
+	room.ID = uuid.New()
 	if err := u.redis.CreateRoom(ctx, room); err != nil {
 		return err
 	}

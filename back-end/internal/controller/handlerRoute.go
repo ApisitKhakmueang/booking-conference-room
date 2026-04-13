@@ -26,6 +26,12 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Delete("/room/:roomID", handler.DeleteRoom)
 }
 
+func InitialRoomRoute(router fiber.Router, handler *http.BookingHandler) {
+	router.Post("/", handler.CreateRoom)
+	router.Put("/:roomID", handler.UpdateRoom)
+	router.Delete("/:roomID", handler.DeleteRoom)
+}
+
 func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 	// มาตรฐานมักจะใช้เป็นพหูพจน์ (Plural)
 	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin

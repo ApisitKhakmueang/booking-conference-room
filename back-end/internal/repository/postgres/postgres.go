@@ -397,7 +397,10 @@ func (p *postgresRepository) DeleteRoomDB(ctx context.Context, roomID uuid.UUID)
 		now := time.Now()
 		result := tx.Model(&domain.Booking{}).
 			Where("room_id = ? AND start_time > ? AND status = ?", roomID, now, "confirm").
-			Update("status", "cancelled")
+			Updates(map[string]interface{}{
+				"status":   "cancelled",
+				"passcode": nil,
+			})
 
 		if result.Error != nil {
 			return result.Error
