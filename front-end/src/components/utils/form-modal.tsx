@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  differenceInCalendarDays,
   format,
 } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -16,6 +17,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
+import { validateBookingForm } from "@/lib/validation";
 
 export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: FormModalProps) {
   const defaultFormData = {
@@ -34,36 +36,16 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
     const { startTime, endTime, duration, date } = formData
+    const isValid = validateBookingForm({
+      startTime,
+      endTime,
+      duration,
+      date
+    });
 
-    if (!startTime || !endTime || !duration) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Please select time.',
-        icon: 'error',
-        timer: 2000
-      })
-      return
-    }
-
-    if (startTime >= endTime) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Start time must be before end time.', // *เติมคำว่า be ให้แกรมม่าเป๊ะขึ้น
-        icon: 'error',
-        timer: 2000
-      });
-      return;
-    }
-
-    if (duration === "Limit 2h") {
-      Swal.fire({
-        title: 'Error',
-        text: 'Limit 2 hours per booking.',
-        icon: 'error',
-        timer: 2000
-      });
-      return;
-    }
+    // 🌟 2. ถ้า Validator คืนค่า false (แปลว่ามี Error และ Swal เด้งไปแล้ว) 
+    // ให้ return หยุดการทำงานของฟังก์ชันนี้ทันที
+    if (!isValid) return;
 
     const finalTitle = titleRef.current?.value || `Booking ${selectedRoom?.name}`;
     const finalDataToSubmit = {

@@ -1,3 +1,7 @@
+import { BookingValidationParams } from '@/utils/interface/form';
+import { differenceInCalendarDays } from 'date-fns';
+import Swal from 'sweetalert2';
+
 // utils/password-utils.ts
 export const checkStrongPassword = (password: string): boolean => {
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -12,3 +16,73 @@ export const getPasswordCriteria = (password: string) => ({
   hasSpecial: /[@$!%*?&]/.test(password),
   hasLength: password.length >= 8,
 });
+
+export const validateBookingForm = ({ 
+  startTime, 
+  endTime, 
+  duration, 
+  date 
+}: BookingValidationParams): boolean => {
+
+  // 1. เช็คว่ากรอกข้อมูลครบไหม
+  if (!startTime || !endTime || !duration) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Please select time.',
+      icon: 'error',
+      timer: 2000
+    });
+    return false; // ส่ง false กลับไปเพื่อบอกว่าไม่ผ่าน
+  }
+
+  // 2. เช็คเวลาเริ่มต้น-สิ้นสุด
+  if (startTime >= endTime) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Start time must be before end time.',
+      icon: 'error',
+      timer: 2000
+    });
+    return false;
+  }
+
+  // 3. เช็ควันที่จองล่วงหน้า
+  if (date) {
+    const daysDifference = differenceInCalendarDays(new Date(date), new Date());
+    
+    if (daysDifference > 30) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot book more than 30 days in advance.',
+        icon: 'error',
+        confirmButtonColor: '#8370ff',
+        timer: 2000
+      });
+      return false;
+    }
+
+    if (daysDifference < 0) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Cannot book in the past.',
+        icon: 'error',
+        timer: 2000
+      });
+      return false;
+    }
+  }
+
+  // 4. เช็คระยะเวลา
+  if (duration === "Limit 2h") {
+    Swal.fire({
+      title: 'Error',
+      text: 'Limit 2 hours per booking.',
+      icon: 'error',
+      timer: 2000
+    });
+    return false;
+  }
+
+  // ถ้าผ่านทุกด่าน จะมาถึงบรรทัดนี้
+  return true; 
+};
