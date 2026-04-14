@@ -9,15 +9,17 @@ import {
   Cuboid,
   Calendar,
   List,
-  History
+  History,
+  User,
+  SquareChartGantt
 } from "lucide-react";
 
 // Components
 import SidebarToggle from "./sidebar-toggle";
 import DropBackground from "./drop-background";
-import ThemeButton from "../../utils/theme-button";
 import { useShallow } from "zustand/shallow";
 import { useControlLayoutStore } from "@/stores/control-layout.store";
+import { useAuthStore } from "@/stores/auth.store";
 
 const SIDEBAR_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -27,7 +29,14 @@ const SIDEBAR_ITEMS = [
   { name: "History", href: "/history", icon: History},
 ] as const;
 
+const ADMIN_ITEMS = [
+  { name: "Room Management", href: "/room-management", icon: SquareChartGantt },
+  { name: "User Management", href: "/user-management", icon: User },
+] as const;
+
 export default function Sidebar() {
+  const user = useAuthStore((state) => state.user)
+
   const { isOpenNav, setIsOpenNav, isHideNav } = useControlLayoutStore(
     useShallow(((state) => ({
       isOpenNav: state.isOpenNav,
@@ -95,6 +104,36 @@ export default function Sidebar() {
                 </li>
               );
             })}
+
+            {user?.role === 'admin' && (
+              <div className="border-t pt-2 space-y-2">
+                {ADMIN_ITEMS.map(item => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+
+                  return (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        className={`
+                          flex items-center gap-3
+                          p-3 lg:p-4 rounded-full
+                          transition-colors duration-300 whitespace-nowrap
+                          ${isActive
+                            ? "bg-light-hover text-white dark:bg-hover dark:text-main"
+                            : "hover:bg-light-hover hover:text-white dark:hover:bg-hover dark:hover:text-main"}
+                        `}
+                        onClick={() => isHideNav && setIsOpenNav(false)}
+                      >
+                        
+                        <Icon size={20} />
+                        {isOpenNav && <span>{item.name}</span>}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </div>
+            )}
           </ul>
         </nav>
       </aside>
