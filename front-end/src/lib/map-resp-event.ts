@@ -1,5 +1,5 @@
 import { ArrangeRoom, BookingEvent, BookingStatus } from "@/utils/interface/interface";
-import { BookingEventResponse } from "@/utils/interface/response";
+import { BookingEventResponse, ConfigResponse } from "@/utils/interface/response";
 
 const statusMap: Record<string, string> = {
   'confirm': 'Confirmed',
@@ -9,25 +9,48 @@ const statusMap: Record<string, string> = {
 };
 
 // 🌟 1. แยกฟังก์ชันสำหรับแปลง "ค่าเดี่ยว (Single Object)" ออกมาก่อน
-export const formatSingleBookingEvent = (resp: BookingEventResponse): BookingEvent => {
+export const formatSingleBookingEvent = (
+  resp: BookingEventResponse, 
+  config?: ConfigResponse // หรือใส่ Interface ของ Config ที่คุณมี
+): BookingEvent => {
   const startDate = new Date(resp.startTime);
   const endDate = new Date(resp.endTime);
 
   const diffMs = endDate.getTime() - startDate.getTime();
   const diffMins = Math.floor(diffMs / 60000);
+  
+  // 🌟 ใช้ค่าจาก config แทนการใส่เลข 200000 หรือ 2 (ชั่วโมง)
+  // สมมติใน config ของคุณคือหน่วยนาที เช่น 120 นาที (2 ชม.)
+  const maxMins = config?.maxBookingMins || 120; 
   const hours = Math.floor(diffMins / 60);
   const minutes = diffMins % 60;
   
   let durationStr = "";
-  if (hours >= 2) {
-    if (minutes > 0) durationStr = "Limit 2h"
-    else durationStr = `${hours}h`
-  } else if (hours > 0 && minutes > 0) {
-    durationStr = `${hours} h ${minutes} m`;
-  } else if (hours > 0) {
-    durationStr = `${hours} h`;
+  
+  // 🌟 1. เช็คว่าเวลาจอง (diffMins) เกินขีดจำกัด (maxMins) หรือไม่
+  if (diffMins > maxMins) {
+    // 🌟 2. คำนวณชั่วโมงและนาทีจาก "ขีดจำกัด (maxMins)"
+    const limitHours = Math.floor(maxMins / 60);
+    const limitMinutes = maxMins % 60;
+
+    // 🌟 3. สร้างข้อความ Limit ให้ฉลาดขึ้น
+    if (limitHours > 0 && limitMinutes > 0) {
+      durationStr = `Limit ${limitHours}h ${limitMinutes}m`;
+    } else if (limitHours > 0) {
+      durationStr = `Limit ${limitHours}h`;
+    } else {
+      durationStr = `Limit ${limitMinutes}m`;
+    }
+    
   } else {
-    durationStr = `${minutes} m`;
+    // กรณีที่ไม่ได้เกินขีดจำกัด ให้แสดงเวลาจองปกติ
+    if (hours > 0 && minutes > 0) {
+      durationStr = `${hours} h ${minutes} m`;
+    } else if (hours > 0) {
+      durationStr = `${hours} h`;
+    } else {
+      durationStr = `${minutes} m`;
+    }
   }
 
   const formattedStatus = statusMap[resp.status] || 'Pending';
@@ -56,18 +79,16 @@ export const formatSingleBookingEvent = (resp: BookingEventResponse): BookingEve
 };
 
 // 🌟 2. สร้าง Overload Types ให้ TypeScript รู้ว่า "ถ้าโยน Array มา จะได้ Array กลับไป"
-export function mapBookingEvents(data: BookingEventResponse): BookingEvent;
-export function mapBookingEvents(data: BookingEventResponse[]): BookingEvent[];
+export function mapBookingEvents(data: BookingEventResponse, config?: ConfigResponse): BookingEvent;
+export function mapBookingEvents(data: BookingEventResponse[], config?: ConfigResponse): BookingEvent[];
 
 // 🌟 3. ฟังก์ชันหลักที่รับได้ทั้ง Array และ Object
 export function mapBookingEvents(
-  data: BookingEventResponse | BookingEventResponse[]
+  data: BookingEventResponse | BookingEventResponse[],
+  config?: ConfigResponse
 ): BookingEvent | BookingEvent[] {
-  // ถ้าข้อมูลที่ส่งมาเป็น Array ให้ใช้ .map() แล้วเรียกฟังก์ชันเดี่ยว
   if (Array.isArray(data)) {
-    return data.map(formatSingleBookingEvent);
+    return data.map((item) => formatSingleBookingEvent(item, config));
   }
-  
-  // ถ้าข้อมูลที่ส่งมาเป็น Object เดี่ยวๆ ให้แปลงแล้วคืนค่าเลย
-  return formatSingleBookingEvent(data);
+  return formatSingleBookingEvent(data, config);
 }

@@ -21,7 +21,8 @@ export const validateBookingForm = ({
   startTime, 
   endTime, 
   duration, 
-  date 
+  date,
+  maxAdvanceDays
 }: BookingValidationParams): boolean => {
 
   // 1. เช็คว่ากรอกข้อมูลครบไหม
@@ -48,12 +49,13 @@ export const validateBookingForm = ({
 
   // 3. เช็ควันที่จองล่วงหน้า
   if (date) {
+    const limitDays = maxAdvanceDays || 30;
     const daysDifference = differenceInCalendarDays(new Date(date), new Date());
     
-    if (daysDifference > 30) {
+    if (daysDifference > limitDays) {
       Swal.fire({
         title: 'Error',
-        text: 'Cannot book more than 30 days in advance.',
+        text: `Cannot book more than ${maxAdvanceDays} days in advance`,
         icon: 'error',
         confirmButtonColor: '#8370ff',
         timer: 2000
@@ -72,13 +74,15 @@ export const validateBookingForm = ({
     }
   }
 
-  // 4. เช็คระยะเวลา
-  if (duration === "Limit 2h") {
+  // 4. เช็คระยะเวลา (รองรับ String ที่ไดนามิกจากฟังก์ชัน formatSingleBookingEvent)
+  if (duration.startsWith("Limit")) {
     Swal.fire({
-      title: 'Error',
-      text: 'Limit 2 hours per booking.',
+      title: 'Booking Limit Exceeded',
+      // นำ duration มาแสดงตรงๆ เช่น "Limit 2h 30m per booking."
+      text: `${duration} per booking.`, 
       icon: 'error',
-      timer: 2000
+      confirmButtonColor: '#8370ff',
+      timer: 2500 // อาจจะเพิ่มเวลาให้อ่านนิดนึง
     });
     return false;
   }

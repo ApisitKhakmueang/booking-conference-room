@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { mapBookingEvents } from '@/lib/map-resp-event';
 import { formatTimeWithSuffix } from '@/lib/time';
 import { bookingService } from '@/service/booking.service';
@@ -16,6 +17,7 @@ import Swal from 'sweetalert2';
 export default function UpNextCard({ handleEditClick }: { handleEditClick: (event: BookingEvent) => void }) {
   const [event, setEvent] = useState<BookingEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { config, isLoadingConfig } = useSystemConfig();
 
   const fetchUpNextBooking = async () => {
     setIsLoading(true);
@@ -23,7 +25,7 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
     try {
       const response = await bookingService.fetchBookingUpNext(now);
       if (response) {
-        const mapBooking = mapBookingEvents(response);
+        const mapBooking = mapBookingEvents(response, config);
         console.log("mapBooking: ", mapBooking);
         setEvent(mapBooking);
       } else {

@@ -13,6 +13,7 @@ import ActiveTab from "./active-tab";
 import MobileFilter from "./mobile-filter";
 import Swal from "sweetalert2";
 import { BookingEventResponse } from "@/utils/interface/response";
+import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 export default function History() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,6 +21,7 @@ export default function History() {
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
+  const { config, isLoadingConfig } = useSystemConfig();
 
   const filteredEvents = useMemo(() => {
     if (!events) return undefined;
@@ -76,7 +78,7 @@ export default function History() {
     const formattedDate = format(currentDate, 'yyyy-MM');
     try {
       const data = await bookingService.fetchUserHistory(formattedDate);
-      const formattedEvents = mapBookingEvents(data);
+      const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
     } catch (error: any) {
       // console.error("Error fetching room data:", error);

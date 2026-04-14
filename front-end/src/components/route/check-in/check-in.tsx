@@ -11,6 +11,7 @@ import Numpad from "./numpad";
 import { BookingEvent, BookingStatus } from "@/utils/interface/interface";
 import { mapBookingEvents } from "@/lib/map-resp-event";
 import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS";
+import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 // const mapEvent:BookingEvent | undefined = 
 // // undefined
@@ -38,6 +39,7 @@ import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS"
 export default function CheckIn({ roomID }: { roomID: string }) {
   const [roomData, setRoomData] = useState<RoomResp | null>(null);
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
+  const { config, isLoadingConfig } = useSystemConfig();
 
   const fetchRoomData = async () => {
     try {
@@ -65,7 +67,7 @@ export default function CheckIn({ roomID }: { roomID: string }) {
 
   const mapEvent = useMemo(() => {
     if (!booking) return undefined
-    return mapBookingEvents(booking)
+    return mapBookingEvents(booking, config)
   }, [booking])
 
   useEffect(() => {

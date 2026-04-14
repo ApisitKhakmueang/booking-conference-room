@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { BookingEvent, TimeGridViewProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
 import { mapBookingEvents } from '@/lib/map-resp-event';
+import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 
 // --- Component: Time Grid View (สำหรับ Week และ Day) ---
 export default function TimeGridView({ setCurrentDate, currentDate, bookings, view, holiday, isSyncing, currentUser }: TimeGridViewProps) {
@@ -17,6 +18,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
+  const { config, isLoadingConfig } = useSystemConfig();
 
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
@@ -44,7 +46,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   };
 
   useEffect(() => {
-    const formattedEvents = mapBookingEvents(bookings || []);
+    const formattedEvents = mapBookingEvents(bookings || [], config);
     setEvents(formattedEvents);
   }, [bookings]);
 

@@ -1,11 +1,11 @@
 'use client';
 
+import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { bookingService } from '@/service/booking.service';
 import { useAuthStore } from '@/stores/auth.store';
-import { ConfigResponse, RoomResp } from '@/utils/interface/response';
+import { RoomResp } from '@/utils/interface/response';
 import { format, parseISO, differenceInMinutes, startOfDay, addHours } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
-import Swal from 'sweetalert2';
 import useSWR from 'swr';
 
 interface RoomTimelineProps {
@@ -41,12 +41,12 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   const user = useAuthStore((state) => state.user);
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const [config, setConfig] = useState<ConfigResponse | undefined>(undefined)
   const [currentTimePos, setCurrentTimePos] = useState<number | null>(null);
   
   // 🌟 1. เพิ่ม State สำหรับเก็บ ID ของกล่องที่กำลังถูกคลิกให้ขยาย
   const [expandedId, setExpandedId] = useState<string | null>(null);
-
+  const { config, isLoadingConfig } = useSystemConfig();
+  
   const { startTimeHour, totalTimeHours } = useMemo(() => {
     const startHour = parseInt(config?.startTime.split(":")[0] || "8", 10);
     const startMinute = parseInt(config?.startTime.split(":")[1] || "0", 10);
@@ -64,34 +64,6 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   }, [config])
 
   const timeSlots = generateTimeSlots(startTimeHour, totalTimeHours);
-
-  const fetchConfig = async () => {
-    try {
-      const response = await bookingService.fetchConfig();
-      setConfig(response)
-    } catch (error:any) {
-      if (error.response?.status === 500) {
-        Swal.fire({
-          title: 'Error',
-          text: "Date format is invalid or missing",
-          icon: 'warning',
-          confirmButtonColor: '#b495ff', 
-        })
-        return;
-      }
-
-      Swal.fire({
-        title: 'Connection Error',
-        text: 'An error occurred while fetching data. Please try again.',
-        icon: 'error',
-        confirmButtonColor: '#b495ff',
-      });
-    }
-  }
-
-  useEffect(() => {
-    fetchConfig();
-  }, [])
 
   const { data: bookings, error, isLoading } = useSWR(
     ['bookings', todayStr], 

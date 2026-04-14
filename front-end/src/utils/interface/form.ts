@@ -18,4 +18,5 @@ export interface BookingValidationParams {
   endTime: string;
   duration: string;
   date: Date | string | null; 
+  maxAdvanceDays?: number
 }

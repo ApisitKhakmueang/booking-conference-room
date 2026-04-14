@@ -1,5 +1,9 @@
 // ฟังก์ชันคำนวณระยะเวลา
-export const calculateDuration = (start: string, end: string) => {
+export const calculateDuration = (
+  start: string, 
+  end: string, 
+  maxMins: number = 120 // 🌟 รับค่าขีดจำกัดเข้ามา (ค่าเริ่มต้น 120 นาที = 2 ชม.)
+) => {
   if (!start || !end) return ""; // ถ้ายังเลือกไม่ครบ ไม่ต้องคำนวณ
 
   // แยกชั่วโมงกับนาทีออกมา แล้วแปลงเป็นตัวเลข
@@ -16,15 +20,27 @@ export const calculateDuration = (start: string, end: string) => {
   // ถ้าเวลาสิ้นสุด น้อยกว่าหรือเท่ากับ เวลาเริ่มต้น (เลือกเวลาผิด)
   if (diffMins <= 0) return "Invalid time"; 
 
-  // แปลงกลับเป็น ชั่วโมง และ นาที
+  // แปลงกลับเป็น ชั่วโมง และ นาที (ของเวลาที่เลือก)
   const hours = Math.floor(diffMins / 60);
   const minutes = diffMins % 60;
 
-  // จัดฟอร์แมตข้อความให้อ่านง่าย{}
-  if ((hours >= 2 && minutes > 0) || hours > 2) {
-    return "Limit 2h"
+  // 🌟 1. ตรวจสอบว่าเวลาที่เลือกเกินขีดจำกัด (maxMins) หรือไม่
+  if (diffMins > maxMins) {
+    // 🌟 2. คำนวณชั่วโมงและนาทีจาก "ขีดจำกัด (maxMins)"
+    const limitHours = Math.floor(maxMins / 60);
+    const limitMinutes = maxMins % 60;
+
+    // 🌟 3. ส่งข้อความ Limit ที่มีเศษนาทีกลับไป
+    if (limitHours > 0 && limitMinutes > 0) {
+      return `Limit ${limitHours}h ${limitMinutes}m`;
+    } else if (limitHours > 0) {
+      return `Limit ${limitHours}h`;
+    } else {
+      return `Limit ${limitMinutes}m`;
+    }
   }
 
+  // 🌟 4. กรณีเวลาไม่เกินขีดจำกัด (จัดฟอร์แมตข้อความตามปกติ)
   if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`; // เช่น 1h 30m
   if (hours > 0) return `${hours}h`; // เช่น 2h
   return `${minutes}m`; // เช่น 30m

@@ -8,10 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import { bookingService } from "@/service/booking.service";
 import { ConfigResponse } from "@/utils/interface/response";
+import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 const generateTimeSlots = (
   intervalMinutes: number = 30,
@@ -67,37 +65,9 @@ export function TimeSelect({
   className,
   placeholder = "Select time..."
 }: TimeSelectProps) {
-  const [time, setTime] = useState<ConfigResponse | undefined>(undefined)
+  const { config, isLoadingConfig } = useSystemConfig();
 
-  const fetchConfig = async () => {
-    try {
-      const response = await bookingService.fetchConfig();
-      setTime(response)
-    } catch (error:any) {
-      if (error.response?.status === 500) {
-        Swal.fire({
-          title: 'Error',
-          text: "Date format is invalid or missing",
-          icon: 'warning',
-          confirmButtonColor: '#b495ff', 
-        })
-        return;
-      }
-
-      Swal.fire({
-        title: 'Connection Error',
-        text: 'An error occurred while fetching data. Please try again.',
-        icon: 'error',
-        confirmButtonColor: '#b495ff',
-      });
-    }
-  }
-
-  useEffect(() => {
-    fetchConfig();
-  }, [])
-
-  const timeSlots = generateTimeSlots(intervalMinutes, time);
+  const timeSlots = generateTimeSlots(intervalMinutes, config);
 
   const safeValue = value || "";
 

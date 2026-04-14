@@ -14,6 +14,7 @@ import { bookingService } from "@/service/booking.service";
 import MobileFilter from "./mobile-filter";
 import { EventGroup } from "./event-group";
 import Swal from "sweetalert2";
+import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 export default function Schedule() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -24,9 +25,8 @@ export default function Schedule() {
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
-
-  // 🌟 1. สร้าง State นาฬิกา เพื่อให้อัปเดตเวลาปัจจุบันตลอด
   const [now, setNow] = useState(new Date());
+  const { config, isLoadingConfig } = useSystemConfig();
 
   // 🌟 2. สั่งให้นาฬิกาเดินทุกๆ 1 นาที
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function Schedule() {
     const formattedDate = format(currentDate, 'yyyy-MM');
     try {
       const data = await bookingService.fetchUserBookings(formattedDate);
-      const formattedEvents = mapBookingEvents(data);
+      const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
     } catch (error: any) {
       // console.error("Error fetching room data:", error);

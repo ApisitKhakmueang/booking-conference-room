@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  differenceInCalendarDays,
-  format,
-} from 'date-fns';
+import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import RoomSelector from "../route/calendar/room-selector";
 import Swal from "sweetalert2"
@@ -18,6 +15,7 @@ import { Input } from '../ui/input';
 import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
 import { validateBookingForm } from "@/lib/validation";
+import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: FormModalProps) {
   const defaultFormData = {
@@ -32,6 +30,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(rooms[0]);
   const [formData, setFormData] = useState(defaultFormData)
   const [calendarMonth, setCurrentMonth] = useState(currentDate);
+  const { config, isLoadingConfig } = useSystemConfig();
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
@@ -40,7 +39,8 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       startTime,
       endTime,
       duration,
-      date
+      date,
+      maxAdvanceDays: config?.maxAdvanceDays
     });
 
     // 🌟 2. ถ้า Validator คืนค่า false (แปลว่ามี Error และ Swal เด้งไปแล้ว) 
@@ -121,7 +121,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   // 🌟 ใช้ useEffect เพื่อคำนวณ Duration อัตโนมัติ
   useEffect(() => {
     if (formData.startTime && formData.endTime) {
-      const newDuration = calculateDuration(formData.startTime, formData.endTime);
+      const newDuration = calculateDuration(formData.startTime, formData.endTime, config?.maxBookingMins);
       
       // อัปเดตค่า duration กลับเข้าไปใน formData
       setFormData((prev) => ({ ...prev, duration: newDuration }));
