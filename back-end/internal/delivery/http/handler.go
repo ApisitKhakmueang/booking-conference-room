@@ -370,11 +370,6 @@ func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetConfigTime(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	role := c.Locals("role")
-	if role != "admin" {
-		return c.Status(fiber.StatusForbidden).SendString("Access denied")
-	}
-
 	response, err := u.usecase.GetConfigTime(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
