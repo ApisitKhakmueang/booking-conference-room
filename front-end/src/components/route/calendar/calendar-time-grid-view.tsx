@@ -168,10 +168,10 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
                 {/* เส้นบอกเวลาปัจจุบัน (Current Time Indicator) */}
                 {isSameDay(day, new Date()) && (
                   <div 
-                    className="absolute w-full border-t-2 border-red-500 z-10 pointer-events-none"
+                    className="absolute w-full border-t-2 border-danger dark:border-rose-500 z-10 pointer-events-none"
                     style={{ top: `${differenceInMinutes(new Date(), startOfDay(new Date()))}px` }}
                   >
-                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full absolute -left-1.5 -top-[5px] shadow-sm"></div>
+                    <div className="w-2.5 h-2.5 bg-danger dark:bg-rose-500 rounded-full absolute -left-1.5 -top-1.5 shadow-sm"></div>
                   </div>
                 )}
               </div>
