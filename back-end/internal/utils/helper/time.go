@@ -174,31 +174,27 @@ func TotalMinutesFromString(timeStr string) (int, error) {
 	return total, nil
 }
 
+func CheckTimeLimit(start, end time.Time, maxBookingMins int) error {
+	// 1. Calculate the duration between start and end time
+	duration := end.Sub(start)
+
+	// 2. Convert duration to minutes and cast to int
+	totalMinutes := int(duration.Minutes())
+
+	// 3. Validate against the maximum allowed minutes from config
+	if totalMinutes > maxBookingMins {
+		return fmt.Errorf("booking duration (%d mins) exceeds the maximum limit of %d mins", totalMinutes, maxBookingMins)
+	}
+
+	// 4. Validate for non-positive or invalid duration (e.g., end time before start time)
+	if totalMinutes <= 0 {
+		return errors.New("booking duration must be greater than 0 minutes")
+	}
+
+	return nil
+}
+
 // Internal function
 func toTotalMinutes(t time.Time) int {
 	return t.Hour()*60 + t.Minute()
 }
-
-// func ParseTime(booking *domain.Booking) (*domain.Date, error) {
-// 	layout := "2006-01-02 15:04:05"
-// 	start, err := ParseTimeFormat(layout, booking.StartTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	end, err := ParseTimeFormat(layout, booking.EndTime)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if err = CheckValidTime(start, end); err != nil {
-// 		return nil, err
-// 	}
-
-// 	date := &domain.Date{
-// 		StartStr: start.Format(time.RFC3339),
-// 		EndStr: end.Format(time.RFC3339),
-// 	}
-
-// 	return date, nil
-// }

@@ -682,6 +682,10 @@ func (u *bookingUsecase) ValidateBooking(ctx context.Context, booking *domain.Bo
 		return err
 	}
 
+	if err := helper.CheckTimeLimit(*booking.StartTime, *booking.EndTime, config.MaxBookingMins); err != nil {
+		return err
+	}
+
 	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
 		return err
 	}
