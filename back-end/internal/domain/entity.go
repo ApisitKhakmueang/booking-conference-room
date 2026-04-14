@@ -147,9 +147,12 @@ type UpNextBookingResponse struct {
 
 // Schema
 type Config struct {
-	ID  				int64 			`gorm:"primaryKey;column:id" json:"id,omitempty"`
-	StartTime   string      `gorm:"not null;column:start_time" json:"startTime,omitempty"`
-	EndTime     string      `gorm:"not null;column:end_time" json:"endTime,omitempty"`
+	ID        					int64  	`gorm:"primaryKey;column:id" json:"id,omitempty"`
+	StartTime 					string 	`gorm:"not null;column:start_time" json:"startTime,omitempty"` // เช่น "08:00"
+	EndTime   					string 	`gorm:"not null;column:end_time" json:"endTime,omitempty"`   // เช่น "20:00"
+	MaxAdvanceDays 			int 		`gorm:"not null;column:max_advance_days;default:30" json:"maxAdvanceDays,omitempty"`
+	MaxBookingMins 			int 		`gorm:"not null;column:max_booking_mins;default:120" json:"maxBookingMins,omitempty"`
+	NoShowThresholdMins int 		`gorm:"not null;column:no_show_threshold_mins;default:15" json:"noShowThresholdMins,omitempty"`
 }
 
 type Holiday struct {
