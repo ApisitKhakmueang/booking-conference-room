@@ -59,3 +59,8 @@ export interface DashboardAnalyticsResponse {
   attendanceHealth: AttendanceHealthResponse;
   popularRooms: PopularRoomResponse[];
 }
+
+export interface ConfigTimeResponse {
+  startTime: string
+  endTime: string
+}

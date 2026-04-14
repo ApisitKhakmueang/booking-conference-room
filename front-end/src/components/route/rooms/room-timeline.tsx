@@ -2,9 +2,10 @@
 
 import { bookingService } from '@/service/booking.service';
 import { useAuthStore } from '@/stores/auth.store';
-import { BookingEventResponse, RoomResp } from '@/utils/interface/response';
+import { BookingEventResponse, ConfigTimeResponse, RoomResp } from '@/utils/interface/response';
 import { format, parseISO, differenceInMinutes, startOfDay, addHours } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
+import Swal from 'sweetalert2';
 import useSWR from 'swr';
 
 interface RoomTimelineProps {
@@ -14,11 +15,25 @@ interface RoomTimelineProps {
 const START_HOUR = 8;
 const TOTAL_HOURS = 12;
 
-const generateTimeSlots = () => {
+const generateTimeSlots = (
+  time: ConfigTimeResponse= {
+    startTime: "08:00",
+    endTime: "20:00"
+  }
+) => {
+  const startHour = parseInt(time?.startTime.split(":")[0] || "8", 10);
+  const startMinute = parseInt(time?.startTime.split(":")[1] || "0", 10);
+  const endHour = parseInt(time?.endTime.split(":")[0] || "20", 10);
+  const endMinute = parseInt(time?.endTime.split(":")[1] || "0", 10);
+
+  const startTotalHours = Math.floor((startHour * 60 + startMinute) / 60);
+  const endTotalHours = Math.ceil((endHour * 60 + endMinute) / 60);
+  const totalHours = endTotalHours - startTotalHours;
+
   const slots = [];
   const baseDate = startOfDay(new Date());
-  for (let i = 0; i < TOTAL_HOURS; i++) {
-    slots.push(format(addHours(baseDate, START_HOUR + i), "hh:mm a"));
+  for (let i = 0; i < totalHours; i++) {
+    slots.push(format(addHours(baseDate, startTotalHours + i), "hh:mm a"));
   }
   return slots;
 };
@@ -41,11 +56,40 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   const user = useAuthStore((state) => state.user);
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const timeSlots = generateTimeSlots();
+  const [time, setTime] = useState<ConfigTimeResponse | undefined>(undefined)
+  const timeSlots = generateTimeSlots(time);
   const [currentTimePos, setCurrentTimePos] = useState<number | null>(null);
   
   // 🌟 1. เพิ่ม State สำหรับเก็บ ID ของกล่องที่กำลังถูกคลิกให้ขยาย
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const fetchConfigTime = async () => {
+    try {
+      const response = await bookingService.fetchConfigTime();
+      setTime(response)
+    } catch (error:any) {
+      if (error.response?.status === 500) {
+        Swal.fire({
+          title: 'Error',
+          text: "Date format is invalid or missing",
+          icon: 'warning',
+          confirmButtonColor: '#b495ff', 
+        })
+        return;
+      }
+
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#b495ff',
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchConfigTime();
+  }, [])
 
   const { data: bookings, error, isLoading } = useSWR(
     ['bookings', todayStr], 

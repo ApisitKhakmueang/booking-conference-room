@@ -1,10 +1,15 @@
 import api from '@/lib/axiosInstance';
-import { BookingEventResponse, DashboardAnalyticsResponse, Holiday, RoomResp } from '@/utils/interface/response';
+import { BookingEventResponse, ConfigTimeResponse, DashboardAnalyticsResponse, Holiday, RoomResp } from '@/utils/interface/response';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 
 export const bookingService = {
   // ดึงข้อมูลการจองตามวันที่
+  fetchConfigTime: async (): Promise<ConfigTimeResponse> => {
+    const response = await api.get(`${API_URL}/config`)
+    return response.data
+  },
+
   fetchBookingUpNext: async (dateStr: string): Promise<BookingEventResponse> => {
     const response = await api.get(`${API_URL}/booking/up-next/${dateStr}`);
     return response.data;

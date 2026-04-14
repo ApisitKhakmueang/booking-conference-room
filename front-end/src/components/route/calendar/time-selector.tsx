@@ -8,17 +8,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { bookingService } from "@/service/booking.service";
+import { ConfigTimeResponse } from "@/utils/interface/response";
 
-const generateTimeSlots = (intervalMinutes: number = 30) => {
-  const slots = [];
-  for (let h = 8; h <= 20; h++) {
-    for (let m = 0; m < 60; m += intervalMinutes) {
-      if (h === 20 && m > 0) break; 
-      const hour = h.toString().padStart(2, '0');
-      const minute = m.toString().padStart(2, '0');
-      slots.push(`${hour}:${minute}`);
-    }
+const generateTimeSlots = (
+  intervalMinutes: number = 30,
+  time: ConfigTimeResponse = {
+    startTime: "08:00",
+    endTime: "20:00"
   }
+) => {
+  const startHour = parseInt(time?.startTime.split(":")[0] || "8", 10);
+  const startMinute = parseInt(time?.startTime.split(":")[1] || "0", 10);
+  const endHour = parseInt(time?.endTime.split(":")[0] || "20", 10);
+  const endMinute = parseInt(time?.endTime.split(":")[1] || "0", 10);
+
+  const startTotalMinutes = startHour * 60 + startMinute;
+  const endTotalMinutes = endHour * 60 + endMinute;
+
+  const slots = [];
+  for (
+    let currentMinutes = startTotalMinutes; 
+    currentMinutes <= endTotalMinutes; 
+    currentMinutes += intervalMinutes
+  ) {
+    // 4. แปลงนาทีรวมกลับเป็นชั่วโมงและนาที
+    const h = Math.floor(currentMinutes / 60);
+    const m = currentMinutes % 60;
+
+    // เติม 0 ด้านหน้าถ้าเลขเป็นหลักเดียว (เช่น 8:0 -> 08:00)
+    const hour = h.toString().padStart(2, '0');
+    const minute = m.toString().padStart(2, '0');
+
+    slots.push(`${hour}:${minute}`);
+  }
+  
   return slots;
 };
 
@@ -38,7 +64,37 @@ export function TimeSelect({
   className,
   placeholder = "Select time..."
 }: TimeSelectProps) {
-  const timeSlots = generateTimeSlots(intervalMinutes);
+  const [time, setTime] = useState<ConfigTimeResponse | undefined>(undefined)
+
+  const fetchConfigTime = async () => {
+    try {
+      const response = await bookingService.fetchConfigTime();
+      setTime(response)
+    } catch (error:any) {
+      if (error.response?.status === 500) {
+        Swal.fire({
+          title: 'Error',
+          text: "Date format is invalid or missing",
+          icon: 'warning',
+          confirmButtonColor: '#b495ff', 
+        })
+        return;
+      }
+
+      Swal.fire({
+        title: 'Connection Error',
+        text: 'An error occurred while fetching data. Please try again.',
+        icon: 'error',
+        confirmButtonColor: '#b495ff',
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchConfigTime();
+  }, [])
+
+  const timeSlots = generateTimeSlots(intervalMinutes, time);
 
   const safeValue = value || "";
 
