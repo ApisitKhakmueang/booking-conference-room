@@ -11,7 +11,8 @@ import {
   List,
   History,
   User,
-  SquareChartGantt
+  SquareChartGantt,
+  Wrench
 } from "lucide-react";
 
 // Components
@@ -32,6 +33,7 @@ const SIDEBAR_ITEMS = [
 const ADMIN_ITEMS = [
   { name: "Room Management", href: "/room-management", icon: SquareChartGantt },
   { name: "User Management", href: "/user-management", icon: User },
+  { name: "System Config", href: "/system-config", icon: Wrench}
 ] as const;
 
 export default function Sidebar() {
