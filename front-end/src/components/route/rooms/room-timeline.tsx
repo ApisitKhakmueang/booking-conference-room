@@ -41,17 +41,17 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   const user = useAuthStore((state) => state.user);
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const [time, setTime] = useState<ConfigTimeResponse | undefined>(undefined)
+  const [config, setConfig] = useState<ConfigTimeResponse | undefined>(undefined)
   const [currentTimePos, setCurrentTimePos] = useState<number | null>(null);
   
   // 🌟 1. เพิ่ม State สำหรับเก็บ ID ของกล่องที่กำลังถูกคลิกให้ขยาย
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const { startTimeHour, totalTimeHours } = useMemo(() => {
-    const startHour = parseInt(time?.startTime.split(":")[0] || "8", 10);
-    const startMinute = parseInt(time?.startTime.split(":")[1] || "0", 10);
-    const endHour = parseInt(time?.endTime.split(":")[0] || "20", 10);
-    const endMinute = parseInt(time?.endTime.split(":")[1] || "0", 10);
+    const startHour = parseInt(config?.startTime.split(":")[0] || "8", 10);
+    const startMinute = parseInt(config?.startTime.split(":")[1] || "0", 10);
+    const endHour = parseInt(config?.endTime.split(":")[0] || "20", 10);
+    const endMinute = parseInt(config?.endTime.split(":")[1] || "0", 10);
 
     const startTotalHours = Math.floor((startHour * 60 + startMinute) / 60);
     const endTotalHours = Math.ceil((endHour * 60 + endMinute) / 60);
@@ -61,14 +61,14 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
       startTimeHour: startTotalHours,
       totalTimeHours: totalHours
     };
-  }, [time])
+  }, [config])
 
   const timeSlots = generateTimeSlots(startTimeHour, totalTimeHours);
 
   const fetchConfigTime = async () => {
     try {
       const response = await bookingService.fetchConfigTime();
-      setTime(response)
+      setConfig(response)
     } catch (error:any) {
       if (error.response?.status === 500) {
         Swal.fire({
@@ -178,7 +178,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
 
                       // 🌟 2. เช็คว่ากล่องนี้คือกล่องที่กำลังถูกคลิกอยู่หรือไม่
                       const isExpanded = expandedId === booking.id;
-                      const hoverCard = !(parseISO(booking.startTime).getHours() === parseInt(time?.endTime.split(":")[0] || "20", 10) - 1)
+                      const hoverCard = !(parseISO(booking.startTime).getHours() === parseInt(config?.endTime.split(":")[0] || "20", 10) - 1)
 
                       return (
                         <div 

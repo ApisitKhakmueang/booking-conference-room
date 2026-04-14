@@ -17,7 +17,10 @@ const generateTimeSlots = (
   intervalMinutes: number = 30,
   time: ConfigTimeResponse = {
     startTime: "08:00",
-    endTime: "20:00"
+    endTime: "20:00",
+    maxAdvanceDays: 30,
+    maxBookingMins: 120,
+    noShowThresholdMins: 15,
   }
 ) => {
   const startHour = parseInt(time?.startTime.split(":")[0] || "8", 10);

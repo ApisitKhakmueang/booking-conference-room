@@ -63,4 +63,7 @@ export interface DashboardAnalyticsResponse {
 export interface ConfigTimeResponse {
   startTime: string
   endTime: string
+  maxAdvanceDays: number
+  maxBookingMins: number
+  noShowThresholdMins: number
 }

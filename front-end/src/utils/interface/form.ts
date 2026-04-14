@@ -12,3 +12,10 @@ interface RoomDisplay {
   name: string
   roomNumber: number
 }
+
+export interface BookingValidationParams {
+  startTime: string;
+  endTime: string;
+  duration: string;
+  date: Date | string | null; 
+}
