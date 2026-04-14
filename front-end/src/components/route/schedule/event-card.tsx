@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 
 export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, onDeleteSuccess } : EventCardScheduleProps) {
   const eventDate = new Date(event.date)
-  const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
+  const formattedDate = event.date ? format(eventDate, 'EEEE, d MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
 

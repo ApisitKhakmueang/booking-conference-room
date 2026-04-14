@@ -10,7 +10,7 @@ interface BookingCard {
 
 export default function BookingCard({ booking }: BookingCard) {
   const eventDate = new Date(booking.date)
-  const formattedDate = booking.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
+  const formattedDate = booking.date ? format(eventDate, 'EEEE, d MMM yyyy') : '';
   const start = formatTimeWithSuffix(booking.startTime)
   const end = formatTimeWithSuffix(booking.endTime)
 

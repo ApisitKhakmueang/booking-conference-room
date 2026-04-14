@@ -22,7 +22,7 @@ const STATUS_THEME: Record<string, { text: string; bg: string; shadow: string }>
 
 export default function CardEvents({ event } : EventCardHistoryProps) {
   const eventDate = new Date(event.date)
-  const formattedDate = event.date ? format(eventDate, 'EEEE, dd MMM yyyy') : '';
+  const formattedDate = event.date ? format(eventDate, 'EEEE, d MMM yyyy') : '';
   const start = formatTimeWithSuffix(event.startTime)
   const end = formatTimeWithSuffix(event.endTime)
   const theme = STATUS_THEME[event.status] || STATUS_THEME['confirm'];
