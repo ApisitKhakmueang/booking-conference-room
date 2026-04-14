@@ -117,6 +117,7 @@ export type BookingStatus = 'Confirmed' | 'Completed' | 'Cancelled' | 'No Show';
 export interface BookingEvent {
   id: string;
   title: string;
+  passcode: string
   date: string
   startTime: string; // เก็บแค่เวลาเพื่อความง่ายในการโชว์
   endTime: string

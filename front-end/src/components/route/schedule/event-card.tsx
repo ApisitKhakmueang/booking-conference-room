@@ -3,7 +3,7 @@ import { bookingService } from "@/service/booking.service";
 import { EventCardScheduleProps } from "@/utils/interface/interface";
 import { formatTimeWithSuffix } from "@/lib/time";
 import { format } from "date-fns";
-import { X } from "lucide-react";
+import { Key, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, onDeleteSuccess } : EventCardScheduleProps) {
@@ -139,6 +139,12 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
             <span className="material-symbols-outlined text-sm">schedule</span> {event.duration}
           </span>
 
+          <span className="text-gray-500 dark:text-stone-500 flex items-center gap-1.5 xs:border-l xs:pl-4 border-gray-200 dark:border-white/10">
+            <Key className="w-3.5 h-3.5 opacity-70" />
+            <span>
+              Passcode: <span className="font-mono text-gray-800 dark:text-stone-200 font-bold ml-0.5 tracking-wider">{event.passcode}</span>
+            </span>
+          </span>
         </div>
       </div>
     </div>

@@ -44,6 +44,7 @@ export const formatSingleBookingEvent = (resp: BookingEventResponse): BookingEve
   return {
     id: resp.id,
     title: resp.title,
+    passcode: resp.passcode,
     date: resp.startTime,
     startTime: resp.startTime,
     endTime: resp.endTime,

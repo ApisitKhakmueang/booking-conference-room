@@ -41,7 +41,7 @@ export default function Room() {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => router.push('/calendar')}
-            className="py-2 px-5 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
             >
               <Calendar className="w-4 h-4" />
               Calendar View
@@ -49,7 +49,7 @@ export default function Room() {
           
           <Button  
             onClick={() => setViewMode(viewMode === 'grid' ? 'timeline' : 'grid')}
-            className="py-2 px-5 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
           >
             {viewMode === 'grid' ? (
               <><CalendarDays className="w-4 h-4" /> Timeline View</>
@@ -57,14 +57,6 @@ export default function Room() {
               <><LayoutGrid className="w-4 h-4" /> Grid View</>
             )}
           </Button>
-
-          {user?.role === 'admin' && (
-            <Button 
-              className='px-5 py-2 text-sm font-semibold rounded bg-dark-purple hover:bg-light-hover/90 dark:bg-dark-purple/90 dark:hover:bg-dark-purple text-white shadow-md transition-all'
-            >
-              Manage Rooms
-            </Button>
-          )}
         </div>
       </div>
 
