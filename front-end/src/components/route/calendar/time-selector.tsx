@@ -50,7 +50,7 @@ export function TimeSelect({
       </SelectTrigger>
       
       {/* สามารถปรับ max-h-[300px] เพื่อให้ Dropdown ไม่ยาวทะลุจอได้ครับ */}
-      <SelectContent className="w-(--radix-select-trigger-width) dark:bg-sidebar dark:border-sidebar max-h-[250px] text-white">
+      <SelectContent className="z-110 w-(--radix-select-trigger-width) dark:bg-sidebar dark:border-sidebar max-h-[250px] dark:text-white">
         {timeSlots.map((time) => (
           <SelectItem 
             key={time} 
