@@ -46,7 +46,7 @@ func NewBookingUsecase(
 }
 
 func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
+	configTime, err := u.helperPostgres.GetConfigDB(ctx)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 }
 
 func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
+	configTime, err := u.helperPostgres.GetConfigDB(ctx)
 	if err != nil {
 		return err
 	}
@@ -492,8 +492,8 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 // 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 }
 
-func (u *bookingUsecase) GetConfigTime(ctx context.Context) (*domain.Config, error) {
-	config, err := u.helperPostgres.GetConfigTimeDB(ctx)
+func (u *bookingUsecase) GetConfig(ctx context.Context) (*domain.Config, error) {
+	config, err := u.helperPostgres.GetConfigDB(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -501,8 +501,8 @@ func (u *bookingUsecase) GetConfigTime(ctx context.Context) (*domain.Config, err
 	return config, nil
 }
 
-func (u *bookingUsecase) UpdateConfigTime(ctx context.Context, config *domain.Config) error {
-	if err := u.helperPostgres.UpdateConfigTimeDB(ctx, config); err != nil {
+func (u *bookingUsecase) UpdateConfig(ctx context.Context, config *domain.Config) error {
+	if err := u.helperPostgres.UpdateConfigDB(ctx, config); err != nil {
 		return err
 	}
 

@@ -2,7 +2,7 @@
 
 import { bookingService } from '@/service/booking.service';
 import { useAuthStore } from '@/stores/auth.store';
-import { ConfigTimeResponse, RoomResp } from '@/utils/interface/response';
+import { ConfigResponse, RoomResp } from '@/utils/interface/response';
 import { format, parseISO, differenceInMinutes, startOfDay, addHours } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
@@ -41,7 +41,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   const user = useAuthStore((state) => state.user);
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const [config, setConfig] = useState<ConfigTimeResponse | undefined>(undefined)
+  const [config, setConfig] = useState<ConfigResponse | undefined>(undefined)
   const [currentTimePos, setCurrentTimePos] = useState<number | null>(null);
   
   // 🌟 1. เพิ่ม State สำหรับเก็บ ID ของกล่องที่กำลังถูกคลิกให้ขยาย
@@ -65,9 +65,9 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
 
   const timeSlots = generateTimeSlots(startTimeHour, totalTimeHours);
 
-  const fetchConfigTime = async () => {
+  const fetchConfig = async () => {
     try {
-      const response = await bookingService.fetchConfigTime();
+      const response = await bookingService.fetchConfig();
       setConfig(response)
     } catch (error:any) {
       if (error.response?.status === 500) {
@@ -90,7 +90,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   }
 
   useEffect(() => {
-    fetchConfigTime();
+    fetchConfig();
   }, [])
 
   const { data: bookings, error, isLoading } = useSWR(

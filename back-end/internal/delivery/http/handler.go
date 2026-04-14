@@ -368,9 +368,9 @@ func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-func (u *BookingHandler) GetConfigTime(c *fiber.Ctx) error {
+func (u *BookingHandler) GetConfig(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	response, err := u.usecase.GetConfigTime(ctx)
+	response, err := u.usecase.GetConfig(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -378,7 +378,7 @@ func (u *BookingHandler) GetConfigTime(c *fiber.Ctx) error {
 	return c.JSON(response)
 }
 
-func (u *BookingHandler) UpdateConfigTime(c *fiber.Ctx) error {
+func (u *BookingHandler) UpdateConfig(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	role := c.Locals("role")
 	if role != "admin" {
@@ -391,7 +391,7 @@ func (u *BookingHandler) UpdateConfigTime(c *fiber.Ctx) error {
 	}
 
 	config.ID = 1 // สมมติมีแค่เรคอร์ดเดียวในตาราง Config
-	if err := u.usecase.UpdateConfigTime(ctx, config); err != nil {
+	if err := u.usecase.UpdateConfig(ctx, config); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 

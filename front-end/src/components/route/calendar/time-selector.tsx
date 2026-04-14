@@ -11,11 +11,11 @@ import {
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { bookingService } from "@/service/booking.service";
-import { ConfigTimeResponse } from "@/utils/interface/response";
+import { ConfigResponse } from "@/utils/interface/response";
 
 const generateTimeSlots = (
   intervalMinutes: number = 30,
-  time: ConfigTimeResponse = {
+  time: ConfigResponse = {
     startTime: "08:00",
     endTime: "20:00",
     maxAdvanceDays: 30,
@@ -67,11 +67,11 @@ export function TimeSelect({
   className,
   placeholder = "Select time..."
 }: TimeSelectProps) {
-  const [time, setTime] = useState<ConfigTimeResponse | undefined>(undefined)
+  const [time, setTime] = useState<ConfigResponse | undefined>(undefined)
 
-  const fetchConfigTime = async () => {
+  const fetchConfig = async () => {
     try {
-      const response = await bookingService.fetchConfigTime();
+      const response = await bookingService.fetchConfig();
       setTime(response)
     } catch (error:any) {
       if (error.response?.status === 500) {
@@ -94,7 +94,7 @@ export function TimeSelect({
   }
 
   useEffect(() => {
-    fetchConfigTime();
+    fetchConfig();
   }, [])
 
   const timeSlots = generateTimeSlots(intervalMinutes, time);

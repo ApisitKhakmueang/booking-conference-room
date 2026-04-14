@@ -48,6 +48,6 @@ type HelperPostgresRepository interface {
 	CheckDayOff(ctx context.Context, date time.Time) error
 	BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error
 	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
-	GetConfigTimeDB(ctx context.Context) (*domain.Config, error)
-	UpdateConfigTimeDB(ctx context.Context, config *domain.Config) error
+	GetConfigDB(ctx context.Context) (*domain.Config, error)
+	UpdateConfigDB(ctx context.Context, config *domain.Config) error
 }

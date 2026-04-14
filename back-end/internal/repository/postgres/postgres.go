@@ -620,7 +620,7 @@ func (p *postgresRepository) BulkUpsertHolidays(ctx context.Context, holidays []
 	return result.Error
 }
 
-func (p *postgresRepository) GetConfigTimeDB(ctx context.Context) (*domain.Config, error) {
+func (p *postgresRepository) GetConfigDB(ctx context.Context) (*domain.Config, error) {
 	config := new(domain.Config)
 	err := p.db.WithContext(ctx).First(config).Error
 	if err != nil {
@@ -629,7 +629,7 @@ func (p *postgresRepository) GetConfigTimeDB(ctx context.Context) (*domain.Confi
 	return config, nil
 }
 
-func (p *postgresRepository) UpdateConfigTimeDB(ctx context.Context, config *domain.Config) error {
+func (p *postgresRepository) UpdateConfigDB(ctx context.Context, config *domain.Config) error {
 	result := p.db.WithContext(ctx).Model(&domain.Config{}).Where("id = ?", config.ID).Updates(config)
 	if result.Error != nil {
 		return result.Error

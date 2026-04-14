@@ -60,7 +60,7 @@ export interface DashboardAnalyticsResponse {
   popularRooms: PopularRoomResponse[];
 }
 
-export interface ConfigTimeResponse {
+export interface ConfigResponse {
   startTime: string
   endTime: string
   maxAdvanceDays: number
