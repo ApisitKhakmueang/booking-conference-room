@@ -46,37 +46,13 @@ func NewBookingUsecase(
 }
 
 func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-	// 	return err
-	// }
-
 	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
 	if err != nil {
 		return err
 	}
 
-	openMinutes, _ := helper.TotalMinutesFromString(configTime.StartTime)
-	closeMinutes, _ := helper.TotalMinutesFromString(configTime.EndTime)
-
-	err = helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
-	if err != nil {
+	if err := u.ValidateBooking(ctx, booking, roomNumber, configTime); err != nil {
 		return err
-	}
-
-	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
-		return err
-	}
-
-	if err := helper.CheckMaxAdvanceBooking(*booking.StartTime); err != nil {
-		return err
-	}
-
-	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
-		return err
-	}
-
-	if !u.helperPostgres.IsRoomAvailable(ctx, booking) {
-		return errors.New("Room unavailable")
 	}
 
 	var finalPasscode string
@@ -107,86 +83,35 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 		return err
 	}
 
-	// completedBooking, err := u.helperPostgres.GetBookingByID(ctx, booking.ID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if completedBooking.StartTime != nil {
-	// 	// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
-	// 	nowYear, nowMonth, nowDay := time.Now().Date()
-	// 	bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
-
-	// 	// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
-	// 	if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
-	// 		u.PublishStatus("booking_created", completedBooking)
-	// 	}
-	// }
 	u.PublishEvent("booking_created", roomNumber, booking)
 
-	go func(b *domain.Booking) {
-		u.EnqeueEvent(b)
-	}(booking)
+	go func(b *domain.Booking, noShowThresoldMins int) {
+		u.EnqeueEvent(b, noShowThresoldMins)
+	}(booking, configTime.NoShowThresholdMins)
 
 	return nil
 }
 
 func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
-	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-	// 	return err
-	// }
-
 	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
 	if err != nil {
 		return err
 	}
 
-	openMinutes, _ := helper.TotalMinutesFromString(configTime.StartTime)
-	closeMinutes, _ := helper.TotalMinutesFromString(configTime.EndTime)
-
-	err = helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
-	if err != nil {
+	if err := u.ValidateBooking(ctx, booking, roomNumber, configTime); err != nil {
 		return err
-	}
-
-	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
-		return err
-	}
-
-	if err := helper.CheckMaxAdvanceBooking(*booking.StartTime); err != nil {
-		return err
-	}
-
-	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
-		return err
-	}
-
-	if !u.helperPostgres.IsRoomAvailable(ctx, booking) {
-		return errors.New("Room unavailable")
 	}
 
 	booking, err = u.redis.UpdateBooking(ctx, booking, roomNumber);
 	if  err != nil {
 		return err
 	}
-
-	
-	// if completedBooking.StartTime != nil {
-	// 	// 1. ดึง ปี, เดือน, วัน ออกมาจากทั้งคู่
-	// 	nowYear, nowMonth, nowDay := time.Now().Date()
-	// 	bookYear, bookMonth, bookDay := completedBooking.StartTime.Date()
-	
-	// 	// 2. เทียบทีละตัวว่าตรงกันหมดหรือไม่
-	// 	if nowYear == bookYear && nowMonth == bookMonth && nowDay == bookDay {
-	// 		u.PublishStatus("booking_updated", completedBooking)
-	// 	}
-	// }
 		
 	u.PublishEvent("booking_updated", roomNumber, booking)
 
-	go func(b *domain.Booking) {
-		u.EnqeueEvent(b)
-	}(booking)
+	go func(b *domain.Booking, noShowThresoldMins int) {
+		u.EnqeueEvent(b, noShowThresoldMins)
+	}(booking, configTime.NoShowThresholdMins)
 
 	return nil
 }
@@ -675,7 +600,7 @@ func (u *bookingUsecase) PublishEvent(event string, roomNumber uint, completedBo
 	}()
 }
 
-func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
+func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking, noShowThresholdMins int) {
 	// ป้องกันเหนียวไว้ก่อน: เช็คว่าเวลาไม่เป็น nil แน่ๆ ป้องกันระบบ Panic
 	if booking.StartTime == nil || booking.EndTime == nil {
 		log.Println("❌ Error: StartTime or EndTime is nil. Cannot enqueue tasks.")
@@ -700,17 +625,24 @@ func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
 	// ---------------------------------------------------
 	// 2. งานเช็คคนไม่มา (No-Show Task) -> StartTime + 15 นาที
 	// ---------------------------------------------------
-	noshowTask, err := worker.NewBookingNoShowTask(booking.ID)
-	if err == nil {
-		noshowTime := (*booking.StartTime).Add(15 * time.Minute) // ⭐️ ดึงค่าออกมาด้วย * ก่อนบวกเวลา
-		info, err := u.asynqClient.Enqueue(noshowTask, asynq.ProcessAt(noshowTime))
-		if err != nil {
-			log.Printf("❌ Failed to enqueue noshow task: %v", err)
+	if noShowThresholdMins > 0 {
+		noshowTask, err := worker.NewBookingNoShowTask(booking.ID)
+		if err == nil {
+			// ✅ แก้ไข: แปลง int เป็น time.Duration เพื่อให้คำนวณได้
+			threshold := time.Duration(noShowThresholdMins) * time.Minute
+			noshowTime := booking.StartTime.Add(threshold)
+
+			info, err := u.asynqClient.Enqueue(noshowTask, asynq.ProcessAt(noshowTime))
+			if err != nil {
+				log.Printf("❌ Failed to enqueue noshow task: %v", err)
+			} else {
+				log.Printf("✅ No-Show Task enqueued! Will execute at: %v (ID: %s)", noshowTime, info.ID)
+			}
 		} else {
-			log.Printf("✅ No-Show Task enqueued! Will execute at: %v (ID: %s)", noshowTime, info.ID)
+			log.Printf("❌ Failed to create noshow task: %v", err)
 		}
 	} else {
-		log.Printf("❌ Failed to create noshow task: %v", err)
+		log.Printf("Skip No-Show Task: Threshold is 0")
 	}
 
 	// ---------------------------------------------------
@@ -727,4 +659,36 @@ func (u *bookingUsecase) EnqeueEvent(booking *domain.Booking) {
 	} else {
 		log.Printf("❌ Failed to create end task: %v", err)
 	}
+}
+
+func (u *bookingUsecase) ValidateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint, config *domain.Config) error {
+	openMinutes, _ := helper.TotalMinutesFromString(config.StartTime)
+	closeMinutes, _ := helper.TotalMinutesFromString(config.EndTime)
+
+	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+	// 	return err
+	// }
+
+	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
+	if err != nil {
+		return err
+	}
+
+	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
+		return err
+	}
+
+	if err := helper.CheckMaxAdvanceBooking(*booking.StartTime, config.MaxAdvanceDays); err != nil {
+		return err
+	}
+
+	if err := u.helperPostgres.GetRoomID(ctx, booking, roomNumber); err != nil {
+		return err
+	}
+
+	if !u.helperPostgres.IsRoomAvailable(ctx, booking) {
+		return errors.New("Room unavailable")
+	}
+
+	return nil
 }

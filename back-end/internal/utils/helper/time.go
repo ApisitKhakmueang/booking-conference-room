@@ -136,11 +136,11 @@ func CheckBeforeNow(start time.Time) error {
 	return errors.New("Can't book in the past.")
 }
 
-func CheckMaxAdvanceBooking(start time.Time) error {
+func CheckMaxAdvanceBooking(start time.Time, maxAdvanceDays int) error {
 	now := time.Now()
 	
 	// คำนวณเวลาปัจจุบัน + 30 วัน
-	maxAllowedDate := now.AddDate(0, 0, 30) 
+	maxAllowedDate := now.AddDate(0, 0, maxAdvanceDays) 
 
 	if start.After(maxAllowedDate) {
 		return errors.New("Cannot book more than 30 days in advance")
