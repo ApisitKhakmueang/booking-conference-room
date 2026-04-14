@@ -3,6 +3,9 @@ package helper
 import (
 	// "log"
 	"errors"
+	"fmt"
+	"strconv"
+
 	// "fmt"
 	// "fmt"
 	"strings"
@@ -34,7 +37,7 @@ func GetStartDayWeek(t time.Time) time.Time {
 	return startOfWeek
 }
 
-func ValidateBusinessHours(start, end time.Time) error {
+func ValidateBusinessHours(start, end time.Time, openMinutes, closeMinutes int) error {
 	// 1. โหลด Timezone ไทย (Asia/Bangkok)
 	loc, err := time.LoadLocation("Asia/Bangkok")
 	if err != nil {
@@ -45,22 +48,22 @@ func ValidateBusinessHours(start, end time.Time) error {
 	thaiStart := start.In(loc)
 	thaiEnd := end.In(loc)
 
-	// 3. กฎข้อที่ 1: ห้ามเริ่มก่อน 08:00
-	// (เช็คชั่วโมง < 8)
-	if thaiStart.Hour() < 8 {
-		return errors.New("Not allow to book before 08:00 a.m.")
+	startMin := toTotalMinutes(thaiStart)
+	endMin := toTotalMinutes(thaiEnd)
+
+	// 1. ตรวจสอบเวลาเริ่ม (ห้ามก่อนเวลาเปิด)
+	if startMin < openMinutes {
+		return fmt.Errorf("Not allow booking before %02d:%02d", openMinutes/60, openMinutes%60)
 	}
 
-	// 4. กฎข้อที่ 2: ห้ามจบหลัง 20:00
-	// กรณีที่ 1: ชั่วโมงมากกว่า 20 (เช่น 21:00) -> ผิด
-	// กรณีที่ 2: ชั่วโมงเป็น 20 แต่มีเศษนาที (เช่น 20:01) -> ผิด
-	if thaiEnd.Hour() > 20 || (thaiEnd.Hour() == 20 && thaiEnd.Minute() > 0) {
-		return errors.New("Not allow to book after 08:00 p.m")
+	// 2. ตรวจสอบเวลาจบ (ห้ามเกินเวลาปิด)
+	if endMin > closeMinutes {
+		return fmt.Errorf("Not allow booking after %02d:%02d", closeMinutes/60, closeMinutes%60)
 	}
 
 	// 5. (แถม) เช็คว่าต้องจองและจบในวันเดียวกันไหม? (ถ้าไม่ข้ามคืน)
 	if thaiStart.Day() != thaiEnd.Day() {
-		return errors.New("Booking in same day")
+		return errors.New("Not allow booking in different days")
 	}
 
 	if !thaiStart.Before(thaiEnd) { 
@@ -133,7 +136,6 @@ func CheckBeforeNow(start time.Time) error {
 	return errors.New("Can't book in the past.")
 }
 
-// เช็คว่าจองล่วงหน้าเกิน 30 วันหรือไม่
 func CheckMaxAdvanceBooking(start time.Time) error {
 	now := time.Now()
 	
@@ -145,6 +147,36 @@ func CheckMaxAdvanceBooking(start time.Time) error {
 	}
 
 	return nil
+}
+
+func TotalMinutesFromString(timeStr string) (int, error) {
+	// 1. แยก string ด้วย ":" เช่น "08:30" -> ["08", "30"]
+	parts := strings.Split(timeStr, ":")
+	if len(parts) != 2 {
+		return 0, fmt.Errorf("invalid time format: %s", timeStr)
+	}
+
+	// 2. แปลงส่วนชั่วโมงเป็น int
+	hours, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, fmt.Errorf("invalid hour: %v", err)
+	}
+
+	// 3. แปลงส่วนนาทีเป็น int
+	minutes, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, fmt.Errorf("invalid minute: %v", err)
+	}
+
+	// 4. คำนวณนาทีรวม: (ชั่วโมง * 60) + นาที
+	total := (hours * 60) + minutes
+
+	return total, nil
+}
+
+// Internal function
+func toTotalMinutes(t time.Time) int {
+	return t.Hour()*60 + t.Minute()
 }
 
 // func ParseTime(booking *domain.Booking) (*domain.Date, error) {

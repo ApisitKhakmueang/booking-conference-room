@@ -52,10 +52,18 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	// if err != nil {
-	// 	return err
-	// }
+	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
+	if err != nil {
+		return err
+	}
+
+	openMinutes, _ := helper.TotalMinutesFromString(configTime.StartTime)
+	closeMinutes, _ := helper.TotalMinutesFromString(configTime.EndTime)
+
+	err = helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
+	if err != nil {
+		return err
+	}
 
 	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
 		return err
@@ -96,7 +104,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context,booking *domain.Booki
 	booking.Passcode = &finalPasscode
 	booking.ID = uuid.New()
 
-	booking, err := u.redis.CreateBooking(ctx, booking, roomNumber)
+	booking, err = u.redis.CreateBooking(ctx, booking, roomNumber)
 	if err != nil {
 		return err
 	}
@@ -130,10 +138,18 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 	// 	return err
 	// }
 
-	// err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime)
-	// if err != nil {
-	// 	return err
-	// }
+	configTime, err := u.helperPostgres.GetConfigTimeDB(ctx)
+	if err != nil {
+		return err
+	}
+
+	openMinutes, _ := helper.TotalMinutesFromString(configTime.StartTime)
+	closeMinutes, _ := helper.TotalMinutesFromString(configTime.EndTime)
+
+	err = helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
+	if err != nil {
+		return err
+	}
 
 	if err := helper.CheckBeforeNow(*booking.StartTime); err != nil {
 		return err
@@ -151,7 +167,7 @@ func (u *bookingUsecase) UpdateBooking(ctx context.Context,booking *domain.Booki
 		return errors.New("Room unavailable")
 	}
 
-	booking, err := u.redis.UpdateBooking(ctx, booking, roomNumber);
+	booking, err = u.redis.UpdateBooking(ctx, booking, roomNumber);
 	if  err != nil {
 		return err
 	}
@@ -552,6 +568,15 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 // 	response.Holidays = filteredHolidays
 
 // 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
+}
+
+func (u *bookingUsecase) GetConfigTime(ctx context.Context) (*domain.Config, error) {
+	config, err := u.helperPostgres.GetConfigTimeDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }
 
 // Helper function

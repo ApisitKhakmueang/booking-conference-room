@@ -146,6 +146,12 @@ type UpNextBookingResponse struct {
 }
 
 // Schema
+type Config struct {
+	ID  				int64 			`gorm:"primaryKey;column:id" json:"id,omitempty"`
+	StartTime   string      `gorm:"not null;column:start_time" json:"startTime,omitempty"`
+	EndTime     string      `gorm:"not null;column:end_time" json:"endTime,omitempty"`
+}
+
 type Holiday struct {
 	ID 				int64 			`gorm:"primaryKey;column:id" json:"id,omitempty"`
 	UpdatedAt *time.Time 	`gorm:"column:updated_at;autoUpdateTime" json:"updatedAt,omitempty"`

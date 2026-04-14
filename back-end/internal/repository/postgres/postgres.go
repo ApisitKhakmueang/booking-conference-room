@@ -604,13 +604,13 @@ func (p *postgresRepository) CheckDayOff(ctx context.Context, date time.Time) er
 	}
 }
 
-func (r *postgresRepository) BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error {
+func (p *postgresRepository) BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error {
 	if len(holidays) == 0 {
 		return nil
 	}
 
 	// ใช้ Batch Upsert เดิมของคุณ ดีมากแล้วครับ
-	result := r.db.
+	result := p.db.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "date"}}, // เช็คซ้ำที่วันที่
@@ -618,6 +618,15 @@ func (r *postgresRepository) BulkUpsertHolidays(ctx context.Context, holidays []
 	}).Create(&holidays)
 
 	return result.Error
+}
+
+func (p *postgresRepository) GetConfigTimeDB(ctx context.Context) (*domain.Config, error) {
+	config := new(domain.Config)
+	err := p.db.WithContext(ctx).First(config).Error
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 // internal function
