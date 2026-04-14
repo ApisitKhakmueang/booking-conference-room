@@ -143,7 +143,7 @@ func CheckMaxAdvanceBooking(start time.Time, maxAdvanceDays int) error {
 	maxAllowedDate := now.AddDate(0, 0, maxAdvanceDays) 
 
 	if start.After(maxAllowedDate) {
-		return errors.New("Cannot book more than 30 days in advance")
+		return fmt.Errorf("Cannot book more than %d days in advance", maxAdvanceDays)
 	}
 
 	return nil
