@@ -629,6 +629,14 @@ func (p *postgresRepository) GetConfigTimeDB(ctx context.Context) (*domain.Confi
 	return config, nil
 }
 
+func (p *postgresRepository) UpdateConfigTimeDB(ctx context.Context, config *domain.Config) error {
+	result := p.db.WithContext(ctx).Model(&domain.Config{}).Where("id = ?", config.ID).Updates(config)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
 // internal function
 // สร้างฟังก์ชัน Helper เล็กๆ ไว้ในไฟล์เดียวกัน
 func preloadBookingRelations(db *gorm.DB) *gorm.DB {

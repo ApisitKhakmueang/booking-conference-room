@@ -1,7 +1,6 @@
 package usercase
 
 import (
-	// "fmt"
 	"context"
 	"log"
 	"sort"
@@ -17,7 +16,6 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
-	// "github.com/google/uuid"
 )
 
 type bookingUsecase struct {
@@ -310,7 +308,6 @@ func (u *bookingUsecase) GetBooking(ctx context.Context,date *domain.Date, roomN
 	return response, nil
 }
 
-// แนะนำให้แก้ Return Type เป็น Object เดียว (pointer) ครับ
 func (u bookingUsecase) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
 	bookings, err := u.redis.GetAnalyticBooking(ctx, date)
 	if err != nil {
@@ -577,6 +574,14 @@ func (u *bookingUsecase) GetConfigTime(ctx context.Context) (*domain.Config, err
 	}
 
 	return config, nil
+}
+
+func (u *bookingUsecase) UpdateConfigTime(ctx context.Context, config *domain.Config) error {
+	if err := u.helperPostgres.UpdateConfigTimeDB(ctx, config); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Helper function

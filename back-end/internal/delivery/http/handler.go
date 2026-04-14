@@ -260,6 +260,10 @@ func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 
 func (u *BookingHandler) CreateRoom(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
 
 	room := new(domain.Room)
 	if err := c.BodyParser(room); err != nil {
@@ -275,6 +279,11 @@ func (u *BookingHandler) CreateRoom(c *fiber.Ctx) error {
 
 func (u *BookingHandler) UpdateRoom(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
 	roomID, err := uuid.Parse(c.Params("roomID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
@@ -297,6 +306,11 @@ func (u *BookingHandler) UpdateRoom(c *fiber.Ctx) error {
 
 func (u *BookingHandler) DeleteRoom(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
 	roomID, err := uuid.Parse(c.Params("roomID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
@@ -356,10 +370,35 @@ func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetConfigTime(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
 	response, err := u.usecase.GetConfigTime(ctx)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
-	
+
 	return c.JSON(response)
+}
+
+func (u *BookingHandler) UpdateConfigTime(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
+	config := new(domain.Config)
+	if err := c.BodyParser(config); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	config.ID = 1 // สมมติมีแค่เรคอร์ดเดียวในตาราง Config
+	if err := u.usecase.UpdateConfigTime(ctx, config); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Update config time successfully")
 }

@@ -34,9 +34,13 @@ func InitialRoomRoute(router fiber.Router, handler *http.BookingHandler) {
 
 func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 	// มาตรฐานมักจะใช้เป็นพหูพจน์ (Plural)
-	router.Get("/config", handler.GetConfigTime)
 	router.Post("/room/:roomID/checkin", handler.CheckInBooking)  // POST  /bookings/room/:id/checkin
 	router.Get("/holidays", handler.GetHoliday) 
 	router.Get("/rooms/details", handler.GetRoom) 
 	router.Get("/room/:room", handler.GetRoomByID) // GET   /bookings/room/:id
+}
+
+func InitialAdminRoute(router fiber.Router, handler *http.BookingHandler) {
+	router.Get("/config", handler.GetConfigTime)
+	router.Put("/config", handler.UpdateConfigTime)
 }

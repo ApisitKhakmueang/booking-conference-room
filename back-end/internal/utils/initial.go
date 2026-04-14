@@ -146,8 +146,9 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 
 	// With middleware
 	api := app.Group("/api/v1")
+	admin := api.Group("/admin", middleware.AuthMiddleware())
 	bookingAPI := api.Group("/booking", middleware.AuthMiddleware())
-	roomAPI := api.Group("/room", middleware.AuthMiddleware())
+	roomAPI := admin.Group("/room", middleware.AuthMiddleware())
 	
 	// api.Get("/holiday", handler.GetHoliday)
 	
@@ -157,6 +158,7 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	wsWithoutBooking := wsGroup.Group("/", middleware.WebsocketMiddleware)
 	
 	controller.InitialHelperRoute(api, handler) // Route ที่ไม่ต้องการ Auth
+	controller.InitialAdminRoute(admin, handler)
 	controller.InitialBookingRoute(bookingAPI, handler)
 	controller.InitialRoomRoute(roomAPI, handler)
 	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)

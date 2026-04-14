@@ -49,4 +49,5 @@ type HelperPostgresRepository interface {
 	BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error
 	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
 	GetConfigTimeDB(ctx context.Context) (*domain.Config, error)
+	UpdateConfigTimeDB(ctx context.Context, config *domain.Config) error
 }
