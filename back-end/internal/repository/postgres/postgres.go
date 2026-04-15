@@ -418,7 +418,7 @@ func (p *postgresRepository) GetRoomDB(ctx context.Context) ([]domain.Room, erro
 
 	result := p.db.
 		WithContext(ctx).
-		Select("id, name, capacity, is_active, room_number").
+		Select("id, name, capacity, is_active, room_number, location").
 		Where("deleted_at IS NULL").
 		Find(&room)
 
