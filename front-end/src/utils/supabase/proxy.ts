@@ -83,6 +83,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if ((
+      request.nextUrl.pathname.startsWith("/room-management") ||
+      request.nextUrl.pathname.startsWith("/user-management") ||
+      request.nextUrl.pathname.startsWith("/system-config")
+    ) && user?.app_metadata?.role === 'user'
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
