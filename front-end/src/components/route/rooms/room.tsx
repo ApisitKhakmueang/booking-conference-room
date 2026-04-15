@@ -36,7 +36,7 @@ export default function Room() {
     <div className={`flex flex-col gap-4 transition-opacity duration-300 ${isLoadingBooking ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
       {/* 🌟 3. Header ปุ่มสลับมุมมอง (วางไว้บนสุด หรือแทรกในหน้า Page.tsx ก็ได้) */}
       <div className="flex md:flex-row flex-col md:justify-between gap-2 pb-4 border-b border-white/5">
-        <p className="text-2xl font-semibold">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
+        <p className="text-2xl font-semibold text-light-secondary dark:text-secondary">{format(new Date(), 'EEEE, d MMMM yyyy')}</p>
 
         <div className="flex items-center gap-2">
           <Button
