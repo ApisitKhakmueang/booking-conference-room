@@ -175,13 +175,13 @@ export default function Schedule() {
             <p className="text-2xl font-semibold text-light-secondary dark:text-secondary">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2 pr-4 md:pr-0">
-              <Button onClick={handleAddClick} className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap xl:flex hidden">
+              <Button onClick={handleAddClick} className="px-4 py-2 bg-dark-purple hover:bg-dark-purple/90 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow-md text-sm cursor-pointer rounded whitespace-nowrap transition-all">
                 <Plus className="w-4 h-4"/>&nbsp;Add Booking
               </Button>
-              <Button onClick={prev} className={`px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer ${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
-              <Button onClick={today} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Today</Button>
-              <Button onClick={next} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer">Next</Button>
-              <Button onClick={() => setIsMobileFilterOpen(true)} className="px-3 py-2 dark:bg-sidebar dark:hover:bg-hover border dark:border-hover border-white rounded bg-dark-purple hover:bg-light-card text-sm cursor-pointer xl:hidden block">Filter</Button>
+              <Button onClick={prev} className={`px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors ${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
+              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
+              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
+              <Button onClick={() => setIsMobileFilterOpen(true)} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors xl:hidden block">Filter</Button>
             </div>
           </header>
 
