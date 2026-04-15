@@ -1,4 +1,4 @@
-import { BookingEventResponse, Holiday, User } from "./response";
+import { BookingEventResponse, ConfigResponse, Holiday, User } from "./response";
 
 export interface EachPageLayoutProps {
   pageName: string;
@@ -192,4 +192,9 @@ export interface TimeGridViewProps {
 export interface OccupyModalProps { 
   setIsOccupyModalOpen: (val: boolean) => void, 
   selectedBooking: BookingEventResponse
+}
+
+export interface ConfigProps {
+  config: ConfigResponse
+  setConfig: (config: ConfigResponse) => void
 }

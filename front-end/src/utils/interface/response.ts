@@ -9,14 +9,11 @@ export interface Holiday {
 
 export interface RoomResp {
   id: string
-  createdAt?: string
-  updatedAt?: string
   name: string
   roomNumber: number
   location?: string
-  capacity?: number
+  capacity: number
   isActive?: string
-  status?: string
 }
 
 export interface User {
