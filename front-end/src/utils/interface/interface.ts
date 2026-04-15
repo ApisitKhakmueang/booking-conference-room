@@ -1,4 +1,4 @@
-import { BookingEventResponse, ConfigResponse, Holiday, User } from "./response";
+import { BookingEventResponse, ConfigResponse, Holiday, RoomResp, User } from "./response";
 
 export interface EachPageLayoutProps {
   pageName: string;
@@ -197,4 +197,25 @@ export interface OccupyModalProps {
 export interface ConfigProps {
   config: ConfigResponse
   setConfig: (config: ConfigResponse) => void
+}
+
+export interface RoomListProps {
+  rooms: RoomResp[]
+  setRooms: React.Dispatch<React.SetStateAction<RoomResp[]>>
+}
+
+export interface RoomCardProps {
+  room: RoomResp;
+  onDelete: (id: string) => void;
+}
+
+export interface StatusSectionProps {
+  rooms: RoomResp[]
+}
+
+export interface PaginationProps {
+  rooms: RoomResp[],
+  currentRooms: RoomResp[]
+  currentPage: number
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>
 }
