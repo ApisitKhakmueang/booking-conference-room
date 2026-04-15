@@ -12,10 +12,10 @@ export default function ThemeButton({ className }: { className?: string}) {
 
   return (
     <button type="button" className={cn("p-5 cursor-pointer flex justify-center", className)} onClick={toggle}>
-      <div className="dark:flex hidden dark:bg-sidebar dark:hover:bg-hover hover:text-main transition-duration-300 p-3.75 rounded-full shadow-xl">
+      <div className="dark:flex hidden dark:bg-sidebar dark:hover:bg-hover hover:text-main transition-duration-300 p-3.75 rounded-full">
         <Moon />
       </div>
-      <div className="flex dark:hidden border border-slate-400 hover:bg-slate-100 text-black transition-duartion-300 p-3.5 rounded-full shadow-xl">
+      <div className="flex dark:hidden border border-slate-400 hover:bg-slate-100 text-black transition-duartion-300 p-3.5 rounded-full">
         <Sun />
       </div>
     </button>
