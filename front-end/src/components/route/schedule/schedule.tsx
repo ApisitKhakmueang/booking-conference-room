@@ -172,7 +172,7 @@ export default function Schedule() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
           <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4">
-            <p className="text-2xl font-semibold">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
+            <p className="text-2xl font-semibold text-light-secondary dark:text-secondary">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2 pr-4 md:pr-0">
               <Button onClick={handleAddClick} className="px-3 py-2 border dark:border-none border-blue-600 bg-blue-600 hover:bg-blue-700 dark:border-dark-purple/80 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow text-sm cursor-pointer rounded whitespace-nowrap xl:flex hidden">

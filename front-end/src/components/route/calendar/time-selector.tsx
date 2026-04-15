@@ -74,7 +74,7 @@ export function TimeSelect({
   return (
     // 🌟 3. ใช้โครงสร้างของ Shadcn UI
     <Select key={safeValue} value={safeValue} onValueChange={onValueChange}>
-      <SelectTrigger className={cn(" w-full dark:bg-sidebar dark:border-sidebar dark:text-white", className)}>
+      <SelectTrigger className={cn(" w-full dark:bg-sidebar dark:border-sidebar dark:text-white focus:border-dark-purple focus:ring-1 focus:ring-dark-purple", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       

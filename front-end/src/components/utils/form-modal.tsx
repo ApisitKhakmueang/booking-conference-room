@@ -311,7 +311,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                     htmlFor="room"
                     className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Room</label>
                   <RoomSelector 
-                    className="px-3 py-2 dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base border border-gray-200 shadow-sm focus:ring-1 focus:ring-dark-purple"
+                    className="px-3 py-2 dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base border border-gray-200 shadow-sm"
                     selectedRoom={selectedRoom} 
                     setSelectedRoom={setSelectedRoom} 
                     rooms={rooms}  />
