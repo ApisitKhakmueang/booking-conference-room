@@ -121,7 +121,7 @@ function Calendar({
           defaultClassNames.range_end
         ),
         today: cn(
-          "bg-blue-50 text-blue-700 font-bold data-[selected=true]:rounded-full dark:bg-light-google/40 dark:text-white",
+          "font-bold data-[selected=true]:rounded-full bg-light-google/40 text-white",
           defaultClassNames.today
         ),
         outside: cn(
@@ -221,7 +221,7 @@ function CalendarDayButton({
         // 🌟 แก้ไข: ตัวอักษรสีเทาเข้มใน Light, ขาวใน Dark
         "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-white dark:hover:bg-light-card/50 dark:hover:text-white",
 
-        "data-[selected-single=true]:bg-blue-600 data-[selected-single=true]:hover:bg-blue-700 dark:data-[selected-single=true]:bg-dark-purple/80 dark:data-[selected-single=true]:hover:bg-dark-purple data-[selected-single=true]:text-white data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
+        "data-[selected-single=true]:bg-dark-purple/80 data-[selected-single=true]:hover:bg-dark-purple data-[selected-single=true]:text-white data-[selected-single=true]:hover:text-white data-[selected-single=true]:rounded-full!",
         
         "[&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,

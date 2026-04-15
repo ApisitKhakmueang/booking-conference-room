@@ -221,7 +221,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                   type="text"
                   ref={titleRef} 
                   // 🌟 3. Input: เพิ่ม Focus state สีม่วง
-                  className="w-full px-3 py-2 border border-gray-200 focus:border-dark-purple focus:ring-1 focus:ring-dark-purple outline-none dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-sm" 
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-600 transition-all shadow-sm" 
                   defaultValue={formData.title}
                   placeholder="Meeting with..."
                 />
@@ -233,7 +233,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Date</label>
               <Input 
                 type="date" 
-                className="w-full px-3 py-2 border border-gray-200 focus:border-dark-purple focus:ring-1 focus:ring-dark-purple outline-none dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base font-light text-gray-800 shadow-sm [&::-webkit-calendar-picker-indicator]:hidden"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-sidebar rounded-lg dark:bg-sidebar dark:text-white text-base font-light text-gray-800 shadow-sm [&::-webkit-calendar-picker-indicator]:hidden"
                 value={format(formData.date || new Date(), 'yyyy-MM-dd')}
                 onChange={(e) => {
                   const inputValue = e.target.value;

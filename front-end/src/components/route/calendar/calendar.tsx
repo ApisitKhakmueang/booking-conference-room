@@ -14,7 +14,7 @@ import RoomSelector from './room-selector';
 import BookingModal from '@/components/utils/booking-modal';
 import { ArrangeRoom } from '@/utils/interface/interface';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
@@ -214,6 +214,7 @@ export default function Calendar() {
                   // 🌟 6. ปุ่ม Add Booking ใช้สีม่วงของแบรนด์เท่านั้น ไม่ใช้สีน้ำเงิน
                   className="px-4 py-2 bg-dark-purple hover:bg-dark-purple/90 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow-md text-sm cursor-pointer rounded whitespace-nowrap transition-all"
                 >
+                  <Plus className="w-4 h-4"/>&nbsp;
                   Add Booking
                 </Button>
               }
