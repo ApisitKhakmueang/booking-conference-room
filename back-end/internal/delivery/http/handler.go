@@ -2,6 +2,7 @@ package http
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
@@ -274,6 +275,9 @@ func (u *BookingHandler) CreateRoom(c *fiber.Ctx) error {
 	}
 
 	if err := u.usecase.CreateRoom(ctx, room) ; err != nil {
+		if strings.Contains(err.Error(), "SQLSTATE 23505") || strings.Contains(err.Error(), "duplicate key") {
+			return c.Status(fiber.StatusConflict).SendString("Unable to save: Room number already exists.")
+		}
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
@@ -301,6 +305,10 @@ func (u *BookingHandler) UpdateRoom(c *fiber.Ctx) error {
 	room.ID = roomID
 
 	if err := u.usecase.UpdateRoom(ctx, room); err != nil {
+		if strings.Contains(err.Error(), "SQLSTATE 23505") || strings.Contains(err.Error(), "duplicate key") {
+			return c.Status(fiber.StatusConflict).SendString("Unable to save: Room number already exists.")
+		}
+		
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	} 
 
