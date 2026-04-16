@@ -120,8 +120,8 @@ type CreateEvent struct {
 }
 
 type Date struct {
-	StartStr 	string		`query:"startDate"`
-	EndStr 		string		`query:"endDate"`
+	StartStr 	string		`params:"startDate"`
+	EndStr 		string		`params:"endDate"`
 }
 
 type AttendanceHealth struct {

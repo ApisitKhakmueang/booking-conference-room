@@ -2,7 +2,6 @@ package http
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 
@@ -26,7 +25,7 @@ func (u *BookingHandler) CreateBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
+	roomNumber, err := strconv.Atoi(c.Params("roomNumber"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -48,15 +47,19 @@ func (u *BookingHandler) CreateBooking(c *fiber.Ctx) error {
 func (u *BookingHandler) UpdateBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
-	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
 	// ดึงจาก Query
-	roomNumber, err := strconv.Atoi(c.Query("room", "0"))
+	roomNumber, err := strconv.Atoi(c.Params("roomNumber"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	if roomNumber == 0 {
@@ -201,15 +204,15 @@ func (u *BookingHandler) GetBooking(c *fiber.Ctx) error {
 func (u *BookingHandler) GetAnalyticBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 
-	q := new(domain.Date)
+	params := new(domain.Date)
 
 	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
 	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
-	if err := c.QueryParser(q); err != nil {
+	if err := c.ParamsParser(params); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	response, err := u.usecase.GetAnalyticBooking(ctx, q)
+	response, err := u.usecase.GetAnalyticBooking(ctx, params)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -225,7 +228,7 @@ func (u *BookingHandler) GetUserBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	date := c.Query("date", time.Now().Format("2006-01"))
+	date := c.Params("date")
 	// if err := c.Query("room", "0"); err != nil {
 	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	// }
@@ -245,7 +248,7 @@ func (u *BookingHandler) GetUserHistory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	date := c.Query("date", time.Now().Format("2006-01"))
+	date := c.Params("date")
 	// if err := c.Query("room", "0"); err != nil {
 	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	// }
@@ -333,7 +336,7 @@ func (u *BookingHandler) GetRoom(c *fiber.Ctx) error {
 }
 
 func (u *BookingHandler) GetRoomByID(c *fiber.Ctx) error {
-	roomID, err := uuid.Parse(c.Params("room"))
+	roomID, err := uuid.Parse(c.Params("roomID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -348,19 +351,13 @@ func (u *BookingHandler) GetRoomByID(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetHoliday(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	q := new(domain.Date)
+	params := new(domain.Date)
 
-	// 3. สั่ง Parser (มันจะทับค่า Default เฉพาะตัวที่ส่งมาถูกต้อง)
-	// ถ้าส่ง ?year=-5 มันจะ Parse ไม่ผ่าน และใช้ค่า Default (หรือเป็น 0) ให้เอง
-	if err := c.QueryParser(q); err != nil {
+	if err := c.ParamsParser(params); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 	
-	// ถ้า User ส่ง ?year=-2025 -> ParseUint Error -> ค่าจะเป็น 0 หรือค่าเดิม
-	// แต่เพื่อความชัวร์ ใส่ Logic กันเหนียวได้:
-	// if q.StartDate == "" { q.StartDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month(), time.Now().Day()) }
-	// if q.EndDate == "" { q.EndDate = fmt.Sprintf("%d-%d-%d", time.Now().Year(), time.Now().Month() + 1, time.Now().Day()) }
-	response, err := u.usecase.GetHoliday(ctx, q)
+	response, err := u.usecase.GetHoliday(ctx, params)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
