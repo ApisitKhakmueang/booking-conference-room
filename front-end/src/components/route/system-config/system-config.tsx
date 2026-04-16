@@ -1,12 +1,16 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdvancedWindow from './advance-window';
 import MaxBookingMins from './max-booking-mins';
 import LateArrivalPolicy from './late-arrival-policy';
 import DailyOperationalHours from './daily-operational-hours';
 import { Button } from '@/components/ui/button';
+import { useSystemConfig } from '@/hooks/data/useSystemConfig';
+import Swal from 'sweetalert2';
+import { configService } from '@/service/booking.service';
 
 export default function OperationalControls() {
+  const { config: fetchedConfig, isLoadingConfig, reloadConfig } = useSystemConfig();
   const [isOpenEdit, setIsOpenEdit] = useState(false)
   const [config, setConfig] = useState({
     maxBookingMins: 1, 
@@ -16,13 +20,74 @@ export default function OperationalControls() {
     noShowThresholdMins: 15,
   });
 
-  const handleSave = () => {
-    console.log('config: ', config)
+  useEffect(() => {
+    if (fetchedConfig) {
+      setConfig({
+        maxBookingMins: fetchedConfig.maxBookingMins / 60,
+        maxAdvanceDays: fetchedConfig.maxAdvanceDays,
+        startTime: fetchedConfig.startTime,
+        endTime: fetchedConfig.endTime,
+        noShowThresholdMins: fetchedConfig.noShowThresholdMins,
+      });
+    }
+  }, [fetchedConfig]); // ทำงานทุกครั้งที่ fetchedConfig เปลี่ยน (เช่น ตอนโหลดเสร็จครั้งแรก)
+
+  // 4. กรณีต้องการ "Discard Changes" (ยกเลิกการแก้ไข)
+  const handleDiscard = () => {
+    if (fetchedConfig) {
+      setConfig({
+        maxBookingMins: fetchedConfig.maxBookingMins / 60,
+        maxAdvanceDays: fetchedConfig.maxAdvanceDays,
+        startTime: fetchedConfig.startTime,
+        endTime: fetchedConfig.endTime,
+        noShowThresholdMins: fetchedConfig.noShowThresholdMins,
+      });
+    }
+
     setIsOpenEdit(false)
+  };
+
+  const handleSave = async () => {
+    if (config.startTime >= config.endTime) {
+      Swal.fire({
+        title: 'Invalid Time',
+        text: 'Commencement time must be before Conclusion time.',
+        icon: 'warning',
+        confirmButtonColor: '#8370ff', // สีปุ่มตาม Theme ของคุณ
+      });
+      return; // 🌟 2. return ออกไปเลย เพื่อไม่ให้โค้ดทำงานต่อลงไปข้างล่าง
+    }
+
+    const body = {...config, maxBookingMins: config.maxBookingMins * 60}
+    try {
+      const result = await configService.updateConfig(body)
+
+      if (result.status === 200) {
+        Swal.fire({
+          title: 'Success',
+          text: 'Create booking successfully !',
+          icon: 'success',
+          timer: 2000
+        })
+
+        reloadConfig();
+      }
+    } catch(error:any) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to update configuration.',
+        icon: 'error',
+        confirmButtonColor: '#b495ff',
+      });
+    } finally {
+      setIsOpenEdit(false)
+    }
   }
 
+  const componentProps = { config, setConfig, isOpenEdit }
+
   return (
-    <div className="w-full text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors">
+    <div className={`w-full text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors ${isLoadingConfig ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
       
       {/* Header */}
       <div className="flex md:flex-row flex-col justify-between md:items-center gap-3 mb-8">
@@ -39,7 +104,7 @@ export default function OperationalControls() {
             <Button 
               onClick={() => setIsOpenEdit(true)}
               className="bg-dark-purple hover:bg-dark-purple/90 text-white font-semibold px-6 py-3 rounded-lg shadow-md dark:shadow-none transition-all">
-              Save Configuration
+              Edit Configuration
             </Button>
           </div>
         )}
@@ -49,16 +114,16 @@ export default function OperationalControls() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* 1. MaxBookingMins Limits (Spans 3 cols) */}
-        <MaxBookingMins config={config} setConfig={setConfig} />
+        <MaxBookingMins {...componentProps} />
 
         {/* 2. Advance Window (Spans 2 cols) */}
-        <AdvancedWindow config={config} setConfig={setConfig} />
+        <AdvancedWindow {...componentProps} />
 
         {/* 3. Late Arrival Policy (Spans 2 cols) */}
-        <LateArrivalPolicy config={config} setConfig={setConfig} />
+        <LateArrivalPolicy {...componentProps} />
 
         {/* 4. Daily Operational Hours (Spans 3 cols) */}
-        <DailyOperationalHours config={config} setConfig={setConfig} />
+        <DailyOperationalHours {...componentProps} />
 
       </div>
 
@@ -66,7 +131,7 @@ export default function OperationalControls() {
       {isOpenEdit && (
         <div className="flex justify-end items-center gap-6 mt-10">
           <Button 
-            onClick={() => setIsOpenEdit(false)}
+            onClick={handleDiscard}
             className="bg-transparent hover:bg-transparent text-sm font-semibold text-light-secondary dark:text-secondary hover:text-light-main dark:hover:text-main transition-colors">
             Discard Changes
           </Button>

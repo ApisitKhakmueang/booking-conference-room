@@ -70,6 +70,10 @@ export const roomService = {
 }
 
 export const configService = {
+  updateConfig: async (body:ConfigResponse) => {
+    return await api.put(`${API_URL}/admin/config`, body)
+  },
+
   fetchConfig: async (): Promise<ConfigResponse> => {
     const response = await api.get(`${API_URL}/config`)
     return response.data
