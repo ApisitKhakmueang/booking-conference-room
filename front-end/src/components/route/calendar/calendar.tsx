@@ -193,9 +193,9 @@ export default function Calendar() {
 
             {/* 🌟 4. ปุ่ม Prev/Today/Next ใช้เส้นขอบสีเทาอ่อน และ hover เป็นสีม่วงอ่อน */}
             <div className="flex gap-2">
-              <Button onClick={prev} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Prev</Button>
-              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
-              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
+              <Button variant="outline-purple" size="sm" onClick={prev} >Prev</Button>
+              <Button variant="outline-purple" size="sm" onClick={today} >Today</Button>
+              <Button variant="outline-purple" size="sm" onClick={next} >Next</Button>
             </div>
           </div>
           
@@ -210,9 +210,9 @@ export default function Calendar() {
               />
               {view === 'month' &&
                 <Button 
+                  variant="dark-purple" 
+                  size="md"
                   onClick={() => setIsAddModalOpen(true)} 
-                  // 🌟 6. ปุ่ม Add Booking ใช้สีม่วงของแบรนด์เท่านั้น ไม่ใช้สีน้ำเงิน
-                  className="px-4 py-2 bg-dark-purple hover:bg-dark-purple/90 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow-md text-sm cursor-pointer rounded whitespace-nowrap transition-all"
                 >
                   <Plus className="w-4 h-4"/>&nbsp;
                   Add Booking

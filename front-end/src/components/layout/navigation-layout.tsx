@@ -7,7 +7,6 @@ import { useShallow } from "zustand/shallow";
 // Hook
 import { useMediaQuery } from "@/hooks/ui/useMediaQuery";
 import useAuth from "@/hooks/auth/useAuth";
-import { useRoomData } from "@/hooks/data/useRoomData";
 
 // Component
 import UserBar from "./user-bar";
@@ -28,8 +27,6 @@ export default function NavigationLayout({
       setIsHideNav: state.setIsHideNav
     })))
   )
-
-  const { room, isLoading, isError } = useRoomData();
 
   // 2. ดึงค่า Media Query มาเก็บใส่ตัวแปร
   const isLargeScreen = useMediaQuery("(max-width: 1024px)")

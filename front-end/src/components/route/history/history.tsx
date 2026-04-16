@@ -123,10 +123,10 @@ export default function History() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button onClick={prev} className="h-fit px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Prev</Button>
-              <Button onClick={today} className="h-fit px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
-              <Button onClick={next} className={`h-fit px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors  ${isNextDisabled ? 'opacity-50' : ''}`}>Next</Button>
-              <Button onClick={() => setIsMobileFilterOpen(true)} className="h-fit px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors xl:hidden block">Filter</Button>
+              <Button onClick={prev} variant="outline-purple" size="sm">Prev</Button>
+              <Button onClick={today} variant="outline-purple" size="sm">Today</Button>
+              <Button onClick={next} variant="outline-purple" size="sm" className={`${isNextDisabled ? 'opacity-50' : ''}`}>Next</Button>
+              <Button onClick={() => setIsMobileFilterOpen(true)} variant="outline-purple" size="sm" className="xl:hidden block">Filter</Button>
             </div>
           </header>
 

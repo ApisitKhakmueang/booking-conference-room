@@ -175,13 +175,16 @@ export default function Schedule() {
             <p className="text-2xl font-semibold text-light-secondary dark:text-secondary">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
             <div className="flex gap-2 pr-4 md:pr-0">
-              <Button onClick={handleAddClick} className="px-4 py-2 bg-dark-purple hover:bg-dark-purple/90 dark:bg-dark-purple/80 dark:hover:bg-dark-purple text-white shadow-md text-sm cursor-pointer rounded whitespace-nowrap transition-all">
+              <Button 
+                variant="dark-purple" 
+                size="md"
+                onClick={handleAddClick} >
                 <Plus className="w-4 h-4"/>&nbsp;Add Booking
               </Button>
-              <Button onClick={prev} className={`px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors ${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
-              <Button onClick={today} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Today</Button>
-              <Button onClick={next} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors">Next</Button>
-              <Button onClick={() => setIsMobileFilterOpen(true)} className="px-3 py-2 border border-gray-200 text-light-secondary dark:text-white dark:border-hover rounded hover:bg-light-purple hover:text-dark-purple dark:hover:bg-hover dark:hover:text-white bg-transparent text-sm cursor-pointer transition-colors xl:hidden block">Filter</Button>
+              <Button onClick={prev} variant="outline-purple" size="sm" className={`${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
+              <Button onClick={today} variant="outline-purple" size="sm">Today</Button>
+              <Button onClick={next} variant="outline-purple" size="sm">Next</Button>
+              <Button onClick={() => setIsMobileFilterOpen(true)} variant="outline-purple" size="sm" className="xl:hidden block">Filter</Button>
             </div>
           </header>
 

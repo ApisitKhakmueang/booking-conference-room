@@ -101,9 +101,7 @@ export default function OperationalControls() {
 
         {!isOpenEdit && (
           <div>
-            <Button 
-              onClick={() => setIsOpenEdit(true)}
-              className="bg-dark-purple hover:bg-dark-purple/90 text-white font-semibold px-6 py-3 rounded-lg shadow-md dark:shadow-none transition-all">
+            <Button onClick={() => setIsOpenEdit(true)} variant="dark-purple" size="md">
               Edit Configuration
             </Button>
           </div>
@@ -131,13 +129,10 @@ export default function OperationalControls() {
       {isOpenEdit && (
         <div className="flex justify-end items-center gap-6 mt-10">
           <Button 
-            onClick={handleDiscard}
-            className="bg-transparent hover:bg-transparent text-sm font-semibold text-light-secondary dark:text-secondary hover:text-light-main dark:hover:text-main transition-colors">
+            onClick={handleDiscard} variant="outline-purple" size="md">
             Discard Changes
           </Button>
-          <Button 
-            onClick={handleSave}
-            className="bg-dark-purple hover:bg-dark-purple/90 text-white font-semibold px-6 py-3 rounded-lg shadow-md dark:shadow-none transition-all">
+          <Button onClick={handleSave} variant="dark-purple" size="md">
             Save Configuration
           </Button>
         </div>
