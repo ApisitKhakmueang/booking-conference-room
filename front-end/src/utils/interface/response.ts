@@ -11,9 +11,9 @@ export interface RoomResp {
   id: string
   name: string
   roomNumber: number
-  location?: string
+  location: string
   capacity: number
-  isActive?: string
+  status: string
 }
 
 export interface User {

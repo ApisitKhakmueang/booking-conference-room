@@ -75,8 +75,6 @@ export interface DisplayStrongPasswordProps {
   password: PasswordValidation
 }
 
-export type typeOperate = 'add' | 'update';
-
 export interface BookingModalProps {
   isAddModalOpen: boolean
   setIsAddModalOpen: (status: boolean) => void
@@ -202,7 +200,8 @@ export interface ConfigProps {
 
 export interface RoomListProps {
   rooms: RoomResp[]
-  setRooms: React.Dispatch<React.SetStateAction<RoomResp[]>>
+  handleEditClick: (room:RoomResp) => void
+  // setRooms: React.Dispatch<React.SetStateAction<RoomResp[]>>
 }
 
 export interface RoomCardProps {
@@ -219,4 +218,11 @@ export interface PaginationProps {
   currentRooms: RoomResp[]
   currentPage: number
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+}
+
+export interface RoomModalProps {
+  typeOperate: 'add' | 'update'
+  isModalOpen: boolean
+  setIsModalOpen: (open:boolean) => void
+  selectedRoom?: RoomResp
 }

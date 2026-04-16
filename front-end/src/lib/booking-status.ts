@@ -21,7 +21,7 @@ export function DisplayRooms(rooms: RoomResp[] | undefined, bookings: BookingEve
 
   return rooms.map((room) => {
     // 2.1 เช็คสถานะปิดปรับปรุงก่อน
-    if (room.isActive === 'maintenance') {
+    if (room.status === 'maintenance') {
       return { ...room, status: 'maintenance' };
     }
 
