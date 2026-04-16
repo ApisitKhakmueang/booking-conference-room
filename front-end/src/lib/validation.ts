@@ -30,7 +30,7 @@ export const validateBookingForm = ({
     Swal.fire({
       title: 'Error',
       text: 'Please select time.',
-      icon: 'error',
+      icon: 'warning',
       timer: 2000
     });
     return false; // ส่ง false กลับไปเพื่อบอกว่าไม่ผ่าน
@@ -41,7 +41,7 @@ export const validateBookingForm = ({
     Swal.fire({
       title: 'Error',
       text: 'Start time must be before end time.',
-      icon: 'error',
+      icon: 'warning',
       timer: 2000
     });
     return false;
@@ -56,7 +56,7 @@ export const validateBookingForm = ({
       Swal.fire({
         title: 'Error',
         text: `Cannot book more than ${maxAdvanceDays} days in advance`,
-        icon: 'error',
+        icon: 'warning',
         confirmButtonColor: '#8370ff',
         timer: 2000
       });
@@ -67,7 +67,7 @@ export const validateBookingForm = ({
       Swal.fire({
         title: 'Error',
         text: 'Cannot book in the past.',
-        icon: 'error',
+        icon: 'warning',
         timer: 2000
       });
       return false;
@@ -80,7 +80,7 @@ export const validateBookingForm = ({
       title: 'Booking Limit Exceeded',
       // นำ duration มาแสดงตรงๆ เช่น "Limit 2h 30m per booking."
       text: `${duration} per booking.`, 
-      icon: 'error',
+      icon: 'warning',
       confirmButtonColor: '#8370ff',
       timer: 2500 // อาจจะเพิ่มเวลาให้อ่านนิดนึง
     });

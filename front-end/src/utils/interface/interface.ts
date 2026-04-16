@@ -201,12 +201,12 @@ export interface ConfigProps {
 export interface RoomListProps {
   rooms: RoomResp[]
   handleEditClick: (room:RoomResp) => void
-  // setRooms: React.Dispatch<React.SetStateAction<RoomResp[]>>
+  reloadRoom: () => void
 }
 
 export interface RoomCardProps {
   room: RoomResp;
-  onDelete: (id: string) => void;
+  onDelete: () => void;
 }
 
 export interface StatusSectionProps {
@@ -225,4 +225,5 @@ export interface RoomModalProps {
   isModalOpen: boolean
   setIsModalOpen: (open:boolean) => void
   selectedRoom?: RoomResp
+  reloadRoom: () => void
 }

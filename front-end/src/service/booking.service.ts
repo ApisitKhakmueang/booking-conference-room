@@ -66,7 +66,19 @@ export const roomService = {
 
   checkinBooking: async (roomID: string, body: any) => {
     return await api.post(`${API_URL}/room/${roomID}/checkin`, body)
-  }
+  },
+
+  createRoom: async (body: any) => {
+    return await api.post(`${API_URL}/admin/room`, body);
+  },
+
+  updateRoom: async (roomID: string | undefined, body: any) => {
+    return await api.put(`${API_URL}/admin/room/${roomID}`, body)
+  },
+
+  deleteRoom: async (roomID: string | undefined) => {
+    return await api.delete(`${API_URL}/admin/room/${roomID}`)
+  },
 }
 
 export const configService = {

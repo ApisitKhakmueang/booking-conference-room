@@ -187,9 +187,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
 
   return (
     <form
-      onSubmit={(e) => {
-        handleSubmit(e)
-      }} 
+      onSubmit={handleSubmit} 
       // 🌟 1. พื้นหลังฟอร์มใช้สีขาวล้วนในโหมดสว่าง (ลบ bg-light-purple ออก)
       className="relative bg-white dark:bg-card rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-100 dark:border-white/10 overflow-hidden">
       
