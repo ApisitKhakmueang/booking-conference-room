@@ -2,7 +2,7 @@ import { X, MapPin } from 'lucide-react';
 import { RoomCardProps } from '@/utils/interface/interface';
 
 export default function RoomCard({ room, onDelete }: RoomCardProps) {
-  const isMaintenance = room.isActive === 'maintenance';
+  const isMaintenance = room.status === 'maintenance';
   
   const statusStyle = isMaintenance
     ? { bg: 'bg-danger/10', text: 'text-danger', dot: 'bg-danger shadow-[0_0_8px_var(--color-danger)]' }
@@ -10,7 +10,8 @@ export default function RoomCard({ room, onDelete }: RoomCardProps) {
 
   return (
     // 🌟 เปลี่ยน flex-row เป็น flex-col บนมือถือ และตั้ง relative เพื่อให้ปุ่ม X แปะมุมบนขวาได้
-    <div className="relative flex flex-col md:flex-row md:items-center justify-between p-4 md:p-5 bg-white border border-gray-100 hover:bg-light-purple shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 group rounded-2xl cursor-pointer gap-4 md:gap-0">
+    <div 
+      className="relative flex flex-col md:flex-row md:items-center justify-between p-4 md:p-5 bg-white border border-gray-100 hover:bg-light-purple shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 group rounded-2xl cursor-pointer gap-4 md:gap-0">
       
       {/* 1. Name & Location */}
       <div className="flex flex-col gap-1.5 w-full md:w-1/3 pr-8 md:pr-0">
@@ -43,7 +44,7 @@ export default function RoomCard({ room, onDelete }: RoomCardProps) {
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${statusStyle.bg}`}>
             <div className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
             <span className={`text-xs font-bold uppercase tracking-widest ${statusStyle.text}`}>
-              {room.isActive}
+              {room.status}
             </span>
           </div>
         </div>

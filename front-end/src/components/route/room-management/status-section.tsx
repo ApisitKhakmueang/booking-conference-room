@@ -1,10 +1,13 @@
 import { StatusSectionProps } from "@/utils/interface/interface";
 
 export default function StatusSection({ rooms }: StatusSectionProps) {
+  console.log("room: ", rooms)
+
+
   const totalRooms = rooms.length;
-  const activeRooms = rooms.filter(r => r.isActive === 'active').length;
-  const maintenanceRooms = rooms.filter(r => r.isActive === 'maintenance').length;
-  const activeRate = totalRooms > 0 ? Math.round((activeRooms / totalRooms) * 100) : 0;
+  const availableRooms = rooms.filter(r => r.status === 'available').length;
+  const maintenanceRooms = rooms.filter(r => r.status === 'maintenance').length;
+  const availableRate = totalRooms > 0 ? Math.round((availableRooms / totalRooms) * 100) : 0;
   const maintenanceRate = totalRooms > 0 ? Math.round((maintenanceRooms / totalRooms) * 100) : 0;
 
   return (
@@ -20,19 +23,19 @@ export default function StatusSection({ rooms }: StatusSectionProps) {
       <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-none">
         <p className="text-xs text-light-secondary dark:text-secondary uppercase tracking-widest font-bold mb-4">Operational Rate</p>
         <div className="flex items-baseline gap-3 mb-4">
-          <span className="text-4xl font-bold text-light-main dark:text-main">{activeRooms.toString().padStart(2, '0')}</span>
-          <span className="text-xs font-bold text-success tracking-wider">{activeRate}% ACTIVE</span>
+          <span className="text-4xl font-bold text-light-main dark:text-main">{availableRooms.toString().padStart(2, '0')}</span>
+          <span className="text-xs font-bold text-success tracking-wider">{availableRate}% ACTIVE</span>
         </div>
         <div className="w-full h-0.5 bg-light-purple dark:bg-hover relative rounded-full">
           {/* 1. แถบสีวิ่ง (Fill) */}
           <div 
             className="absolute top-0 left-0 h-full bg-success rounded-full transition-all duration-500" 
-            style={{ width: `${activeRate}%` }} 
+            style={{ width: `${availableRate}%` }} 
           />
           {/* 2. จุดวงกลมเรืองแสง (Indicator) */}
           <div 
             className="absolute top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-success shadow-[0_0_8px_var(--color-success)] transition-all duration-500" 
-            style={{ left: `calc(${activeRate}% - 4px)` }} 
+            style={{ left: `calc(${availableRate}% - 4px)` }} 
           />
         </div>
       </div>

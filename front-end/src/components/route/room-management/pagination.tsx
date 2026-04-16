@@ -1,6 +1,5 @@
 import { PaginationProps } from "@/utils/interface/interface";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useState } from "react";
 
 const ITEMS_PER_PAGE = 4
 
@@ -15,13 +14,13 @@ export default function Pagination({ rooms, currentRooms, currentPage, setCurren
 
   return (
     <div className="flex md:flex-row flex-col justify-between items-center gap-2 px-2 text-xs text-light-secondary dark:text-secondary font-bold uppercase tracking-widest border-t border-gray-100 dark:border-hover pt-6">
-      <span>Displaying {currentRooms.length} of {totalRooms} spaces</span>
+      <span>Displaying {currentRooms.length} of {totalRooms} rooms</span>
       
       <div className="flex items-center md:gap-8 gap-2">
         <button 
           onClick={goToPrevPage}
           disabled={currentPage === 1}
-          className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Previous
         </button>
@@ -49,7 +48,7 @@ export default function Pagination({ rooms, currentRooms, currentPage, setCurren
         <button 
           onClick={goToNextPage}
           disabled={currentPage === totalPages}
-          className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           Next <ArrowRight className="w-3.5 h-3.5" />
         </button>
