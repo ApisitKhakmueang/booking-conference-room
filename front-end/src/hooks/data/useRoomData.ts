@@ -1,12 +1,12 @@
 import useSWR from 'swr';
-import { bookingService } from '@/service/booking.service';
+import { roomService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 import { RoomResp } from '@/utils/interface/response';
 
 export function useRoomData() {
   const { data, error, isLoading, mutate } = useSWR<RoomResp[]>(
     'room-details', 
-    () => bookingService.fetchRoomDetails(),
+    () => roomService.fetchRoomDetails(),
     {
       // 🌟 1. ตั้งค่าการอัปเดตข้อมูลอัตโนมัติ (Background Sync)
       revalidateOnFocus: true, // สลับแท็บกลับมา ดึงข้อมูลใหม่ทันที

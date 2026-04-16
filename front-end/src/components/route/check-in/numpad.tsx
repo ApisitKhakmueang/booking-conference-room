@@ -3,7 +3,7 @@
 import { Delete } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { bookingService } from "@/service/booking.service";
+import { roomService } from "@/service/booking.service";
 import Swal from "sweetalert2";
 
 interface NumpadProps {
@@ -29,7 +29,7 @@ export default function Numpad({ roomID }: NumpadProps) {
     }
 
     try {
-      const result = await bookingService.checkinBooking(roomID, body)
+      const result = await roomService.checkinBooking(roomID, body)
       if (result.status === 200) {
         Swal.fire({
           title: 'Success',

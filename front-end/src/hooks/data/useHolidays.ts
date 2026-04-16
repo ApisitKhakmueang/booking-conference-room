@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { parseISO } from 'date-fns';
 import { Holiday } from '@/utils/interface/response';
-import { bookingService } from '@/service/booking.service';
+import { helperService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 
 export function useHolidays(startYear: string, endYear: string) {
@@ -13,7 +13,7 @@ export function useHolidays(startYear: string, endYear: string) {
     const fetchHolidays = async () => {
       setIsLoadingHoliday(true);
       try {
-        const data = await bookingService.fetchHolidays(startYear, endYear);
+        const data = await helperService.fetchHolidays(startYear, endYear);
         
         const formattedHolidays = data.map((h: any) => ({
           ...h,

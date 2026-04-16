@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import RealTimeClock from "./realtime-clock";
-import { bookingService } from "@/service/booking.service";
+import { roomService } from "@/service/booking.service";
 import { RoomResp } from "@/utils/interface/response";
 import Swal from "sweetalert2";
 import QRCode from "react-qr-code";
@@ -43,7 +43,7 @@ export default function CheckIn({ roomID }: { roomID: string }) {
 
   const fetchRoomData = async () => {
     try {
-      const response = await bookingService.fetchRoomByID(roomID);
+      const response = await roomService.fetchRoomByID(roomID);
       setRoomData(response);
     } catch (error: any) {
       // console.error("Error fetching room data:", error);

@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { bookingService } from '@/service/booking.service';
+import { configService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 // อย่าลืม import interface ของ ConfigTimeResponse ถ้าคุณมี
 // import { ConfigTimeResponse } from '@/utils/interface/response';
@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 export function useSystemConfig() {
   const { data, error, isLoading, mutate } = useSWR(
     'system-config', // Key ประจำตัวของ SWR
-    () => bookingService.fetchConfig(),
+    () => configService.fetchConfig(),
     {
       // 🌟 ทริค: ค่า Config ปกติไม่ค่อยเปลี่ยนบ่อย อาจจะปิดการโหลดใหม่ตอนสลับแท็บเพื่อประหยัดโควต้า API
       revalidateOnFocus: false, 
