@@ -197,6 +197,7 @@ export interface OccupyModalProps {
 export interface ConfigProps {
   config: ConfigResponse
   setConfig: (config: ConfigResponse) => void
+  isOpenEdit: boolean
 }
 
 export interface RoomListProps {

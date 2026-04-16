@@ -1,7 +1,7 @@
 import { ConfigProps } from "@/utils/interface/interface";
 import { Hourglass } from "lucide-react";
 
-export default function MaxBookingMins({ config, setConfig }: ConfigProps) {
+export default function MaxBookingMins({ config, setConfig, isOpenEdit }: ConfigProps) {
   // คำนวณ % ของ Slider (Min 1, Max 5 -> Range = 4)
   const durationPercent = ((Number(config.maxBookingMins) || 1) - 1) / 4 * 100;
 
@@ -15,6 +15,7 @@ export default function MaxBookingMins({ config, setConfig }: ConfigProps) {
       <div>
         <div className="flex items-baseline gap-2 mb-4">
           <input 
+            disabled={!isOpenEdit}
             type="number" min="1" max="5" step="0.5" 
             value={config.maxBookingMins}
             onChange={(e) => {
@@ -29,7 +30,7 @@ export default function MaxBookingMins({ config, setConfig }: ConfigProps) {
               val = Math.round(val * 2) / 2;
               setConfig({...config, maxBookingMins: val});
             }}
-            className="text-4xl font-bold bg-transparent outline-none md:w-20 w-10 text-light-main dark:text-main border-b-2 border-transparent focus:border-dark-purple/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="text-4xl font-bold bg-transparent outline-none md:w-20 w-10 text-light-main dark:text-main border-b-2 border-transparent focus:border-dark-purple/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-50"
           />
           <span className="text-sm text-light-secondary dark:text-secondary">hours</span>
           <span className="ml-auto text-[10px] text-light-secondary dark:text-secondary tracking-widest uppercase font-semibold">Max Capacity</span>

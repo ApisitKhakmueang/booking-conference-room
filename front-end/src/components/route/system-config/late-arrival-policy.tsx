@@ -1,7 +1,7 @@
 import { ConfigProps } from "@/utils/interface/interface";
 import { Hand } from "lucide-react";
 
-export default function LateArrivalPolicy({ config, setConfig }: ConfigProps) {
+export default function LateArrivalPolicy({ config, setConfig, isOpenEdit }: ConfigProps) {
   return (
     <div className="bg-white dark:bg-sidebar border border-gray-100 dark:border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-none p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between transition-colors">
       <div className="flex items-start gap-4 mb-6">
@@ -15,6 +15,7 @@ export default function LateArrivalPolicy({ config, setConfig }: ConfigProps) {
       </div>
       <div className="bg-light-purple dark:bg-card rounded-xl p-3 flex items-center gap-4 border border-transparent w-full transition-colors focus-within:border-dark-purple focus-within:ring-1 focus-within:ring-dark-purple flex-1">
         <input 
+          disabled={!isOpenEdit}
           type="number" 
           value={config.noShowThresholdMins} 
           onChange={(e) => {
@@ -22,7 +23,7 @@ export default function LateArrivalPolicy({ config, setConfig }: ConfigProps) {
             if (val > 20) val = 20; // จำกัดไม่เกิน 20 นาทีตาม UX
             setConfig({...config, noShowThresholdMins: isNaN(val) ? ('' as any) : val})
           }} 
-          className="w-16 bg-white dark:bg-card text-center p-2 rounded-lg outline-none font-bold text-light-main dark:text-main text-2xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors" />
+          className="w-16 bg-white dark:bg-card text-center p-2 rounded-lg outline-none font-bold text-light-main dark:text-main text-2xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors disabled:opacity-50" />
         <span className="text-sm text-light-secondary dark:text-secondary font-medium pr-2">Minutes Grace Period</span>
       </div>
     </div>

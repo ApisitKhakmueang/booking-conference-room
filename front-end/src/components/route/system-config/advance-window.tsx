@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/select" 
 import { ConfigProps } from "@/utils/interface/interface"
 
-export default function AdvancedWindow({ config, setConfig }: ConfigProps) {
+export default function AdvancedWindow({ config, setConfig, isOpenEdit }: ConfigProps) {
   return (
     <div className="bg-white dark:bg-sidebar border border-gray-100 dark:border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-none p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between gap-3 transition-colors">
       <div>
@@ -18,6 +18,7 @@ export default function AdvancedWindow({ config, setConfig }: ConfigProps) {
       <div>
         {/* Shadcn Select */}
         <Select 
+          disabled={!isOpenEdit}
           value={config.maxAdvanceDays.toString()} 
           onValueChange={(value) => setConfig({...config, maxAdvanceDays: Number(value)})}
         >
