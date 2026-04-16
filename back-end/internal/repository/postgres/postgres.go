@@ -418,7 +418,7 @@ func (p *postgresRepository) GetRoomDB(ctx context.Context) ([]domain.Room, erro
 
 	result := p.db.
 		WithContext(ctx).
-		Select("id, name, capacity, is_active, room_number, location").
+		Select("id, name, capacity, status, room_number, location").
 		Where("deleted_at IS NULL").
 		Find(&room)
 
@@ -435,7 +435,7 @@ func (p *postgresRepository) GetRoomByID_DB(ctx context.Context, roomID uuid.UUI
 	result := p.db.
 		WithContext(ctx).
 		Where("id = ?", roomID).
-		Select("id, name, capacity, is_active, room_number").
+		Select("id, name, capacity, status, room_number").
 		First(&room)
 
 	if result.Error != nil {
@@ -546,7 +546,7 @@ func (p *postgresRepository) IsRoomAvailable(ctx context.Context, booking *domai
 		WithContext(ctx).
 		Model(room).
 		Where("id = ?", booking.RoomID).
-		Where("is_active = ?", "available").
+		Where("status = ?", "available").
 		Count(&countRoom)
 
 	log.Println("countRoom: ", countRoom)

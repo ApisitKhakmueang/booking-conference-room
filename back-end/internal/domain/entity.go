@@ -174,7 +174,7 @@ type Room struct {
 	RoomNumber  uint						`gorm:"not null" json:"roomNumber,omitempty"`
 	Location 		string					`json:"location,omitempty"`
 	Capacity 		uint						`json:"capacity,omitempty"`
-	IsActive 		string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"isActive,omitempty"`
+	Status 			string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"status,omitempty"`
 }
 
 type User struct {
