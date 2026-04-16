@@ -1,5 +1,7 @@
 import { X, MapPin } from 'lucide-react';
 import { RoomCardProps } from '@/utils/interface/interface';
+import Swal from 'sweetalert2';
+import { roomService } from '@/service/booking.service';
 
 export default function RoomCard({ room, onDelete }: RoomCardProps) {
   const isMaintenance = room.status === 'maintenance';
@@ -7,6 +9,49 @@ export default function RoomCard({ room, onDelete }: RoomCardProps) {
   const statusStyle = isMaintenance
     ? { bg: 'bg-danger/10', text: 'text-danger', dot: 'bg-danger shadow-[0_0_8px_var(--color-danger)]' }
     : { bg: 'bg-success/10', text: 'text-success', dot: 'bg-success shadow-[0_0_8px_var(--color-success)]' };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // สำคัญมาก! ป้องกันไม่ให้การคลิกทะลุไปเปิด Modal แก้ไข
+
+    // ถามเพื่อความแน่ใจก่อนลบ
+    const confirm = await Swal.fire({
+      title: 'Are you sure?',
+      text: "Do you really want to delete this room?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#8370ff',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        const result = await roomService.deleteRoom(room.id);
+        
+        // 🌟 1. เปลี่ยนจาก === 200 เป็นเงื่อนไขที่ครอบคลุมความสำเร็จทั้งหมด (200-299)
+        // เพราะบาง API สั่ง Delete สำเร็จจะตอบ 204 No Content
+        if (result.status >= 200 && result.status < 300) {
+          Swal.fire({
+            title: 'Deleted!',
+            text: 'Your room has been deleted.',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          });
+
+          // 🌟 2. เพิ่ม setTimeout หน่วงเวลาสักนิด (เช่น 300ms) 
+          // เพื่อให้ชัวร์ว่า Database ฝั่ง Backend ลบข้อมูลเสร็จแล้วจริงๆ ก่อนที่เราจะขอข้อมูลใหม่
+          if (onDelete) {
+            setTimeout(() => {
+              onDelete();
+            }, 100); // 0.3 วินาที (เร็วพอที่ผู้ใช้จะไม่รู้สึกว่าช้า แต่มากพอให้ DB ลบเสร็จ)
+          }
+        }
+      } catch (error) {
+        Swal.fire('Error', 'Failed to delete booking', 'error');
+      }
+    }
+  };
 
   return (
     // 🌟 เปลี่ยน flex-row เป็น flex-col บนมือถือ และตั้ง relative เพื่อให้ปุ่ม X แปะมุมบนขวาได้
@@ -54,10 +99,7 @@ export default function RoomCard({ room, onDelete }: RoomCardProps) {
       {/* 🌟 ในมือถือจะเป็น Absolute แปะมุมขวาบน จอใหญ่จะกลับมาอยู่ Flex ขวาสุด */}
       <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto flex justify-end md:w-12">
         <button 
-          onClick={(e) => {
-             e.stopPropagation(); 
-             onDelete(room.id);
-          }}
+          onClick={handleDelete}
           className="text-light-secondary dark:text-secondary bg-transparent hover:bg-danger/10 dark:hover:bg-hover hover:text-danger dark:hover:text-white transition-colors p-2 rounded-lg cursor-pointer"
           title="Delete Room"
         >

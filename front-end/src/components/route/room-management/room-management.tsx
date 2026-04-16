@@ -43,7 +43,7 @@ export default function RoomManagement() {
     setSelectedRoom(event)
   }
 
-  const modalProps = { typeOperate, isModalOpen, setIsModalOpen, selectedRoom }
+  const modalProps = { typeOperate, isModalOpen, setIsModalOpen, selectedRoom, reloadRoom }
 
   return (
     <div className={`w-full text-sm pb-3 ${isLoading ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
@@ -63,7 +63,7 @@ export default function RoomManagement() {
       <StatusSection rooms={room} />
 
       {/* 3. Room List Section */}
-      <RoomList rooms={room} handleEditClick={handleEditClick} />
+      <RoomList rooms={room} handleEditClick={handleEditClick} reloadRoom={reloadRoom} />
       
       <RoomModal {...modalProps} />
     </div>

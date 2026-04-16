@@ -2,17 +2,88 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input";
 import { RoomModalProps } from "@/utils/interface/interface"
 import { useEffect, useRef, useState } from "react";
+import StatusSelector from "./status-selector";
+import Swal from "sweetalert2";
+import { roomService } from "@/service/booking.service";
 
-export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, selectedRoom }: RoomModalProps) {
+export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, selectedRoom, reloadRoom }: RoomModalProps) {
   const defaultFormData = {
     name: "",
     roomNumber: 1,
     location: "",
     capacity: 4,
+    status: "available"
   }
   const [formData, setFormData] = useState(defaultFormData)
   const nameRef = useRef<HTMLInputElement>(null)
   const locationRef = useRef<HTMLInputElement>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    formData.name = nameRef.current?.value || ""
+    formData.location = locationRef.current?.value || ""
+
+    if (formData.name === '' || formData.location === '') {
+      Swal.fire({
+        title: 'Error',
+        text: 'Please fill in all required fields.',
+        icon: 'warning',
+        timer: 2000
+      });
+      return false; // ส่ง false กลับไปเพื่อบอกว่าไม่ผ่าน
+    }
+
+    // 🌟 ใช้ Destructuring แยก status ออกมา และเก็บส่วนที่เหลือไว้ใน payload
+    const { status, ...payloadWithoutStatus } = formData;
+
+    // 🌟 เลือกว่าจะส่งข้อมูลชุดไหนไปที่ API
+    const body = typeOperate === 'add' ? payloadWithoutStatus : formData;
+
+    try {      
+      // ตัวอย่างการส่ง API
+      let result
+      if (typeOperate === 'add') {
+        result = await roomService.createRoom(body);
+      } else {
+        result = await roomService.updateRoom(selectedRoom?.id, body);
+      }
+
+      if (result.status === 200) {
+        Swal.fire({
+          title: 'Success',
+          text: 'Create booking successfully !',
+          icon: 'success',
+          timer: 2000
+        })
+
+        if (reloadRoom) {
+          reloadRoom();
+        }
+      }
+      
+      setFormData(defaultFormData);
+    } catch (error:any) {
+      if (error.response?.status === 409) {
+        Swal.fire({
+          title: 'Error',
+          text: "Room number already exists.",
+          icon: 'warning',
+          confirmButtonColor: '#b495ff', 
+        })
+        return;
+      }
+
+      Swal.fire({
+        title: 'Error',
+        text: 'Failed to update room.',
+        icon: 'error',
+        confirmButtonColor: '#b495ff',
+      });
+    } finally {
+      setIsModalOpen(false);
+    }
+  };
 
   const handleNumberKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (['-', 'e', 'E', '.'].includes(e.key)) {
@@ -44,13 +115,14 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
         roomNumber: selectedRoom.roomNumber,
         location: selectedRoom.location,
         capacity: selectedRoom.capacity,
+        status: selectedRoom.status
       });
 
     } else {
       setFormData(defaultFormData);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeOperate, selectedRoom]);
+  }, [isModalOpen, typeOperate, selectedRoom]);
 
   return (
     <>
@@ -64,9 +136,7 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
           ></div>
 
           <form
-            // onSubmit={(e) => {
-            //   handleSubmit(e)
-            // }} 
+            onSubmit={handleSubmit}
             // 🌟 1. พื้นหลังฟอร์มใช้สีขาวล้วนในโหมดสว่าง (ลบ bg-light-purple ออก)
             className="relative bg-white dark:bg-card rounded-xl shadow-2xl w-full max-w-md transform transition-all border border-gray-100 dark:border-white/10 overflow-hidden">
             
@@ -157,6 +227,13 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
                         placeholder="Meeting with..."
                       />
                   </div>
+
+                  {typeOperate === 'update' && (
+                    <StatusSelector 
+                      value={formData.status} // 🌟 1. ส่งแค่ string ไปให้
+                      onChange={(val) => setFormData({ ...formData, status: val })} // 🌟 2. ส่งฟังก์ชันอัปเดตกลับมาที่ formData หลัก
+                    />
+                  )}
                 </div>
                 
             </div>

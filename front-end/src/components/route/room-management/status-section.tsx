@@ -1,8 +1,6 @@
 import { StatusSectionProps } from "@/utils/interface/interface";
 
 export default function StatusSection({ rooms }: StatusSectionProps) {
-  console.log("room: ", rooms)
-
 
   const totalRooms = rooms.length;
   const availableRooms = rooms.filter(r => r.status === 'available').length;

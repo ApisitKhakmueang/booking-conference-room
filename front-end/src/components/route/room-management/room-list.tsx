@@ -6,7 +6,7 @@ import Pagination from "./pagination";
 
 const ITEMS_PER_PAGE = 4;
 
-export default function RoomList({ rooms, handleEditClick }: RoomListProps) {
+export default function RoomList({ rooms, handleEditClick, reloadRoom }: RoomListProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalRooms = rooms.length;
@@ -16,33 +16,6 @@ export default function RoomList({ rooms, handleEditClick }: RoomListProps) {
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentRooms = rooms.slice(indexOfFirstItem, indexOfLastItem);
-
-  // const handleDeleteRoom = (id: string) => {
-  //   Swal.fire({
-  //     title: 'Are you sure?',
-  //     text: "Do you really want to delete this room?",
-  //     icon: 'warning',
-  //     showCancelButton: true,
-  //     confirmButtonColor: '#FF6B6B', // 🌟 สี Danger จาก Theme
-  //     cancelButtonColor: '#8370ff',
-  //     confirmButtonText: 'Yes, delete it!'
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       setRooms(prev => {
-  //           const newRooms = prev.filter(room => room.id !== id);
-            
-  //           // ตรวจสอบว่าถ้าลบแล้วหน้าปัจจุบันว่างเปล่า ให้ถอยกลับไปหน้าก่อนหน้า
-  //           const newTotalPages = Math.ceil(newRooms.length / ITEMS_PER_PAGE);
-  //           if (currentPage > newTotalPages && newTotalPages > 0) {
-  //               setCurrentPage(newTotalPages);
-  //           }
-  //           return newRooms;
-  //       });
-  //       Swal.fire({ title: 'Deleted!', text: 'Room has been deleted.', icon: 'success', timer: 1500, showConfirmButton: false });
-  //       // TODO: ยิง API เพื่อลบห้องใน Database จริงที่นี่
-  //     }
-  //   });
-  // };
 
   return (
     <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar rounded-3xl md:p-5 p-4 shadow-xl dark:shadow-none">
@@ -59,7 +32,7 @@ export default function RoomList({ rooms, handleEditClick }: RoomListProps) {
         {currentRooms.length > 0 ? (
           currentRooms.map((room) => (
             <div key={room.id} onClick={() => handleEditClick(room)}>
-              <RoomCard room={room} onDelete={() => console.log('deleted room')} />
+              <RoomCard room={room} onDelete={reloadRoom} />
             </div>
           ))
         ) : (
