@@ -3,7 +3,7 @@ import UserManagement from "@/components/route/user-management"
 
 export default function Page() {
   return (
-    <EachPageLayout pageName="Room Management">
+    <EachPageLayout pageName="User Management">
       <UserManagement />
     </EachPageLayout>
   )
