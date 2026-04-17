@@ -3,7 +3,7 @@ import UserManagement from "@/components/route/user-management"
 
 export default function Page() {
   return (
-    <EachPageLayout pageName="User Management">
+    <EachPageLayout pageName="User Management" className="flex justify-center">
       <UserManagement />
     </EachPageLayout>
   )

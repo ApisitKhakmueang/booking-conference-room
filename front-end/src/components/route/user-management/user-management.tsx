@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react';
-import { Search, MoreVertical, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { User } from '@/utils/interface/response';
 import Pagination from './pagination';
+import Header from './header';
+import { Input } from '@/components/ui/input';
+import UserCard from './user-card';
 
 // ข้อมูลจำลอง 10 คน
 const initialUsers: User[] = [
@@ -22,16 +25,14 @@ const initialUsers: User[] = [
 export default function UserTable() {
   const [users, setUsers] = useState<User[]>(initialUsers);
   
-  // 🌟 Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // 🌟 คำนวณหา Index ของข้อมูลที่จะแสดงในหน้านั้นๆ
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(users.length / itemsPerPage);
 
-  // ฟังก์ชันสลับสถานะ
   const toggleStatus = (id: string) => {
     setUsers(users.map(u => 
       u.id === id 
@@ -41,82 +42,42 @@ export default function UserTable() {
   };
 
   return (
-    <div className="w-full mt-6 space-y-6 text-white font-sans">
+    <div className="w-full max-w-6xl mt-6 space-y-6 pb-6">
       
       {/* Top Bar: Search & Invite Button */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input 
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-light-secondary dark:text-secondary" />
+          <Input 
             type="text" 
             placeholder="Search members..." 
-            className="w-full bg-[#18181b] text-sm text-white rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#9b7aee] border border-white/5 transition-all shadow-sm" 
+            className="pl-10 pr-4 py-2.5 bg-white dark:bg-sidebar border border-gray-200 dark:border-white/10 text-light-main dark:text-main transition-all shadow-sm" 
           />
         </div>
-        <button className="w-full sm:w-auto bg-[#9b7aee] hover:bg-[#8a68df] text-white font-semibold py-2.5 px-6 rounded-lg text-sm transition-colors shadow-md">
+        {/* <button className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-lg bg-dark-purple hover:bg-light-hover/90 dark:bg-dark-purple/90 dark:hover:bg-dark-purple text-white shadow-md transition-all">
           + Invite Member
-        </button>
+        </button> */}
       </div>
 
-      {/* Table Area */}
-      <div className="w-full">
+      {/* Table Area - Theme แบบเดียวกับ RoomList */}
+      <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar rounded-3xl md:p-5 p-4 shadow-xl dark:shadow-none">
         
         {/* Header */}
-        <div className="hidden sm:grid grid-cols-12 gap-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 px-6">
-          <div className="col-span-5 md:col-span-4">MEMBER NAME</div>
-          <div className="col-span-4 md:col-span-5">IDENTITY</div>
-          <div className="col-span-2">STATUS</div>
-          <div className="col-span-1 text-right">ACTION</div>
+        <Header />
+
+        {/* List Content */}
+        <div className="flex flex-col gap-3 mb-6">
+          {currentUsers.length > 0 ? (
+            <UserCard currentUsers={currentUsers} toggleStatus={toggleStatus} />
+          ) : (
+            <div className="text-center py-10 text-light-secondary dark:text-secondary text-sm font-medium">No users available.</div>
+          )}
         </div>
 
-        {/* Rows - ลูปจาก currentUsers (ข้อมูลเฉพาะหน้าปัจจุบัน) แทน users ทั้งหมด */}
-        <div>
-          {currentUsers.map((user) => (
-            <div key={user.id} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center p-4 sm:px-6 sm:py-5 bg-[#1c1c1e] hover:bg-[#232326] rounded-2xl transition-colors border border-white/5 shadow-sm mb-3">
-              
-              {/* Member Col */}
-              <div className="col-span-5 md:col-span-4 flex items-center gap-4">
-                <div className="relative">
-                  <img src={user.avatarUrl || "https://via.placeholder.com/150"} alt={user.fullName} className="w-10 h-10 rounded-full object-cover bg-gray-800" />
-                  <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#1c1c1e] rounded-full ${user.status === 'active' ? 'bg-[#9b7aee]' : 'bg-gray-500'}`}></div>
-                </div>
-                <div>
-                  <div className="font-bold text-[15px] text-gray-100">{user.fullName}</div>
-                  <div className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mt-1 flex items-center gap-1.5">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    {user.role || 'MEMBER'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Identity Col */}
-              <div className="col-span-4 md:col-span-5 text-sm font-medium text-gray-400 truncate">
-                {user.email}
-              </div>
-
-              {/* Status Col (Toggle) */}
-              <div className="col-span-2 flex items-center gap-3">
-                <button 
-                  onClick={() => toggleStatus(user.id)} 
-                  className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-300 ${user.status === 'active' ? 'bg-[#9b7aee]' : 'bg-gray-700'}`}
-                >
-                  <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${user.status === 'active' ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                </button>
-              </div>
-
-              {/* Action Col */}
-              <div className="col-span-1 flex justify-end">
-                <button className="p-2 text-gray-500 hover:text-white rounded-lg transition-colors">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </div>
-
-            </div>
-          ))}
-        </div>
-
-        {/* 🌟 Table Footer (Pagination UI) */}
-        <Pagination users={users} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <Pagination users={users} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        )}
 
       </div>
     </div>
