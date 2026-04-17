@@ -8,19 +8,8 @@ import RoomList from './room-list';
 import { useRoomData } from '@/hooks/data/useRoomData';
 import RoomModal from './room-modal';
 
-// Mock Data
-const INITIAL_ROOMS: RoomResp[] = [
-  { id: '1', name: 'Suite 01', roomNumber: 1, location: 'Primary Wing', capacity: 8, status: 'active' },
-  { id: '2', name: 'Suite 02', roomNumber: 2, location: 'Creative Hub', capacity: 12, status: 'maintenance' },
-  { id: '3', name: 'Suite 03', roomNumber: 3, location: 'Library Hall', capacity: 4, status: 'active' },
-  { id: '4', name: 'Suite 04', roomNumber: 4, location: 'East Wing', capacity: 10, status: 'active' },
-  { id: '5', name: 'Suite 05', roomNumber: 5, location: 'West Wing', capacity: 6, status: 'active' },
-  { id: '6', name: 'Suite 06', roomNumber: 6, location: 'North Wing', capacity: 20, status: 'maintenance' },
-];
-
 export default function RoomManagement() {
-  const { room: rawRoom, isLoading, isError, reloadRoom } = useRoomData();
-  const [rooms, setRooms] = useState<RoomResp[]>(INITIAL_ROOMS);
+  const { room: rawRoom, isLoading, reloadRoom } = useRoomData();
   const [selectedRoom, setSelectedRoom] = useState<RoomResp | undefined>(undefined)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add')

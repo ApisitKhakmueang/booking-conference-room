@@ -1,11 +1,14 @@
-import { PaginationProps } from "@/utils/interface/interface";
+import { RoomPaginationProps } from "@/utils/interface/interface";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const ITEMS_PER_PAGE = 4
 
-export default function Pagination({ rooms, currentRooms, currentPage, setCurrentPage }: PaginationProps) {
+export default function Pagination({ rooms, currentPage, setCurrentPage }: RoomPaginationProps) {
   const totalRooms = rooms.length;
   const totalPages = Math.ceil(totalRooms / ITEMS_PER_PAGE);
+
+  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
 
   // ฟังก์ชันเปลี่ยนหน้า
   const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
@@ -14,7 +17,7 @@ export default function Pagination({ rooms, currentRooms, currentPage, setCurren
 
   return (
     <div className="flex md:flex-row flex-col justify-between items-center gap-2 px-2 text-xs text-light-secondary dark:text-secondary font-bold uppercase tracking-widest border-t border-gray-100 dark:border-hover pt-6">
-      <span>Displaying {currentRooms.length} of {totalRooms} rooms</span>
+      <span>Displaying {rooms.length > 0 ? indexOfFirstItem + 1 : 0}-{Math.min(indexOfLastItem, rooms.length)} of {totalRooms} rooms</span>
       
       <div className="flex items-center md:gap-8 gap-2">
         <button 

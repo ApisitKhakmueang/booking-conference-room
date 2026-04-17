@@ -22,7 +22,7 @@ export interface User {
   fullName: string
   avatarUrl?: string
   role?: string
-  createdAt?: string
+  status: string
 }
 
 export interface BookingEventResponse {

@@ -213,9 +213,8 @@ export interface StatusSectionProps {
   rooms: RoomResp[]
 }
 
-export interface PaginationProps {
+export interface RoomPaginationProps {
   rooms: RoomResp[],
-  currentRooms: RoomResp[]
   currentPage: number
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>
 }

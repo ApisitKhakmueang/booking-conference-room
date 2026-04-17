@@ -42,7 +42,7 @@ export default function RoomList({ rooms, handleEditClick, reloadRoom }: RoomLis
 
       {/* 🌟 4. Pagination Controls */}
       {totalPages > 1 && (
-        <Pagination rooms={rooms} currentRooms={currentRooms} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <Pagination rooms={rooms} currentPage={currentPage} setCurrentPage={setCurrentPage} />
       )}
     </div>
   )
