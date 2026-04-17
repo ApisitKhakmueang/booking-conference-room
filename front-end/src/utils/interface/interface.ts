@@ -1,7 +1,7 @@
 import { BookingEventResponse, ConfigResponse, Holiday, RoomResp, User } from "./response";
 
 export interface EachPageLayoutProps {
-  pageName: string;
+  pageName?: string;
   children: React.ReactNode;
   className?: string;
 }
@@ -225,4 +225,15 @@ export interface RoomModalProps {
   setIsModalOpen: (open:boolean) => void
   selectedRoom?: RoomResp
   reloadRoom: () => void
+}
+
+export interface UserPaginationProps {
+  users: User[]
+  currentPage: number
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+}
+
+export interface UserCardProps {
+  currentUsers: User[]
+  toggleStatus: (id:string) => void
 }

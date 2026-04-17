@@ -23,9 +23,11 @@ export default function EachPageLayout({
             ? 'px-5' 
             : 'lg:px-30 px-5'
           : "lg:px-30 px-5"}`}>
-      <h1 className={`font-semibold text-4xl dark:text-main ${pageName === "Schedule" ? 'pb-2' : ' pb-5'}`}>
-        {pageName}
-      </h1>
+      {pageName &&
+        <h1 className={`font-semibold text-4xl dark:text-main ${pageName === "Schedule" ? 'pb-2' : ' pb-5'}`}>
+          {pageName}
+        </h1>
+      }
 
       <div className={className}>
         {children}
