@@ -57,13 +57,13 @@ export default function MonthYearPicker({ currentDate, setCurrentDate }: MonthYe
       {/* 🌟 Trigger Button */}
       <button 
         onClick={handleOpen}
-        className="flex items-center gap-6 bg-light-sidebar dark:bg-sidebar border border-dark-purple/20 dark:border-white/5 hover:bg-light-purple dark:hover:bg-hover px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer shadow-sm dark:shadow-none"
+        className="flex items-center gap-3 bg-light-sidebar dark:bg-sidebar border border-dark-purple/20 dark:border-white/5 hover:bg-light-purple dark:hover:bg-hover px-3 md:px-4 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer shadow-sm dark:shadow-none"
       >
         <div className="flex flex-col items-start">
-          <span className="text-[10px] uppercase tracking-widest text-light-secondary dark:text-secondary font-bold">
+          <span className="text-[10px] uppercase tracking-widest text-light-secondary dark:text-secondary font-bold whitespace-nowrap">
             Current Period
           </span>
-          <span className="font-semibold text-lg text-dark-purple dark:text-[#E2DFFF]">
+          <span className="font-semibold text-base text-dark-purple dark:text-[#E2DFFF] whitespace-nowrap">
             {format(currentDate, 'MMMM yyyy')}
           </span>
         </div>
