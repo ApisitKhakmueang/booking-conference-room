@@ -1,10 +1,14 @@
 import EachPageLayout from "@/components/layout/each-page-layout"
-import UserManagement from "@/components/route/user-management"
+import UserHistory from "@/components/route/user-management/user-history"
 
-export default function Page() {
+// 🌟 2. รับ params เข้ามาใน Component
+export default async function Page({ params }: { params: Promise<{ userID: string }> }) {
+  const resolvedParams = await params;
+
   return (
     <EachPageLayout className="flex justify-center">
-      <UserManagement />
+      {/* 🌟 4. ส่ง userId เป็น Prop เข้าไปใน Component ลูก */}
+      <UserHistory userId={resolvedParams.userID} />
     </EachPageLayout>
   )
 }
