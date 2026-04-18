@@ -3,13 +3,13 @@
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { bookingService } from '@/service/booking.service';
 import { useAuthStore } from '@/stores/auth.store';
-import { RoomResp } from '@/utils/interface/response';
+import { RoomResponse } from '@/utils/interface/response';
 import { format, parseISO, differenceInMinutes, startOfDay, addHours } from 'date-fns';
 import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 interface RoomTimelineProps {
-  rooms: RoomResp[];
+  rooms: RoomResponse[];
 }
 
 const generateTimeSlots = (startTimelineHour: number, totalTimelineHours: number) => {

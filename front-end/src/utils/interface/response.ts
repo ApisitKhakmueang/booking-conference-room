@@ -7,7 +7,7 @@ export interface Holiday {
   source: string;
 }
 
-export interface RoomResp {
+export interface RoomResponse {
   id: string
   name: string
   roomNumber: number
@@ -16,7 +16,7 @@ export interface RoomResp {
   status: string
 }
 
-export interface User {
+export interface UserResponse {
   id: string
   email: string
   fullName: string
@@ -32,8 +32,8 @@ export interface BookingEventResponse {
   title: string
   passcode: string
   status: string
-  User: User
-  Room: RoomResp
+  User: UserResponse
+  Room: RoomResponse
 }
 
 export interface AttendanceHealthResponse {
@@ -45,7 +45,7 @@ export interface AttendanceHealthResponse {
 	noShowRate: number
 }
 
-export interface PopularRoomResponse {
+export interface PopularRoomResponseonse {
   id: number;
   roomNumber: string;
   name: string;
@@ -54,7 +54,7 @@ export interface PopularRoomResponse {
 
 export interface DashboardAnalyticsResponse {
   attendanceHealth: AttendanceHealthResponse;
-  popularRooms: PopularRoomResponse[];
+  popularRooms: PopularRoomResponseonse[];
 }
 
 export interface ConfigResponse {
@@ -63,4 +63,27 @@ export interface ConfigResponse {
   maxAdvanceDays: number
   maxBookingMins: number
   noShowThresholdMins: number
+}
+
+export interface UserStatistics {
+  upcoming: number;
+  completed: number;
+  cancelled: number;
+  noShow: number;
+}
+
+export interface BookingHistoryItem {
+  id: string;
+  title: string;
+  startTime: string; // Format ISO string
+  endTime: string;   // Format ISO string
+  status: string;    // "confirm" | "complete" | "cancelled" | "no_show"
+  checkedInAt: string | null; // สามารถเป็น null ได้ถ้ายังไม่เช็คอิน
+  Room: RoomResponse;    // ใช้ RoomResponse เดิมที่มีอยู่แล้วได้เลย
+}
+
+export interface UserHistoryResponse {
+  user: UserResponse;        // ใช้ User เดิมที่มีอยู่แล้ว
+  statistics: UserStatistics;
+  bookingHistory: BookingHistoryItem[];
 }

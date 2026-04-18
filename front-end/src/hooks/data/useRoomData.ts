@@ -1,10 +1,10 @@
 import useSWR from 'swr';
 import { roomService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
-import { RoomResp } from '@/utils/interface/response';
+import { RoomResponse } from '@/utils/interface/response';
 
 export function useRoomData() {
-  const { data, error, isLoading, mutate } = useSWR<RoomResp[]>(
+  const { data, error, isLoading, mutate } = useSWR<RoomResponse[]>(
     'room-details', 
     () => roomService.fetchRoomDetails(),
     {

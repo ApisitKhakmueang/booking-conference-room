@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { RoomResp } from '@/utils/interface/response';
+import { RoomResponse } from '@/utils/interface/response';
 import { Button } from '@/components/ui/button';
 import StatusSection from './status-section';
 import RoomList from './room-list';
@@ -10,7 +10,7 @@ import RoomModal from './room-modal';
 
 export default function RoomManagement() {
   const { room: rawRoom, isLoading, reloadRoom } = useRoomData();
-  const [selectedRoom, setSelectedRoom] = useState<RoomResp | undefined>(undefined)
+  const [selectedRoom, setSelectedRoom] = useState<RoomResponse | undefined>(undefined)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add')
 
@@ -26,7 +26,7 @@ export default function RoomManagement() {
     setSelectedRoom(undefined)
   }
 
-  const handleEditClick = (event:RoomResp) => {
+  const handleEditClick = (event:RoomResponse) => {
     setTypeOperate("update")
     setIsModalOpen(true)
     setSelectedRoom(event)

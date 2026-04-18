@@ -3,12 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import RealTimeClock from "./realtime-clock";
 import { roomService } from "@/service/booking.service";
-import { RoomResp } from "@/utils/interface/response";
+import { RoomResponse } from "@/utils/interface/response";
 import Swal from "sweetalert2";
 import QRCode from "react-qr-code";
 import BookingCard from "./booking-card";
 import Numpad from "./numpad";
-import { BookingEvent, BookingStatus } from "@/utils/interface/interface";
 import { mapBookingEvents } from "@/lib/map-resp-event";
 import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS";
 import { useSystemConfig } from "@/hooks/data/useSystemConfig";
@@ -37,7 +36,7 @@ import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 // }
 
 export default function CheckIn({ roomID }: { roomID: string }) {
-  const [roomData, setRoomData] = useState<RoomResp | null>(null);
+  const [roomData, setRoomData] = useState<RoomResponse | null>(null);
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
   const { config, isLoadingConfig } = useSystemConfig();
 

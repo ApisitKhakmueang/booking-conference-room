@@ -1,5 +1,5 @@
 import { BookingStatus } from "@/lib/booking-status";
-import { RoomResp } from "@/utils/interface/response";
+import { RoomResponse } from "@/utils/interface/response";
 import { useMemo } from "react";
 
 const CircleChart = ({ value, total, label, colorClass, strokeClass }: { value: number, total: number, label: string, colorClass: string, strokeClass: string }) => {
@@ -30,7 +30,7 @@ const CircleChart = ({ value, total, label, colorClass, strokeClass }: { value: 
   );
 };
 
-export default function RoomStatusCard({ rooms }: {rooms: RoomResp[]}) {
+export default function RoomStatusCard({ rooms }: {rooms: RoomResponse[]}) {
   const countedAmoutRoom = useMemo(() => {
     return BookingStatus(rooms);
   }, [rooms]);

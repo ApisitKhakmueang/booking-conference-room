@@ -1,4 +1,4 @@
-import { BookingEventResponse, ConfigResponse, Holiday, RoomResp, User } from "./response";
+import { BookingEventResponse, ConfigResponse, Holiday, RoomResponse, UserResponse } from "./response";
 
 export interface EachPageLayoutProps {
   pageName?: string;
@@ -122,7 +122,7 @@ export interface BookingEvent {
   duration: string; // นาที
   room: ArrangeRoom | undefined;
   status: BookingStatus;
-  user: User
+  user: UserResponse
 }
 
 export interface RenderEventGroupProps { 
@@ -199,22 +199,22 @@ export interface ConfigProps {
 }
 
 export interface RoomListProps {
-  rooms: RoomResp[]
-  handleEditClick: (room:RoomResp) => void
+  rooms: RoomResponse[]
+  handleEditClick: (room:RoomResponse) => void
   reloadRoom: () => void
 }
 
 export interface RoomCardProps {
-  room: RoomResp;
+  room: RoomResponse;
   onDelete: () => void;
 }
 
 export interface StatusSectionProps {
-  rooms: RoomResp[]
+  rooms: RoomResponse[]
 }
 
 export interface RoomPaginationProps {
-  rooms: RoomResp[],
+  rooms: RoomResponse[],
   currentPage: number
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>
 }
@@ -223,17 +223,17 @@ export interface RoomModalProps {
   typeOperate: 'add' | 'update'
   isModalOpen: boolean
   setIsModalOpen: (open:boolean) => void
-  selectedRoom?: RoomResp
+  selectedRoom?: RoomResponse
   reloadRoom: () => void
 }
 
 export interface UserPaginationProps {
-  users: User[]
+  users: UserResponse[]
   currentPage: number
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>
 }
 
 export interface UserCardProps {
-  currentUsers: User[]
+  currentUsers: UserResponse[]
   toggleStatus: (id:string) => void
 }

@@ -1,5 +1,5 @@
 import { UserProfile } from "./interface"
-import { RoomResp } from "./response"
+import { RoomResponse } from "./response"
 
 export interface AuthState {
   user: UserProfile | null
@@ -23,6 +23,6 @@ export interface ControlLayoutState {
 }
 
 export interface RoomState {
-  rooms: RoomResp[] | null
-  setRooms: (newRooms: RoomResp[]) => void
+  rooms: RoomResponse[] | null
+  setRooms: (newRooms: RoomResponse[]) => void
 }

@@ -1,23 +1,10 @@
 'use client'
 
 import { MonitorCheck, MonitorX, ToolCase, UserRound } from 'lucide-react';
-import { BookingEventResponse, RoomResp } from '@/utils/interface/response';
+import { BookingEventResponse, RoomResponse } from '@/utils/interface/response';
 import BookingModal from '@/components/utils/booking-modal';
 import { useState } from 'react';
 import OccupyModal from './occupy-modal';
-
-const MOCK_ROOMS = [
-  { id: 1, name: "Room A", capacity: 10, status: "available" },
-  { id: 2, name: "Room B", capacity: 10, status: "occupied" },
-  { id: 3, name: "Room C", capacity: 10, status: "available" },
-  { id: 4, name: "Room D", capacity: 6, status: "maintenance" },
-  { id: 5, name: "Room E", capacity: 6, status: "available" },
-  { id: 6, name: "Room F", capacity: 6, status: "occupied" },
-  { id: 7, name: "Room G", capacity: 6, status: "available" },
-  { id: 8, name: "Room H", capacity: 4, status: "available" },
-  { id: 9, name: "Room I", capacity: 4, status: "occupied" },
-  { id: 10, name: "Room J", capacity: 4, status: "available" },
-] as const 
 
 type RoomStatus = "available" | "occupied" | "maintenance";
 
@@ -42,7 +29,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: RoomResp[], bookings: BookingEventResponse[] }) {
+export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: RoomResponse[], bookings: BookingEventResponse[] }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<number | null>(null)

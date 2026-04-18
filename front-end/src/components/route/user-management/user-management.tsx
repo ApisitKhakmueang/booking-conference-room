@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { User } from '@/utils/interface/response';
+import { UserResponse } from '@/utils/interface/response';
 import Pagination from './pagination';
 import Header from './header';
 import { Input } from '@/components/ui/input';
 import UserCard from './user-card';
 
 // ข้อมูลจำลอง 10 คน
-const initialUsers: User[] = [
+const initialUsers: UserResponse[] = [
   { id: "1", fullName: "Julian Thorne", role: "Lead Curator", email: "j.thorne@velvetconcierge.com", status: "active", avatarUrl: "https://i.pravatar.cc/150?u=1" },
   { id: "2", fullName: "Elena Vance", role: "Guest Relations", email: "vance.elena@velvetconcierge.com", status: "inactive", avatarUrl: "https://i.pravatar.cc/150?u=2" },
   { id: "3", fullName: "Marcus Sterling", role: "Security Director", email: "sterling.m@velvetconcierge.com", status: "active", avatarUrl: "https://i.pravatar.cc/150?u=3" },
@@ -23,7 +23,7 @@ const initialUsers: User[] = [
 ];
 
 export default function UserTable() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<UserResponse[]>(initialUsers);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -54,9 +54,6 @@ export default function UserTable() {
             className="pl-10 pr-4 py-2.5 bg-white dark:bg-sidebar border border-gray-200 dark:border-white/10 text-light-main dark:text-main transition-all shadow-sm" 
           />
         </div>
-        {/* <button className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-lg bg-dark-purple hover:bg-light-hover/90 dark:bg-dark-purple/90 dark:hover:bg-dark-purple text-white shadow-md transition-all">
-          + Invite Member
-        </button> */}
       </div>
 
       {/* Table Area - Theme แบบเดียวกับ RoomList */}

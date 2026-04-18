@@ -1,5 +1,5 @@
 import api from '@/lib/axiosInstance';
-import { BookingEventResponse, ConfigResponse, DashboardAnalyticsResponse, Holiday, RoomResp } from '@/utils/interface/response';
+import { BookingEventResponse, ConfigResponse, DashboardAnalyticsResponse, Holiday, RoomResponse } from '@/utils/interface/response';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 
@@ -54,12 +54,12 @@ export const bookingService = {
 
 export const roomService = {
   
-  fetchRoomDetails: async ():Promise<RoomResp[]> => {
+  fetchRoomDetails: async ():Promise<RoomResponse[]> => {
     const response = await api.get(`${API_URL}/rooms/details`);
     return response.data;
   },
 
-  fetchRoomByID: async (roomID: string):Promise<RoomResp> => {
+  fetchRoomByID: async (roomID: string):Promise<RoomResponse> => {
     const response = await api.get(`${API_URL}/room/${roomID}`);
     return response.data;
   },

@@ -2,7 +2,7 @@
 
 import { Card, type CardProps } from "@/components/ui/card" // 🌟 Import CardProps มาด้วย
 import { BookingStatus } from "@/lib/booking-status"
-import { RoomResp } from "@/utils/interface/response"
+import { RoomResponse } from "@/utils/interface/response"
 import { useMemo } from "react"
 
 const ROOM_STATUS = [
@@ -12,7 +12,7 @@ const ROOM_STATUS = [
   { name: 'Maintainance', amount: 1, variant: 'purple' },
 ] as const
 
-export default function RoomStatus({ displayRooms, isLoadingBooking }: { displayRooms: RoomResp[], isLoadingBooking: boolean }) {
+export default function RoomStatus({ displayRooms, isLoadingBooking }: { displayRooms: RoomResponse[], isLoadingBooking: boolean }) {
   const countAmountRoom = useMemo(() => {
     return BookingStatus(displayRooms);
   }, [displayRooms])

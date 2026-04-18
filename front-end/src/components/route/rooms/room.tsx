@@ -4,7 +4,7 @@ import RoomsGrid, { RoomGridSkeleton } from "./room-grid";
 import RoomStatus from "./room-status";
 import useBookingStatusWS from "@/hooks/data/useBookingStatusWS";
 import { useMemo, useState } from 'react';
-import { RoomResp } from '@/utils/interface/response';
+import { RoomResponse } from '@/utils/interface/response';
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarDays, LayoutGrid } from "lucide-react";
 import RoomTimeline from "./room-timeline";
@@ -26,7 +26,7 @@ export default function Room() {
 
   // 🌟 2. ใช้ useMemo ผสมร่างข้อมูลแทนการใช้ useEffect -> setRoom
   // มันจะคำนวณใหม่ให้อัตโนมัติ เฉพาะตอนที่ rawRooms หรือ bookings มีการเปลี่ยนแปลงเท่านั้น
-  const displayRooms:RoomResp[] = useMemo(() => {
+  const displayRooms:RoomResponse[] = useMemo(() => {
     return DisplayRooms(rawRoom, bookings)
   }, [rawRoom, bookings]); // คำนวณใหม่เมื่อสองตัวนี้เปลี่ยน
 
