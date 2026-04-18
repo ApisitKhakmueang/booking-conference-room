@@ -174,17 +174,19 @@ export default function Schedule() {
           <header className="flex sm:flex-row flex-col justify-between gap-5 shrink-0 xl:pr-8 pt-4">
             <p className="text-2xl font-semibold text-light-secondary dark:text-secondary">{format(currentDate, 'EEEE, d MMMM yyyy')}</p>
 
-            <div className="flex gap-2 pr-4 md:pr-0">
+            <div className="flex flex-col xs:flex-row gap-2 xs:pr-4 md:pr-0">
               <Button 
                 variant="dark-purple" 
                 size="md"
                 onClick={handleAddClick} >
                 <Plus className="w-4 h-4"/>&nbsp;Add Booking
               </Button>
-              <Button onClick={prev} variant="outline-purple" size="sm" className={`${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
-              <Button onClick={today} variant="outline-purple" size="sm">Today</Button>
-              <Button onClick={next} variant="outline-purple" size="sm">Next</Button>
-              <Button onClick={() => setIsMobileFilterOpen(true)} variant="outline-purple" size="sm" className="xl:hidden block">Filter</Button>
+              <div className="flex gap-2 justify-between">
+                <Button onClick={prev} variant="outline-purple" size="sm" className={`${isPrevDisabled ? 'opacity-50' : ''}`}>Prev</Button>
+                <Button onClick={today} variant="outline-purple" size="sm">Today</Button>
+                <Button onClick={next} variant="outline-purple" size="sm">Next</Button>
+                <Button onClick={() => setIsMobileFilterOpen(true)} variant="outline-purple" size="sm" className="xl:hidden block">Filter</Button>
+              </div>
             </div>
           </header>
 
