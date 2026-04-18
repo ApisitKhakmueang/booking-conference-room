@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import CardEvents, { CardEventsSkeleton } from "./event-card";
 import DesktopSidebar from "./desktop-sidebar";
 import { Button } from "@/components/ui/button";
-import MonthYearPicker from "./month-year-picker";
+import MonthYearPicker from "../../utils/month-year-picker";
 import { mapBookingEvents } from "@/lib/map-resp-event";
 import { bookingService } from "@/service/booking.service";
 import ActiveTab from "./active-tab";
