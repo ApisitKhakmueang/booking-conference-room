@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { BookingEvent } from "@/utils/interface/interface"
 import DesktopSidebar from "./desktop-sidebar"
+import { StatusFilter } from "./status-filter"
 
 interface MobileFilterProps {
   setIsMobileFilterOpen: (val: boolean) => void,
@@ -9,9 +10,11 @@ interface MobileFilterProps {
   filteredEvents: BookingEvent[] | undefined,
   selectedRooms: number[],
   setSelectedRooms: React.Dispatch<React.SetStateAction<number[]>>
+  activeTab: string
+  setActiveTab: (tab: string) => void
 }
 
-export default function MobileFilter({ setIsMobileFilterOpen, currentDate, setCurrentDate, filteredEvents, selectedRooms, setSelectedRooms }: MobileFilterProps) {
+export default function MobileFilter({ setIsMobileFilterOpen, currentDate, setCurrentDate, filteredEvents, selectedRooms, setSelectedRooms,activeTab, setActiveTab }: MobileFilterProps) {
   return (
     <div className="fixed inset-0 z-100 flex items-end bg-black/50 xl:hidden">
       <div className="w-full max-h-[85vh] flex flex-col bg-light-main-background dark:bg-card rounded-t-3xl p-6 pb-10 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
@@ -32,6 +35,9 @@ export default function MobileFilter({ setIsMobileFilterOpen, currentDate, setCu
             selectedRooms={selectedRooms}       // 🌟 ส่ง State ลงไปใน Mobile ด้วย
             setSelectedRooms={setSelectedRooms} 
           />
+
+          {/* 🌟 2. เพิ่มส่วนเลือก Status Filter */}
+          <StatusFilter activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
 
         <Button 

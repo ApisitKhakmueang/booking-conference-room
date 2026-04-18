@@ -2,7 +2,7 @@ const tabs = ["ALL", "COMPLETED", "CANCELLED", "NO SHOW"];
 
 export default function ActiveTab({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) {
   return (
-    <div className="flex items-center xs:gap-8 gap-5 border-b border-gray-100 dark:border-white/10 px-4">
+    <div className="xs:flex hidden items-center xs:gap-8 gap-5 border-b border-gray-100 dark:border-white/10 px-4">
       {tabs.map((tab) => (
         <button
           key={tab}

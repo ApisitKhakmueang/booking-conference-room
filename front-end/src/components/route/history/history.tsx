@@ -179,6 +179,8 @@ export default function History() {
           filteredEvents={filteredEvents}
           selectedRooms={selectedRooms}
           setSelectedRooms={setSelectedRooms}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
         />
       )}
     </div>
