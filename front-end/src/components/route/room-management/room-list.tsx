@@ -2,7 +2,7 @@ import { useState } from "react";
 import RoomCard from "./room-card";
 import Swal from "sweetalert2";
 import { RoomListProps } from "@/utils/interface/interface";
-import Pagination from "./pagination";
+import RoomPagination from "./room-pagination";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -42,7 +42,7 @@ export default function RoomList({ rooms, handleEditClick, reloadRoom }: RoomLis
 
       {/* 🌟 4. Pagination Controls */}
       {totalPages > 1 && (
-        <Pagination rooms={rooms} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <RoomPagination rooms={rooms} currentPage={currentPage} setCurrentPage={setCurrentPage} />
       )}
     </div>
   )

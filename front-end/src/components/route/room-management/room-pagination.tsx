@@ -1,9 +1,9 @@
 import { RoomPaginationProps } from "@/utils/interface/interface";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ITEMS_PER_PAGE = 4
 
-export default function Pagination({ rooms, currentPage, setCurrentPage }: RoomPaginationProps) {
+export default function RoomPagination({ rooms, currentPage, setCurrentPage }: RoomPaginationProps) {
   const totalRooms = rooms.length;
   const totalPages = Math.ceil(totalRooms / ITEMS_PER_PAGE);
 
@@ -25,7 +25,7 @@ export default function Pagination({ rooms, currentPage, setCurrentPage }: RoomP
           disabled={currentPage === 1}
           className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Previous
+          <ChevronLeft className="w-3.5 h-3.5" /> Previous
         </button>
         
         <div className="flex items-center gap-2 text-sm font-semibold">
@@ -53,7 +53,7 @@ export default function Pagination({ rooms, currentPage, setCurrentPage }: RoomP
           disabled={currentPage === totalPages}
           className="flex items-center gap-2 hover:text-light-main dark:hover:text-main transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
-          Next <ArrowRight className="w-3.5 h-3.5" />
+          Next <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
