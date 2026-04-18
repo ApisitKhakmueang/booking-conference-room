@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { UserResponse } from '@/utils/interface/response';
-import Pagination from './pagination';
+import UserPagination from './user-pagination';
 import Header from './header';
 import { Input } from '@/components/ui/input';
 import UserCard from './user-card';
@@ -73,7 +73,7 @@ export default function UserTable() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <Pagination users={users} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+          <UserPagination users={users} currentPage={currentPage} setCurrentPage={setCurrentPage} />
         )}
 
       </div>

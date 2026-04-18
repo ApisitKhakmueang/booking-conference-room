@@ -19,7 +19,7 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
           : { text: 'text-gray-400 dark:text-gray-500', toggleBg: 'bg-gray-300 dark:bg-gray-700', dot: 'bg-gray-400', ring: 'border-white dark:border-sidebar' };
 
         return (
-          <div key={user.id} className="relative flex flex-col md:flex-row md:items-center p-4 md:p-5 bg-white border border-gray-100 hover:bg-light-purple shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 group rounded-2xl cursor-pointer">
+          <div key={user.id} className="relative flex flex-col md:flex-row md:items-center p-4 md:p-5 bg-white border border-gray-100 hover:bg-light-purple shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar dark:hover:bg-hover transition-all duration-300 group rounded-2xl">
             
             {/* 1. Member Name & Avatar (w-[35%]) */}
             <div className="flex items-center gap-4 w-full md:w-[35%] pr-8 md:pr-0">
@@ -54,7 +54,7 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
               <div className="flex items-center gap-3">
                 <button 
                   onClick={(e) => { e.stopPropagation(); toggleStatus(user.id); }} 
-                  className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-300 ${statusStyle.toggleBg}`}
+                  className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-300 cursor-pointer ${statusStyle.toggleBg}`}
                 >
                   <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${isActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
                 </button>
@@ -69,7 +69,7 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
             <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto flex justify-end md:w-[10%]">
               <button 
                 onClick={(e) => { e.stopPropagation(); goToDetail(user.id); }}
-                className="text-light-secondary dark:text-secondary bg-transparent hover:bg-light-purple dark:hover:bg-hover hover:text-dark-purple dark:hover:text-white transition-colors p-2 rounded-lg cursor-pointer md:pr-6">
+                className="text-light-secondary dark:text-secondary bg-transparent hover:text-dark-purple dark:hover:text-white transition-colors p-2 rounded-lg cursor-pointer md:pr-6">
                 <Eye className="w-5 h-5" />
               </button>
             </div>
