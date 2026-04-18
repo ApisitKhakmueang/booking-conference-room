@@ -38,7 +38,7 @@ func (r *redisRepository) CreateBooking(ctx context.Context, booking *domain.Boo
 }
 
 func (r *redisRepository) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	prevRoomNumber, err := r.postgres.GetRoomNumber(ctx, booking.ID)
+	prevRoomNumber, err := r.postgres.GetRoomNumberDB(ctx, booking.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (r *redisRepository) GetHoliday(ctx context.Context, date *domain.Date) ([]
 }
 
 func (r *redisRepository) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
-	roomNumber, err := r.postgres.GetRoomNumber(ctx, bookingID)
+	roomNumber, err := r.postgres.GetRoomNumberDB(ctx, bookingID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -267,7 +267,7 @@ func (r *redisRepository) UpdateBookingEndStatus(ctx context.Context, bookingID 
 }
 
 func (r *redisRepository) UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) (*domain.Booking, uint, error) {
-	roomNumber, err := r.postgres.GetRoomNumber(ctx, bookingID)
+	roomNumber, err := r.postgres.GetRoomNumberDB(ctx, bookingID)
 	if err != nil {
 		return nil, 0, err
 	}
