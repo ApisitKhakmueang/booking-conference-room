@@ -29,7 +29,7 @@ type PostgresRepository interface {
 	DeleteRoomDB(ctx context.Context, roomID uuid.UUID) error
 	GetRoomDB(ctx context.Context) ([]domain.Room, error)
 	GetRoomByID_DB(ctx context.Context, roomID uuid.UUID) (*domain.Room, error)
-	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
+	GetRoomNumberDB(ctx context.Context, bookingID uuid.UUID) (uint, error)
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 
 	// CheckLatestUpdateHoliday(startDate string, endDate string) (*time.Time, error)
@@ -40,6 +40,7 @@ type PostgresRepository interface {
 }
 
 type HelperPostgresRepository interface {
+	GetPaginatedUsersDB(ctx context.Context, q *domain.UserPaginationQuery) ([]domain.User, int64, error)
 	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 	GetRoomID(ctx context.Context, booking *domain.Booking, roomNumber uint) error
@@ -47,7 +48,7 @@ type HelperPostgresRepository interface {
 	IsPasscodeAvailable(ctx context.Context, booking *domain.Booking, passcode string) bool
 	CheckDayOff(ctx context.Context, date time.Time) error
 	BulkUpsertHolidays(ctx context.Context, holidays []domain.Holiday) error
-	GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error)
+	GetRoomNumberDB(ctx context.Context, bookingID uuid.UUID) (uint, error)
 	GetConfigDB(ctx context.Context) (*domain.Config, error)
 	UpdateConfigDB(ctx context.Context, config *domain.Config) error
 }

@@ -16,23 +16,6 @@ type Books struct {
 	Name      string    `json:"name"`
 }
 
-// type Schedule struct {
-// 	Date   string    `json:"date"`
-// 	Events []Booking `json:"events"`
-// }
-
-// type CreateBookFilter struct {
-// 	Email   string 		`query:"email"` // จาก URL Query
-// 	Room   	uint    	`query:"room"`      // จาก URL Query
-// }
-
-// type BookingDetail struct {
-// 	Email 		string
-// 	StartTime string
-// 	EndTime 	string
-// 	Room 			uint
-// }
-
 // 1. สร้าง Type ใหม่ชื่อ Date
 type DateRes time.Time
 
@@ -107,6 +90,74 @@ type WSMessage struct {
 	Data  interface{} `json:"data,omitempty"`  // ข้อมูลจริงๆ
 }
 
+// Static
+// 🌟 1. Struct หลักที่รวมทุกอย่างเข้าด้วยกัน (ตัวนี้คือตัวที่เราจะ return กลับไปให้ Frontend)
+type UserDetailResponse struct {
+	User           UserInfoRes             `json:"user"`
+	Statistics     UserStatsRes            `json:"statistics"`
+	BookingHistory []UserBookingHistoryRes `json:"bookingHistory"`
+}
+
+// 🌟 2. Struct สำหรับข้อมูล User พื้นฐาน (คัดมาเฉพาะที่ใช้)
+type UserInfoRes struct {
+	ID        uuid.UUID `json:"id"`
+	FullName  string    `json:"fullName"`
+	Email     string    `json:"email"`
+	AvatarUrl string    `json:"avatarUrl"`
+	Role      string    `json:"role"`
+	Status    string    `json:"status"`
+}
+
+// 🌟 3. Struct สำหรับเก็บสถิติ
+type UserStatsRes struct {
+	TotalBookings int `json:"totalBookings"`
+	Completed     int `json:"completed"`
+	Cancelled     int `json:"cancelled"`
+	NoShow        int `json:"noShow"`
+}
+
+// 🌟 4. Struct สำหรับตารางประวัติการจอง
+type UserBookingHistoryRes struct {
+	ID          uuid.UUID   `json:"id"`
+	Title       string      `json:"title"`
+	StartTime   *time.Time  `json:"startTime"`
+	EndTime     *time.Time  `json:"endTime"`
+	Status      *string     `json:"status"`
+	CheckedInAt *time.Time  `json:"checkedInAt"`
+	Room        UserRoomRes `json:"Room"` // ใช้ตัวพิมพ์ใหญ่ตาม JSON แบบเดิม
+}
+
+// 🌟 5. Struct สำหรับข้อมูลห้องย่อยๆ ที่อยู่ในการจอง
+type UserRoomRes struct {
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	RoomNumber uint      `json:"roomNumber"`
+	Location   string    `json:"location"`
+}
+
+// User management 
+// เอาไว้รับ Query จาก URL
+type UserPaginationQuery struct {
+	Page   int    `query:"page"`
+	Limit  int    `query:"limit"`
+	Search string `query:"search"`
+}
+
+// เอาไว้ส่งกลับไปให้ Frontend
+type PaginatedUserResponse struct {
+	Data []User `json:"data"`
+	Meta PaginationMeta `json:"meta"`
+}
+
+type PaginationMeta struct {
+	TotalItems       int64 `json:"totalItems"`
+	ItemsPerPage     int   `json:"itemsPerPage"`
+	TotalPages       int   `json:"totalPages"`
+	CurrentPage      int   `json:"currentPage"`
+	IndexOfFirstItem int   `json:"indexOfFirstItem"` // ⭐️ เพิ่มเข้ามา
+	IndexOfLastItem  int   `json:"indexOfLastItem"`  // ⭐️ เพิ่มเข้ามา
+}
+
 // Query & group data
 type GetBookingFilter struct {
 	Duration   	string 	`query:"duration"` // จาก URL Query
@@ -165,39 +216,29 @@ type Holiday struct {
 }
 
 type Room struct {
-	ID        	uuid.UUID 			`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
+	ID        	uuid.UUID 				`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
 	CreatedAt 	*time.Time				`json:"createdAt,omitempty"`
 	UpdatedAt 	*time.Time				`json:"updatedAt,omitempty"`
 	DeletedAt 	*gorm.DeletedAt 	`gorm:"index" json:"deletedAt,omitempty"`
 	
-	Name 				string 					`gorm:"not null" json:"name,omitempty"`
-	RoomNumber  uint						`gorm:"not null" json:"roomNumber,omitempty"`
-	Location 		string					`json:"location,omitempty"`
-	Capacity 		uint						`json:"capacity,omitempty"`
-	Status 			string 					`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"status,omitempty"`
+	Name 				string 						`gorm:"not null" json:"name,omitempty"`
+	RoomNumber  uint							`gorm:"not null" json:"roomNumber,omitempty"`
+	Location 		string						`json:"location,omitempty"`
+	Capacity 		uint							`json:"capacity,omitempty"`
+	Status 			string 						`gorm:"type:varchar(20);default:'available';check:status IN ('available', 'maintenance')" json:"status,omitempty"`
 }
 
 type User struct {
-	ID 					uuid.UUID 		`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
-	Email 			string 				`json:"email,omitempty"`
-	FullName 		string				`json:"fullName,omitempty"`
-	AvatarUrl 	string				`json:"avatarUrl,omitempty"`
-	Role				string				`json:"role,omitempty"`
-	CreatedAt 	*time.Time		`json:"createdAt,omitempty"`
+	ID 					uuid.UUID 				`gorm:"type:uuid;primaryKey" json:"id,omitempty"`
+	Email 			string 						`json:"email,omitempty"`
+	FullName 		string						`json:"fullName,omitempty"`
+	AvatarUrl 	string						`json:"avatarUrl,omitempty"`
+	Role				string						`json:"role,omitempty"`
+	CreatedAt 	*time.Time				`json:"createdAt,omitempty"`
+	UpdatedAt 	*time.Time				`json:"updatedAt,omitempty"`
+	DeletedAt 	gorm.DeletedAt 		`gorm:"index" json:"-"`
+	Status 			string 						`gorm:"type:varchar(20);default:'active';check:status IN ('active', 'inactive')" json:"status,omitempty"`
 }
-
-// type Calendar struct {
-// 	ID        				uuid.UUID 					`gorm:"type:uuid;primaryKey" json:"id"`
-// 	CreatedAt 				time.Time						`json:"createdAt"`
-// 	UpdatedAt 				time.Time						`json:"updatedAt"`
-// 	DeletedAt 				gorm.DeletedAt 			`gorm:"index" json:"deletedAt"`
-
-// 	CalendarNumber 		uint 								`gorm:"default:0" json:"calendarNumber"`	
-// 	GoogleCalendarID 	string 							`gorm:"unique;not null" json:"google_calendarId"`
-// 	RoomID 						uuid.UUID 					`gorm:"not null" json:"roomId"`
-
-// 	Room     					*Room     						`gorm:"foreignKey:RoomID" json:"Calendar,omitempty"`
-// }
 
 type Booking struct {
 	ID        		uuid.UUID 			`gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id,omitempty"`

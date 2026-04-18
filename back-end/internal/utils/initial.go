@@ -172,7 +172,7 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 func InitialCalendarService() (*calendar.Service, error) {
 	jsonCreds := os.Getenv("GOOGLE_CREDENTIALS_JSON")
 	if jsonCreds == "" {
-			return nil, fmt.Errorf("GOOGLE_CREDENTIALS_JSON is missing")
+		return nil, fmt.Errorf("GOOGLE_CREDENTIALS_JSON is missing")
 	}
 
 	ctx := context.Background()

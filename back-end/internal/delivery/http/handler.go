@@ -402,3 +402,20 @@ func (u *BookingHandler) UpdateConfig(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).SendString("Update config time successfully")
 }
+
+func (u *BookingHandler) GetPaginatedUsers(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	
+	q := new(domain.UserPaginationQuery)
+	// ดึงข้อมูลจาก ?page=1&limit=5&search=xxx มาใส่ใน q
+	if err := c.QueryParser(q); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	response, err := u.usecase.GetPaginatedUsers(ctx, q)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}

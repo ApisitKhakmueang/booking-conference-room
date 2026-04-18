@@ -445,7 +445,7 @@ func (p *postgresRepository) GetRoomByID_DB(ctx context.Context, roomID uuid.UUI
 	return room, nil
 }
 
-func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.UUID) (uint, error) {
+func (p *postgresRepository) GetRoomNumberDB(ctx context.Context, bookingID uuid.UUID) (uint, error) {
 	instBooking := new(domain.Booking)
 	err := p.db.WithContext(ctx).
 		Preload("Room", func(db *gorm.DB) *gorm.DB {
@@ -460,6 +460,28 @@ func (p *postgresRepository) GetRoomNumber(ctx context.Context, bookingID uuid.U
 	}
 
 	return instBooking.Room.RoomNumber, err
+}
+
+func (p *postgresRepository) GetPaginatedUsersDB(ctx context.Context, q *domain.UserPaginationQuery) ([]domain.User, int64, error) {
+	var users []domain.User
+	var totalItems int64
+
+	query := p.db.WithContext(ctx).Model(&domain.User{})
+	if q.Search != "" {
+		query = query.Where("full_name ILIKE ? OR email ILIKE ?", "%"+q.Search+"%", "%"+q.Search+"%")
+	}
+
+	if err := query.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (q.Page - 1) * q.Limit
+	if err := query.Offset(offset).Limit(q.Limit).Order("created_at DESC").Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// ⭐️ คืนค่ากลับไป 3 ตัวตรงๆ
+	return users, totalItems, nil
 }
 
 // helper function

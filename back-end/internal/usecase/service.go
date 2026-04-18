@@ -3,6 +3,7 @@ package usercase
 import (
 	"context"
 	"log"
+	"math"
 	"sort"
 	"time"
 
@@ -470,26 +471,6 @@ func (u *bookingUsecase) GetHoliday(ctx context.Context,date *domain.Date) ([]do
 	}
 
 	return googleHolidays, nil
-// 	var filteredHolidays []domain.Holiday
-
-// 	// สมมติว่าใน function นี้คุณมีตัวแปร year และ month ที่รับมาจาก User อยู่แล้ว
-// 	targetMonth := time.Month(month)
-
-// 	for _, h := range googleHolidays {
-// 		// เนื่องจาก h.Date เป็น type Custom Date เราต้องแปลงเป็น time.Time ก่อนเพื่อเช็คเดือน
-// 		// (ถ้า h.Date เป็น time.Time อยู่แล้ว ก็ใช้ .Month() ได้เลย)
-// 		t := h.Date.Time()
-
-// 		// เช็คว่า เดือนตรงกัน และ ปีตรงกัน ไหม
-// 		if t.Month() == targetMonth && t.Year() == year {
-// 			filteredHolidays = append(filteredHolidays, h)
-// 		}
-// 	}
-
-// 	// 3. ยัดข้อมูลที่กรองแล้ว ใส่ response
-// 	response.Holidays = filteredHolidays
-
-// 	// 6. ส่งข้อมูลที่เพิ่งดึงมากลับไป
 }
 
 func (u *bookingUsecase) GetConfig(ctx context.Context) (*domain.Config, error) {
@@ -507,6 +488,46 @@ func (u *bookingUsecase) UpdateConfig(ctx context.Context, config *domain.Config
 	}
 
 	return nil
+}
+
+func (u *bookingUsecase) GetPaginatedUsers(ctx context.Context, q *domain.UserPaginationQuery) (*domain.PaginatedUserResponse, error) {
+	// 1. จัดการ Default
+	if q.Page <= 0 { q.Page = 1 }
+	if q.Limit <= 0 { q.Limit = 5 }
+
+	// 2. เรียก Repo รับของดิบมา
+	users, totalItems, err := u.helperPostgres.GetPaginatedUsersDB(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. คำนวณ Logic
+	totalPages := int(math.Ceil(float64(totalItems) / float64(q.Limit)))
+	var indexOfFirstItem, indexOfLastItem int
+
+	if totalItems > 0 {
+		indexOfFirstItem = ((q.Page - 1) * q.Limit) + 1
+		indexOfLastItem = q.Page * q.Limit
+		if int64(indexOfLastItem) > totalItems {
+			indexOfLastItem = int(totalItems)
+		}
+	} else {
+		indexOfFirstItem = 0
+		indexOfLastItem = 0
+	}
+
+	// 4. ⭐️ ประกอบร่างและ Return ทีเดียว
+	return &domain.PaginatedUserResponse{
+		Data: users,
+		Meta: domain.PaginationMeta{
+				TotalItems:       totalItems,
+				ItemsPerPage:     q.Limit,
+				TotalPages:       totalPages,
+				CurrentPage:      q.Page,
+				IndexOfFirstItem: indexOfFirstItem,
+				IndexOfLastItem:  indexOfLastItem,
+		},
+	}, nil
 }
 
 // Helper function

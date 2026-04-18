@@ -39,4 +39,5 @@ func InitialHelperRoute(router fiber.Router, handler *http.BookingHandler) {
 
 func InitialAdminRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Put("/config", handler.UpdateConfig)
+	router.Get("/users", handler.GetPaginatedUsers)
 }
