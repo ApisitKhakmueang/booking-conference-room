@@ -122,7 +122,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
         <div className="flex flex-col gap-2">
           {error && <p className="text-sm text-red-500">{error}</p>}
 
-          <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3'>
+          <Button type="submit" variant="dark-purple" disabled={isLoading} className='p-3 rounded-full'>
             {isSignIn ? (isLoading ? "Signing in..." : "Sign in") : (isLoading ? "Creating account..." : "Create account")}
           </Button>
         </div>
