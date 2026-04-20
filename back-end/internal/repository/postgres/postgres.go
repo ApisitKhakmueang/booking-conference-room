@@ -515,6 +515,50 @@ func (p *postgresRepository) GetUserOverviewDB(ctx context.Context, userID uuid.
 	}, nil
 }
 
+func (p *postgresRepository) GetPaginatedUserBookingsDB(ctx context.Context, userID uuid.UUID, q *domain.BookingPaginationQuery) ([]domain.UserBookingHistoryRes, int64, error) {
+	var bookings []domain.UserBookingHistoryRes
+	var totalItems int64
+
+	// 1. สร้าง Base Query โฟกัสเฉพาะ User คนนี้
+    // ⭐️ อย่าลืม Preload("Room") เพื่อดึงข้อมูลห้องมาใส่ใน Struct
+	query := p.db.WithContext(ctx).Model(&domain.Booking{}).
+		Preload("Room").
+		Where("user_id = ?", userID)
+
+	// 2. Filter ตาม Status (ถ้ามีการส่งมาและไม่ใช่ค่าว่างหรือ ALL)
+	if q.Status != "" && q.Status != "all" {
+		query = query.Where("status = ?", q.Status)
+	}
+
+	// 3. Filter ตาม เดือนและปี (สร้างขอบเขตวันที่)
+	if q.Year > 0 && q.Month > 0 {
+		// หาวันแรกของเดือน (เช่น 2026-04-01 00:00:00)
+		loc, err := time.LoadLocation("Asia/Bangkok")
+		if err != nil {
+			return nil, 0, err
+		}
+		startDate := time.Date(q.Year, time.Month(q.Month), 1, 0, 0, 0, 0, loc)
+		// หาวันแรกของเดือนถัดไป (เช่น 2026-05-01 00:00:00)
+		endDate := startDate.AddDate(0, 1, 0)
+
+		// ค้นหาช่วงเวลาที่ StartTime อยู่ภายในเดือนนั้น
+		query = query.Where("start_time >= ? AND start_time < ?", startDate, endDate)
+	}
+
+	// 4. นับจำนวน (Count) สำหรับทำ Pagination
+	if err := query.Count(&totalItems).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 5. ดึงข้อมูลจริง (Offset/Limit) โดยเรียงจากวันที่ล่าสุดก่อน
+	offset := (q.Page - 1) * q.Limit
+	if err := query.Offset(offset).Limit(q.Limit).Order("start_time DESC").Find(&bookings).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return bookings, totalItems, nil
+}
+
 // helper function
 func (p *postgresRepository) CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error {
 	now := time.Now()

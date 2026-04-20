@@ -539,6 +539,42 @@ func (u *bookingUsecase) GetUserOverview(ctx context.Context, userID uuid.UUID) 
 	return userOverviewResponse, nil
 }
 
+func (u *bookingUsecase) GetPaginatedUserBookings(ctx context.Context, userID uuid.UUID, q *domain.BookingPaginationQuery) (*domain.PaginatedBookingResponse, error) {
+	if q.Page <= 0 { q.Page = 1 }
+	if q.Limit <= 0 { q.Limit = 5 }
+
+	bookings, totalItems, err := u.helperPostgres.GetPaginatedUserBookingsDB(ctx, userID, q)
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := int(math.Ceil(float64(totalItems) / float64(q.Limit)))
+	var indexOfFirstItem, indexOfLastItem int
+
+	if totalItems > 0 {
+		indexOfFirstItem = ((q.Page - 1) * q.Limit) + 1
+		indexOfLastItem = q.Page * q.Limit
+		if int64(indexOfLastItem) > totalItems {
+			indexOfLastItem = int(totalItems)
+		}
+	} else {
+		indexOfFirstItem = 0
+		indexOfLastItem = 0
+	}
+
+	return &domain.PaginatedBookingResponse{
+		Data: bookings,
+		Meta: domain.PaginationMeta{
+				TotalItems:       totalItems,
+				ItemsPerPage:     q.Limit,
+				TotalPages:       totalPages,
+				CurrentPage:      q.Page,
+				IndexOfFirstItem: indexOfFirstItem,
+				IndexOfLastItem:  indexOfLastItem,
+		},
+	}, nil
+}
+
 // Helper function
 func (u *bookingUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error {
 	booking, roomNumber, err := u.redis.UpdateBookingEndStatus(ctx, bookingID);

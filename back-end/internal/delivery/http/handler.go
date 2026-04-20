@@ -448,3 +448,32 @@ func (u *BookingHandler) GetUserOverview(c *fiber.Ctx) error {
 	// ส่งกลับเป็น JSON ก้อนเดียวที่มีทั้ง User และ Statistics
 	return c.Status(fiber.StatusOK).JSON(response)
 }
+
+func (u *BookingHandler) GetPaginatedUserBookings(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
+	// 1. ดึง User ID จาก URL Params
+	userID, err := uuid.Parse(c.Params("userID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid User ID")
+	}
+
+	// 2. รับค่า Query Params (Pagination & Filters)
+	q := new(domain.BookingPaginationQuery)
+	if err := c.QueryParser(q); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	// 3. เรียก Usecase (ซึ่งข้างในจะจัดการค่า Default Page/Limit เหมือนในหน้า User ปกติ)
+	response, err := u.usecase.GetPaginatedUserBookings(ctx, userID, q)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
+}

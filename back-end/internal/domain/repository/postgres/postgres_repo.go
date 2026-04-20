@@ -52,4 +52,5 @@ type HelperPostgresRepository interface {
 	UpdateConfigDB(ctx context.Context, config *domain.Config) error
 	GetPaginatedUsersDB(ctx context.Context, q *domain.UserPaginationQuery) ([]domain.User, int64, error)
 	GetUserOverviewDB(ctx context.Context, userID uuid.UUID) (*domain.UserOverviewResponse, error)
+	GetPaginatedUserBookingsDB(ctx context.Context, userID uuid.UUID, q *domain.BookingPaginationQuery) ([]domain.UserBookingHistoryRes, int64, error)
 }
