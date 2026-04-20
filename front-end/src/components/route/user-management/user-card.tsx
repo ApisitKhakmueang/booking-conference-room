@@ -25,7 +25,7 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
             <div className="flex items-center gap-4 w-full md:w-[35%] pr-8 md:pr-0">
               <div className="relative">
                 <img src={user.avatarUrl || "https://via.placeholder.com/150"} alt={user.fullName} className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-800" />
-                <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 rounded-full ${statusStyle.dot} ${statusStyle.ring}`}></div>
+                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${statusStyle.dot}`}></div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <h3 className="text-light-main dark:text-main font-bold text-base tracking-wide leading-none">
