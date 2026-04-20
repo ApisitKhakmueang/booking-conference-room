@@ -530,6 +530,15 @@ func (u *bookingUsecase) GetPaginatedUsers(ctx context.Context, q *domain.UserPa
 	}, nil
 }
 
+func (u *bookingUsecase) GetUserOverview(ctx context.Context, userID uuid.UUID) (*domain.UserOverviewResponse, error) {
+	userOverviewResponse, err := u.helperPostgres.GetUserOverviewDB(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return userOverviewResponse, nil
+}
+
 // Helper function
 func (u *bookingUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error {
 	booking, roomNumber, err := u.redis.UpdateBookingEndStatus(ctx, bookingID);

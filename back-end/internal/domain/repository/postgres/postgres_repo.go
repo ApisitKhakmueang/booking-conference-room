@@ -40,7 +40,6 @@ type PostgresRepository interface {
 }
 
 type HelperPostgresRepository interface {
-	GetPaginatedUsersDB(ctx context.Context, q *domain.UserPaginationQuery) ([]domain.User, int64, error)
 	CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*domain.Booking, error)
 	GetRoomID(ctx context.Context, booking *domain.Booking, roomNumber uint) error
@@ -51,4 +50,6 @@ type HelperPostgresRepository interface {
 	GetRoomNumberDB(ctx context.Context, bookingID uuid.UUID) (uint, error)
 	GetConfigDB(ctx context.Context) (*domain.Config, error)
 	UpdateConfigDB(ctx context.Context, config *domain.Config) error
+	GetPaginatedUsersDB(ctx context.Context, q *domain.UserPaginationQuery) ([]domain.User, int64, error)
+	GetUserOverviewDB(ctx context.Context, userID uuid.UUID) (*domain.UserOverviewResponse, error)
 }

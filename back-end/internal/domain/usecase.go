@@ -40,6 +40,7 @@ type BookingUsecase interface {
 	UpdateConfig(ctx context.Context, config *Config) error
 
 	GetPaginatedUsers(ctx context.Context, q *UserPaginationQuery) (*PaginatedUserResponse, error)
+	GetUserOverview(ctx context.Context, userID uuid.UUID) (*UserOverviewResponse, error)
 
 	UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error
 	UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) error

@@ -484,6 +484,37 @@ func (p *postgresRepository) GetPaginatedUsersDB(ctx context.Context, q *domain.
 	return users, totalItems, nil
 }
 
+func (p *postgresRepository) GetUserOverviewDB(ctx context.Context, userID uuid.UUID) (*domain.UserOverviewResponse, error) {
+	var userInfo domain.UserInfoRes
+	var stats domain.UserStatsRes
+
+	// 1. ดึงข้อมูลพื้นฐานของ User
+	if err := p.db.WithContext(ctx).Model(&domain.User{}).
+		Select("id, full_name, email, avatar_url, role, status").
+		Where("id = ?", userID).
+		First(&userInfo).Error; err != nil {
+		return nil, err
+	}
+
+	// 2. นับสถิติทุกสถานะใน Query เดียว! (Single Query Aggregation)
+	if err := p.db.WithContext(ctx).Model(&domain.Booking{}).
+		Select(`
+			COALESCE(SUM(CASE WHEN status = 'confirm' THEN 1 ELSE 0 END), 0) as upcoming,
+			COALESCE(SUM(CASE WHEN status = 'complete' THEN 1 ELSE 0 END), 0) as completed,
+			COALESCE(SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END), 0) as cancelled,
+			COALESCE(SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END), 0) as no_show
+		`).
+		Where("user_id = ?", userID).
+		Scan(&stats).Error; err != nil {
+		return nil, err
+	}
+
+	return &domain.UserOverviewResponse{
+		User:       userInfo,
+		Statistics: stats,
+	}, nil
+}
+
 // helper function
 func (p *postgresRepository) CheckInBooking(ctx context.Context, roomID uuid.UUID, passcode string) error {
 	now := time.Now()

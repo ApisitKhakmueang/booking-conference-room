@@ -405,6 +405,11 @@ func (u *BookingHandler) UpdateConfig(c *fiber.Ctx) error {
 
 func (u *BookingHandler) GetPaginatedUsers(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
 	
 	q := new(domain.UserPaginationQuery)
 	// ดึงข้อมูลจาก ?page=1&limit=5&search=xxx มาใส่ใน q
@@ -417,5 +422,29 @@ func (u *BookingHandler) GetPaginatedUsers(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func (u *BookingHandler) GetUserOverview(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
+	// รับ userID จาก Params
+	userID, err := uuid.Parse(c.Params("userID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid User ID")
+	}
+
+	// เรียก Usecase -> Repository
+	response, err := u.usecase.GetUserOverview(ctx, userID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	// ส่งกลับเป็น JSON ก้อนเดียวที่มีทั้ง User และ Statistics
 	return c.Status(fiber.StatusOK).JSON(response)
 }
