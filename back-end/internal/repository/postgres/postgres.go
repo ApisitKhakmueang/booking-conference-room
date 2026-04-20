@@ -734,6 +734,25 @@ func (p *postgresRepository) UpdateConfigDB(ctx context.Context, config *domain.
 	return nil
 }
 
+func (p *postgresRepository) UpdateUserStatusDB(ctx context.Context, userID uuid.UUID, newStatus string) error {
+	result := p.db.WithContext(ctx).
+		Model(&domain.User{}).
+		Where("id = ?", userID).
+		Update("status", newStatus) // ลบลูกน้ำออกแล้ว
+
+	// 1. เช็ค Error จาก Database (เช่น connection หลุด หรือ query พัง)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// 2. ⭐️ เช็คว่าอัปเดตโดนใครไหม (ถ้าเป็น 0 แปลว่าหา User ID นี้ไม่เจอ)
+	if result.RowsAffected == 0 {
+		return errors.New("user not found") 
+	}
+
+	return nil
+}
+
 // internal function
 // สร้างฟังก์ชัน Helper เล็กๆ ไว้ในไฟล์เดียวกัน
 func preloadBookingRelations(db *gorm.DB) *gorm.DB {

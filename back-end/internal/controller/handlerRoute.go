@@ -42,4 +42,5 @@ func InitialAdminRoute(router fiber.Router, handler *http.BookingHandler) {
 	router.Get("/users", handler.GetPaginatedUsers)
 	router.Get("/users/:userID/overview", handler.GetUserOverview)
 	router.Get("/users/:userID/bookings", handler.GetPaginatedUserBookings)
+	router.Put("/users/:userID", handler.UpdateUserStatus)
 }

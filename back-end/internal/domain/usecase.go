@@ -38,6 +38,7 @@ type BookingUsecase interface {
 	GetHoliday(ctx context.Context,date *Date) ([]Holiday, error)
 	GetConfig(ctx context.Context) (*Config, error)
 	UpdateConfig(ctx context.Context, config *Config) error
+	UpdateUserStatus(ctx context.Context, userID uuid.UUID, newStatus string) error
 
 	GetPaginatedUsers(ctx context.Context, q *UserPaginationQuery) (*PaginatedUserResponse, error)
 	GetUserOverview(ctx context.Context, userID uuid.UUID) (*UserOverviewResponse, error)

@@ -403,6 +403,38 @@ func (u *BookingHandler) UpdateConfig(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Update config time successfully")
 }
 
+func (u *BookingHandler) UpdateUserStatus(c *fiber.Ctx) error {
+	ctx := c.UserContext()
+	role := c.Locals("role")
+	if role != "admin" {
+		return c.Status(fiber.StatusForbidden).SendString("Access denied")
+	}
+
+	userID, err := uuid.Parse(c.Params("userID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid User ID")
+	}
+
+	// ⭐️ สร้าง Struct เฉพาะกิจมารับ JSON Body
+	var req struct {
+		Status string `json:"status"`
+	}
+	
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+	}
+
+	if err := u.usecase.UpdateUserStatus(ctx, userID, req.Status); err != nil {
+		// ดักจับ Error แจ้งว่าหา User ไม่เจอ (ต่อเนื่องจาก Repository ที่เราทำไว้)
+		if err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).SendString("User not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Update user status successfully")
+}
+
 func (u *BookingHandler) GetPaginatedUsers(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 

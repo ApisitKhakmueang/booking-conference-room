@@ -490,6 +490,18 @@ func (u *bookingUsecase) UpdateConfig(ctx context.Context, config *domain.Config
 	return nil
 }
 
+func (u *bookingUsecase) UpdateUserStatus(ctx context.Context, userID uuid.UUID, newStatus string) error {
+	if newStatus != "active" && newStatus != "inactive" {
+		return errors.New("invalid status: must be 'active' or 'inactive'")
+	}
+
+	if err := u.helperPostgres.UpdateUserStatusDB(ctx, userID, newStatus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *bookingUsecase) GetPaginatedUsers(ctx context.Context, q *domain.UserPaginationQuery) (*domain.PaginatedUserResponse, error) {
 	// 1. จัดการ Default
 	if q.Page <= 0 { q.Page = 1 }
