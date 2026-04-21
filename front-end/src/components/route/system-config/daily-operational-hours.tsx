@@ -11,7 +11,7 @@ export default function DailyOperationalHours({ config, setConfig, isOpenEdit }:
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col xl:flex-row lg:flex-col sm:flex-row gap-4 w-full">
         <div className="bg-light-purple dark:bg-card border border-transparent p-4 rounded-xl flex-1 flex justify-between items-center group focus-within:border-dark-purple focus-within:ring-1 focus-within:ring-dark-purple transition-colors">
           <div>
             <p className="text-[9px] text-light-secondary dark:text-secondary tracking-widest font-bold mb-1">COMMENCEMENT</p>
