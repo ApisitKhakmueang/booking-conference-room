@@ -1,12 +1,12 @@
 import { useState } from "react";
-import RoomCard from "./room-card";
+import RoomCard, { RoomCardSkeleton } from "./room-card";
 import Swal from "sweetalert2";
 import { RoomListProps } from "@/utils/interface/interface";
 import RoomPagination from "./room-pagination";
 
 const ITEMS_PER_PAGE = 4;
 
-export default function RoomList({ rooms, handleEditClick, reloadRoom }: RoomListProps) {
+export default function RoomList({ rooms, handleEditClick, reloadRoom, isLoading }: RoomListProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalRooms = rooms.length;
@@ -29,7 +29,9 @@ export default function RoomList({ rooms, handleEditClick, reloadRoom }: RoomLis
 
       {/* List Content */}
       <div className="flex flex-col gap-3 mb-6">
-        {currentRooms.length > 0 ? (
+        {isLoading ? (
+          <RoomCardSkeleton />
+        ) : currentRooms.length > 0 ? (
           currentRooms.map((room) => (
             <div key={room.id} onClick={() => handleEditClick(room)}>
               <RoomCard room={room} onDelete={reloadRoom} />

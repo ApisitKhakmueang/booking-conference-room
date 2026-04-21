@@ -60,3 +60,31 @@ export default function StatusSection({ rooms }: StatusSectionProps) {
     </div>
   )
 }
+
+export function StatusSectionSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
+      {/* Card 1: Total Rooms */}
+      <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar p-6 rounded-2xl shadow-sm dark:shadow-none animate-pulse">
+        <div className="h-3 w-24 bg-slate-200 dark:bg-white/10 rounded-md mb-5"></div>
+        <div className="flex items-baseline gap-3">
+          <div className="h-10 w-12 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          <div className="h-6 w-16 bg-slate-200 dark:bg-white/10 rounded-full"></div>
+        </div>
+      </div>
+
+      {/* Card 2 & 3: Operational & Maintenance */}
+      {Array.from({ length: 2 }).map((_, i) => (
+        <div key={i} className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-none animate-pulse">
+          <div className="h-3 w-32 bg-slate-200 dark:bg-white/10 rounded-md mb-5"></div>
+          <div className="flex items-baseline gap-3 mb-5">
+            <div className="h-10 w-12 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+          {/* Progress Bar Skeleton */}
+          <div className="w-full h-1 bg-slate-200 dark:bg-white/10 rounded-full"></div>
+        </div>
+      ))}
+    </div>
+  );
+}

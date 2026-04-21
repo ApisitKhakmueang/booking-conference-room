@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { RoomResponse } from '@/utils/interface/response';
 import { Button } from '@/components/ui/button';
-import StatusSection from './status-section';
+import StatusSection, { StatusSectionSkeleton } from './status-section';
 import RoomList from './room-list';
 import { useRoomData } from '@/hooks/data/useRoomData';
 import RoomModal from './room-modal';
@@ -35,7 +35,7 @@ export default function RoomManagement() {
   const modalProps = { typeOperate, isModalOpen, setIsModalOpen, selectedRoom, reloadRoom }
 
   return (
-    <div className={`w-full text-sm pb-3 ${isLoading ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
+    <div className="w-full max-w-6xl text-sm pb-3">
       
       {/* 1. Add Button */}
       <div className="flex md:flex-row flex-col justify-between md:items-center gap-2 mb-6">
@@ -48,11 +48,11 @@ export default function RoomManagement() {
         </div>
       </div>
 
-      {/* 2. Stats Section */}
-      <StatusSection rooms={room} />
+      {/* 🌟 2. Stats Section - สลับระหว่าง Skeleton / ของจริง */}
+      {isLoading ? <StatusSectionSkeleton /> : <StatusSection rooms={room} />}
 
-      {/* 3. Room List Section */}
-      <RoomList rooms={room} handleEditClick={handleEditClick} reloadRoom={reloadRoom} />
+      {/* 🌟 3. Room List Section - ส่ง isLoading เข้าไป */}
+      <RoomList rooms={room} handleEditClick={handleEditClick} reloadRoom={reloadRoom} isLoading={isLoading} />
       
       <RoomModal {...modalProps} />
     </div>

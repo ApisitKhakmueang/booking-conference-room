@@ -110,3 +110,41 @@ export default function RoomCard({ room, onDelete }: RoomCardProps) {
     </div>
   );
 }
+
+export function RoomCardSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div 
+          key={index}
+          className="relative flex flex-col md:flex-row md:items-center justify-between p-4 md:p-5 bg-white border border-gray-100 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar rounded-2xl gap-4 md:gap-0 animate-pulse"
+        >
+          {/* 1. Name & Location */}
+          <div className="flex flex-col gap-2 w-full md:w-1/3 pr-8 md:pr-0 mt-1">
+            <div className="h-5 w-32 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="h-3 w-48 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+          {/* Capacity & Status */}
+          <div className="flex items-center justify-between w-full md:w-1/2 border-t border-gray-100 dark:border-white/5 md:border-none pt-3 md:pt-0 mt-1">
+            {/* Capacity */}
+            <div className="flex items-center gap-2 md:w-1/2">
+              <div className="h-5 w-8 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+              <div className="h-3 w-8 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex md:w-1/2 md:justify-start justify-end">
+              <div className="h-7 w-24 bg-slate-200 dark:bg-white/10 rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Action */}
+          <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto flex justify-end md:w-12">
+            <div className="h-8 w-8 bg-slate-200 dark:bg-white/10 rounded-lg"></div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}

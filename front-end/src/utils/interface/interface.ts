@@ -202,6 +202,7 @@ export interface RoomListProps {
   rooms: RoomResponse[]
   handleEditClick: (room:RoomResponse) => void
   reloadRoom: () => void
+  isLoading?: boolean;
 }
 
 export interface RoomCardProps {
