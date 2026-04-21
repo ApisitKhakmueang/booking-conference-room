@@ -81,7 +81,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
           placeholder="you@example.com"
           value={email}
           required
-          className="border border-gray-300 rouded-lg p-2"
+          className="border-gray-300 dark:border-gray-700"
           onChange={e => setEmail(e.target.value)}
         />
 
@@ -102,7 +102,7 @@ export default function SignIn_SignUp_Fill_Form({ isSignIn }: SignInProps) {
             type={isShowPassword ? 'text' : 'password'}
             placeholder="********"
             value={password}
-            className="w-full"
+            className="border-gray-300 dark:border-gray-700"
             required
             onChange={e => {
               setPassword(e.target.value)
