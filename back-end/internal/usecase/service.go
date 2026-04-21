@@ -553,7 +553,7 @@ func (u *bookingUsecase) GetUserOverview(ctx context.Context, userID uuid.UUID) 
 
 func (u *bookingUsecase) GetPaginatedUserBookings(ctx context.Context, userID uuid.UUID, q *domain.BookingPaginationQuery) (*domain.PaginatedBookingResponse, error) {
 	if q.Page <= 0 { q.Page = 1 }
-	if q.Limit <= 0 { q.Limit = 5 }
+	if q.Limit <= 0 { q.Limit = 4 }
 
 	bookings, totalItems, err := u.helperPostgres.GetPaginatedUserBookingsDB(ctx, userID, q)
 	if err != nil {
