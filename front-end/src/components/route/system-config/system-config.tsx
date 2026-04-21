@@ -87,7 +87,7 @@ export default function OperationalControls() {
   const componentProps = { config, setConfig, isOpenEdit }
 
   return (
-    <div className={`w-full text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors ${isLoadingConfig ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
+    <div className={`w-full max-w-6xl text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors ${isLoadingConfig ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
       
       {/* Header */}
       <div className="flex md:flex-row flex-col justify-between md:items-center gap-3 mb-8">
