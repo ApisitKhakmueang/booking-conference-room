@@ -2,12 +2,12 @@
 import { useEffect, useState } from 'react';
 import AdvancedWindow from './advance-window';
 import MaxBookingMins from './max-booking-mins';
-import CheckInPolicy from './check-in-policy';
 import DailyOperationalHours from './daily-operational-hours';
 import { Button } from '@/components/ui/button';
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import Swal from 'sweetalert2';
 import { configService } from '@/service/booking.service';
+import LateArrivalPolicy from './late-arrival-policy';
 
 export default function OperationalControls() {
   const { config: fetchedConfig, isLoadingConfig, reloadConfig } = useSystemConfig();
@@ -18,7 +18,6 @@ export default function OperationalControls() {
     startTime: "08:00",
     endTime: "20:00",
     noShowThresholdMins: 15,
-    earlyCheckInMinutes: 15
   });
 
   useEffect(() => {
@@ -29,7 +28,6 @@ export default function OperationalControls() {
         startTime: fetchedConfig.startTime,
         endTime: fetchedConfig.endTime,
         noShowThresholdMins: fetchedConfig.noShowThresholdMins,
-        earlyCheckInMinutes: fetchedConfig.earlyCheckInMinutes
       });
     }
   }, [fetchedConfig]); // ทำงานทุกครั้งที่ fetchedConfig เปลี่ยน (เช่น ตอนโหลดเสร็จครั้งแรก)
@@ -43,7 +41,6 @@ export default function OperationalControls() {
         startTime: fetchedConfig.startTime,
         endTime: fetchedConfig.endTime,
         noShowThresholdMins: fetchedConfig.noShowThresholdMins,
-        earlyCheckInMinutes: fetchedConfig.earlyCheckInMinutes
       });
     }
 
@@ -90,7 +87,7 @@ export default function OperationalControls() {
   const componentProps = { config, setConfig, isOpenEdit }
 
   return (
-    <div className={`w-full max-w-6xl text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors ${isLoadingConfig ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
+    <div className={`w-full text-sm pb-10 text-light-main dark:text-main font-sans mt-4 transition-colors ${isLoadingConfig ? 'opacity-40 pointer-none' : 'opacity-100'}`}>
       
       {/* Header */}
       <div className="flex md:flex-row flex-col justify-between md:items-center gap-3 mb-8">
@@ -121,7 +118,7 @@ export default function OperationalControls() {
         <AdvancedWindow {...componentProps} />
 
         {/* 3. Late Arrival Policy (Spans 2 cols) */}
-        <CheckInPolicy {...componentProps} />
+        <LateArrivalPolicy {...componentProps} />
 
         {/* 4. Daily Operational Hours (Spans 3 cols) */}
         <DailyOperationalHours {...componentProps} />

@@ -12,29 +12,6 @@ import { mapBookingEvents } from "@/lib/map-resp-event";
 import useBookingStatusByRoomIDWS from "@/hooks/data/useBookingStatusByRoomIDWS";
 import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
-// const mapEvent:BookingEvent | undefined = 
-// // undefined
-// {
-//   id: "evt-001",
-//   title: "Business Strategy Sync",
-//   date: "2026-04-06",
-//   startTime: "2026-04-06T08:30:00.000Z",
-//   endTime: "2026-04-06T09:30:00.000Z",
-//   duration: "1 h",
-//   room: {
-//     id: "rm-01",
-//     name: "Boardroom Alpha",
-//     roomNumber: 401,
-//   },
-//   status: "Confirmed" as BookingStatus,
-//   user: {
-//     id: "usr-101",
-//     email: "alexander.s@company.com",
-//     fullName: "Alexander Sterling",
-//     role: "Executive",
-//   }
-// }
-
 export default function CheckIn({ roomID }: { roomID: string }) {
   const [roomData, setRoomData] = useState<RoomResponse | null>(null);
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)

@@ -63,7 +63,6 @@ export interface ConfigResponse {
   maxAdvanceDays: number
   maxBookingMins: number
   noShowThresholdMins: number
-  earlyCheckInMinutes: number
 }
 
 export interface PaginationMeta {
