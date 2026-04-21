@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import AdvancedWindow from './advance-window';
 import MaxBookingMins from './max-booking-mins';
-import LateArrivalPolicy from './late-arrival-policy';
+import CheckInPolicy from './check-in-policy';
 import DailyOperationalHours from './daily-operational-hours';
 import { Button } from '@/components/ui/button';
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
@@ -18,6 +18,7 @@ export default function OperationalControls() {
     startTime: "08:00",
     endTime: "20:00",
     noShowThresholdMins: 15,
+    earlyCheckInMinutes: 15
   });
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function OperationalControls() {
         startTime: fetchedConfig.startTime,
         endTime: fetchedConfig.endTime,
         noShowThresholdMins: fetchedConfig.noShowThresholdMins,
+        earlyCheckInMinutes: fetchedConfig.earlyCheckInMinutes
       });
     }
   }, [fetchedConfig]); // ทำงานทุกครั้งที่ fetchedConfig เปลี่ยน (เช่น ตอนโหลดเสร็จครั้งแรก)
@@ -41,6 +43,7 @@ export default function OperationalControls() {
         startTime: fetchedConfig.startTime,
         endTime: fetchedConfig.endTime,
         noShowThresholdMins: fetchedConfig.noShowThresholdMins,
+        earlyCheckInMinutes: fetchedConfig.earlyCheckInMinutes
       });
     }
 
@@ -118,7 +121,7 @@ export default function OperationalControls() {
         <AdvancedWindow {...componentProps} />
 
         {/* 3. Late Arrival Policy (Spans 2 cols) */}
-        <LateArrivalPolicy {...componentProps} />
+        <CheckInPolicy {...componentProps} />
 
         {/* 4. Daily Operational Hours (Spans 3 cols) */}
         <DailyOperationalHours {...componentProps} />
