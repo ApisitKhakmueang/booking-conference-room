@@ -466,7 +466,7 @@ func (p *postgresRepository) GetPaginatedUsersDB(ctx context.Context, q *domain.
 	var users []domain.User
 	var totalItems int64
 
-	query := p.db.WithContext(ctx).Model(&domain.User{})
+	query := p.db.WithContext(ctx).Model(&domain.User{}).Where("role = ?", "user")
 	if q.Search != "" {
 		query = query.Where("full_name ILIKE ? OR email ILIKE ?", "%"+q.Search+"%", "%"+q.Search+"%")
 	}
