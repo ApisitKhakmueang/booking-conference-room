@@ -1,24 +1,14 @@
+import { SummaryCardProps } from '@/utils/interface/interface';
 import { Calendar, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { useMemo } from 'react';
-
-interface StatisticsProps {
-  upcoming: number 
-  completed: number
-  cancelled: number
-  noShow: number
-}
-
-interface SummaryCardProps {
-  statistics: StatisticsProps
-}
 
 export default function SummaryCard({ statistics }: SummaryCardProps) {
   const statisticsObject = useMemo(() => {
     return [
-      { label: 'Upcoming', val: statistics.upcoming || 0, icon: Calendar, color: 'text-dark-purple dark:text-purple-400' },
-      { label: 'Completed', val: statistics.completed || 0, icon: CheckCircle2, color: 'text-emerald-500 dark:text-emerald-400' },
-      { label: 'Cancelled', val: statistics.cancelled || 0, icon: XCircle, color: 'text-rose-500 dark:text-rose-400' },
-      { label: 'No-Show', val: statistics.noShow || 0, icon: AlertTriangle, color: 'text-orange-500 dark:text-orange-400' },
+      { label: 'Upcoming', val: statistics?.upcoming || 0, icon: Calendar, color: 'text-dark-purple dark:text-purple-400' },
+      { label: 'Completed', val: statistics?.completed || 0, icon: CheckCircle2, color: 'text-emerald-500 dark:text-emerald-400' },
+      { label: 'Cancelled', val: statistics?.cancelled || 0, icon: XCircle, color: 'text-rose-500 dark:text-rose-400' },
+      { label: 'No-Show', val: statistics?.noShow || 0, icon: AlertTriangle, color: 'text-orange-500 dark:text-orange-400' },
     ]
   }, [statistics])
 

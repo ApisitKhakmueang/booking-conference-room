@@ -1,21 +1,9 @@
-import { BookingHistoryItem } from "@/utils/interface/response";
+import { HistoryPaginationProps } from "@/utils/interface/interface";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-interface HistoryPagination {
-  booking: BookingHistoryItem[]
-  currentPage: number
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>
-}
-
-const ITEMS_PER_PAGE = 4
-
-export default function HistoryPagination({ booking, currentPage, setCurrentPage }: HistoryPagination) {
-  const totalItems = booking.length;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
-  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-
+export default function HistoryPagination({ 
+  currentPage, setCurrentPage, totalPages, totalItems, indexOfFirstItem, indexOfLastItem 
+}: HistoryPaginationProps) {
   const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const goToPrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const goToPage = (page: number) => setCurrentPage(page);

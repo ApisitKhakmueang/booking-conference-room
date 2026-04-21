@@ -8,7 +8,7 @@ export default async function Page({ params }: { params: Promise<{ userID: strin
   return (
     <EachPageLayout className="flex justify-center">
       {/* 🌟 4. ส่ง userId เป็น Prop เข้าไปใน Component ลูก */}
-      <UserHistory userId={resolvedParams.userID} />
+      <UserHistory userID={resolvedParams.userID} />
     </EachPageLayout>
   )
 }

@@ -1,27 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HistoryHeader from "./history-header";
 import HistoryPagination from "./history-pagination";
-import { BookingHistoryItem } from "@/utils/interface/response";
 import HistoryCard from "./history-card";
 import MonthYearPicker from "@/components/utils/month-year-picker";
 import StatusPicker from "./status-picker";
+import { usePaginatedUserBookings } from "@/hooks/data/usePaginatedUserBookings";
 
-interface HistoryTableContainer {
-  booking: BookingHistoryItem[]
-}
-
-const ITEMS_PER_PAGE = 4
-
-export default function HistoryTableContainer({ booking }: HistoryTableContainer) {
+export default function HistoryTableContainer({ userID }: { userID: string }) {
   const [currentStatus, setCurrentStatus] = useState('all')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4
 
-  const totalItems = booking.length;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
-  const currentBookings = booking.slice(indexOfFirstItem, indexOfLastItem);
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1; // บวก 1 เพราะ Date ของ JS เดือนเริ่มที่ 0
+
+  // 🌟 รีเซ็ตหน้ากลับเป็นหน้า 1 เสมอเวลาเปลี่ยนตัวกรอง
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentStatus, currentDate]);
+
+  const { bookingsData, isLoadingBookings } = usePaginatedUserBookings(userID, currentPage, itemsPerPage, currentStatus, year, month);
+
+  // 🌟 ดึงข้อมูลออกจาก SWR
+  const currentBookings = bookingsData?.data || [];
+  const totalItems = bookingsData?.meta.totalItems || 0;
+  const totalPages = bookingsData?.meta.totalPages || 1;
+  const indexOfFirstItem = bookingsData?.meta.indexOfFirstItem || 0;
+  const indexOfLastItem = bookingsData?.meta.indexOfLastItem || 0;
 
   return (
     <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar rounded-3xl md:p-5 p-4 shadow-xl dark:shadow-none">
@@ -51,7 +57,14 @@ export default function HistoryTableContainer({ booking }: HistoryTableContainer
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <HistoryPagination booking={booking} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <HistoryPagination 
+          currentPage={currentPage} 
+          setCurrentPage={setCurrentPage} 
+          totalPages={totalPages}
+          totalItems={totalItems}
+          indexOfFirstItem={indexOfFirstItem}
+          indexOfLastItem={indexOfLastItem}
+        />
       )}
 
     </div>
