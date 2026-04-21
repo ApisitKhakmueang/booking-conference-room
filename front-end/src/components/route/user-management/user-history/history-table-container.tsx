@@ -33,7 +33,7 @@ export default function HistoryTableContainer({ userID }: { userID: string }) {
     <div className="bg-white border border-gray-100 dark:border-none dark:bg-sidebar rounded-3xl md:p-5 p-4 shadow-xl dark:shadow-none">
       
       {/* Table Filters */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 px-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 px-2">
         <h2 className="text-lg font-bold text-light-main dark:text-main">Booking History</h2>
         <div className="flex flex-col items-start xs:flex-row md:items-center gap-3 w-full sm:w-auto">
           <MonthYearPicker currentDate={currentDate} setCurrentDate={setCurrentDate} />

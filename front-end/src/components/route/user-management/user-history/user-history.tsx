@@ -14,7 +14,7 @@ export default function UserHistory({ userID }: { userID: string }) {
   const statistics = overviewData?.statistics
 
   return (
-    <div className="w-full max-w-6xl mx-auto mt-5 space-y-4 pb-5">
+    <div className="w-full max-w-6xl mx-auto space-y-4 pb-5">
       
       {/* Back Button */}
       <button 
