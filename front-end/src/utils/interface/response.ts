@@ -108,10 +108,10 @@ export interface UserRoomRes {
 export interface UserBookingHistoryRes {
   id: string;                 // uuid.UUID แปลงเป็น string
   title: string;
-  startTime: string | null;   // *time.Time เป็น pointer เผื่อค่า null
-  endTime: string | null;     // *time.Time เป็น pointer เผื่อค่า null
-  status: string | null;      // *string เป็น pointer เผื่อค่า null
-  checkedInAt: string | null; // *time.Time เป็น pointer เผื่อค่า null
+  startTime: string;   // *time.Time เป็น pointer เผื่อค่า null
+  endTime: string;     // *time.Time เป็น pointer เผื่อค่า null
+  status: string;      // *string เป็น pointer เผื่อค่า null
+  checkedInAt: string; // *time.Time เป็น pointer เผื่อค่า null
   Room: UserRoomRes;          // ตัวพิมพ์ใหญ่ตาม json:"Room"
 }
 
