@@ -83,3 +83,47 @@ export default function UserCard({ currentUsers, toggleStatus, updatingID }: Use
     </>
   )
 }
+
+export function UserCardSkeleton() {
+  return (
+    <>
+      {/* วนลูปสร้าง Skeleton จำลอง 5 อัน */}
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div 
+          key={index} 
+          className="relative flex flex-col md:flex-row md:items-center p-4 md:p-5 bg-white border border-gray-100 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar rounded-2xl animate-pulse"
+        >
+          
+          {/* 1. Member Name & Avatar Skeleton */}
+          <div className="flex items-center gap-4 w-full md:w-[35%] pr-8 md:pr-0">
+            <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-white/10 shrink-0"></div>
+            <div className="flex flex-col gap-2 w-full">
+              <div className="h-4 w-32 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+              <div className="h-3 w-20 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            </div>
+          </div>
+
+          {/* 2. Identity (Email) Skeleton */}
+          <div className="w-full md:w-[35%] flex items-center pt-3 md:pt-0 mt-3 md:mt-0">
+            <div className="h-4 w-48 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+          {/* 3. Status Badge / Toggle Skeleton */}
+          <div className="w-full md:w-[20%] flex justify-between md:justify-start items-center pt-3 md:pt-0 mt-3 md:mt-0">
+            <div className="md:hidden h-3 w-12 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-6 rounded-full bg-slate-200 dark:bg-white/10"></div>
+              <div className="h-3 w-16 bg-slate-200 dark:bg-white/10 rounded-md hidden md:block"></div>
+            </div>
+          </div>
+
+          {/* 4. Action Skeleton */}
+          <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto flex justify-end md:w-[10%]">
+            <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-white/10 md:mr-4"></div>
+          </div>
+
+        </div>
+      ))}
+    </>
+  );
+}

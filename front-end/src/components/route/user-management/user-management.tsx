@@ -6,7 +6,7 @@ import { UserResponse } from '@/utils/interface/response';
 import UserPagination from './user-pagination';
 import Header from './header';
 import { Input } from '@/components/ui/input';
-import UserCard from './user-card';
+import UserCard, { UserCardSkeleton } from './user-card';
 import Swal from 'sweetalert2';
 import { usePaginatedUsers } from '@/hooks/data/usePaginatedUsers';
 import { adminService } from '@/service/booking.service';
@@ -19,7 +19,7 @@ export default function UserTable() {
   const [updatingID, setUpdatingID] = useState<string | null>(null);
 
   // 🌟 เรียกใช้ Hook แค่บรรทัดเดียว!
-  const { usersData, reloadUsers } = usePaginatedUsers(currentPage, itemsPerPage, searchTerm);
+  const { usersData, reloadUsers, isLoadingUsers } = usePaginatedUsers(currentPage, itemsPerPage, searchTerm);
 
   // ดึงข้อมูลออกมาก่อนใช้
   const currentUsers = usersData?.data || [];
@@ -79,11 +79,13 @@ export default function UserTable() {
 
         {/* List Content */}
         <div className="flex flex-col gap-3 mb-6">
-          {currentUsers.length > 0 ? (
+          {isLoadingUsers ? (
+            <UserCardSkeleton /> // กำลังโหลด: โชว์ Skeleton 5 อัน
+          ) : currentUsers.length > 0 ? (
             <UserCard 
               currentUsers={currentUsers} 
               toggleStatus={toggleStatus} 
-              updatingID={updatingID} // 🌟 4. ส่ง updatingID ลงไปให้ตัวลูก
+              updatingID={updatingID} 
             />
           ) : (
             <div className="text-center py-10 text-light-secondary dark:text-secondary text-sm font-medium">No users available.</div>

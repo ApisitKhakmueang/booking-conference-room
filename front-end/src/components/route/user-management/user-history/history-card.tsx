@@ -1,8 +1,8 @@
-import { BookingHistoryItem } from '@/utils/interface/response';
+import { UserBookingHistoryRes } from '@/utils/interface/response';
 import { format, differenceInMinutes, parseISO } from 'date-fns';
 
 interface HistoryCard {
-  booking: BookingHistoryItem
+  booking: UserBookingHistoryRes
 }
 
 export default function HistoryCard({ booking }: HistoryCard) {
@@ -74,5 +74,46 @@ export default function HistoryCard({ booking }: HistoryCard) {
       </div>
 
     </div>
+  );
+}
+
+export function HistoryCardSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div 
+          key={index} 
+          className="relative grid grid-cols-2 md:flex md:flex-row md:items-center p-4 md:p-5 bg-white border border-gray-100 shadow-sm dark:shadow-none dark:border-none dark:bg-sidebar rounded-2xl gap-y-3 md:gap-y-0 gap-x-2 md:gap-x-0 mb-3 animate-pulse"
+        >
+          
+          {/* Date */}
+          <div className="col-span-1 md:w-[20%] flex flex-col gap-1.5 mt-1">
+            <div className="h-4 w-16 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="h-3 w-10 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+          {/* Time & Duration */}
+          <div className="col-span-1 md:w-[35%] flex flex-col items-end md:items-start gap-1.5 mt-1">
+            <div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="h-3 w-12 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+          <div className="col-span-2 md:hidden w-full h-px bg-gray-100 dark:bg-white/5"></div>
+
+          {/* Room */}
+          <div className="col-span-1 md:w-[35%] flex flex-col pt-3 md:pt-0 gap-1.5">
+            <div className="h-4 w-20 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+            <div className="h-2 w-14 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+          {/* Status */}
+          <div className="col-span-1 md:w-[10%] flex items-center gap-2 pt-3 md:pt-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-white/10"></div>
+            <div className="h-3 w-16 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+
+        </div>
+      ))}
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import HistoryHeader from "./history-header";
 import HistoryPagination from "./history-pagination";
-import HistoryCard from "./history-card";
+import HistoryCard, { HistoryCardSkeleton } from "./history-card";
 import MonthYearPicker from "@/components/utils/month-year-picker";
 import StatusPicker from "./status-picker";
 import { usePaginatedUserBookings } from "@/hooks/data/usePaginatedUserBookings";
@@ -45,13 +45,15 @@ export default function HistoryTableContainer({ userID }: { userID: string }) {
       <HistoryHeader />
 
       {/* Rows */}
-      <div className="flex flex-col">
-        {currentBookings.length > 0 ? (
+      <div className="flex flex-col flex-1 relative gap-2 mt-3">
+        {isLoadingBookings ? (
+          <HistoryCardSkeleton /> // 🌟 กำลังโหลด: แสดง Skeleton 4 แถว
+        ) : currentBookings.length > 0 ? (
           currentBookings.map((booking) => (
             <HistoryCard key={booking.id} booking={booking} />
           ))
         ) : (
-          <div className="text-center py-10 text-light-secondary dark:text-secondary text-sm font-medium">No bookings found.</div>
+          <div className="text-center py-10 text-light-secondary dark:text-secondary text-sm font-medium">No bookings found for this period.</div>
         )}
       </div>
 

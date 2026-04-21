@@ -17,3 +17,22 @@ export default function ProfileHeader({ user }: { user?: UserResponse }) {
     </div>
   )
 }
+
+export function ProfileHeaderSkeleton() {
+  return (
+    <div className="flex items-center gap-5 animate-pulse">
+      {/* Avatar Skeleton (ขนาดเท่าของจริงเป๊ะ) */}
+      <div className="w-16 h-16 rounded-2xl bg-slate-200 dark:bg-white/10 shrink-0"></div>
+      
+      {/* Text Info Skeleton */}
+      <div className="flex flex-col gap-2">
+        {/* Name */}
+        <div className="h-7 w-48 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+        {/* Email */}
+        <div className="h-4 w-32 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+        {/* Status Badge */}
+        <div className="h-5 w-16 bg-slate-200 dark:bg-white/10 rounded-md mt-1"></div>
+      </div>
+    </div>
+  );
+}

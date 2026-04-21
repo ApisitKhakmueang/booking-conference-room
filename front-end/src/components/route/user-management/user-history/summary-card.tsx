@@ -25,3 +25,24 @@ export default function SummaryCard({ statistics }: SummaryCardProps) {
     </div>
   )
 }
+
+export function SummaryCardSkeleton() {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div 
+          key={index}
+          className="bg-white dark:bg-sidebar border border-gray-100 dark:border-none p-5 rounded-2xl shadow-sm animate-pulse"
+        >
+          {/* Header (Icon + Label) */}
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-white/10 shrink-0"></div>
+            <div className="h-3 w-16 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+          </div>
+          {/* Number */}
+          <div className="h-8 w-12 bg-slate-200 dark:bg-white/10 rounded-md mt-1"></div>
+        </div>
+      ))}
+    </div>
+  );
+}

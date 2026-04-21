@@ -2,8 +2,8 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import ProfileHeader from './profile-header';
-import SummaryCard from './summary-card';
+import ProfileHeader, { ProfileHeaderSkeleton } from './profile-header';
+import SummaryCard, { SummaryCardSkeleton } from './summary-card';
 import HistoryTableContainer from './history-table-container';
 import { useUserOverview } from '@/hooks/data/useUserOverview';
 
@@ -25,10 +25,18 @@ export default function UserHistory({ userID }: { userID: string }) {
       </button>
 
       {/* Profile Header */}
-      <ProfileHeader user={user} />
+      {isLoadingOverview ? (
+        <ProfileHeaderSkeleton /> // 🌟 แสดง Skeleton ตอนโหลด
+      ) : (
+        <ProfileHeader user={user} /> // โหลดเสร็จโชว์ข้อมูลจริง
+      )}
 
-      {/* Summary Cards */}
-      <SummaryCard statistics={statistics} />
+      {/* Summary Cards section */}
+      {isLoadingOverview ? (
+        <SummaryCardSkeleton /> // 🌟 แสดง Skeleton ตอนโหลด
+      ) : (
+        <SummaryCard statistics={statistics} /> // โหลดเสร็จโชว์ข้อมูลจริง
+      )}
 
       {/* History Table Container */}
       <HistoryTableContainer userID={userID} />
