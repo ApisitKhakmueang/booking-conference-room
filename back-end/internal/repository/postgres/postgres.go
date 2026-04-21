@@ -366,7 +366,7 @@ func (p *postgresRepository) UpdateRoomDB(ctx context.Context, room *domain.Room
 	result := p.db.
 		WithContext(ctx).
 		Where("id = ?", room.ID).
-		Select("Name", "RoomNumber", "Location", "Capacity", "IsActive").
+		Select("Name", "RoomNumber", "Location", "Capacity", "Status").
 		Updates(room)
 
 	if result.Error != nil {
