@@ -1,14 +1,9 @@
-import { UserPaginationProps } from "@/utils/interface/interface";
+import { UserPaginationProps } from "@/utils/interface/interface"; // แก้ path ให้ตรงกับของคุณ
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const ITEMS_PER_PAGE = 5;
-
-export default function UserPagination({ users, currentPage, setCurrentPage }: UserPaginationProps) {
-  const totalUsers = users.length;
-  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
-
-  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
-  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+export default function UserPagination({ 
+  currentPage, setCurrentPage, totalPages, totalUsers, indexOfFirstItem, indexOfLastItem 
+}: UserPaginationProps) {
 
   const goToNextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const goToPrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -16,7 +11,8 @@ export default function UserPagination({ users, currentPage, setCurrentPage }: U
 
   return (
     <div className="flex md:flex-row flex-col justify-between items-center gap-4 px-2 text-xs text-light-secondary dark:text-secondary font-bold uppercase tracking-widest pt-2">
-      <span>Displaying {users.length > 0 ? indexOfFirstItem + 1 : 0}-{Math.min(indexOfLastItem, users.length)} of {totalUsers} users</span>
+      {/* 🌟 แสดงตัวเลขจาก Backend ได้เลย */}
+      <span>Displaying {totalUsers > 0 ? indexOfFirstItem : 0}-{Math.min(indexOfLastItem, totalUsers)} of {totalUsers} users</span>
       
       <div className="flex items-center md:gap-8 gap-4">
         <button 

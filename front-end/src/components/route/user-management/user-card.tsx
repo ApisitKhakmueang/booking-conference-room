@@ -2,7 +2,7 @@ import { UserCardProps } from "@/utils/interface/interface";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) {
+export default function UserCard({ currentUsers, toggleStatus, updatingID }: UserCardProps) {
   const router = useRouter()
 
   const goToDetail = (userId: string) => {
@@ -13,6 +13,8 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
     <>
       {currentUsers.map((user) => {
         const isActive = user.status === 'active';
+
+        const isUpdating = updatingID === user.id;
         
         const statusStyle = isActive
           ? { text: 'text-success', toggleBg: 'bg-success', dot: 'bg-success shadow-[0_0_8px_var(--color-success)]', ring: 'border-white dark:border-sidebar' }
@@ -53,8 +55,9 @@ export default function UserCard({ currentUsers, toggleStatus }: UserCardProps) 
               </span>
               <div className="flex items-center gap-3">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); toggleStatus(user.id); }} 
-                  className={`w-10 h-6 rounded-full flex items-center p-1 transition-colors duration-300 cursor-pointer ${statusStyle.toggleBg}`}
+                  onClick={(e) => { e.stopPropagation(); toggleStatus(user.id, user.status as 'active' | 'inactive'); }} 
+                  disabled={isUpdating}
+                  className={`w-10 h-6 rounded-full flex items-center p-1 transition-all duration-300 ${statusStyle.toggleBg} ${isUpdating ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
                 >
                   <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${isActive ? 'translate-x-4' : 'translate-x-0'}`}></div>
                 </button>
