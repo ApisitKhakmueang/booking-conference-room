@@ -111,7 +111,7 @@ export default function Sidebar() {
               <div className="border-t pt-2 space-y-2">
                 {ADMIN_ITEMS.map(item => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href;
+                  const isActive = pathname.includes(item.href);
 
                   return (
                     <li key={item.name}>
