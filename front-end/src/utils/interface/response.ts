@@ -65,25 +65,57 @@ export interface ConfigResponse {
   noShowThresholdMins: number
 }
 
-export interface UserStatistics {
-  upcoming: number;
-  completed: number;
-  cancelled: number;
-  noShow: number;
+export interface PaginationMeta {
+  totalItems: number;       // int64 ใน Go แปลงเป็น number
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+  indexOfFirstItem: number; // ⭐️ ดึงมาจาก Struct ใหม่
+  indexOfLastItem: number;  // ⭐️ ดึงมาจาก Struct ใหม่
 }
 
-export interface BookingHistoryItem {
-  id: string;
+// ==========================================
+// 3. User & Statistics (ข้อมูลผู้ใช้และสถิติ)
+// ==========================================
+
+export interface UserStatsRes {
+  upcoming: number;  // int64 แปลงเป็น number
+  completed: number; 
+  cancelled: number; 
+  noShow: number;    
+}
+
+export interface UserOverviewResponse {
+  user: UserResponse;
+  statistics: UserStatsRes;
+}
+
+export interface PaginatedUserResponse {
+  data: UserResponse[]; // สันนิษฐานว่าใช้โครงสร้างเดียวกับ UserInfoRes
+  meta: PaginationMeta;
+}
+
+// ==========================================
+// 4. Booking History & Rooms (ประวัติการจองและห้อง)
+// ==========================================
+export interface UserRoomRes {
+  id: string;        // uuid.UUID แปลงเป็น string
+  name: string;
+  roomNumber: number; // uint แปลงเป็น number
+  location: string;
+}
+
+export interface UserBookingHistoryRes {
+  id: string;                 // uuid.UUID แปลงเป็น string
   title: string;
-  startTime: string; // Format ISO string
-  endTime: string;   // Format ISO string
-  status: string;    // "confirm" | "complete" | "cancelled" | "no_show"
-  checkedInAt: string | null; // สามารถเป็น null ได้ถ้ายังไม่เช็คอิน
-  Room: RoomResponse;    // ใช้ RoomResponse เดิมที่มีอยู่แล้วได้เลย
+  startTime: string | null;   // *time.Time เป็น pointer เผื่อค่า null
+  endTime: string | null;     // *time.Time เป็น pointer เผื่อค่า null
+  status: string | null;      // *string เป็น pointer เผื่อค่า null
+  checkedInAt: string | null; // *time.Time เป็น pointer เผื่อค่า null
+  Room: UserRoomRes;          // ตัวพิมพ์ใหญ่ตาม json:"Room"
 }
 
-export interface UserHistoryResponse {
-  user: UserResponse;        // ใช้ User เดิมที่มีอยู่แล้ว
-  statistics: UserStatistics;
-  bookingHistory: BookingHistoryItem[];
+export interface PaginatedBookingResponse {
+  data: UserBookingHistoryRes[];
+  meta: PaginationMeta;
 }

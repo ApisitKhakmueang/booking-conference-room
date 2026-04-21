@@ -228,12 +228,16 @@ export interface RoomModalProps {
 }
 
 export interface UserPaginationProps {
-  users: UserResponse[]
-  currentPage: number
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>
+  currentPage: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  totalPages: number;
+  totalUsers: number;
+  indexOfFirstItem: number;
+  indexOfLastItem: number;
 }
 
 export interface UserCardProps {
   currentUsers: UserResponse[]
-  toggleStatus: (id:string) => void
+  toggleStatus: (id:string, currentStatus: 'active' | 'inactive') => void
+  updatingID: string | null
 }

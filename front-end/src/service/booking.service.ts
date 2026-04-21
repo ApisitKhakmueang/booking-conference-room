@@ -1,5 +1,14 @@
 import api from '@/lib/axiosInstance';
-import { BookingEventResponse, ConfigResponse, DashboardAnalyticsResponse, Holiday, RoomResponse } from '@/utils/interface/response';
+import { 
+  BookingEventResponse, 
+  ConfigResponse, 
+  DashboardAnalyticsResponse, 
+  Holiday, 
+  RoomResponse, 
+  PaginatedUserResponse,
+  UserOverviewResponse,
+  PaginatedBookingResponse
+} from '@/utils/interface/response';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_HTTP;
 
@@ -96,5 +105,38 @@ export const helperService = {
   fetchHolidays: async (startYear:string, endYear: string):Promise<Holiday[]> => {
     const response = await api.get(`${API_URL}/holidays/startDate/${startYear}/endDate/${endYear}`)
     return response.data
+  },
+}
+
+export const adminService = {
+  
+  // GET /admin/users - ดึงรายชื่อผู้ใช้ทั้งหมดแบบแบ่งหน้า (Pagination)
+  fetchPaginatedUsers: async (page: number, limit: number, search?: string): Promise<PaginatedUserResponse> => {
+    // ส่ง page และ limit ผ่าน Query String
+    const url = search ?
+    `${API_URL}/admin/users?page=${page}&limit=${limit}&search=${search}`:
+    `${API_URL}/admin/users?page=${page}&limit=${limit}`
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  // GET /admin/users/:userID/overview - ดึงข้อมูลภาพรวมของผู้ใช้ (ข้อมูลส่วนตัว + สถิติ)
+  fetchUserOverview: async (userID: string): Promise<UserOverviewResponse> => {
+    const response = await api.get(`${API_URL}/admin/users/${userID}/overview`);
+    return response.data;
+  },
+
+  // GET /admin/users/:userID/bookings - ดึงประวัติการจองของผู้ใช้แบบแบ่งหน้า (Pagination)
+  fetchPaginatedUserBookings: async (userID: string, page: number, limit: number, status: string, year: number, month: number): Promise<PaginatedBookingResponse> => {
+    // ใช้วิธีส่ง Query String เช่นเดียวกันกับการดึง User List
+    const response = await api.get(`${API_URL}/admin/users/${userID}/bookings?page=${page}&limit=${limit}&status=${status}&year=${year}&month=${month}`);
+    return response.data;
+  },
+
+  updateUserStatus: async (userID: string, status: 'active' | 'inactive'): Promise<string> => {
+    const response = await api.put(`${API_URL}/admin/users/${userID}`, { 
+      status: status 
+    });
+    return response.data;
   },
 }
