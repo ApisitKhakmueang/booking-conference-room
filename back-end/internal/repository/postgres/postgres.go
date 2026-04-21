@@ -516,13 +516,11 @@ func (p *postgresRepository) GetUserOverviewDB(ctx context.Context, userID uuid.
 }
 
 func (p *postgresRepository) GetPaginatedUserBookingsDB(ctx context.Context, userID uuid.UUID, q *domain.BookingPaginationQuery) ([]domain.UserBookingHistoryRes, int64, error) {
-	var bookings []domain.UserBookingHistoryRes
+	var bookings []domain.Booking 
 	var totalItems int64
 
-	// 1. สร้าง Base Query โฟกัสเฉพาะ User คนนี้
-    // ⭐️ อย่าลืม Preload("Room") เพื่อดึงข้อมูลห้องมาใส่ใน Struct
 	query := p.db.WithContext(ctx).Model(&domain.Booking{}).
-		Preload("Room").
+		Preload("Room"). // ตอนนี้ Preload จะทำงานได้ 100% แล้ว
 		Where("user_id = ?", userID)
 
 	// 2. Filter ตาม Status (ถ้ามีการส่งมาและไม่ใช่ค่าว่างหรือ ALL)
@@ -556,7 +554,28 @@ func (p *postgresRepository) GetPaginatedUserBookingsDB(ctx context.Context, use
 		return nil, 0, err
 	}
 
-	return bookings, totalItems, nil
+	var result []domain.UserBookingHistoryRes
+	for _, b := range bookings {
+		// นำข้อมูลจาก Model มาใส่ใน DTO ทีละรายการ
+		dto := domain.UserBookingHistoryRes{
+			ID:          b.ID,
+			Title:       b.Title,
+			StartTime:   b.StartTime,
+			EndTime:     b.EndTime,
+			Status:      b.Status, // สมมติว่า Status ใน Booking เป็น string ธรรมดา 
+			CheckedInAt: b.CheckedInAt,
+			Room: domain.UserRoomRes{ // Mapping ข้อมูลห้อง
+				ID:         b.Room.ID,
+				Name:       b.Room.Name,
+				RoomNumber: b.Room.RoomNumber,
+				Location:   b.Room.Location,
+			},
+		}
+		result = append(result, dto)
+	}
+
+	// ⭐️ 3. Return ตัว result ที่แปลงร่างเสร็จแล้วกลับไป
+	return result, totalItems, nil
 }
 
 // helper function
