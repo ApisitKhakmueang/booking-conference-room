@@ -241,3 +241,23 @@ export interface UserCardProps {
   toggleStatus: (id:string, currentStatus: 'active' | 'inactive') => void
   updatingID: string | null
 }
+
+export interface HistoryPaginationProps {
+  currentPage: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  totalPages: number;
+  totalItems: number;
+  indexOfFirstItem: number;
+  indexOfLastItem: number;
+}
+
+interface StatisticsProps {
+  upcoming: number 
+  completed: number
+  cancelled: number
+  noShow: number
+}
+
+export interface SummaryCardProps {
+  statistics?: StatisticsProps
+}
