@@ -41,7 +41,7 @@ export default function Room() {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => router.push('/calendar')}
-            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple hover:text-white dark:border-white/10 dark:text-stone-400 dark:hover:bg-white/10 dark:hover:text-white dark:hover:border-white/20 shadow-none text-sm font-medium cursor-pointer rounded-lg whitespace-nowrap transition-all duration-300 gap-2 active:scale-95"
             >
               <Calendar className="w-4 h-4" />
               Calendar View
@@ -49,7 +49,7 @@ export default function Room() {
           
           <Button  
             onClick={() => setViewMode(viewMode === 'grid' ? 'timeline' : 'grid')}
-            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple/10 dark:border-sidebar dark:text-stone-400 dark:hover:bg-sidebar/20 shadow-none text-sm font-medium cursor-pointer rounded whitespace-nowrap transition-all gap-2"
+            className="py-2 px-4 bg-transparent border border-dark-purple text-dark-purple hover:bg-dark-purple hover:text-white dark:border-white/10 dark:text-stone-400 dark:hover:bg-white/10 dark:hover:text-white dark:hover:border-white/20 shadow-none text-sm font-medium cursor-pointer rounded-lg whitespace-nowrap transition-all duration-300 gap-2 active:scale-95"
           >
             {viewMode === 'grid' ? (
               <><CalendarDays className="w-4 h-4" /> Timeline View</>
