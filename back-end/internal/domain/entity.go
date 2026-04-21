@@ -81,6 +81,7 @@ type Config struct {
 	MaxAdvanceDays 			int 		`gorm:"not null;column:max_advance_days;default:30" json:"maxAdvanceDays,omitempty"`
 	MaxBookingMins 			int 		`gorm:"not null;column:max_booking_mins;default:120" json:"maxBookingMins,omitempty"`
 	NoShowThresholdMins int 		`gorm:"not null;column:no_show_threshold_mins;default:15" json:"noShowThresholdMins,omitempty"`
+	EarlyCheckInMinutes int 		`gorm:"not null;column:early_check_in_minutes;default:15" json:"earlyCheckInMinutes,omitempty"`
 }
 
 type Holiday struct {
