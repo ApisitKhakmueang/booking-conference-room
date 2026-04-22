@@ -23,7 +23,7 @@ export default function CurrentlyActiveList({ bookings, isLoadingBooking }: { bo
         </span>
       </div>
 
-      <div className="flex flex-col gap-4 overflow-y-auto pr-2 no-scrollbar max-h-40">
+      <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar max-h-40">
         
         {/* ⏳ Skeleton Loading */}
         {isLoadingBooking ? (
