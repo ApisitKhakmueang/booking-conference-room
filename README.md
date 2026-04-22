@@ -27,6 +27,7 @@ Domain (Entities) → Usecase (Business Logic) → Repository (Data Access) → 
 ```
 
 This application enables organizations to:
+
 - Manage conference room availability and bookings
 - Support real-time check-in/check-out functionality
 - Integrate with Google Calendar for holiday management
@@ -36,6 +37,7 @@ This application enables organizations to:
 ## 🛠 Tech Stack
 
 ### Backend
+
 - **Language**: Go 1.25.4
 - **Framework**: Fiber v2 (lightweight web framework)
 - **ORM**: GORM with PostgreSQL driver
@@ -45,6 +47,7 @@ This application enables organizations to:
 - **External APIs**: Google Calendar API, Supabase
 
 ### Frontend
+
 - **Framework**: Next.js 16 with React 19
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 4
@@ -55,6 +58,7 @@ This application enables organizations to:
 - **Real-time**: react-use-websocket
 
 ### Database & Infrastructure
+
 - **Primary Database**: PostgreSQL (via Supabase)
 - **Cache/Queue**: Redis
 - **Authentication**: Supabase Auth with JWT
@@ -155,6 +159,7 @@ BookingConferenceRoom/
 ## ✨ Features
 
 ### Core Booking Features
+
 - **Create Bookings**: Reserve conference rooms with custom time slots
 - **Modify Bookings**: Update or reschedule bookings before check-in
 - **Cancel Bookings**: Cancel bookings with proper status updates
@@ -163,12 +168,14 @@ BookingConferenceRoom/
 - **Booking History**: View all past and upcoming bookings
 
 ### Real-time Capabilities
+
 - **WebSocket Updates**: Live booking status changes across all connected clients
 - **Redis Pub/Sub**: Multi-instance server synchronization
 - **Hub System**: Efficient topic-based message broadcasting
 - **Instant Notifications**: Real-time notifications on booking events
 
 ### Administrative Features
+
 - **User Management**: View, activate/deactivate user accounts
 - **Room Management**: Create, edit, delete conference rooms
 - **System Configuration**: Set booking hours, max duration, advance booking days
@@ -176,6 +183,7 @@ BookingConferenceRoom/
 - **Holiday Management**: Auto-sync with Google Calendar for public holidays
 
 ### Authentication & Security
+
 - **Email/Password Auth**: Secure user registration and login
 - **OAuth Integration**: Google OAuth support via Supabase
 - **JWT Tokens**: Stateless authentication with token-based access
@@ -185,6 +193,7 @@ BookingConferenceRoom/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Go 1.25.4** or higher
 - **Node.js 18** or higher
 - **PostgreSQL** (via Supabase)
@@ -192,6 +201,7 @@ BookingConferenceRoom/
 - **Docker & Docker Compose** (optional)
 
 ### Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd BookingConferenceRoom
@@ -200,12 +210,15 @@ cd BookingConferenceRoom
 ## 🔧 Backend Setup
 
 ### 1. Navigate to Backend Directory
+
 ```bash
 cd back-end
 ```
 
 ### 2. Set Environment Variables
+
 Create a `.env` file in the `back-end` directory:
+
 ```env
 # Database
 DATABASE_URL=postgresql://user:password@host:port/database
@@ -232,16 +245,19 @@ JWT_SECRET=your_jwt_secret
 ```
 
 ### 3. Install Dependencies
+
 ```bash
 go mod download
 ```
 
 ### 4. Run Database Migrations
+
 ```bash
 # If using migration files (adjust as needed)
 ```
 
 ### 5. Start the Server
+
 ```bash
 # Using air for hot reload (development)
 air
@@ -255,12 +271,15 @@ The backend will start on `http://your-website-domain:8080`
 ## 🎨 Frontend Setup
 
 ### 1. Navigate to Frontend Directory
+
 ```bash
 cd front-end
 ```
 
 ### 2. Set Environment Variables
+
 Create a `.env.local` file in the `front-end` directory:
+
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -274,11 +293,13 @@ NEXT_PUBLIC_WS_URL=ws://your-website-domain:8080
 ```
 
 ### 3. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 4. Start Development Server
+
 ```bash
 npm run dev
 ```
@@ -290,6 +311,7 @@ The frontend will start on `http://your-website-domain:3000`
 ### PostgreSQL (Supabase)
 
 **Key Tables:**
+
 - **bookings**: Stores all booking records with status and timing
 - **rooms**: Conference room definitions with capacity and location
 - **users**: User profiles synced from Supabase Auth
@@ -297,6 +319,7 @@ The frontend will start on `http://your-website-domain:3000`
 - **holidays**: Public holidays from Google Calendar
 
 **Features:**
+
 - GORM ORM for Go with automatic migrations
 - Soft deletes for audit trails
 - Foreign key relationships with cascading
@@ -305,12 +328,14 @@ The frontend will start on `http://your-website-domain:3000`
 ### Redis
 
 **Functions:**
+
 1. **Caching**: Booking lists, room availability, user data
 2. **Real-time Pub/Sub**: Broadcasting booking events across instances
 3. **Task Queue (Asynq)**: Scheduled booking start/end tasks
 4. **Session Storage**: Optional session cache
 
 **Key Pattern:**
+
 ```
 booking:room:{roomNumber}:{date}
 booking:user:{userId}:{date}
@@ -333,6 +358,7 @@ User → Sign Up/Sign In → Supabase Auth → JWT Token → Store in localStora
 ```
 
 ### JWT Token Structure
+
 ```json
 {
   "sub": "user-id-uuid",
@@ -348,28 +374,31 @@ User → Sign Up/Sign In → Supabase Auth → JWT Token → Store in localStora
 ### Authorization
 
 **Backend Middleware:**
+
 - Validates JWT signature and expiration
 - Extracts user ID and role from claims
 - Enforces role-based access control
 
 **Frontend Interceptor:**
+
 - Automatically includes Authorization header in all requests
 - Format: `Authorization: Bearer <token>`
 - Token refresh handled by Supabase SDK
 
 ### Protected Routes
 
-| Route | Permission | Description |
-|-------|-----------|-------------|
-| `/api/v1/booking/*` | Authenticated Users | Booking CRUD operations |
-| `/api/v1/admin/*` | Admin Role | Administrative operations |
-| `/ws/bookings/*` | Authenticated Users | WebSocket connections |
+| Route               | Permission          | Description               |
+| ------------------- | ------------------- | ------------------------- |
+| `/api/v1/booking/*` | Authenticated Users | Booking CRUD operations   |
+| `/api/v1/admin/*`   | Admin Role          | Administrative operations |
+| `/ws/bookings/*`    | Authenticated Users | WebSocket connections     |
 
 ## ⚡ Real-time Features
 
 ### WebSocket Architecture
 
 **Hub System** (`internal/delivery/websocket/hub.go`)
+
 ```
 Client 1 ─┐
 Client 2 ─┤─→ Hub ─→ Topic 1: bookings_realtime
@@ -377,6 +406,7 @@ Client 3 ─┘      └─→ Topic 2: room:uuid:1234
 ```
 
 **Features:**
+
 - Topic-based message routing
 - Automatic client registration/unregistration
 - Memory-efficient topic cleanup
@@ -385,10 +415,12 @@ Client 3 ─┘      └─→ Topic 2: room:uuid:1234
 ### Real-time Events
 
 **Subscribed Topics:**
+
 - `bookings_realtime`: All booking changes
 - `room:{roomId}`: Room-specific updates
 
 **Event Types:**
+
 ```json
 {
   "type": "booking_created|booking_updated|booking_deleted|check_in|check_out",
@@ -404,7 +436,7 @@ Client 3 ─┘      └─→ Topic 2: room:uuid:1234
 ```typescript
 const { sendJsonMessage, lastJsonMessage } = useWebSocket(
   `ws://your-website-domain:8080/ws/bookings/${roomId}`,
-  { reconnect: true }
+  { reconnect: true },
 );
 
 // Listen for updates
@@ -419,19 +451,20 @@ useEffect(() => {
 
 ### Booking Endpoints
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/booking/room/:roomNumber` | Create booking | User |
-| PUT | `/api/v1/booking/:bookingID/room/:roomNumber` | Update booking | User |
-| DELETE | `/api/v1/booking/:bookingID` | Cancel booking | User |
-| PATCH | `/api/v1/booking/:bookingID/checkout` | Check out | User |
-| POST | `/booking/room/:roomID/checkin` | Check in | User |
-| GET | `/api/v1/booking/me/date/:date` | Get user bookings | User |
-| GET | `/api/v1/booking/analytic/startDate/:startDate/endDate/:endDate` | Booking analytics | Admin |
+| Method | Endpoint                                                         | Description       | Auth  |
+| ------ | ---------------------------------------------------------------- | ----------------- | ----- |
+| POST   | `/api/v1/booking/room/:roomNumber`                               | Create booking    | User  |
+| PUT    | `/api/v1/booking/:bookingID/room/:roomNumber`                    | Update booking    | User  |
+| DELETE | `/api/v1/booking/:bookingID`                                     | Cancel booking    | User  |
+| PATCH  | `/api/v1/booking/:bookingID/checkout`                            | Check out         | User  |
+| POST   | `/booking/room/:roomID/checkin`                                  | Check in          | User  |
+| GET    | `/api/v1/booking/me/date/:date`                                  | Get user bookings | User  |
+| GET    | `/api/v1/booking/analytic/startDate/:startDate/endDate/:endDate` | Booking analytics | Admin |
 
 ### Request/Response Examples
 
 **Create Booking**
+
 ```
 POST /api/v1/booking/room/101
 Authorization: Bearer <token>
@@ -454,6 +487,7 @@ Response:
 ```
 
 **Check In**
+
 ```
 POST /booking/room/{roomId}/checkin
 Authorization: Bearer <token>
@@ -476,17 +510,18 @@ Response:
 
 Administrators can set the following via `/api/v1/admin/config`:
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `start_time` | Earliest booking time (HH:MM format) | "08:00" |
-| `end_time` | Latest booking end time (HH:MM format) | "20:00" |
-| `max_advance_days` | How many days ahead users can book | 30 |
-| `max_booking_mins` | Maximum booking duration in minutes | 120 |
-| `no_show_threshold_mins` | Grace period before no-show marking | 15 |
+| Setting                  | Description                            | Default |
+| ------------------------ | -------------------------------------- | ------- |
+| `start_time`             | Earliest booking time (HH:MM format)   | "08:00" |
+| `end_time`               | Latest booking end time (HH:MM format) | "20:00" |
+| `max_advance_days`       | How many days ahead users can book     | 30      |
+| `max_booking_mins`       | Maximum booking duration in minutes    | 120     |
+| `no_show_threshold_mins` | Grace period before no-show marking    | 15      |
 
 ### Backend Configuration
 
 Environment-based configuration:
+
 - `ENV`: `development` or `production`
 - `PORT`: Server port (default: 8080)
 - `DEBUG`: Enable debug logging
@@ -517,6 +552,7 @@ npm run dev
 ### Production Deployment
 
 **Backend:**
+
 ```bash
 # Build Docker image
 docker build -t booking-conference-room-api:latest ./back-end
@@ -529,6 +565,7 @@ docker run -p 8080:8080 \
 ```
 
 **Frontend:**
+
 ```bash
 # Build Next.js application
 npm run build
@@ -538,6 +575,7 @@ npm start
 ```
 
 **Recommended Platforms:**
+
 - **Backend**: Koyeb, Railway, Render, Fly.io
 - **Frontend**: Vercel, Netlify, Railway
 - **Database**: Supabase (PostgreSQL hosted)
@@ -546,6 +584,7 @@ npm start
 ### Environment Variables Checklist
 
 **Backend Production:**
+
 - [ ] `DATABASE_URL` pointing to production database
 - [ ] `REDIS_ADDR` pointing to production Redis
 - [ ] `SUPABASE_URL` and `SUPABASE_KEY`
@@ -554,6 +593,7 @@ npm start
 - [ ] `ENV=production`
 
 **Frontend Production:**
+
 - [ ] `NEXT_PUBLIC_SUPABASE_URL`
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - [ ] `NEXT_PUBLIC_API_URL` pointing to production API
@@ -564,14 +604,17 @@ npm start
 ### Asynq Task Processing
 
 **Scheduled Tasks:**
+
 1. **BookingExpiredTask**: Marks booking as "complete" or "no_show" at end time
 2. **BookingStartTask**: Executes at booking start time
 
 **Task Retry:**
+
 - Automatic exponential backoff
 - Failed tasks are retried per Asynq configuration
 
 **Running Worker:**
+
 ```bash
 # In back-end directory
 go run ./cmd/worker/main.go
@@ -582,6 +625,7 @@ go run ./cmd/worker/main.go
 ### Dashboard Metrics
 
 **Available Analytics:**
+
 - Total bookings (date range)
 - Room utilization rates
 - Peak booking hours
@@ -590,6 +634,7 @@ go run ./cmd/worker/main.go
 - Average booking duration
 
 **Endpoint:**
+
 ```
 GET /api/v1/booking/analytic/startDate/{date}/endDate/{date}
 Authorization: Bearer <admin_token>
@@ -600,6 +645,7 @@ Authorization: Bearer <admin_token>
 ### Common Issues
 
 **Database Connection Error:**
+
 ```
 Error: failed to connect to PostgreSQL
 → Check DATABASE_URL format and credentials
@@ -607,6 +653,7 @@ Error: failed to connect to PostgreSQL
 ```
 
 **Redis Connection Error:**
+
 ```
 Error: failed to connect to Redis
 → Verify REDIS_ADDR is correct (host:port)
@@ -614,6 +661,7 @@ Error: failed to connect to Redis
 ```
 
 **JWT Validation Failed:**
+
 ```
 Error: invalid or expired token
 → Ensure token is not expired
@@ -622,6 +670,7 @@ Error: invalid or expired token
 ```
 
 **WebSocket Connection Issues:**
+
 ```
 Error: WebSocket connection failed
 → Check NEXT_PUBLIC_WS_URL in frontend .env
