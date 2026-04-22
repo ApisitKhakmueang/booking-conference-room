@@ -21,7 +21,7 @@ export default function Google({ isSignIn }: SignInProps) {
         </div>
 
         <div className='relative flex justify-center'>
-          <span className='bg-light-sidebar dark:bg-sidebar px-2'>or</span>
+          <span className='bg-light-sidebar dark:bg-main-background px-2'>or</span>
         </div>
       </div>
 
