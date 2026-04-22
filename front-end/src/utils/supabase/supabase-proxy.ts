@@ -47,6 +47,9 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  const userStatus = user?.app_metadata?.status;
+  const userRole = user?.app_metadata?.role
+
   // redirect root
   if (request.nextUrl.pathname === "/") {
     const url = request.nextUrl.clone();
@@ -64,12 +67,20 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (user && userStatus === 'inactive') {
+    // ปล่อยให้เข้าได้แค่หน้า /suspended และหน้า /auth (เผื่อให้เขากด Sign Out ได้)
+    if (
+      !request.nextUrl.pathname.startsWith("/suspended") && 
+      !request.nextUrl.pathname.startsWith("/auth")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/suspended"; // เตะไปหน้าแจ้งเตือนโดนแบน
+      return NextResponse.redirect(url);
+    }
+  }
+
   // logged in แต่เข้า auth page
-  if (
-    user &&
-    request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // 🌟 1. เพิ่มข้อยกเว้น: ถ้าเป็นหน้า update-password หรือ callback ให้ปล่อยผ่านไปเลย ห้ามเตะ!
+  if (user && request.nextUrl.pathname.startsWith("/auth")) {
     if (
       request.nextUrl.pathname.startsWith("/auth/update-password") ||
       request.nextUrl.pathname.startsWith("/auth/callback")
@@ -77,9 +88,9 @@ export async function updateSession(request: NextRequest) {
       return supabaseResponse; 
     }
 
-    // 🌟 2. ถ้าเป็นหน้า auth อื่นๆ (เช่น sign-in, sign-up) ให้เตะไป dashboard ตามปกติ
+    // 🌟 ถ้าโดนแบนอยู่ แล้วพยายามมาหน้า auth ให้เตะไป suspended แทนที่จะเป็น dashboard
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = userStatus === 'inactive' ? "/suspended" : "/dashboard";
     return NextResponse.redirect(url);
   }
 
@@ -87,7 +98,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/room-management") ||
       request.nextUrl.pathname.startsWith("/user-management") ||
       request.nextUrl.pathname.startsWith("/system-config")
-    ) && user?.app_metadata?.role === 'user'
+    ) && userRole === 'user'
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
