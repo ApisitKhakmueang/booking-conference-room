@@ -26,7 +26,6 @@ func main() {
 	redisAddr := os.Getenv("REDIS_URL")
 
 	db := utils.InitialDBConnection()
-	utils.InitDatabase(db)
 
 	googleCalendarService, err := utils.InitialCalendarService()
 	if err != nil {
