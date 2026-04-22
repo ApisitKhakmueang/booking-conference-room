@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import RealtimeGuard from '@/components/auth/realtime-guard';
+import { createClient } from '@/utils/supabase/server';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,12 +27,15 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies()
   const theme = cookieStore.get('theme')?.value ?? 'dark'
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
 
   return (
     <html lang="en" className={`${theme} dark:bg-main-background bg-light-main-background`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <RealtimeGuard userId={session?.user?.id} />
         {children}
       </body>
     </html>
