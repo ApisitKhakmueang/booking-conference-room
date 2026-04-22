@@ -12,6 +12,7 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/postgres"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/redis"
@@ -73,6 +74,24 @@ func InitialDBConnection() *gorm.DB {
 	fmt.Println("Coneect DB successfully")
 
 	return db
+}
+
+func InitDatabase(db *gorm.DB) error {
+    
+    // นำ Struct ทุกตัวที่ต้องการสร้างตารางใส่เข้าไปใน AutoMigrate
+    err := db.AutoMigrate(
+        &domain.Config{},
+        &domain.Holiday{},
+        &domain.Room{},
+        &domain.User{},
+        &domain.Booking{}, // Booking มี Foreign Key ไปหา Room และ User ควรไว้หลังสุด
+    )
+    
+    if err != nil {
+        return fmt.Errorf("failed to auto migrate database: %w", err)
+    }
+    
+    return nil
 }
 
 func InitialSupabase() *supabase.Client {
