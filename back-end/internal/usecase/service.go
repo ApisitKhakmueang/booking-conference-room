@@ -743,9 +743,9 @@ func (u *bookingUsecase) ValidateBooking(ctx context.Context, booking *domain.Bo
 	openMinutes, _ := helper.TotalMinutesFromString(config.StartTime)
 	closeMinutes, _ := helper.TotalMinutesFromString(config.EndTime)
 
-	// if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
-	// 	return err
-	// }
+	if err := u.helperPostgres.CheckDayOff(ctx, *booking.StartTime); err != nil {
+		return err
+	}
 
 	err := helper.ValidateBusinessHours(*booking.StartTime, *booking.EndTime, openMinutes, closeMinutes)
 	if err != nil {
