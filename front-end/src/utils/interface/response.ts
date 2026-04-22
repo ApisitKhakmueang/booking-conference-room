@@ -45,12 +45,7 @@ export interface AttendanceHealthResponse {
 	noShowRate: number
 }
 
-export interface PopularRoomResponse {
-  id: number;
-  roomNumber: string;
-  name: string;
-  percentage: number;
-}
+
 
 export interface DashboardAnalyticsResponse {
   attendanceHealth: AttendanceHealthResponse;
