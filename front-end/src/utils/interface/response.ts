@@ -45,7 +45,7 @@ export interface AttendanceHealthResponse {
 	noShowRate: number
 }
 
-export interface PopularRoomResponseonse {
+export interface PopularRoomResponse {
   id: number;
   roomNumber: string;
   name: string;
@@ -54,7 +54,7 @@ export interface PopularRoomResponseonse {
 
 export interface DashboardAnalyticsResponse {
   attendanceHealth: AttendanceHealthResponse;
-  popularRooms: PopularRoomResponseonse[];
+  popularRooms: PopularRoomResponse[];
 }
 
 export interface ConfigResponse {
