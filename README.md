@@ -364,7 +364,8 @@ User → Sign Up/Sign In → Supabase Auth → JWT Token → Store in localStora
   "sub": "user-id-uuid",
   "email": "user@example.com",
   "app_metadata": {
-    "role": "admin|user"
+    "role": "admin|user",
+    "status": "active|inactive"
   },
   "iat": 1234567890,
   "exp": 1234571490
