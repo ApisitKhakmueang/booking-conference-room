@@ -96,7 +96,7 @@ export default function CheckIn({ roomID }: { roomID: string }) {
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-12 lg:gap-24 max-w-4xl mx-auto items-center">
           
           <div className="flex flex-col items-center lg:items-start w-full">
-            <Numpad roomID={roomData?.id} />
+            <Numpad roomID={roomData?.id} booking={booking} />
           </div> 
 
           <div className="flex flex-col gap-8 w-full min-w-0 items-center lg:items-start">

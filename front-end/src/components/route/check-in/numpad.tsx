@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { roomService } from "@/service/booking.service";
 import Swal from "sweetalert2";
+import { BookingEventResponse } from "@/utils/interface/response";
 
 interface NumpadProps {
   roomID: string | undefined;
+  booking?: BookingEventResponse
 }
 
-export default function Numpad({ roomID }: NumpadProps) {
+export default function Numpad({ roomID, booking }: NumpadProps) {
   const [passcode, setPasscode] = useState<string>("");
 
   const handlePasscode = async (newPasscode: string) => {
@@ -67,6 +69,16 @@ export default function Numpad({ roomID }: NumpadProps) {
       setPasscode(newPasscode);
       
       if (newPasscode.length === 4) {
+        if (!booking) {
+          Swal.fire({
+            title: 'No Active Booking',
+            text: 'There is no meeting happening right now to check into.',
+            icon: 'info',
+            confirmButtonColor: '#b495ff',
+          });
+          return setPasscode(""); 
+        } 
+
         setTimeout(() => {
           handlePasscode(newPasscode)
         }, 300);
