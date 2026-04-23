@@ -40,8 +40,9 @@ export default function MaxBookingMins({ config, setConfig, isOpenEdit }: Config
         <div className="relative w-full h-[3px] bg-gray-200 dark:bg-card rounded-full mb-3">
           <div className="absolute h-full bg-dark-purple rounded-full transition-all duration-200" style={{ width: `${durationPercent}%` }} />
           <input type="range" min="1" max="5" step="0.5" value={config.maxBookingMins || 1}
+            disabled={!isOpenEdit}
             onChange={(e) => setConfig({...config, maxBookingMins: parseFloat(e.target.value)})}
-            className="absolute w-full h-full opacity-0 cursor-pointer"
+            className="absolute w-full h-full opacity-0 cursor-pointer disabled:cursor-default"
           />
           <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-dark-purple rounded-full shadow-[0_0_8px_var(--color-dark-purple)] transition-all duration-200 pointer-events-none" style={{ left: `calc(${durationPercent}% - 7px)` }} />
         </div>
