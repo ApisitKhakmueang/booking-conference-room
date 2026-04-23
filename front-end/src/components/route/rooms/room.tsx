@@ -12,17 +12,13 @@ import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { DisplayRooms } from "@/lib/booking-status";
 import { useRoomData } from "@/hooks/data/useRoomData";
-import { useAuthStore } from "@/stores/auth.store";
 
 export default function Room() {
   const router = useRouter()
-
-  const user = useAuthStore((state) => state.user);
-
   const { bookings, isLoadingBooking } = useBookingStatusWS();
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
 
-  const { room: rawRoom, isLoading, isError } = useRoomData();
+  const { room: rawRoom } = useRoomData();
 
   // 🌟 2. ใช้ useMemo ผสมร่างข้อมูลแทนการใช้ useEffect -> setRoom
   // มันจะคำนวณใหม่ให้อัตโนมัติ เฉพาะตอนที่ rawRooms หรือ bookings มีการเปลี่ยนแปลงเท่านั้น
