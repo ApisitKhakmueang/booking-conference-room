@@ -240,7 +240,7 @@ export interface UserPaginationProps {
 export interface UserCardProps {
   currentUsers: UserResponse[]
   toggleStatus: (id:string, currentStatus: 'active' | 'inactive') => void
-  updatingID: string | null
+  updatingIDs: string[]
 }
 
 export interface HistoryPaginationProps {

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
-import { UserResponse } from '@/utils/interface/response';
 import UserPagination from './user-pagination';
 import Header from './header';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,7 @@ export default function UserTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 5;
 
-  const [updatingID, setUpdatingID] = useState<string | null>(null);
+  const [updatingIDs, setUpdatingIDs] = useState<string[]>([]);
 
   // 🌟 เรียกใช้ Hook แค่บรรทัดเดียว!
   const { usersData, reloadUsers, isLoadingUsers } = usePaginatedUsers(currentPage, itemsPerPage, searchTerm);
@@ -29,10 +28,11 @@ export default function UserTable() {
   const indexOfLastItem = usersData?.meta.indexOfLastItem || 0;
 
   const toggleStatus = async (id: string, currentStatus: string) => {
-    // 🌟 2. ถ้ามี ID นี้กำลังอัปเดตอยู่ ให้ Return ทิ้งเลย (ป้องกันคนกดรัวตอนยังไม่เสร็จ)
-    if (updatingID === id) return;
+    // 🌟 2. เช็คว่า ID นี้อยู่ในคิวอัปเดตหรือยัง
+    if (updatingIDs.includes(id)) return;
 
-    setUpdatingID(id); // ล็อคว่า ID นี้กำลังทำรายการนะ
+    // 🌟 3. เอา ID ต่อท้ายเข้าไปใน Array
+    setUpdatingIDs((prev) => [...prev, id]); 
 
     const updateStatus = currentStatus === 'active' ? 'inactive' : 'active'
     const updatedUsers = currentUsers.map(u => 
@@ -42,16 +42,12 @@ export default function UserTable() {
     reloadUsers({ ...usersData!, data: updatedUsers }, false);
 
     try {
-      console.log("update status: ", updateStatus)
       await adminService.updateUserStatus(id, updateStatus); 
-      
-      setUpdatingID(null); 
-      reloadUsers(); 
-      // 🌟 3. ปลดล็อคเมื่อเสร็จสิ้น
     } catch (error) {
-      setUpdatingID(null); // ปลดล็อคแม้ว่าจะพัง
-      reloadUsers();
       Swal.fire('Error', 'Failed to update status', 'error');
+    } finally {
+      setUpdatingIDs((prev) => prev.filter(updatingId => updatingId !== id)); 
+      reloadUsers(); 
     }
   };
 
@@ -85,7 +81,7 @@ export default function UserTable() {
             <UserCard 
               currentUsers={currentUsers} 
               toggleStatus={toggleStatus} 
-              updatingID={updatingID} 
+              updatingIDs={updatingIDs} 
             />
           ) : (
             <div className="text-center py-10 text-light-secondary dark:text-secondary text-sm font-medium">No users available.</div>

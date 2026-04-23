@@ -2,7 +2,7 @@ import { UserCardProps } from "@/utils/interface/interface";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function UserCard({ currentUsers, toggleStatus, updatingID }: UserCardProps) {
+export default function UserCard({ currentUsers, toggleStatus, updatingIDs }: UserCardProps) {
   const router = useRouter()
 
   const goToDetail = (userId: string) => {
@@ -14,7 +14,7 @@ export default function UserCard({ currentUsers, toggleStatus, updatingID }: Use
       {currentUsers.map((user) => {
         const isActive = user.status === 'active';
 
-        const isUpdating = updatingID === user.id;
+        const isUpdating = updatingIDs.includes(user.id);
         
         const statusStyle = isActive
           ? { text: 'text-success', toggleBg: 'bg-success', dot: 'bg-success shadow-[0_0_8px_var(--color-success)]', ring: 'border-white dark:border-sidebar' }
