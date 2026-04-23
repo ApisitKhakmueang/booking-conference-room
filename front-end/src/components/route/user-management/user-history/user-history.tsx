@@ -19,9 +19,9 @@ export default function UserHistory({ userID }: { userID: string }) {
       {/* Back Button */}
       <button 
         onClick={() => router.back()} 
-        className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-light-secondary dark:text-secondary hover:text-dark-purple dark:hover:text-white transition-colors w-fit cursor-pointer"
+        className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-light-secondary dark:text-secondary hover:text-dark-purple dark:hover:text-white transition-colors w-fit cursor-pointer group"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to Users
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Users
       </button>
 
       {/* Profile Header */}

@@ -9,6 +9,7 @@ import useValidatePassword from "@/hooks/auth/useValidatePassword";
 import DisplayStrongPassword from "./signin-signup/display-strong-password";
 import { updatePassword } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 export default function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -41,6 +42,15 @@ export default function UpdatePasswordForm() {
 
   return (
     <CardLayout>
+      <button 
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-light-secondary dark:text-secondary hover:text-light-main dark:hover:text-main transition-all duration-300 group cursor-pointer mb-6 w-fit"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-xs font-bold uppercase tracking-[0.2em]">Back</span>
+      </button>
+
       <p className="text-3xl font-semibold">Reset Your Password</p>
       <p className="text-slate">Please enter your new password below.</p>
 

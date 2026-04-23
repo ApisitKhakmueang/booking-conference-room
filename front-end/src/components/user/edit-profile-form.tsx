@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button"
 import { useUsername } from "@/hooks/profile/useUsername"
 import CardLayout from "../layout/card-layout"
 import { Input } from "../ui/input"
-import { X } from "lucide-react"
+import { ArrowLeft, X } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function EditProfileForm() {
+  const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const { profileFile, previewProfile, error: imageError, changeProfile, cancelImage } = useProfileImage(user?.avatar)
   const { username, changeUsername, cancelUsername } = useUsername(user?.name)
@@ -27,6 +29,15 @@ export default function EditProfileForm() {
 
   return (
     <CardLayout>
+      <button 
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-light-secondary dark:text-secondary hover:text-light-main dark:hover:text-main transition-all duration-300 group cursor-pointer mb-6 w-fit"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-xs font-bold uppercase tracking-[0.2em]">Back</span>
+      </button>
+
       <div className='flex flex-col justify-start w-full dark:text-main mb-5'>
         <h1 className='text-3xl font-semibold'>Edit profile</h1>
         <h1 className="text-slate">Edit your profile and username</h1>
