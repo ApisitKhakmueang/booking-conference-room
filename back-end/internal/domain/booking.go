@@ -24,18 +24,12 @@ type BookingUsecases interface {
 }
 
 type BookingRedisRepo interface {
-	CreateBooking(ctx context.Context,booking *Booking, roomNumber uint) (*Booking, error)
-	UpdateBooking(ctx context.Context,booking *Booking, roomNumber uint) (*Booking, error)
-	DeleteBooking(ctx context.Context,booking *Booking, roomNumber uint) (*Booking, error)
-	CheckOutBooking(ctx context.Context, booking *Booking, roomNumber uint) (*Booking, error)
-	GetBookingByDay(ctx context.Context, date *Date) ([]Booking, error)
-	GetUpNextBooking(ctx context.Context, endOfDay time.Time) (*Booking, error)
-	GetBooking(ctx context.Context, dateTime *Date, roomID uuid.UUID, roomNumber uint) ([]Booking, error)
-	GetAnalyticBooking(ctx context.Context,date *Date) ([]Booking, error)
-	GetBookingStatus(ctx context.Context) ([]Booking, error)
-	GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*Booking, error)
-	GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
-	GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]Booking, error)
+	ClearCacheAfterCreateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint)
+	ClearCacheAfterUpdateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint, prevRoomNumber uint)
+	ClearCacheAfterDeleteBooking(ctx context.Context, userID uuid.UUID, roomNumber uint)
+	ClearCacheAfterCheckOutBooking(ctx context.Context, userID uuid.UUID, roomNumber uint)
+	GetBookingCacheByKey(ctx context.Context, cacheKey string) ([]Booking, error)
+	SetBookingCache(ctx context.Context, cacheKey string, bookings []Booking)
 }
 
 type BookingPostgresRepo interface {

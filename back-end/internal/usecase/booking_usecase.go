@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -66,11 +67,12 @@ func (u *bookingUsecases) CreateBooking(ctx context.Context,booking *domain.Book
 
 	booking.Passcode = &finalPasscode
 	booking.ID = uuid.New()
-
-	booking, err = u.cache.CreateBooking(ctx, booking, roomNumber)
+	booking, err = u.db.CreateBookingDB(ctx, booking)
 	if err != nil {
 		return err
 	}
+
+	u.cache.ClearCacheAfterCreateBooking(ctx, booking.UserID, roomNumber)
 
 	u.PublishEvent("booking_created", roomNumber, booking)
 
@@ -91,10 +93,17 @@ func (u *bookingUsecases) UpdateBooking(ctx context.Context,booking *domain.Book
 		return err
 	}
 
-	booking, err = u.cache.UpdateBooking(ctx, booking, roomNumber);
-	if  err != nil {
+	prevRoomNumber, err := u.db.GetRoomNumberDB(ctx, booking.ID)
+	if err != nil {
 		return err
 	}
+
+	booking, err = u.db.UpdateBookingDB(ctx, booking)
+	if err != nil {
+		return err
+	}
+	
+	u.cache.ClearCacheAfterUpdateBooking(ctx, booking.UserID, roomNumber, prevRoomNumber);
 		
 	u.PublishEvent("booking_updated", roomNumber, booking)
 
@@ -111,14 +120,12 @@ func (u *bookingUsecases) DeleteBooking(ctx context.Context,booking *domain.Book
 		return err
 	}
 
-	// if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
-	// 	return err
-	// }
-
-	deletedBooking, err := u.cache.DeleteBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
+	deletedBooking, err := u.db.DeleteBookingDB(ctx, booking);
 	if err != nil {
-		return errors.New("Don't have this booking")
+		return err
 	}
+
+	u.cache.ClearCacheAfterDeleteBooking(ctx, completedBooking.UserID, completedBooking.Room.RoomNumber);
 
 	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
 	u.PublishStatus("booking_deleted", completedBooking)
@@ -132,14 +139,12 @@ func (u *bookingUsecases) CheckOutBooking(ctx context.Context,booking *domain.Bo
 		return err
 	}
 
-	// if err := helper.CheckBeforeOneHour(*completedBooking.StartTime); err != nil {
-	// 	return err
-	// }
-
-	deletedBooking, err := u.cache.CheckOutBooking(ctx, completedBooking, completedBooking.Room.RoomNumber);
+	deletedBooking, err := u.db.CheckOutBookingDB(ctx, booking);
 	if err != nil {
-		return errors.New("Don't have this booking")
+		return err
 	}
+
+	u.cache.ClearCacheAfterCheckOutBooking(ctx, completedBooking.UserID, completedBooking.Room.RoomNumber);
 
 	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
 	u.PublishStatus("booking_deleted", completedBooking)
@@ -167,7 +172,7 @@ func (u *bookingUsecases) GetBookingByDay(ctx context.Context, DateStr string) (
 	date.StartStr = startTime.Format(layout)
 	date.EndStr = endTime.Format(layout)
 	
-	bookings, err := u.cache.GetBookingByDay(ctx, &date)
+	bookings, err := u.db.GetBookingByDayDB(ctx, &date)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +188,7 @@ func (u *bookingUsecases) GetUpNextBooking(ctx context.Context, date string) (*d
 	}
 
 	endTime := startTime.AddDate(0, 0, 1)
-	booking, err := u.cache.GetUpNextBooking(ctx, endTime)
+	booking, err := u.db.GetUpNextBookingDB(ctx, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -197,12 +202,22 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 	if err := u.db.GetRoomID(ctx, instBooking, roomNumber); err != nil {
 		return nil, err
 	}
+	
+	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, date.StartStr, date.EndStr)
 
-	bookings, err := u.cache.GetBooking(ctx, date, instBooking.RoomID, roomNumber)
-	if err != nil {
-		return nil, err
+	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	
+	if err != nil { 
+		// 3.1 ดึงจาก Postgres
+		bookings, err = u.db.GetBookingDB(ctx, date, instBooking.RoomID)
+		if err != nil {
+			return nil, err // ถ้า DB พังอีก ก็คือพังจริงๆ แล้ว Return Error กลับหน้าบ้านเลย
+		}
+
+		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
+		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
+		u.cache.SetBookingCache(ctx, cacheKey, bookings)
 	}
-	// log.Printf("bookings: %v\n", bookings)
 
 	groupBookings, err := helper.ConvertBooking(bookings)
 	if err != nil {
@@ -221,9 +236,19 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 }
 
 func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
-	bookings, err := u.cache.GetAnalyticBooking(ctx, date)
-	if err != nil {
-		return nil, err
+	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
+
+	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+
+	if err != nil { 
+		// 3.1 ดึงจาก Postgres
+		bookings, err := u.db.GetAnalyticBookingDB(ctx, date)
+		if err != nil {
+			return nil, err
+		}
+		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
+		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
+		u.cache.SetBookingCache(ctx, cacheKey, bookings)
 	}
 
 	totalBookings := len(bookings)
@@ -309,7 +334,7 @@ func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Da
 }
 
 func (u *bookingUsecases) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
-	booking, err := u.cache.GetBookingStatus(ctx)
+	booking, err := u.db.GetBookingStatusDB(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +344,7 @@ func (u *bookingUsecases) GetBookingStatus(ctx context.Context) ([]domain.Bookin
 }
 
 func (u *bookingUsecases) GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking, err := u.cache.GetBookingStatusByRoomID(ctx, roomID)
+	booking, err := u.db.GetBookingStatusByRoomID_DB(ctx, roomID)
 	if err != nil {
 		return nil, err
 	}
@@ -329,18 +354,38 @@ func (u *bookingUsecases) GetBookingStatusByRoomID(ctx context.Context, roomID u
 }
 
 func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
-	bookings, err := u.cache.GetUserBooking(ctx, userID, date)
-	if err != nil {
-		return nil, err
+	cacheKey := fmt.Sprintf("booking:user:%s:date:%s", userID, date)
+
+	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	
+	if err != nil { 
+		// 3.1 ดึงจาก Postgres
+		bookings, err := u.db.GetUserBookingDB(ctx, userID, date)
+		if err != nil {
+			return nil, err
+		}
+		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
+		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
+		u.cache.SetBookingCache(ctx, cacheKey, bookings)
 	}
 
 	return bookings, nil
 }
 
 func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
-	bookings, err := u.cache.GetUserHistory(ctx, userID, date)
-	if err != nil {
-		return nil, err
+	cacheKey := fmt.Sprintf("history:user:%s:date:%s", userID, date)
+
+	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	
+	if err != nil { 
+		// 3.1 ดึงจาก Postgres
+		bookings, err := u.db.GetUserHistoryDB(ctx, userID, date)
+		if err != nil {
+			return nil, err
+		}
+		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
+		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
+		u.cache.SetBookingCache(ctx, cacheKey, bookings)
 	}
 
 	return bookings, nil

@@ -24,200 +24,43 @@ func NewBookingRedisRepo(rdb *redis.Client, postgres domain.BookingPostgresRepo)
 	}
 }
 
-func (r *bookingRedisRepo) CreateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	booking, err := r.postgres.CreateBookingDB(ctx, booking)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *bookingRedisRepo) ClearCacheAfterCreateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint) {
 	r.DeleteBookingCache(ctx, roomNumber)
-	r.DeleteUserCache(ctx, booking.UserID)
-
-	return booking, nil
+	r.DeleteUserCache(ctx, userID)
 }
 
-func (r *bookingRedisRepo) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	prevRoomNumber, err := r.postgres.GetRoomNumberDB(ctx, booking.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	booking, err = r.postgres.UpdateBookingDB(ctx, booking)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *bookingRedisRepo) ClearCacheAfterUpdateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint, prevRoomNumber uint) {
 	// 1. ลบ Cache ห้องเก่า (เพื่อให้ข้อมูลที่ย้ายออกหายไป)
 	r.DeleteBookingCache(ctx, prevRoomNumber)
 
 	// 2. ลบ Cache ห้องใหม่ (เพื่อให้ข้อมูลที่ย้ายเข้าอัปเดต)
 	// ต่อให้ห้องจะเป็นห้องเดิม การสั่ง Delete ซ้ำที่ Key เดิมใน Redis ไม่ทำให้เกิด Error ครับ
 	r.DeleteBookingCache(ctx, roomNumber)
-
-	r.DeleteUserCache(ctx, booking.UserID)
-
-	return booking, nil
+	r.DeleteUserCache(ctx, userID)
 }
 
-func (r *bookingRedisRepo) DeleteBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	deletedBooking, err := r.postgres.DeleteBookingDB(ctx, booking);
-	if err != nil {
-		return nil, err
-	}
-
+func (r *bookingRedisRepo) ClearCacheAfterDeleteBooking(ctx context.Context, userID uuid.UUID, roomNumber uint) {
 	r.DeleteBookingCache(ctx, roomNumber)
-	r.DeleteUserCache(ctx, booking.UserID)
-	r.DeleteHistoryCache(ctx, booking.UserID)
-	
-	return deletedBooking, nil
+	r.DeleteUserCache(ctx, userID)
+	r.DeleteHistoryCache(ctx, userID)
 }
 
-func (r *bookingRedisRepo) CheckOutBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) (*domain.Booking, error) {
-	deletedBooking, err := r.postgres.CheckOutBookingDB(ctx, booking);
-	if err != nil {
-		return nil, err
-	}
-
+func (r *bookingRedisRepo) ClearCacheAfterCheckOutBooking(ctx context.Context, userID uuid.UUID, roomNumber uint) {
 	r.DeleteBookingCache(ctx, roomNumber)
-	r.DeleteUserCache(ctx, booking.UserID)
-	r.DeleteHistoryCache(ctx, booking.UserID)
-	
-	return deletedBooking, nil
+	r.DeleteUserCache(ctx, userID)
+	r.DeleteHistoryCache(ctx, userID)
 }
 
-func (r *bookingRedisRepo) GetBookingByDay(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
-	bookings, err := r.postgres.GetBookingByDayDB(ctx, date)
-	if err != nil {
-		return nil, err
-	}
-
-	return bookings, nil
-}
-
-func (r *bookingRedisRepo) GetUpNextBooking(ctx context.Context, endOfDay time.Time) (*domain.Booking, error) {
-	booking, err := r.postgres.GetUpNextBookingDB(ctx, endOfDay)
-	if err != nil {
-		return nil, err
-	}
-
-	return booking, nil
-}
-
-func (r *bookingRedisRepo) GetBooking(ctx context.Context, dateTime *domain.Date, roomID uuid.UUID, roomNumber uint) ([]domain.Booking, error) {
-	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, dateTime.StartStr, dateTime.EndStr)
-
+// รับ cacheKey เข้ามาตรงๆ เลย!
+func (r *bookingRedisRepo) GetBookingCacheByKey(ctx context.Context, cacheKey string) ([]domain.Booking, error) {
 	vals, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err == nil {
-		var bookings []domain.Booking
-		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
-			return nil, err
-		}
-
-		return bookings, nil
-	}
-
-	bookings, err := r.postgres.GetBookingDB(ctx, dateTime, roomID)
 	if err != nil {
+		return nil, err // คืนค่า redis.Nil กลับไป
+	}
+
+	var bookings []domain.Booking
+	if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
 		return nil, err
-	}
-
-	if jsonBytes, err := json.Marshal(bookings); err == nil {
-		r.SetJsonCache(ctx, cacheKey, jsonBytes)
-	}
-
-	return bookings, nil
-}
-
-func (r *bookingRedisRepo) GetAnalyticBooking(ctx context.Context, date *domain.Date) ([]domain.Booking, error) {
-	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
-
-	vals, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err == nil {
-		var bookings []domain.Booking
-		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
-			return nil, err
-		}
-
-		return bookings, nil
-	}
-
-	bookings, err := r.postgres.GetAnalyticBookingDB(ctx, date)
-	if err != nil {
-		return nil, err
-	}
-
-	if jsonBytes, err := json.Marshal(bookings); err == nil {
-		r.SetJsonCache(ctx, cacheKey, jsonBytes)
-	}
-
-	return bookings, nil
-}
-
-func (r *bookingRedisRepo) GetBookingStatus(ctx context.Context) ([]domain.Booking, error) {
-	bookings, err := r.postgres.GetBookingStatusDB(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
-	return bookings, nil
-}
-
-func (r *bookingRedisRepo) GetBookingStatusByRoomID(ctx context.Context, roomID uuid.UUID) (*domain.Booking, error) {
-	booking, err := r.postgres.GetBookingStatusByRoomID_DB(ctx, roomID)
-	if err != nil {
-		return nil, err
-	}
-
-	// คืนค่าข้อมูลที่เพิ่งดึงมาจาก DB ให้ระบบเอาไปใช้ต่อ
-	return booking, nil
-}
-
-func (r *bookingRedisRepo) GetUserBooking(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
-	cacheKey := fmt.Sprintf("booking:user:%s:date:%s", userID, date)
-
-	vals, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err == nil {
-		var bookings []domain.Booking
-		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
-			return nil, err
-		}
-
-		return bookings, nil
-	}
-
-	bookings, err := r.postgres.GetUserBookingDB(ctx, userID, date)
-	if err != nil {
-		return nil, err
-	}
-
-	if jsonBytes, err := json.Marshal(bookings); err == nil {
-		r.SetJsonCache(ctx, cacheKey, jsonBytes)
-	}
-
-	return bookings, nil
-}
-
-func (r *bookingRedisRepo) GetUserHistory(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
-	cacheKey := fmt.Sprintf("history:user:%s:date:%s", userID, date)
-
-	vals, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err == nil {
-		var bookings []domain.Booking
-		if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
-			return nil, err
-		}
-
-		return bookings, nil
-	}
-
-	bookings, err := r.postgres.GetUserHistoryDB(ctx, userID, date)
-	if err != nil {
-		return nil, err
-	}
-
-	if jsonBytes, err := json.Marshal(bookings); err == nil {
-		r.SetJsonCache(ctx, cacheKey, jsonBytes)
 	}
 
 	return bookings, nil
@@ -249,8 +92,13 @@ func (r *bookingRedisRepo) ClearCacheByPrefix(ctx context.Context,prefix string)
 	return nil
 }
 
-func (r *bookingRedisRepo) SetJsonCache(ctx context.Context, cacheKey string, jsonBytes []byte) {
-	err := r.rdb.Set(ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err() // TTL ปรับตามความเหมาะสม
+func (r *bookingRedisRepo) SetBookingCache(ctx context.Context, cacheKey string, bookings []domain.Booking) {
+	jsonBytes, err := json.Marshal(bookings)
+	if err != nil {
+		log.Printf("Failed to marshal: %v", err) // เรียกใช้ฟังก์ชันจาก BaseRedisRepo ของคุณ
+	}
+
+	err = r.rdb.Set(ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err() // TTL ปรับตามความเหมาะสม
 	if err != nil {
 		// log.Println("Redis Set Error:", err) 
 		// Error ตรงนี้ปล่อยผ่านได้ เพราะ User ได้ข้อมูลจาก DB แล้ว
