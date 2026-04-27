@@ -13,12 +13,11 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/gateway"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/gateway"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/postgres"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/middleware"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 	"github.com/hibiken/asynq"
 
 	"github.com/gofiber/fiber/v2"
@@ -125,7 +124,16 @@ func InitialRedisConnection(ctx context.Context, redisURL string) (*redis.Client
 	return rdb, nil
 }
 
-func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) *fiber.App {
+func InitialFiber(usecase *domain.AllUsecase, bookingWsHub *Websocket.Hub) *fiber.App {
+	// HTTP Handler
+	bookingHandler := http.NewBookingHandlers(usecase.BookingUsecases)
+	configHandler := http.NewConfigHandler(usecase.ConfigUsecase)
+	roomHandler := http.NewRoomHandler(usecase.RoomUsecase)
+	userHandler := http.NewUserHandler(usecase.UserUsecase)
+
+	// Websocker Hanlder
+	bookingWebsocket := Websocket.NewWSBookingHandler(bookingWsHub, usecase.BookingUsecases)
+
 	supabaseClient := InitialSupabase()
 
 	app := fiber.New()
@@ -155,35 +163,20 @@ func InitialFiber(handler *http.BookingHandler, ws *Websocket.WSBookingHandler) 
 	app.Use(etag.New(etag.Config{
 		Weak: true, // ใช้ Weak ETag (W/...) เหมาะกับ JSON
 	}))
-	
-	// For test without middleware
-	// api := app.Group("/api/booking")
-	// controller.InitialBookingRoute(api, handler)
-	// apiTest := app.Group("/api")
-	// apiTest.Get("/holiday", handler.GetHoliday)
-	// apiTest.Get("/room/details", handler.GetRoomDetails)
 
-	// With middleware
+	// HTTP API
 	api := app.Group("/api/v1")
 	admin := api.Group("/admin", middleware.AuthMiddleware())
 	bookingAPI := api.Group("/booking", middleware.AuthMiddleware())
 	roomAPI := admin.Group("/room", middleware.AuthMiddleware())
-	
-	// api.Get("/holiday", handler.GetHoliday)
+	controller.InitialBookingRoute(bookingAPI, bookingHandler)
+	controller.InitialRoomRoute(roomAPI, roomHandler)
+	controller.InitialHelperRoute(api, bookingHandler, roomHandler, configHandler) // Route ที่ไม่ต้องการ Auth
+	controller.InitialAdminRoute(admin, userHandler, configHandler)
 	
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
-
-	wsWithoutBooking := wsGroup.Group("/", middleware.WebsocketMiddleware)
-	
-	controller.InitialHelperRoute(api, handler) // Route ที่ไม่ต้องการ Auth
-	controller.InitialAdminRoute(admin, handler)
-	controller.InitialBookingRoute(bookingAPI, handler)
-	controller.InitialRoomRoute(roomAPI, handler)
-	controller.InitialWSRoute(wsWithMiddleware, ws, supabaseClient)
-	controller.InitialWSRoute(wsWithoutBooking, ws, supabaseClient)
-
-	// app.Get("/api/product/:id", handler.TestRedis)
+	controller.InitialWSRoute(wsWithMiddleware, bookingWebsocket, supabaseClient)
 
 	return app
 }
@@ -198,17 +191,39 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub, redisAddr string, asynqClient *asynq.Client) (*http.BookingHandler, *Websocket.WSBookingHandler) {
-	postgresRepo := Postgres.NewPostgresRepository(db)
-	redisRepo := Redis.NewRedisRepository(rdb, postgresRepo)
-	redisPublisher := Redis.NewRedisPublisher(rdb)
-	calendarService := gateway.NewGoogleCalendarGateway(googleCalendarService)
-	
-	bookingUsecase := usercase.NewBookingUsecase(redisRepo, redisRepo, postgresRepo, redisPublisher, calendarService, asynqClient)
-	handler := http.NewBookingHandler(bookingUsecase)
-	websocketHandler := Websocket.NewWSBookingHandler(bookingWsHub, bookingUsecase)
-	
-	worker.StartAsynqWorker(redisAddr, bookingUsecase)
+func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub, redisAddr string, asynqClient *asynq.Client) *domain.AllUsecase {
+	// Postgres Repositorys
+	bookingPostgres := postgresRepo.NewBookingPostgresRepo(db)
+	configPostgres := postgresRepo.NewConfigPostgresRepo(db)
+	roomPostgres := postgresRepo.NewRoomPostgresRepo(db)
+	userPostgres := postgresRepo.NewUserPostgresRepo(db)
+	workerPostgres := postgresRepo.NewWorkerPostgresRepo(db)
 
-	return handler, websocketHandler
+	// Redis Repositorys
+	bookingRedis := redisRepo.NewBookingRedisRepo(rdb, bookingPostgres)
+	configRedis := redisRepo.NewConfigRedisRepo(rdb, configPostgres)
+	roomRedis := redisRepo.NewRoomRedisRepo(rdb, roomPostgres)
+	workerRedis := redisRepo.NewWorkerRedisRepo(rdb, workerPostgres)
+
+	// Publishers
+	bookingPublisher := redisRepo.NewRedisPublisher(rdb)
+	workerPublisher := redisRepo.NewRedisPublisher(rdb)
+
+	// Gateway
+	configGateway := gateway.NewGoogleCalendarGateway(googleCalendarService)
+
+	// Usecases
+	bookingUsecases := usecase.NewBookingUsecases(bookingPublisher, bookingRedis, bookingPostgres, asynqClient)
+	configUsecase := usecase.NewConfiggUsecase(configRedis, configPostgres, configGateway)
+	roomUsecase := usecase.NewRoomUsecase(roomRedis)
+	userUsecase := usecase.NewUserUsecase(userPostgres)
+	workerUsecase := usecase.NewWorkerUsecase(workerPublisher, workerRedis, workerPostgres, workerPublisher)
+
+	return &domain.AllUsecase{
+		BookingUsecases: bookingUsecases,
+		ConfigUsecase: configUsecase,
+		RoomUsecase: roomUsecase,
+		UserUsecase: userUsecase,
+		WorkerUsecase: workerUsecase,
+	}
 }

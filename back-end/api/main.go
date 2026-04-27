@@ -32,7 +32,6 @@ func main() {
 		log.Fatal("Can't connect to google calendar")
 	}
 
-
 	rdb, err := utils.InitialRedisConnection(ctx, redisAddr)
 	if err != nil {
 		log.Fatalf("Can't connect to Redis: %v", err)
@@ -46,7 +45,7 @@ func main() {
 	asynqClient := worker.NewAsynqClient(redisAddr)
 	defer asynqClient.Close()
 
-	handleUsecase, websocketHandler := utils.InitialCleanArch(
+	allUsecase := utils.InitialCleanArch(
 		rdb, 
 		db, 
 		googleCalendarService, 
@@ -54,8 +53,9 @@ func main() {
 		redisAddr,
 		asynqClient,
 	)
+	worker.StartAsynqWorker(redisAddr, allUsecase.WorkerUsecase)
 
-	app := utils.InitialFiber(handleUsecase, websocketHandler)	
+	app := utils.InitialFiber(allUsecase, bookingWsHub)	
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" 
