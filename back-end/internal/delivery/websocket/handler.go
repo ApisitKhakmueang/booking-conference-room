@@ -13,11 +13,11 @@ import (
 // สร้าง Struct เก็บ Dependency ที่จำเป็น
 type WSBookingHandler struct {
 	hub     *Hub
-	usecase domain.BookingUsecase
+	usecase domain.BookingUsecases
 }
 
 // Constructor รับค่าเข้ามา
-func NewWSBookingHandler(hub *Hub, usecase domain.BookingUsecase) *WSBookingHandler {
+func NewWSBookingHandler(hub *Hub, usecase domain.BookingUsecases) *WSBookingHandler {
 	return &WSBookingHandler{
 		hub:     hub,
 		usecase: usecase,
