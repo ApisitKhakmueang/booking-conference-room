@@ -9,17 +9,17 @@ import (
 
 	// "log"
 
-	customError "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/customErrors"
+	customError "github.com/ApisitKhakmueang/BookingConferenceRoom/internal/custom_errors"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/hibiken/asynq"
 )
 
 // สร้าง Struct เพื่อรับ Usecase หรือ Repo เข้ามาใช้งาน
 type BookingProcessor struct {
-	usecase domain.BookingUsecase // หรือจะเป็น Repo ก็ได้ตามสถาปัตยกรรมของคุณ
+	usecase domain.WorkerUsecase // หรือจะเป็น Repo ก็ได้ตามสถาปัตยกรรมของคุณ
 }
 
-func NewBookingProcessor(uc domain.BookingUsecase) *BookingProcessor {
+func NewBookingProcessor(uc domain.WorkerUsecase) *BookingProcessor {
 	return &BookingProcessor{usecase: uc}
 }
 

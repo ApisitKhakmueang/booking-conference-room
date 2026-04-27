@@ -25,8 +25,8 @@ func NewAsynqClient(redisAddrURL string) *asynq.Client {
 // ========================================================
 // 2. ฟังก์ชันสตาร์ท Server (คนรับงานไปทำ)
 // ========================================================
-// สังเกตว่าเรารับ bookingUC เข้ามาด้วย เพื่อเอามาผูกกับ Processor
-func StartAsynqWorker(redisAddrURL string, bookingUC domain.BookingUsecase) {
+// สังเกตว่าเรารับ workUsecase เข้ามาด้วย เพื่อเอามาผูกกับ Processor
+func StartAsynqWorker(redisAddrURL string, workUsecase domain.WorkerUsecase) {
 	redisOpt, err := asynq.ParseRedisURI(redisAddrURL)
 	if err != nil {
 		log.Fatalf("❌ Failed to parse Redis URI for Asynq Worker: %v", err)
@@ -43,7 +43,7 @@ func StartAsynqWorker(redisAddrURL string, bookingUC domain.BookingUsecase) {
 	mux := asynq.NewServeMux()
 	
 	// สร้าง Processor และผูกชื่องาน
-	processor := NewBookingProcessor(bookingUC)
+	processor := NewBookingProcessor(workUsecase)
 	mux.HandleFunc(TypeBookingExpired, processor.HandleBookingExpiredTask)
 	mux.HandleFunc(TypeBookingStart, processor.HandleBookingStartTask)
 	mux.HandleFunc(TypeBookingNoShow, processor.HandleBookingNoShowTask)
