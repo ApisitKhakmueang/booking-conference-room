@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/postgres"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/postgres"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )

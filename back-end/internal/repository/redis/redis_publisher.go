@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/redis"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/redis"
 	"github.com/redis/go-redis/v9"
 )
 

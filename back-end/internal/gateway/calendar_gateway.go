@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/calendar"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/calendar"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 

@@ -10,9 +10,9 @@ import (
 	"errors"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/calendar"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/postgres"
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/repository/redis"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/calendar"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/postgres"
+	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/helper"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/worker"
 	"github.com/google/uuid"
