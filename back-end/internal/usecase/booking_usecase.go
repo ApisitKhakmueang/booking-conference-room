@@ -264,7 +264,7 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
-		bookings, err := u.db.GetAnalyticBookingDB(ctx, date)
+		bookings, err = u.db.GetAnalyticBookingDB(ctx, date)
 		if err != nil {
 			return nil, err
 		}
@@ -274,7 +274,7 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
 		})
 	}
-
+	
 	totalBookings := len(bookings)
 
 	// ⭐️ ป้องกันบั๊ก: ถ้าไม่มีการจองเลย ให้ส่งค่าว่างกลับไปทันที ไม่งั้นตอนหาร % โปรแกรมจะพัง (Divide by zero)
@@ -385,7 +385,7 @@ func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, d
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
-		bookings, err := u.db.GetUserBookingDB(ctx, userID, date)
+		bookings, err = u.db.GetUserBookingDB(ctx, userID, date)
 		if err != nil {
 			return nil, err
 		}
@@ -407,7 +407,7 @@ func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, d
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
-		bookings, err := u.db.GetUserHistoryDB(ctx, userID, date)
+		bookings, err = u.db.GetUserHistoryDB(ctx, userID, date)
 		if err != nil {
 			return nil, err
 		}

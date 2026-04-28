@@ -70,7 +70,7 @@ func (u *roomUsecase) GetRoom(ctx context.Context) ([]domain.Room, error) {
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
-		rooms, err := u.db.GetRoomDB(ctx)
+		rooms, err = u.db.GetRoomDB(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +92,7 @@ func (u *roomUsecase) GetRoomByID(ctx context.Context, roomID uuid.UUID) (*domai
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
-		room, err := u.db.GetRoomByID_DB(ctx, roomID)
+		room, err = u.db.GetRoomByID_DB(ctx, roomID)
 		if err != nil {
 			return nil, err
 		}
