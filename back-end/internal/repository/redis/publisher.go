@@ -16,7 +16,7 @@ func NewRedisPublisher(rdb *redis.Client) domain.RealtimePublisher {
 	return &redisPub{rdb: rdb}
 }
 
-func (p *redisPub) PublishEvents(ctx context.Context, event string, payload interface{}) error {
+func (p *redisPub) PublishEvent(ctx context.Context, event string, payload interface{}) error {
 	// ห่อข้อมูลเป็น JSON
 	// log.Println("enter publish event")
 	data, _ := json.Marshal(map[string]interface{}{
