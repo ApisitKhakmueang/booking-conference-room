@@ -15,11 +15,7 @@ type RoomUsecase interface {
 }
 
 type RoomRedisRepo interface {
-	CreateRoom(ctx context.Context, room *Room) error
-	UpdateRoom(ctx context.Context, room *Room) error
-	DeleteRoom(ctx context.Context, roomID uuid.UUID) error
-	GetRoom(ctx context.Context) ([]Room, error)
-	GetRoomByID(ctx context.Context, roomID uuid.UUID) (*Room, error)
+	RedisCacheRepository
 }
 
 type RoomPostgresRepo interface {
