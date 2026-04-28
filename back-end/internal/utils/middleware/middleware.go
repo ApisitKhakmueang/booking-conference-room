@@ -47,13 +47,10 @@ func AuthMiddleware() fiber.Handler {
 				// log.Printf("AppMetadata ที่แกะได้: %v", appMetadata)
 				
 				if role, exists := appMetadata["role"]; exists {
-					// log.Printf("Role ของคนนี้คือ: %v", role)
-					log.Println("role: ", role)
 					c.Locals("role", role) // เก็บ role ไว้ใช้ต่อใน API
 				}
 
 				if status, exists := appMetadata["status"]; exists {
-					// log.Printf("Role ของคนนี้คือ: %v", status)
 					if status == "inactive" {
 						return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Account has been suspended."})
 					}
