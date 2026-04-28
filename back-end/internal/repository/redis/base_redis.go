@@ -43,13 +43,31 @@ func (b *BaseRedisRepo) ClearCacheByPrefix(ctx context.Context,prefix string) er
 	return nil
 }
 
-func (b *BaseRedisRepo) SetJsonCache(ctx context.Context, cacheKey string, jsonBytes []byte) {
-	err := b.rdb.Set(ctx, cacheKey, jsonBytes, 7*24*time.Hour).Err() // TTL ปรับตามความเหมาะสม
+func (b *BaseRedisRepo) SetCache(ctx context.Context, cacheKey string, data any, expiration time.Duration) {
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		log.Printf("Failed to marshal: %v", err) // เรียกใช้ฟังก์ชันจาก BaseRedisRepo ของคุณ
+	}
+
+	err = b.rdb.Set(ctx, cacheKey, jsonBytes, expiration).Err() // TTL ปรับตามความเหมาะสม
 	if err != nil {
 		// log.Println("Redis Set Error:", err) 
 		// Error ตรงนี้ปล่อยผ่านได้ เพราะ User ได้ข้อมูลจาก DB แล้ว
 		log.Printf("Failed to set cache: %v", err)
 	}
+}
+
+func (r *bookingRedisRepo) GetCache(ctx context.Context, cacheKey string, dest any) error {
+	vals, err := r.rdb.Get(ctx, cacheKey).Result()
+	if err != nil {
+		return err // คืนค่า redis.Nil กลับไป
+	}
+
+	if err := json.Unmarshal([]byte(vals), dest); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (b *BaseRedisRepo) DeleteBookingCache(ctx context.Context, roomNumber uint) {
