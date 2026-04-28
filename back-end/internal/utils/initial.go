@@ -201,23 +201,25 @@ func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *cal
 
 	// Redis Repositorys
 	bookingRedis := redisRepo.NewBookingRedisRepo(rdb)
-	configRedis := redisRepo.NewConfigRedisRepo(rdb, configPostgres)
-	roomRedis := redisRepo.NewRoomRedisRepo(rdb, roomPostgres)
-	workerRedis := redisRepo.NewWorkerRedisRepo(rdb, workerPostgres)
+	configRedis := redisRepo.NewConfigRedisRepo(rdb)
+	roomRedis := redisRepo.NewRoomRedisRepo(rdb)
+	workerRedis := redisRepo.NewWorkerRedisRepo(rdb)
 
 	// Publishers
 	bookingPublisher := redisRepo.NewRedisPublisher(rdb)
 	workerPublisher := redisRepo.NewRedisPublisher(rdb)
+	configPublisher := redisRepo.NewRedisPublisher(rdb)
+	roomPublisher := redisRepo.NewRedisPublisher(rdb)
 
 	// Gateway
 	configGateway := gateway.NewGoogleCalendarGateway(googleCalendarService)
 
 	// Usecases
 	bookingUsecases := usecase.NewBookingUsecases(bookingPublisher, bookingRedis, bookingPostgres, asynqClient)
-	configUsecase := usecase.NewConfiggUsecase(configRedis, configPostgres, configGateway)
-	roomUsecase := usecase.NewRoomUsecase(roomRedis)
+	configUsecase := usecase.NewConfigUsecase(configPublisher, configRedis, configPostgres, configGateway)
+	roomUsecase := usecase.NewRoomUsecase(roomPublisher, roomRedis, roomPostgres)
 	userUsecase := usecase.NewUserUsecase(userPostgres)
-	workerUsecase := usecase.NewWorkerUsecase(workerPublisher, workerRedis, workerPostgres, workerPublisher)
+	workerUsecase := usecase.NewWorkerUsecase(workerPublisher, workerRedis, workerPostgres)
 
 	return &domain.AllUsecase{
 		BookingUsecases: bookingUsecases,
