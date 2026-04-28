@@ -214,9 +214,10 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 			return nil, err // ถ้า DB พังอีก ก็คือพังจริงๆ แล้ว Return Error กลับหน้าบ้านเลย
 		}
 
-		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
-		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
-		u.cache.SetBookingCache(ctx, cacheKey, bookings)
+		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
+			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+		})
 	}
 
 	groupBookings, err := helper.ConvertBooking(bookings)
@@ -246,9 +247,11 @@ func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Da
 		if err != nil {
 			return nil, err
 		}
-		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
-		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
-		u.cache.SetBookingCache(ctx, cacheKey, bookings)
+		
+		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
+			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+		})
 	}
 
 	totalBookings := len(bookings)
@@ -364,9 +367,11 @@ func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, d
 		if err != nil {
 			return nil, err
 		}
-		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
-		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
-		u.cache.SetBookingCache(ctx, cacheKey, bookings)
+		
+		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
+			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+		})
 	}
 
 	return bookings, nil
@@ -383,9 +388,11 @@ func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, d
 		if err != nil {
 			return nil, err
 		}
-		// 3.2 ถ้าได้ของจาก DB มาแล้ว เอาไปเก็บใส่ Cache ให้คนอื่นใช้ต่อในอนาคต (อย่าลืมใช้ go routine ถ้าไม่อยากให้บล็อก)
-		// หรือเรียกฟังก์ชันปกติก็ได้ถ้าไม่ได้กังวลเรื่องเวลามาก
-		u.cache.SetBookingCache(ctx, cacheKey, bookings)
+		
+		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
+			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+		})
 	}
 
 	return bookings, nil

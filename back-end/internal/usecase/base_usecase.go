@@ -4,6 +4,7 @@ package usecase
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 )
@@ -32,5 +33,17 @@ func (b *BaseUsecase) PublishEvent(event string, roomNumber uint, payloadData in
 		if pubErr := b.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
 			log.Printf("Failed to publish real-time event: %v", pubErr)
 		}
+	}()
+}
+
+// RunInBackground รับเวลา Timeout และ "งาน (task)" ที่ต้องการให้ทำ
+func (b *BaseUsecase) RunInBackground(timeout time.Duration, task func(bgCtx context.Context)) {
+	go func() {
+		// สร้าง Context ใหม่พร้อม Timeout
+		bgCtx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+
+		// สั่งให้ "งาน" นั้นทำงาน โดยส่ง bgCtx เข้าไปให้ด้วย
+		task(bgCtx)
 	}()
 }
