@@ -200,7 +200,7 @@ func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *cal
 	workerPostgres := postgresRepo.NewWorkerPostgresRepo(db)
 
 	// Redis Repositorys
-	bookingRedis := redisRepo.NewBookingRedisRepo(rdb, bookingPostgres)
+	bookingRedis := redisRepo.NewBookingRedisRepo(rdb)
 	configRedis := redisRepo.NewConfigRedisRepo(rdb, configPostgres)
 	roomRedis := redisRepo.NewRoomRedisRepo(rdb, roomPostgres)
 	workerRedis := redisRepo.NewWorkerRedisRepo(rdb, workerPostgres)

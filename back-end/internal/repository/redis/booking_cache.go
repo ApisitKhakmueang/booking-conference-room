@@ -14,13 +14,11 @@ import (
 
 type bookingRedisRepo struct {
 	*BaseRedisRepo
-	postgres domain.BookingPostgresRepo
 }
 
-func NewBookingRedisRepo(rdb *redis.Client, postgres domain.BookingPostgresRepo) *bookingRedisRepo {
+func NewBookingRedisRepo(rdb *redis.Client) *bookingRedisRepo {
 	return &bookingRedisRepo{
 		BaseRedisRepo: &BaseRedisRepo{rdb:rdb},
-		postgres: postgres,
 	}
 }
 
