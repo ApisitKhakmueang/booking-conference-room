@@ -2,7 +2,6 @@ package redisRepo
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -12,40 +11,13 @@ import (
 
 type configRedisRepo struct {
 	*BaseRedisRepo
-	postgres domain.ConfigPostgresRepo
 }
 
-func NewConfigRedisRepo(rdb *redis.Client, postgres domain.ConfigPostgresRepo) *configRedisRepo {
+func NewConfigRedisRepo(rdb *redis.Client) *configRedisRepo {
 	return &configRedisRepo{
 		BaseRedisRepo: &BaseRedisRepo{rdb: rdb},
-		postgres:      postgres,
 	}
 }
-
-func (r *configRedisRepo) GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
-	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
-
-	var holidays []domain.Holiday
-	val, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err == nil {
-		if err := json.Unmarshal([]byte(val), &holidays); err == nil {
-			return holidays, nil
-		}
-	}
-
-	holidays, err = r.postgres.GetHolidayDB(ctx, date)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if jsonBytes, err := json.Marshal(holidays); err == nil {
-		r.SetJsonCache(ctx, cacheKey, jsonBytes)
-	}
-
-	return holidays, nil
-}
-
 
 func (r *configRedisRepo) FindHolidaySynced(ctx context.Context, date *domain.Date) int64 {
 	key := fmt.Sprintf("sync_flag:holidays:%s:%s", date.StartStr, date.EndStr)

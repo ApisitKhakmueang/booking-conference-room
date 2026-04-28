@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -9,89 +10,95 @@ import (
 )
 
 type configUsecase struct {
+	BaseUsecase
 	cache          domain.ConfigRedisRepo // เรียกผ่าน Interface
 	db domain.ConfigPostgresRepo // เรียกผ่าน Interface
 	gateway        domain.ConfigGateWay
 }
 
 // NewBookingUsecase คือ Constructor
-func NewConfiggUsecase(
+func NewConfigUsecase(
+	pub				domain.RealtimePublisher,
 	cache 		domain.ConfigRedisRepo,
 	db 				domain.ConfigPostgresRepo,
 	gateway 	domain.ConfigGateWay,) domain.ConfigUsecase {
 	return &configUsecase{
-		cache:   	cache,
-		db: 			db,
-		gateway:	gateway,
+		BaseUsecase: 	NewBaseUsecase(pub),
+		cache:   			cache,
+		db: 					db,
+		gateway:			gateway,
 	}
 }
 
 func (u *configUsecase) GetHoliday(ctx context.Context, date *domain.Date) ([]domain.Holiday, error) {
-	// 	// loc := time.FixedZone("ICT", 7*60*60)
-	// 	// startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, loc)
-	// 	// endDate := startDate.AddDate(0, 1, -1) // วันสุดท้ายของเดือน
-
-	// 	// 3. หาว่าวันที่เท่าไหร่บ้างที่เป็น เสาร์(6)-อาทิตย์(0)
-
 	now := time.Now()
-
-	// 2. ใช้ Format มาตรฐาน (2006-01-02 คือสูตรลับของ Go ห้ามเปลี่ยนเลข)
 	layout := "2006-01-02"
 
-	// StartDate: วันนี้
 	if date.StartStr == "" {
 		date.StartStr = now.Format(layout)
 	}
-
-	// 3. EndDate: ใช้ AddDate(ปี, เดือน, วัน)
-	// Go จะจัดการเรื่อง เดือน 12 -> 1 หรือ ปีอธิกสุรทิน ให้เองอัตโนมัติ
 	if date.EndStr == "" {
 		nextMonth := now.AddDate(0, 1, 0)
 		date.EndStr = nextMonth.Format(layout)
 	}
 
+	// ⭐️ สร้าง cacheKey ไว้ใช้ร่วมกันทั้ง 2 ฝั่งเลย
+	cacheKey := fmt.Sprintf("holidays:%s:%s", date.StartStr, date.EndStr)
 	isSynced := u.cache.FindHolidaySynced(ctx, date)
 
+	// ==========================================
+	// กรณีที่ 1: SYNC แล้ว (ดึงข้อมูลจาก Cache หรือ DB)
+	// ==========================================
 	if isSynced > 0 {
-		// ถ้า Sync แล้ว -> ดึงจาก DB ได้เลย มั่นใจได้ว่าข้อมูลครบ
-		holidays, err := u.cache.GetHoliday(ctx, date)
+		var holidays []domain.Holiday
+		err := u.cache.GetCache(ctx, cacheKey, &holidays)
+
 		if err != nil {
-			return nil, err
+			// ดึงจาก Postgres
+			holidays, err = u.db.GetHolidayDB(ctx, date)
+			if err != nil {
+				return nil, err
+			}
+
+			u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+				u.cache.SetCache(bgCtx, cacheKey, holidays, 7*24*time.Hour) // เก็บไว้ 7 วัน (หรือปรับตามเหมาะสม)
+			})
 		}
-		// ถ้า DB ว่างเปล่า (len=0) ก็แปลว่าเดือนนั้นไม่มีวันหยุดจริงๆ (เพราะ Sync มาแล้ว)
-		// ดังนั้น return ได้เลย
 		return holidays, nil
 	}
 
+	// ==========================================
+	// กรณีที่ 2: ยังไม่เคย SYNC (ดึง Google API แล้วอัปเดต DB/Cache)
+	// ==========================================
 	googleHolidays, err := u.gateway.FetchHolidays(date)
 	if err != nil {
-		// กรณีต่อ Google ไม่ได้ ให้ลองไปดึงของเก่าจาก DB มาใช้แก้ขัดไปก่อน (Fallback)
-		fallbackHolidays, dbErr := u.cache.GetHoliday(ctx, date)
+		// ✅ แก้ไข: ดึงจาก DB ตามที่ Comment แจ้งไว้
+		fallbackHolidays, dbErr := u.db.GetHolidayDB(ctx, date)
 		if dbErr == nil && len(fallbackHolidays) > 0 {
-			return fallbackHolidays, nil // ดีกว่า return error
+			return fallbackHolidays, nil
 		}
 		return nil, err
 	}
 
-	// 	// log.Printf("BEFORE INSERT: First=%v, Last=%v\n", googleHolidays[0].Date.Time(), googleHolidays[len(googleHolidays)-1].Date.Time())
-
-	// 	// 5. บันทึกสิ่งที่ได้ลง DB (Save for next time)
-	// 	// แนะนำให้ใช้ Batch Insert (Create ทีเดียวหลาย row)
+	// Save ลง DB ทันที (ให้จบในเส้นทางหลัก)
 	if len(googleHolidays) > 0 {
 		if err := u.db.BulkUpsertHolidays(ctx, googleHolidays); err != nil {
-			// Log error ไว้ แต่ไม่ต้อง return error ก็ได้
-			// เพราะเรามี data ส่งให้ user แล้ว (แค่ cache ไม่สำเร็จ)
-			log.Println("Failed to cache holidays:", err)
-		}
-
-		if err := u.cache.DeleteHolidayCache(ctx, date); err != nil {
-			return nil, err
+			log.Println("Failed to save holidays to DB:", err)
 		}
 	}
 
-	if err := u.cache.SetHolidaySynced(ctx, date); err != nil {
-		log.Println("Failed to set sync flag:", err)
-	}
+	// 🌟 ท่าไม้ตาย: โยนการอัปเดต Cache และการ Set Sync Flag เข้า Background ให้หมด!
+	u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+		// ถ้ามีวันหยุด ก็อัปเดตข้อมูลสดใหม่ลง Cache ไปเลย
+		if len(googleHolidays) > 0 {
+			u.cache.SetCache(bgCtx, cacheKey, googleHolidays, 7*24*time.Hour)
+		}
+		
+		// Set Sync Flag (ถึงแม้เดือนนั้นจะไม่มีวันหยุด ก็ต้อง Set ไว้ ระบบจะได้ไม่ไปกวน Google API บ่อยๆ)
+		if err := u.cache.SetHolidaySynced(bgCtx, date); err != nil {
+			log.Println("Failed to set sync flag:", err)
+		}
+	})
 
 	return googleHolidays, nil
 }
