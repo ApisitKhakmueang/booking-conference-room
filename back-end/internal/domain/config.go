@@ -15,7 +15,6 @@ type ConfigGateWay interface {
 type ConfigRedisRepo interface {
 	RedisCacheRepository
 
-	GetHoliday(ctx context.Context, date *Date) ([]Holiday, error)
 	FindHolidaySynced(ctx context.Context, date *Date) int64
 	SetHolidaySynced(ctx context.Context, date *Date) error
 	DeleteHolidayCache(ctx context.Context, date *Date) error
