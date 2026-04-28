@@ -24,6 +24,8 @@ type BookingUsecases interface {
 }
 
 type BookingRedisRepo interface {
+	RedisCacheRepository
+
 	ClearCacheAfterCreateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint)
 	ClearCacheAfterUpdateBooking(ctx context.Context, userID uuid.UUID, roomNumber uint, prevRoomNumber uint)
 	ClearCacheAfterDeleteBooking(ctx context.Context, userID uuid.UUID, roomNumber uint)

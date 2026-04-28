@@ -49,21 +49,6 @@ func (r *bookingRedisRepo) ClearCacheAfterCheckOutBooking(ctx context.Context, u
 	r.DeleteHistoryCache(ctx, userID)
 }
 
-// รับ cacheKey เข้ามาตรงๆ เลย!
-func (r *bookingRedisRepo) GetBookingCacheByKey(ctx context.Context, cacheKey string) ([]domain.Booking, error) {
-	vals, err := r.rdb.Get(ctx, cacheKey).Result()
-	if err != nil {
-		return nil, err // คืนค่า redis.Nil กลับไป
-	}
-
-	var bookings []domain.Booking
-	if err := json.Unmarshal([]byte(vals), &bookings); err != nil {
-		return nil, err
-	}
-
-	return bookings, nil
-}
-
 // Internal Function
 func (r *bookingRedisRepo) ClearCacheByPrefix(ctx context.Context,prefix string) error {
 	var keys []string

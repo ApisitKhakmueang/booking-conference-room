@@ -205,7 +205,8 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 	
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, date.StartStr, date.EndStr)
 
-	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	var bookings []domain.Booking
+	err := u.cache.GetCache(ctx, cacheKey, &bookings)
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
@@ -216,7 +217,7 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
 		})
 	}
 
@@ -239,7 +240,8 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
 	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
 
-	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	var bookings []domain.Booking
+	err := u.cache.GetCache(ctx, cacheKey, &bookings)
 
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
@@ -250,7 +252,7 @@ func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Da
 		
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
 		})
 	}
 
@@ -359,7 +361,8 @@ func (u *bookingUsecases) GetBookingStatusByRoomID(ctx context.Context, roomID u
 func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:user:%s:date:%s", userID, date)
 
-	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	var bookings []domain.Booking
+	err := u.cache.GetCache(ctx, cacheKey, &bookings)
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
@@ -370,7 +373,7 @@ func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, d
 		
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
 		})
 	}
 
@@ -380,7 +383,8 @@ func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, d
 func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("history:user:%s:date:%s", userID, date)
 
-	bookings, err := u.cache.GetBookingCacheByKey(ctx, cacheKey)
+	var bookings []domain.Booking
+	err := u.cache.GetCache(ctx, cacheKey, &bookings)
 	
 	if err != nil { 
 		// 3.1 ดึงจาก Postgres
@@ -391,7 +395,7 @@ func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, d
 		
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-			u.cache.SetBookingCache(bgCtx, cacheKey, bookings)
+			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
 		})
 	}
 
