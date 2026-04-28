@@ -72,7 +72,10 @@ func (u *bookingUsecases) CreateBooking(ctx context.Context,booking *domain.Book
 		return err
 	}
 
-	u.cache.ClearCacheAfterCreateBooking(ctx, booking.UserID, roomNumber)
+	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
 
 	u.PublishEvent("booking_created", roomNumber, booking)
 
@@ -103,7 +106,12 @@ func (u *bookingUsecases) UpdateBooking(ctx context.Context,booking *domain.Book
 		return err
 	}
 	
-	u.cache.ClearCacheAfterUpdateBooking(ctx, booking.UserID, roomNumber, prevRoomNumber);
+	prefixPrevRoomNumber := fmt.Sprintf("booking:%d", prevRoomNumber)
+	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
+	u.cache.DeleteCache(ctx, prefixPrevRoomNumber)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
 		
 	u.PublishEvent("booking_updated", roomNumber, booking)
 
@@ -125,7 +133,13 @@ func (u *bookingUsecases) DeleteBooking(ctx context.Context,booking *domain.Book
 		return err
 	}
 
-	u.cache.ClearCacheAfterDeleteBooking(ctx, completedBooking.UserID, completedBooking.Room.RoomNumber);
+
+	prefixRoomNumber := fmt.Sprintf("booking:%d", booking.Room.RoomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
+	prefixHistory := fmt.Sprintf("history:user:%s", booking.UserID)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
+	u.cache.DeleteCache(ctx, prefixHistory)
 
 	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
 	u.PublishStatus("booking_deleted", completedBooking)
@@ -144,7 +158,12 @@ func (u *bookingUsecases) CheckOutBooking(ctx context.Context,booking *domain.Bo
 		return err
 	}
 
-	u.cache.ClearCacheAfterCheckOutBooking(ctx, completedBooking.UserID, completedBooking.Room.RoomNumber);
+	prefixRoomNumber := fmt.Sprintf("booking:%d", booking.Room.RoomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
+	prefixHistory := fmt.Sprintf("history:user:%s", booking.UserID)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
+	u.cache.DeleteCache(ctx, prefixHistory)
 
 	u.PublishEvent("booking_deleted", completedBooking.Room.RoomNumber, deletedBooking)
 	u.PublishStatus("booking_deleted", completedBooking)
@@ -237,7 +256,7 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 	return response, nil
 }
 
-func (u bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
+func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
 	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
 
 	var bookings []domain.Booking
