@@ -15,8 +15,7 @@ type WorkerUsecase interface {
 }
 
 type WorkerRedisRepo interface {
-	UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) (*Booking, uint, error)
-	UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) (*Booking, uint, error)
+	RedisCacheRepository
 }
 
 type WorkerPostgresRepo interface {

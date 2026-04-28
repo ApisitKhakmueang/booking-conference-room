@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
 	"github.com/google/uuid"
@@ -12,47 +14,66 @@ type workerUsecase struct {
 	BaseUsecase
 	cache          domain.WorkerRedisRepo // เรียกผ่าน Interface
 	db domain.WorkerPostgresRepo // เรียกผ่าน Interface
-	publisher      domain.RealtimePublisher
 }
 
 // NewBookingUsecase คือ Constructor
 func NewWorkerUsecase(
 	pub		domain.RealtimePublisher,
 	cache domain.WorkerRedisRepo,
-	db domain.WorkerPostgresRepo,
-	publisher domain.RealtimePublisher,) domain.WorkerUsecase {
+	db domain.WorkerPostgresRepo,) domain.WorkerUsecase {
 	return &workerUsecase{
-		BaseUsecase: NewBaseUsecase(pub),
+		BaseUsecase: 		NewBaseUsecase(pub),
 		cache:          cache,
-		db: db,
-		publisher:      publisher,
+		db: 						db,
 	}
 }
 
 func (u *workerUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID uuid.UUID) error {
-	booking, roomNumber, err := u.cache.UpdateBookingEndStatus(ctx, bookingID)
+	roomNumber, err := u.db.GetRoomNumberDB(ctx, bookingID)
 	if err != nil {
 		return err
 	}
 
-	u.PublishEvent("booking_end", roomNumber, booking)
-	u.PublishStatus("booking_end", booking)
-	u.PublishRoomStatus("booking_end", booking)
-	// u.PublishStatus("booking_updated_status", booking)
+	updateBooking, err := u.db.UpdateBookingStatusDB(ctx, bookingID, "complete")
+	if err != nil {
+		return err
+	}
+
+	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", updateBooking.UserID)
+	prefixHistory := fmt.Sprintf("history:user:%s", updateBooking.UserID)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
+	u.cache.DeleteCache(ctx, prefixHistory)
+
+	u.PublishEvent("booking_end", roomNumber, updateBooking)
+	u.PublishStatus("booking_end", updateBooking)
+	u.PublishRoomStatus("booking_end", updateBooking)
 
 	return nil
 }
 
 func (u *workerUsecase) UpdateBookingNoshowStatus(ctx context.Context, bookingID uuid.UUID) error {
-	booking, roomNumber, err := u.cache.UpdateBookingNoshowStatus(ctx, bookingID)
+	roomNumber, err := u.db.GetRoomNumberDB(ctx, bookingID)
 	if err != nil {
 		return err
 	}
 
-	u.PublishEvent("booking_noshow", roomNumber, booking)
-	u.PublishStatus("booking_noshow", booking)
-	u.PublishRoomStatus("booking_noshow", booking)
-	// u.PublishStatus("booking_updated_status", booking)
+	updateBooking, err := u.db.UpdateBookingStatusDB(ctx, bookingID, "no_show")
+	if err != nil {
+		return err
+	}
+
+	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
+	prefixUser := fmt.Sprintf("booking:user:%s", updateBooking.UserID)
+	prefixHistory := fmt.Sprintf("history:user:%s", updateBooking.UserID)
+	u.cache.DeleteCache(ctx, prefixRoomNumber)
+	u.cache.DeleteCache(ctx, prefixUser)
+	u.cache.DeleteCache(ctx, prefixHistory)
+
+	u.PublishEvent("booking_noshow", roomNumber, updateBooking)
+	u.PublishStatus("booking_noshow", updateBooking)
+	u.PublishRoomStatus("booking_noshow", updateBooking)
 
 	return nil
 }
@@ -74,13 +95,11 @@ func (u *workerUsecase) PublishRoomStatus(event string, completedBooking *domain
 
 	// log.Printf("Publishing real-time event: %v", payload)
 
-	go func() {
-		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
-		bgCtx := context.Background()
+	u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
 			log.Printf("Failed to publish real-time event: %v", pubErr)
 		}
-	}()
+	})
 }
 
 func (u *workerUsecase) PublishStatus(event string, completedBooking *domain.Booking) {
@@ -91,11 +110,9 @@ func (u *workerUsecase) PublishStatus(event string, completedBooking *domain.Boo
 
 	// log.Printf("Publishing real-time event: %v", payload)
 
-	go func() {
-		// ต้องใช้ context.Background() เพราะ ctx เดิมอาจจะหมดอายุตอน API จบ
-		bgCtx := context.Background()
+	u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 		if pubErr := u.publisher.PublishEvent(bgCtx, event, payload); pubErr != nil {
 			log.Printf("Failed to publish real-time event: %v", pubErr)
 		}
-	}()
+	})
 }
