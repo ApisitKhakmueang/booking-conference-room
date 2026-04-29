@@ -139,12 +139,12 @@ func InitialFiber(usecase *domain.AllUsecase, bookingWsHub *Websocket.Hub) *fibe
 	app := fiber.New()
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
-			// ถ้าไม่มี Env ให้ใช้ localhost เป็นค่าเริ่มต้น
-			frontendURL = "http://localhost:3000"
+		// ถ้าไม่มี Env ให้ใช้ localhost เป็นค่าเริ่มต้น
+		frontendURL = "http://localhost:3000"
 	} else {
-			// ถ้ามี Env (เช่น URL ของ Vercel) ให้เพิ่ม localhost เข้าไปเผื่อไว้ด้วย
-			// ใช้เครื่องหมาย , คั่น
-			frontendURL = fmt.Sprintf("%s, http://localhost:3000", frontendURL)
+		// ถ้ามี Env (เช่น URL ของ Vercel) ให้เพิ่ม localhost เข้าไปเผื่อไว้ด้วย
+		// ใช้เครื่องหมาย , คั่น
+		frontendURL = fmt.Sprintf("%s, http://localhost:3000", frontendURL)
 	}
 
 	// 2. ตั้งค่า CORS แบบเจาะจง
@@ -206,20 +206,17 @@ func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *cal
 	workerRedis := redisRepo.NewWorkerRedisRepo(rdb)
 
 	// Publishers
-	bookingPublisher := redisRepo.NewRedisPublisher(rdb)
-	workerPublisher := redisRepo.NewRedisPublisher(rdb)
-	configPublisher := redisRepo.NewRedisPublisher(rdb)
-	roomPublisher := redisRepo.NewRedisPublisher(rdb)
+	publisher := redisRepo.NewRedisPublisher(rdb)
 
 	// Gateway
 	configGateway := gateway.NewGoogleCalendarGateway(googleCalendarService)
 
 	// Usecases
-	bookingUsecases := usecase.NewBookingUsecases(bookingPublisher, bookingRedis, bookingPostgres, asynqClient)
-	configUsecase := usecase.NewConfigUsecase(configPublisher, configRedis, configPostgres, configGateway)
-	roomUsecase := usecase.NewRoomUsecase(roomPublisher, roomRedis, roomPostgres)
+	bookingUsecases := usecase.NewBookingUsecases(publisher, bookingRedis, bookingPostgres, asynqClient)
+	configUsecase := usecase.NewConfigUsecase(publisher, configRedis, configPostgres, configGateway)
+	roomUsecase := usecase.NewRoomUsecase(publisher, roomRedis, roomPostgres)
 	userUsecase := usecase.NewUserUsecase(userPostgres)
-	workerUsecase := usecase.NewWorkerUsecase(workerPublisher, workerRedis, workerPostgres)
+	workerUsecase := usecase.NewWorkerUsecase(publisher, workerRedis, workerPostgres)
 
 	return &domain.AllUsecase{
 		BookingUsecases: bookingUsecases,
