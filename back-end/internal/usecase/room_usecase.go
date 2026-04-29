@@ -10,7 +10,7 @@ import (
 )
 
 type roomUsecase struct {
-	BaseUsecase
+	*BaseUsecase
 	cache domain.RoomRedisRepo // เรียกผ่าน
 	db 		domain.RoomPostgresRepo
 }
@@ -21,7 +21,7 @@ func NewRoomUsecase(
 		cache domain.RoomRedisRepo, 
 		db 		domain.RoomPostgresRepo) domain.RoomUsecase {
 	return &roomUsecase{ 
-		BaseUsecase: 	NewBaseUsecase(pub),
+		BaseUsecase: 	&BaseUsecase{publisher: pub},
 		cache:				cache,
 		db: 					db,
 	}

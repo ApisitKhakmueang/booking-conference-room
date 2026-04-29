@@ -11,7 +11,7 @@ import (
 )
 
 type workerUsecase struct {
-	BaseUsecase
+	*BaseUsecase
 	cache          domain.WorkerRedisRepo // เรียกผ่าน Interface
 	db domain.WorkerPostgresRepo // เรียกผ่าน Interface
 }
@@ -22,7 +22,7 @@ func NewWorkerUsecase(
 	cache domain.WorkerRedisRepo,
 	db domain.WorkerPostgresRepo,) domain.WorkerUsecase {
 	return &workerUsecase{
-		BaseUsecase: 		NewBaseUsecase(pub),
+		BaseUsecase: 		&BaseUsecase{publisher: pub},
 		cache:          cache,
 		db: 						db,
 	}

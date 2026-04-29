@@ -16,7 +16,7 @@ import (
 )
 
 type bookingUsecases struct {
-	BaseUsecase
+	*BaseUsecase
 	cache					domain.BookingRedisRepo // เรียกผ่าน Interface
 	db						domain.BookingPostgresRepo // เรียกผ่าน Interface
 	asynqClient		*asynq.Client
@@ -28,7 +28,7 @@ func NewBookingUsecases(
 	db 						domain.BookingPostgresRepo,
 	asynqClient		*asynq.Client) domain.BookingUsecases {
 	return &bookingUsecases{
-		BaseUsecase: 	NewBaseUsecase(pub),
+		BaseUsecase: 	&BaseUsecase{publisher: pub},
 		cache:				cache,
 		db:   				db,
 		asynqClient: 	asynqClient,

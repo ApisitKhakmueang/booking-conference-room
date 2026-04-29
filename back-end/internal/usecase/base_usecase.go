@@ -14,12 +14,6 @@ type BaseUsecase struct {
 	publisher domain.RealtimePublisher
 }
 
-func NewBaseUsecase(pub domain.RealtimePublisher) BaseUsecase {
-	return BaseUsecase{
-		publisher: pub,
-	}
-}
-
 // ⭐️ เปลี่ยน completedBooking เป็น payloadData interface{} เพื่อให้รับข้อมูลได้ทุกแบบ
 func (b *BaseUsecase) PublishEvent(event string, roomNumber uint, payloadData interface{}) {
 	payload := map[string]interface{}{

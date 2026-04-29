@@ -10,7 +10,7 @@ import (
 )
 
 type configUsecase struct {
-	BaseUsecase
+	*BaseUsecase
 	cache          domain.ConfigRedisRepo // เรียกผ่าน Interface
 	db domain.ConfigPostgresRepo // เรียกผ่าน Interface
 	gateway        domain.ConfigGateWay
@@ -23,7 +23,7 @@ func NewConfigUsecase(
 	db 				domain.ConfigPostgresRepo,
 	gateway 	domain.ConfigGateWay,) domain.ConfigUsecase {
 	return &configUsecase{
-		BaseUsecase: 	NewBaseUsecase(pub),
+		BaseUsecase: 	&BaseUsecase{publisher: pub},
 		cache:   			cache,
 		db: 					db,
 		gateway:			gateway,
