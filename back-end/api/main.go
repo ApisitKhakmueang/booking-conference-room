@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 	_ "time/tzdata" // 🔥 เพิ่มบรรทัดนี้ (ขีดล่าง _ สำคัญมาก)
 
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
@@ -75,5 +76,15 @@ func main() {
 	// 8. Wait for Interrupt Signal (รอจนกว่าจะมีการกด Ctrl+C)
 	<-ctx.Done()
 	log.Println("Shutting down server...")
+
+	// กำหนดเวลาให้ Shutdown ไม่เกิน 5 วินาที
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := app.ShutdownWithContext(shutdownCtx); err != nil {
+		log.Printf("Fiber Shutdown Error: %v", err)
+	}
+
+	log.Println("Server gracefully stopped")
 }
 
