@@ -13,7 +13,7 @@ type configRedisRepo struct {
 	*BaseRedisRepo
 }
 
-func NewConfigRedisRepo(rdb *redis.Client) *configRedisRepo {
+func NewConfigRedisRepo(rdb *redis.Client) domain.ConfigRedisRepo {
 	return &configRedisRepo{
 		BaseRedisRepo: &BaseRedisRepo{rdb: rdb},
 	}
