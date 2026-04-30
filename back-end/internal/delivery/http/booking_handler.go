@@ -26,7 +26,7 @@ func (u *BookingHandlers) CreateBooking(c *fiber.Ctx) error {
 
 	roomNumber, err := strconv.Atoi(c.Params("roomNumber"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 	
 	booking := new(domain.Booking)
@@ -40,20 +40,20 @@ func (u *BookingHandlers) CreateBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return c.Status(fiber.StatusOK).SendString("Create booking successfully !")
+	return c.Status(fiber.StatusCreated).SendString("Create booking successfully !")
 }
 
 func (u *BookingHandlers) UpdateBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	// ดึงจาก Query
 	roomNumber, err := strconv.Atoi(c.Params("roomNumber"))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
 	userID, err := uuid.Parse(c.Locals("user_id").(string))
@@ -140,7 +140,7 @@ func (u *BookingHandlers) CheckInBooking(c *fiber.Ctx) error {
 
 	// ส่ง req.Passcode (ที่เป็น string ธรรมดา) ไปได้เลย ปลอดภัย 100%
 	if err := u.usecase.CheckInBooking(ctx, roomID, req.Passcode); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
 
 	return c.Status(fiber.StatusOK).SendString("Checkin booking successfully!")
@@ -198,9 +198,6 @@ func (u *BookingHandlers) GetUserBooking(c *fiber.Ctx) error {
 	}
 
 	date := c.Params("date")
-	// if err := c.Query("room", "0"); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	// }
 
 	bookings, err := u.usecase.GetUserBooking(ctx, userID, date)
 	if err != nil {
@@ -218,9 +215,6 @@ func (u *BookingHandlers) GetUserHistory(c *fiber.Ctx) error {
 	}
 
 	date := c.Params("date")
-	// if err := c.Query("room", "0"); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	// }
 
 	bookings, err := u.usecase.GetUserHistory(ctx, userID, date)
 	if err != nil {
