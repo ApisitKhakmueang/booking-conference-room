@@ -90,6 +90,101 @@ This application enables organizations to:
 - **Authentication**: Supabase Auth with JWT tokens
 - **Containerization**: Docker & Docker Compose
 
+## 🏗️ Architecture
+
+### Backend Architecture Layers
+
+#### 1. **Domain Layer** (`internal/domain/`)
+Core business entities and interfaces that represent the system's core concepts.
+
+**Entities:**
+- `Config`: System configuration (booking hours, limits, thresholds)
+- `Holiday`: Holiday records synced from Google Calendar
+- `Room`: Conference room definitions with capacity and status
+- `User`: User profiles with roles (admin/user) and status (active/inactive)
+- `Booking`: Core booking entity with full lifecycle tracking (confirm, cancelled, complete, no_show)
+
+**Interfaces:**
+- `BookingUsecase`: Contract for all booking business logic
+- `RoomUsecase`, `UserUsecase`, `ConfigUsecase`: Other business logic contracts
+
+#### 2. **Usecase Layer** (`internal/usecase/`)
+Implements business logic and orchestrates data access through repositories.
+
+**Key Services:**
+- `booking_usecase.go`: Booking creation, updates, cancellations, analytics
+- `room_usecase.go`: Room management and availability
+- `user_usecase.go`: User profile and status management
+- `config_usecase.go`: System configuration management
+
+**Responsibilities:**
+- Validate booking requests and constraints
+- Generate secure passcodes for check-in
+- Schedule background tasks for booking expiration
+- Calculate analytics and room utilization metrics
+- Coordinate between multiple repositories
+
+#### 3. **Repository Layer** (`internal/repository/`)
+Data access abstraction for all persistence operations.
+
+**PostgreSQL Repositories** (`postgres/`):
+- `booking_db.go`: Booking CRUD, filtering, pagination, analytics queries
+- `room_db.go`: Room CRUD and availability queries
+- `user_db.go`: User CRUD and pagination
+- `config_db.go`: System configuration storage
+- `worker_db.go`: Worker task persistence
+
+**Redis Repositories** (`redis/`):
+- `base_redis.go`: Shared Redis connection logic
+- `booking_cache.go`: Cached booking queries
+- `room_cache.go`: Room availability cache
+- `config_cache.go`: Configuration cache
+- `worker_cache.go`: Task queue state
+- `publisher.go`: Real-time event publishing
+
+#### 4. **Delivery Layer** (`internal/delivery/`)
+HTTP handlers and WebSocket handlers for client communication.
+
+**HTTP Handlers** (`http/`):
+- `booking_handler.go`: RESTful endpoints for booking operations
+- `room_handler.go`: Room CRUD endpoints
+- `user_handler.go`: User management endpoints
+- `config_handler.go`: System configuration endpoints
+
+**WebSocket Handlers** (`websocket/`):
+- `handler.go`: WebSocket connection management
+- `hub.go`: Topic-based message broadcasting system
+
+#### 5. **Controller Layer** (`internal/controller/`)
+Route definitions and middleware setup.
+
+- `handler_route.go`: HTTP route registration with auth middleware
+- `websocket_route.go`: WebSocket endpoint registration
+
+#### 6. **Gateway Layer** (`internal/repository/gateway/`)
+External service integration.
+
+- `calendar_gateway.go`: Google Calendar API integration for holiday synchronization
+
+#### 7. **Worker Layer** (`internal/worker/`)
+Background job processing with Asynq.
+
+- `processor.go`: Task queue processor setup and configuration
+- `task_booking.go`: Booking expiration and no-show marking tasks
+- `initial.go`: Worker initialization
+
+#### 8. **Middleware** (`internal/utils/middleware/`)
+Cross-cutting concerns and authentication.
+
+- `middleware.go`: JWT validation, role-based access control, user status checking
+
+#### 9. **Utilities** (`internal/utils/`)
+Helper functions and initialization.
+
+- `initial.go`: Database, Redis, Fiber app, Supabase initialization
+- `helper/booking.go`: Booking validation, passcode generation
+- `helper/time.go`: Time parsing and date calculations
+
 ## 📁 Project Structure
 
 ```
@@ -233,25 +328,29 @@ BookingConferenceRoom/
 
 ### Administrative Features
 
-- **User Management**:
+- **User Management**: 
   - View all users with pagination
   - Activate/deactivate user accounts
   - Track user statistics (total bookings, no-shows, etc.)
-- **Room Management**:
+  
+- **Room Management**: 
   - Create, edit, delete conference rooms
   - Set room capacity and location
   - Enable/disable rooms with status flags
-- **System Configuration**:
+  
+- **System Configuration**: 
   - Set booking hours (start/end time)
   - Configure maximum advance booking days
   - Set maximum booking duration
   - Set no-show threshold grace period
-- **Analytics Dashboard**:
+  
+- **Analytics Dashboard**: 
   - Booking statistics (date range filters)
   - Room utilization metrics
   - Popular rooms ranking
   - Attendance health (no-show patterns)
-- **Holiday Management**:
+  
+- **Holiday Management**: 
   - Auto-sync with Google Calendar
   - Display public holidays in booking calendar
   - Block bookings on holidays
@@ -292,16 +391,6 @@ cd BookingConferenceRoom
 
 ## 🔧 Backend Setup
 
-### Prerequisites
-
-Before starting the backend setup, ensure you have:
-
-- **Go 1.25.4** or higher installed ([Download](https://golang.org/dl))
-- **PostgreSQL** database access (via Supabase recommended)
-- **Redis** server running (local or remote)
-- **Supabase account** with a project created
-- **Google Calendar API key** (optional, for holiday management)
-
 ### 1. Navigate to Backend Directory
 
 ```bash
@@ -312,230 +401,90 @@ cd back-end
 
 Create a `.env` file in the `back-end` directory with the following configuration:
 
-#### Required Environment Variables
-
 ```env
-# ==================== DATABASE ====================
-# PostgreSQL connection string from Supabase
+# Database Configuration
 DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 
-# ==================== REDIS ====================
-# Redis server address (host:port)
-REDIS_ADDR=localhost:6379
-REDIS_PASSWORD=                    # Leave empty if no password
-REDIS_DB=0                         # Redis database number (0-15)
+# Redis Configuration
+REDIS_ADDR=your_redis_host:6379
+REDIS_PASSWORD=your_redis_password
+REDIS_DB=0
 
-# ==================== SERVER ====================
-# Server port (default: 8080)
+# Server Configuration
 PORT=8080
-# Environment: development or production
 ENV=development
-# Frontend URL for CORS (must match exact origin)
 FRONTEND_URL=http://localhost:3000
 
-# ==================== SUPABASE ====================
-# Supabase project URL (from project settings)
+# Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
-# Supabase anonymous/public API key
 SUPABASE_KEY=your_anon_key
-# Supabase JWT secret (from project settings > API)
 SUPABASE_JWT_SECRET=your_jwt_secret_from_supabase
 
-# ==================== GOOGLE CALENDAR (OPTIONAL) ====================
-# Google Calendar API key (get from Google Cloud Console)
+# Google Calendar Configuration
 GOOGLE_CALENDAR_API_KEY=your_google_calendar_api_key
-# Calendar ID for holidays (Thailand: en.th#holiday@group.v.calendar.google.com)
 GOOGLE_CALENDAR_ID=en.th#holiday@group.v.calendar.google.com
 
-# ==================== OPTIONAL SETTINGS ====================
-# Enable debug mode (true/false)
+# Optional: Application Settings
 DEBUG=false
-# Logging level (debug, info, warn, error)
 LOG_LEVEL=info
 ```
 
-#### Getting Required Values
-
-**Supabase Credentials:**
-
-1. Go to [Supabase Dashboard](https://app.supabase.com)
-2. Select your project
-3. Click Settings → API
-4. Copy `Project URL` → `SUPABASE_URL`
-5. Copy `anon public` key → `SUPABASE_KEY`
-6. Copy `JWT secret` → `SUPABASE_JWT_SECRET`
-
-**Google Calendar API Key:**
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project
-3. Enable Google Calendar API
-4. Create API key (Credentials → Create Credentials → API Key)
-5. Use the API key → `GOOGLE_CALENDAR_API_KEY`
-
-### 3. Install Go Dependencies
+### 3. Install Dependencies
 
 ```bash
-# Download all dependencies
 go mod download
-
-# Verify and clean up go.mod/go.sum
 go mod tidy
 ```
 
-**Expected output:** No errors or warnings
+### 4. Run Database Migrations
 
-### 4. Database Migrations
+The application automatically runs GORM migrations on startup, creating all necessary tables.
 
-The application automatically creates all necessary database tables on startup using GORM's auto-migration feature.
-
-**To verify database schema manually:**
-
+To manually verify the database schema:
 ```bash
-# Connect to PostgreSQL
-psql "$DATABASE_URL"
-
-# Check for tables
-\dt
-
-# List booking table structure
-\d booking
-
-# Exit psql
-\q
-```
-
-**To reset database (⚠️ WARNING: Deletes all data):**
-
-```bash
-# Connect to database and drop all tables
-psql "$DATABASE_URL" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
-
-# Restart backend - migrations will recreate tables
+# Access your PostgreSQL database
+psql $DATABASE_URL
 ```
 
 ### 5. Start the Backend Server
 
-#### Development with Hot Reload (Recommended)
+#### Development with Hot Reload
 
-Using `air` for automatic code reload on changes:
+Using `air` for automatic reload on code changes:
 
 ```bash
-# Install air if not already installed
+# Make sure air is installed
 go install github.com/cosmtrek/air@latest
 
-# Run with hot reload from back-end directory
+# Run the server with hot reload
 air
 ```
 
-**Expected output:**
-
-```
-...
-building...
-/booking-api
-time="2026-04-22T10:30:00Z" level=info msg="Start server on :8080"
-```
-
-The backend will be available at `http://localhost:8080`
-
-**Troubleshooting air:**
-
-```bash
-# If air command not found, add Go bin to PATH
-# On Linux/Mac:
-export PATH="$HOME/go/bin:$PATH"
-
-# On Windows:
-# Add %USERPROFILE%\go\bin to system PATH
-
-# Or run directly:
-$HOME/go/bin/air
-```
+The backend will start on `http://localhost:8080`
 
 #### Production Build
 
 ```bash
-# Build executable
+# Build the application
 go build -o booking-api ./api
 
 # Run the binary
 ./booking-api
-
-# Or with output redirection
-./booking-api > logs/server.log 2>&1 &
 ```
 
-#### Docker Build (Optional)
+### 6. (Optional) Start the Worker
+
+In a separate terminal for background job processing:
 
 ```bash
-# Build Docker image
-docker build -t booking-api:latest .
-
-# Run container
-docker run -d \
-  --name booking-api \
-  -p 8080:8080 \
-  -e DATABASE_URL="postgresql://..." \
-  -e REDIS_ADDR="redis-container:6379" \
-  -e SUPABASE_URL="https://..." \
-  -e SUPABASE_KEY="..." \
-  -e SUPABASE_JWT_SECRET="..." \
-  booking-api:latest
-```
-
-### 6. Start Background Worker (Optional but Recommended)
-
-The worker processes scheduled tasks like booking expiration and no-show marking. Run in a separate terminal:
-
-```bash
-# From back-end directory
+# Navigate to back-end directory if not already there
 cd back-end
 
-# Run the worker
+# Run the worker for task queue processing
 go run ./cmd/worker/main.go
 ```
 
-**Expected output:**
-
-```
-time="2026-04-22T10:30:05Z" level=info msg="Starting Asynq worker..."
-```
-
-**Worker Configuration** (edit `internal/worker/initial.go`):
-
-- `NumWorkers`: Number of concurrent task processors (default: 10)
-- `StrictPriority`: Process by priority (default: false)
-- `LogLevel`: Logging verbosity (default: info)
-
-**To monitor worker tasks:**
-
-```bash
-# Connect to Redis
-redis-cli
-
-# Monitor in real-time
-MONITOR
-
-# Check pending tasks
-KEYS "asynq:*"
-
-# View task count
-LLEN asynq:queues:default
-
-# Exit Redis CLI
-EXIT
-```
-
-### 7. Verify Backend is Running
-
-```bash
-# Test API endpoint
-curl http://localhost:8080/api/v1/config
-
-# Expected response:
-# {"id":1,"start_time":"08:00","end_time":"20:00","max_advance_days":30,...}
-```
+The worker processes scheduled tasks like booking expiration and no-show marking.
 
 ## 🎨 Frontend Setup
 
@@ -582,7 +531,6 @@ The frontend will start on `http://your-website-domain:3000`
 #### Database Schema
 
 **Config Table** - System-wide settings
-
 ```sql
 Table: config
 ├── id (BIGSERIAL PRIMARY KEY)
@@ -595,7 +543,6 @@ Table: config
 ```
 
 **Holiday Table** - Public holidays from Google Calendar
-
 ```sql
 Table: holiday
 ├── id (BIGSERIAL PRIMARY KEY)
@@ -607,7 +554,6 @@ Table: holiday
 ```
 
 **Room Table** - Conference rooms
-
 ```sql
 Table: room
 ├── id (UUID PRIMARY KEY, DEFAULT: gen_random_uuid())
@@ -624,7 +570,6 @@ Indexes: room_number (UNIQUE), deleted_at
 ```
 
 **User Table** - User profiles (synced from Supabase Auth)
-
 ```sql
 Table: "user"
 ├── id (UUID PRIMARY KEY)
@@ -641,7 +586,6 @@ Indexes: email (UNIQUE), role, status, deleted_at
 ```
 
 **Booking Table** - Room reservations
-
 ```sql
 Table: booking
 ├── id (UUID PRIMARY KEY, DEFAULT: gen_random_uuid())
@@ -657,7 +601,7 @@ Table: booking
 ├── checked_in_at (TIMESTAMP, nullable)
 └── deleted_at (TIMESTAMP, nullable - soft delete)
 
-Indexes:
+Indexes: 
   - (room_id, deleted_at)
   - (user_id, deleted_at)
   - (start_time, end_time)
@@ -676,7 +620,7 @@ Indexes:
 
 #### Functions
 
-1. **Caching**
+1. **Caching** 
    - Booking lists for specific dates
    - Room availability data
    - User profile cache
@@ -903,60 +847,58 @@ useEffect(() => {
 
 #### Booking Endpoints
 
-| Method | Endpoint                                                         | Description                       | Auth  | Required Fields                      |
-| ------ | ---------------------------------------------------------------- | --------------------------------- | ----- | ------------------------------------ |
-| POST   | `/api/v1/booking/room/:roomNumber`                               | Create booking                    | User  | start_time, end_time, [title]        |
-| PUT    | `/api/v1/booking/:bookingID/room/:roomNumber`                    | Update booking                    | User  | [start_time], [end_time], [title]    |
-| DELETE | `/api/v1/booking/:bookingID`                                     | Cancel booking                    | User  | —                                    |
-| PATCH  | `/api/v1/booking/:bookingID/checkout`                            | Complete booking                  | User  | —                                    |
-| GET    | `/api/v1/booking/me/date/:date`                                  | Get user's bookings for date      | User  | date (YYYY-MM-DD)                    |
-| GET    | `/api/v1/booking/me/history/date/:date`                          | Get user's booking history        | User  | date (YYYY-MM-DD), [limit], [offset] |
-| GET    | `/api/v1/booking/date/:date`                                     | Get all bookings for date         | Admin | date (YYYY-MM-DD)                    |
-| GET    | `/api/v1/booking/up-next/:date`                                  | Get upcoming bookings & analytics | Admin | date (YYYY-MM-DD)                    |
-| GET    | `/api/v1/booking/analytic/startDate/:startDate/endDate/:endDate` | Get booking analytics             | Admin | startDate, endDate (YYYY-MM-DD)      |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/v1/booking/room/:roomNumber` | Create booking | User |
+| PUT | `/api/v1/booking/:bookingID/room/:roomNumber` | Update booking | User |
+| DELETE | `/api/v1/booking/:bookingID` | Delete booking | User |
+| PATCH | `/api/v1/booking/:bookingID/checkout` | Check out booking | User |
+| GET | `/api/v1/booking/me/date/:date` | Get user's bookings for date | User |
+| GET | `/api/v1/booking/me/history/date/:date` | Get user's booking history | User |
+| GET | `/api/v1/booking/date/:date` | Get all bookings for date | Admin |
+| GET | `/api/v1/booking/up-next/:date` | Get upcoming bookings & analytics | Admin |
+| GET | `/api/v1/booking/analytic/startDate/:startDate/endDate/:endDate` | Get booking analytics | Admin |
 
 #### Room Endpoints
 
-| Method | Endpoint                       | Description            | Auth  | Required Fields              |
-| ------ | ------------------------------ | ---------------------- | ----- | ---------------------------- |
-| GET    | `/api/v1/rooms/details`        | Get all rooms          | User  | —                            |
-| GET    | `/api/v1/room/:roomID`         | Get room details       | User  | roomID (UUID)                |
-| POST   | `/api/v1/room`                 | Create room            | Admin | name, room_number, capacity  |
-| PUT    | `/api/v1/room/:roomID`         | Update room            | Admin | [name], [capacity], [status] |
-| DELETE | `/api/v1/room/:roomID`         | Delete room            | Admin | —                            |
-| POST   | `/api/v1/room/:roomID/checkin` | Check in with passcode | User  | passcode                     |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/v1/rooms/details` | Get all rooms | User |
+| GET | `/api/v1/room/:roomID` | Get room details | User |
+| POST | `/api/v1/room` | Create room | Admin |
+| PUT | `/api/v1/room/:roomID` | Update room | Admin |
+| DELETE | `/api/v1/room/:roomID` | Delete room | Admin |
+| POST | `/api/v1/room/:roomID/checkin` | Check in with passcode | User |
 
 #### User Management Endpoints
 
-| Method | Endpoint                         | Description                     | Auth  | Parameters                               |
-| ------ | -------------------------------- | ------------------------------- | ----- | ---------------------------------------- |
-| GET    | `/api/v1/users`                  | Get all users (paginated)       | Admin | [limit=10], [offset=0], [search]         |
-| GET    | `/api/v1/users/:userID/overview` | Get user statistics             | Admin | userID (UUID)                            |
-| GET    | `/api/v1/users/:userID/bookings` | Get user's bookings (paginated) | Admin | userID (UUID), [limit=10], [offset=0]    |
-| PUT    | `/api/v1/users/:userID`          | Update user status              | Admin | userID (UUID), status (active\|inactive) |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/v1/users` | Get all users (paginated) | Admin |
+| GET | `/api/v1/users/:userID/overview` | Get user statistics | Admin |
+| GET | `/api/v1/users/:userID/bookings` | Get user's bookings (paginated) | Admin |
+| PUT | `/api/v1/users/:userID` | Update user status | Admin |
 
 #### Configuration Endpoints
 
-| Method | Endpoint         | Description                 | Auth  | Required Fields                                                                            |
-| ------ | ---------------- | --------------------------- | ----- | ------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/config` | Get system configuration    | User  | —                                                                                          |
-| PUT    | `/api/v1/config` | Update system configuration | Admin | [start_time], [end_time], [max_advance_days], [max_booking_mins], [no_show_threshold_mins] |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/v1/config` | Get system configuration | User |
+| PUT | `/api/v1/config` | Update system configuration | Admin |
 
 #### Holiday Endpoints
 
-| Method | Endpoint                                                 | Description                | Auth | Parameters                      |
-| ------ | -------------------------------------------------------- | -------------------------- | ---- | ------------------------------- |
-| GET    | `/api/v1/holidays/startDate/:startDate/endDate/:endDate` | Get holidays in date range | User | startDate, endDate (YYYY-MM-DD) |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/v1/holidays/startDate/:startDate/endDate/:endDate` | Get holidays in date range | User |
 
 #### WebSocket Endpoints
 
-| Endpoint              | Description                     | Auth | Message Type                                                           |
-| --------------------- | ------------------------------- | ---- | ---------------------------------------------------------------------- |
-| `WS /ws/room/:roomID` | Room-specific real-time updates | User | booking_created, booking_updated, booking_deleted, check_in, check_out |
-| `WS /ws/status`       | User booking status updates     | User | status_change                                                          |
-| `WS /ws/:room`        | General room updates            | User | availability_change, room_status                                       |
-
-**Legend:** `[]` = optional field, `\|` = choice, `(YYYY-MM-DD)` = date format
+| Endpoint | Description | Auth |
+|----------|-------------|------|
+| `WS /ws/room/:roomID` | Room-specific real-time updates | User |
+| `WS /ws/status` | User booking status updates | User |
+| `WS /ws/:room` | General room updates | User |
 
 ### Request/Response Examples
 
@@ -1111,13 +1053,13 @@ Example error response:
 
 Administrators can update the following system settings via `PUT /api/v1/config`:
 
-| Setting                  | Description                                     | Default |
-| ------------------------ | ----------------------------------------------- | ------- |
-| `start_time`             | Earliest booking time (HH:MM format, 24-hour)   | "08:00" |
-| `end_time`               | Latest booking end time (HH:MM format, 24-hour) | "20:00" |
-| `max_advance_days`       | How many days ahead users can book              | 30      |
-| `max_booking_mins`       | Maximum booking duration in minutes             | 120     |
-| `no_show_threshold_mins` | Grace period in minutes before marking no-show  | 15      |
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `start_time` | Earliest booking time (HH:MM format, 24-hour) | "08:00" |
+| `end_time` | Latest booking end time (HH:MM format, 24-hour) | "20:00" |
+| `max_advance_days` | How many days ahead users can book | 30 |
+| `max_booking_mins` | Maximum booking duration in minutes | 120 |
+| `no_show_threshold_mins` | Grace period in minutes before marking no-show | 15 |
 
 **Example Configuration Update:**
 
@@ -1212,7 +1154,6 @@ npm run dev
 ```
 
 **What starts:**
-
 - Redis on `localhost:6379`
 - Backend on `http://localhost:8080`
 - Frontend on `http://localhost:3000`
@@ -1244,7 +1185,7 @@ docker run -d \
 **Docker Compose for Production:**
 
 ```yaml
-version: "3.8"
+version: '3.8'
 
 services:
   redis:
@@ -1301,7 +1242,6 @@ vercel --prod
 ```
 
 Configure environment variables in Vercel dashboard:
-
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_API_URL` (production backend URL)
@@ -1310,7 +1250,6 @@ Configure environment variables in Vercel dashboard:
 #### Recommended Hosting Platforms
 
 **Backend:**
-
 - **Koyeb** - Easy deployment, built-in Redis support
 - **Railway** - Simple GitHub integration
 - **Render** - Free tier available
@@ -1318,20 +1257,17 @@ Configure environment variables in Vercel dashboard:
 - **DigitalOcean App Platform** - Scalable, affordable
 
 **Frontend:**
-
 - **Vercel** - Next.js optimized, free tier
 - **Netlify** - Simple GitHub deployment
 - **Railway** - All-in-one solution
 - **Cloudflare Pages** - Fast CDN
 
 **Database:**
-
 - **Supabase** - PostgreSQL managed service
 - **Neon** - Serverless PostgreSQL
 - **AWS RDS** - Managed database
 
 **Cache/Queue:**
-
 - **Redis Cloud** - Managed Redis
 - **Upstash** - Serverless Redis
 - **AWS ElastiCache** - Managed Redis
@@ -1379,7 +1315,6 @@ Configure environment variables in Vercel dashboard:
 #### Database Backups
 
 For Supabase:
-
 - Automatic daily backups included
 - Accessible from Supabase dashboard
 - Point-in-time recovery available on Pro plan
@@ -1423,6 +1358,7 @@ usecase → Asynq Client → Redis Queue
    - Triggered at booking end time
    - Marks booking as `complete` or `no_show`
    - Determines no-show based on `no_show_threshold_mins`
+   
 2. **BookingStartTask**
    - Triggered at booking start time
    - Validates room is available
@@ -1504,495 +1440,166 @@ LogLevel:     asynq.InfoLevel
 
 Adjustable via environment variables or code modification.
 
-## 🔧 Troubleshooting
+## � Troubleshooting
 
 ### Common Issues & Solutions
 
 #### Backend Connection Issues
 
 **Error: `failed to connect to PostgreSQL`**
-
 ```
-Symptom: Backend starts but fails immediately with connection error
-
 Solution:
-1. Verify DATABASE_URL format (must include ?sslmode=require for Supabase):
+1. Verify DATABASE_URL format:
    postgresql://user:password@host:port/database?sslmode=require
-
-2. Check database server is running:
-   # For Supabase - verify in Supabase dashboard
-   # For local PostgreSQL - check: systemctl status postgresql (Linux)
-   #                            or brew services (macOS)
-
-3. Verify credentials are correct:
-   psql "postgresql://user:password@host:port/database?sslmode=require"
-
-4. Check firewall allows database port (usually 5432):
-   # Test connectivity: telnet host 5432
-
-5. Verify user has permission to access database:
-   psql -U postgres -d postgres -c "\\l"  # List databases
+2. Check PostgreSQL is running and accessible
+3. Verify credentials and database name
+4. Test connection: psql $DATABASE_URL
 ```
 
 **Error: `failed to connect to Redis`**
-
 ```
-Symptom: Backend and worker fail to connect to Redis
-
 Solution:
-1. Verify Redis is running:
-   redis-cli PING          # Should return PONG
-   # Or: systemctl status redis-server (Linux)
-
-2. Check REDIS_ADDR format is correct:
-   - Format: host:port
-   - Examples: localhost:6379, redis.example.com:6379
-   - Not: redis://localhost:6379 (that's a URL format)
-
-3. If Redis requires password, verify REDIS_PASSWORD:
-   redis-cli -a "your-password" PING
-
-4. Test connectivity:
-   # Install redis-cli if needed: apt-get install redis-tools
-   redis-cli -h your-host -p 6379 PING
-
-5. Check firewall allows Redis port (usually 6379):
-   telnet your-host 6379
-
-6. If using Redis Cloud or hosted Redis:
-   - Use full connection string format
-   - Example: redis-cloud-url.redislabs.com:xxxxx
-```
-
-**Error: `dial tcp: lookup localhost: no such host`**
-
-```
-Symptom: Inside Docker container can't reach host services
-
-Solution:
-1. Use Docker host IP instead of localhost:
-   - On Docker Desktop: host.docker.internal
-   - On Linux: Use container's gateway IP
-
-2. Example .env for Docker:
-   DATABASE_URL=postgresql://user:password@host.docker.internal:5432/db
-   REDIS_ADDR=host.docker.internal:6379
-
-3. Or use Docker networking:
-   docker-compose up  # Manages networking automatically
+1. Check Redis is running
+2. Verify REDIS_ADDR format: host:port (e.g., localhost:6379)
+3. If using password: REDIS_PASSWORD is required
+4. Test connection: redis-cli ping
 ```
 
 #### Authentication Issues
 
-**Error: `invalid or expired token` / `401 Unauthorized`**
-
+**Error: `invalid or expired token`**
 ```
-Symptom: Valid token rejected by backend
-
 Solution:
-1. Verify SUPABASE_JWT_SECRET matches Supabase settings:
-   - Go to Supabase Dashboard → Settings → API
-   - Copy exact JWT secret value
-   - Ensure no extra spaces or quotes
-
-2. Check token format in Authorization header:
-   - Correct: Authorization: Bearer eyJhbGc...
-   - Incorrect: Authorization: eyJhbGc...  (missing "Bearer ")
-
-3. Validate token structure:
-   - Paste token in https://jwt.io
-   - Verify payload has: sub (user ID), email, role
-   - Check exp (expiration time) hasn't passed
-
-4. Regenerate token if old:
-   - Logout and login again in frontend
-   - Clear browser localStorage of old tokens
-
-5. Check token claims are set correctly in Supabase:
-   - Supabase Dashboard → Auth → Users → User Details
-   - Verify user has role claim set
+1. Ensure JWT token is not expired
+2. Verify SUPABASE_JWT_SECRET matches Supabase settings
+3. Check Authorization header format: "Bearer <token>"
+4. Validate token structure in jwt.io
 ```
 
 **Error: `403 Forbidden - User account suspended`**
-
 ```
-Symptom: Authenticated user gets forbidden on all requests
-
 Solution:
-1. Check user status in database:
-   psql "$DATABASE_URL" -c "SELECT id, email, status FROM \"user\" WHERE email='user@example.com';"
-
-2. User status should be 'active'. If 'inactive':
-   - Admin reactivates via API: PUT /api/v1/users/:userID with status=active
-   - Or update directly: UPDATE "user" SET status='active' WHERE id='...';
-
-3. Verify user has correct role:
-   - Check JWT token claims include role: admin or user
-   - Verify Supabase user has metadata set
-
-4. Check if user was soft-deleted:
-   psql "$DATABASE_URL" -c "SELECT id, deleted_at FROM \"user\" WHERE id='...';"
-   # deleted_at should be NULL
-```
-
-**Error: `token claims invalid` or `token signature invalid`**
-
-```
-Symptom: Token decoding fails even with valid token
-
-Solution:
-1. Ensure SUPABASE_JWT_SECRET exactly matches:
-   - Go to Supabase Console
-   - Settings → API → JWT Secret
-   - Copy EXACT value (case-sensitive)
-   - In backend .env: SUPABASE_JWT_SECRET="exact-copied-value"
-
-2. Don't include quotes in .env:
-   Correct:   SUPABASE_JWT_SECRET=abcd1234efgh5678
-   Wrong:     SUPABASE_JWT_SECRET="abcd1234efgh5678"
-
-3. Verify JWT algorithm matches:
-   - Supabase uses HS256 by default
-   - Check token header: { "alg": "HS256", "typ": "JWT" }
+1. Check user status in database
+2. Admin must reactivate user via PUT /api/v1/users/:userID
+3. Verify user role has required permissions
 ```
 
 #### WebSocket Issues
 
-**Error: `WebSocket connection failed` / `connection refused`**
-
+**Error: `WebSocket connection failed`**
 ```
-Symptom: Frontend can't establish WebSocket connection
-
 Solution:
-1. Verify backend WebSocket server is running:
-   - Check backend started without errors
-   - Verify PORT is set (default: 8080)
-
-2. Check NEXT_PUBLIC_WS_URL in frontend .env:
-   - Format: ws://host:port (note: ws not http)
-   - Correct: ws://localhost:8080
-   - Wrong: http://localhost:8080, wss://localhost:8080
-
-3. Verify WebSocket route is registered:
-   - Backend: internal/controller/websocket_route.go
-   - Check routes like: GET /ws/room/:roomID
-
-4. Check CORS allows WebSocket:
-   - Backend FRONTEND_URL must match exactly
-   - Example: FRONTEND_URL=http://localhost:3000
-
-5. Ensure firewall/network allows port:
-   # Test with wscat (npm install -g wscat):
-   wscat -c ws://localhost:8080/ws/room/test-room-id
-
-6. Check browser console for errors:
-   - Open DevTools → Console
-   - Look for WebSocket connection errors
-```
-
-**Error: `WebSocket upgrade rejected` / `401`**
-
-```
-Symptom: WebSocket connection rejected with auth error
-
-Solution:
-1. Verify JWT token is included in WebSocket handshake:
-   - Frontend must send token in Authorization header during upgrade
-   - react-use-websocket: connectionStatus should be 'CONNECTED'
-
-2. Check token is valid before connecting:
-   - Verify token in localStorage: localStorage.getItem('auth-storage')
-   - Token should not be expired
-
-3. Verify WebSocket middleware validates token:
-   - Backend middleware must extract token from header
-   - Check token presence and validity
-
-4. Test WebSocket with proper token:
-   wscat -c ws://localhost:8080/ws/room/123 --header "Authorization: Bearer <token>"
+1. Check NEXT_PUBLIC_WS_URL in frontend .env
+2. Verify backend WebSocket routes registered in controller
+3. Check CORS settings in backend
+4. Ensure firewall allows WebSocket traffic (port 8080)
+5. Test with: wscat -c ws://localhost:8080/ws/room/123
 ```
 
 #### Database Schema Issues
 
-**Error: `relation "booking" does not exist` / `column "start_time" does not exist`**
-
+**Error: `relation does not exist`**
 ```
-Symptom: Database tables are missing or incomplete
-
 Solution:
-1. Restart backend to trigger GORM auto-migration:
-   - Stop current backend process
-   - Verify DATABASE_URL is correct
-   - Run backend again: go run ./api/main.go
-   - Check logs for migration messages
-
-2. Manually verify tables were created:
-   psql "$DATABASE_URL" -c "\\dt"           # List all tables
-   psql "$DATABASE_URL" -c "\\d booking"    # Describe booking table
-
-3. If tables don't exist, manually create them:
-   # Option 1: Delete and recreate database (if development):
-   # In Supabase: Project → Database → Delete → Recreate
-
-   # Option 2: Run GORM migrations explicitly
-   # Add this to code temporarily to force migration
-
-4. Check database encoding:
-   psql "$DATABASE_URL" -c "\\l"            # Check "Encoding" column
-   # Should be UTF8
-
-5. Verify user has permission to create tables:
-   psql "$DATABASE_URL" -c "\\du"           # List users and permissions
-```
-
-**Error: `connection pool exhausted` / `too many connections`**
-
-```
-Symptom: Requests fail with connection pool error after many concurrent requests
-
-Solution:
-1. Check current connections:
-   psql "$DATABASE_URL" -c "SELECT count(*) FROM pg_stat_activity;"
-
-2. Increase connection pool in code:
-   # In internal/utils/initial.go, adjust:
-   db.DB().SetConnPool(sqlDB)
-   sqlDB.SetMaxOpenConns(25)  # Increase from default 10
-
-3. Or set in connection string:
-   DATABASE_URL=postgresql://user:pass@host/db?maxOpenConns=25
-
-4. Monitor long-running queries:
-   psql "$DATABASE_URL" -c "SELECT pid, now() - pg_stat_activity.query_start AS duration, query FROM pg_stat_activity WHERE state != 'idle';"
-
-5. Kill stuck connections if needed:
-   psql "$DATABASE_URL" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid();"
+1. Restart backend to trigger GORM auto-migration
+2. Manually run migrations if using migration files
+3. Check database was created with correct encoding (UTF-8)
 ```
 
 #### Task Queue Issues
 
-**Error: `Asynq: connection refused` / `failed to enqueue task`**
-
+**Error: `Asynq: connection refused`**
 ```
-Symptom: Task scheduling fails, no background processing
-
 Solution:
-1. Ensure Redis is running and accessible:
-   redis-cli PING                # Should return PONG
-   redis-cli INFO replication    # Check server status
-
-2. Verify REDIS_ADDR is correct in both backend and worker:
-   # Backend .env
-   REDIS_ADDR=localhost:6379
-
-   # Worker must use same Redis server
-
-3. Check Redis has space available:
-   redis-cli INFO memory
-   # Check 'used_memory' vs 'maxmemory'
-
-4. View error logs:
-   # Backend logs should show task enqueue errors
-   # Worker logs should show connection attempts
+1. Ensure Redis is running
+2. Verify REDIS_ADDR is correct
+3. Check worker process is running
+4. View logs: docker logs <worker-container>
 ```
 
-**Error: `Pending Tasks Not Processing` / Tasks stuck in Redis**
-
+**Pending Tasks Not Processing:**
 ```
-Symptom: Tasks created but never processed by worker
-
 Solution:
-1. Ensure worker process is running:
-   # Check if worker process is active
-   ps aux | grep "go run"
-
-   # If not, start worker in separate terminal:
-   cd back-end && go run ./cmd/worker/main.go
-
-2. Verify Redis connection in worker:
-   # Worker logs should show:
-   # "Starting Asynq worker..." or similar
-
-3. Check for task errors:
-   # Connect to Redis and inspect tasks
-   redis-cli
-   > KEYS "asynq:*"
-   > HGETALL "asynq:tasks:{taskID}"
-   > LRANGE "asynq:queues:default" 0 -1
-
-4. Check task payload format:
-   # Payload must be valid JSON
-   # Verify BookingStatusPayload is correctly serialized
-
-5. Inspect worker logs:
-   # Check for panic or error messages
-   # Check retry count: (retried X times)
-
-6. Reset queue if needed (WARNING: Deletes pending tasks):
-   redis-cli DEL "asynq:queues:default"
-   redis-cli FLUSHDB  # Nuclear option - clears all Redis data
-```
-
-**Error: `worker panic: unmarshaling payload failed`**
-
-```
-Symptom: Worker crashes when processing task
-
-Solution:
-1. Check task payload structure matches handler:
-   # In task_booking.go, verify BookingStatusPayload format
-   # Ensure payload JSON has correct field names (case-sensitive)
-
-2. Verify task is enqueued with correct type:
-   # Check asynq.NewTask("task_type", payload)
-   # Task type must exactly match registered handler
-
-3. Inspect actual task data in Redis:
-   redis-cli
-   > HGETALL "asynq:tasks:{taskID}"
-   > Check 'Payload' field
-
-4. Re-enqueue task with correct format:
-   # Create booking again, which will create new task
-   # Or manually delete stuck task and reprocess
+1. Ensure worker process is running in separate terminal
+2. Check Redis connection: redis-cli PING
+3. Verify task payload is valid JSON
+4. Monitor tasks: redis-cli KEYS "asynq:*"
+5. Check worker logs for errors
 ```
 
 ### Debug Mode
 
-Enable detailed logging for troubleshooting:
+Enable detailed logging:
 
 ```bash
-# Backend with debug logging
+# Backend
 export DEBUG=true
 export LOG_LEVEL=debug
-export PORT=8080
 
 # Run with verbose output
 go run ./api/main.go
-
-# Output should show:
-# time="..." level=debug msg="database connected"
-# time="..." level=debug msg="redis connected"
-# time="..." level=info msg="Start server on :8080"
 ```
 
 Monitor logs in real-time:
 
 ```bash
-# Docker container logs
-docker logs -f <container-id> --tail 50
+# Docker
+docker logs -f <container-id>
 
-# Local file logging (if configured)
+# Local
 tail -f logs/app.log
-
-# Real-time filter for errors only
-tail -f logs/app.log | grep -i error
 ```
 
 ### Performance Troubleshooting
 
-**High Memory Usage by Backend**
-
+**High Memory Usage:**
 ```bash
-# Monitor backend memory in real-time
+# Monitor backend memory
 docker stats <container-id>
 
-# Check for memory leaks:
-# - Look for continuously increasing memory
-# - Restart worker if memory grows unbounded
+# Check database connections
+psql $DATABASE_URL -c "SELECT count(*) FROM pg_stat_activity;"
 
-# Check database connection pool size:
-psql "$DATABASE_URL" -c "SELECT count(*) as active_connections FROM pg_stat_activity WHERE state = 'active';"
-
-# Optimize connection pool:
-# Reduce SetMaxOpenConns if too many idle connections
+# Monitor Redis memory
+redis-cli INFO memory
 ```
 
-**Slow API Responses / High Query Latency**
-
+**Slow Queries:**
 ```bash
-# Enable query logging in PostgreSQL:
-# In Supabase Dashboard: Project → Logs → Database Logs
+# Enable query logging in PostgreSQL
+# In database settings, enable slow query log
 
-# Check slow queries:
-psql "$DATABASE_URL" -c "SELECT query, calls, mean_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
+# Check indexes
+psql $DATABASE_URL -c "\d booking"
 
-# Analyze query plan:
-psql "$DATABASE_URL" -c "EXPLAIN ANALYZE SELECT * FROM booking WHERE room_id = '...' AND start_time > NOW();"
-
-# Add missing indexes:
-psql "$DATABASE_URL" -c "CREATE INDEX idx_booking_room_date ON booking(room_id, start_time) WHERE deleted_at IS NULL;"
-
-# Monitor Redis latency:
-redis-cli --latency
-```
-
-**High CPU Usage**
-
-```bash
-# Identify hot spots:
-# Monitor goroutines: Add /debug/pprof endpoint to backend
-# Use pprof to analyze CPU profile:
-go tool pprof http://localhost:6060/debug/pprof/profile
-
-# Check for infinite loops or busy-waiting in:
-# - WebSocket handlers
-# - Background job processing
-# - Database query loops
+# Analyze query plan
+EXPLAIN ANALYZE SELECT * FROM booking WHERE room_id = '...';
 ```
 
 ### Health Checks
 
 **Backend Health:**
-
 ```bash
-# Simple connectivity check
+# Simple check
 curl http://localhost:8080/api/v1/config
-# Should return: {"id":1,"start_time":"08:00",...}
 
-# Check specific features
-curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/booking/me/date/2026-04-22
-# Should return valid response
-
-# Test WebSocket (requires wscat)
-wscat -c ws://localhost:8080/ws/room/test123
-# Should connect successfully
+# Full health check endpoint (if implemented)
+curl http://localhost:8080/health
 ```
 
 **Database Health:**
-
 ```bash
-# Test PostgreSQL connection
-psql "$DATABASE_URL" -c "SELECT 1;"
-# Should return: 1
+# Test connection
+go run -c "import psycopg2; conn = psycopg2.connect('...')"
 
-# Check database size
-psql "$DATABASE_URL" -c "SELECT pg_size_pretty(pg_database_size(current_database()));"
-
-# Verify all tables exist
-psql "$DATABASE_URL" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public';"
-# Should return: 5 (config, holiday, room, user, booking)
+# Or via psql
+psql $DATABASE_URL -c "SELECT 1;"
 ```
 
 **Redis Health:**
-
 ```bash
-# Basic connectivity
-redis-cli PING  # Should return: PONG
-
-# Check memory usage
-redis-cli INFO memory
-
-# Check connected clients
-redis-cli INFO clients
-
-# Test pub/sub (in one terminal)
-redis-cli
-> SUBSCRIBE test_channel
-
-# In another terminal, publish
-redis-cli
-> PUBLISH test_channel "hello"
+redis-cli PING  # Should return PONG
+redis-cli INFO replication
 ```
 
 ## 📚 Additional Resources
