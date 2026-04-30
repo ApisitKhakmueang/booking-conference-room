@@ -14,4 +14,5 @@ type RedisCacheRepository interface {
 	SetCache(ctx context.Context, cacheKey string, data any, expiration time.Duration)
 	GetCache(ctx context.Context, cacheKey string, dest any) error
 	DeleteCache(ctx context.Context, prefix string)
+	ClearCacheByPrefix(ctx context.Context,prefix string) error
 }
