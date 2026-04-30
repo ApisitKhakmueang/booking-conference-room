@@ -14,7 +14,7 @@ type userPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewUserPostgresRepo(db *gorm.DB) *userPostgresRepo {
+func NewUserPostgresRepo(db *gorm.DB) domain.UserPostgresRepo {
 	return &userPostgresRepo{db: db}
 }
 

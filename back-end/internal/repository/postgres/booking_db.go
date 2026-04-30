@@ -18,7 +18,7 @@ type bookingPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewBookingPostgresRepo(db *gorm.DB) *bookingPostgresRepo {
+func NewBookingPostgresRepo(db *gorm.DB) domain.BookingPostgresRepo {
 	return &bookingPostgresRepo{db: db}
 }
 

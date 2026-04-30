@@ -12,7 +12,7 @@ type configPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewConfigPostgresRepo(db *gorm.DB) *configPostgresRepo {
+func NewConfigPostgresRepo(db *gorm.DB) domain.ConfigPostgresRepo {
 	return &configPostgresRepo{db: db}
 }
 

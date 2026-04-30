@@ -13,7 +13,7 @@ type roomPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewRoomPostgresRepo(db *gorm.DB) *roomPostgresRepo {
+func NewRoomPostgresRepo(db *gorm.DB) domain.RoomPostgresRepo {
 	return &roomPostgresRepo{db: db}
 }
 

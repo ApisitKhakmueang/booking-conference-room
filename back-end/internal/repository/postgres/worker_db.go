@@ -14,7 +14,7 @@ type workerPostgresRepo struct {
 	db *gorm.DB
 }
 
-func NewWorkerPostgresRepo(db *gorm.DB) *workerPostgresRepo {
+func NewWorkerPostgresRepo(db *gorm.DB) domain.WorkerPostgresRepo {
 	return &workerPostgresRepo{db: db}
 }
 
