@@ -9,7 +9,6 @@ import (
 
 	// "encoding/json"
 
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/controller"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/websocket"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/domain"
@@ -169,14 +168,14 @@ func InitialFiber(usecase *domain.AllUsecase, bookingWsHub *Websocket.Hub) *fibe
 	admin := api.Group("/admin", middleware.AuthMiddleware())
 	bookingAPI := api.Group("/booking", middleware.AuthMiddleware())
 	roomAPI := admin.Group("/room", middleware.AuthMiddleware())
-	controller.InitialBookingRoute(bookingAPI, bookingHandler)
-	controller.InitialRoomRoute(roomAPI, roomHandler)
-	controller.InitialHelperRoute(api, bookingHandler, roomHandler, configHandler) // Route ที่ไม่ต้องการ Auth
-	controller.InitialAdminRoute(admin, userHandler, configHandler)
+	http.InitialBookingRoute(bookingAPI, bookingHandler)
+	http.InitialRoomRoute(roomAPI, roomHandler)
+	http.InitialHelperRoute(api, bookingHandler, roomHandler, configHandler) // Route ที่ไม่ต้องการ Auth
+	http.InitialAdminRoute(admin, userHandler, configHandler)
 	
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
-	controller.InitialWSRoute(wsWithMiddleware, bookingWebsocket, supabaseClient)
+	Websocket.InitialWSRoute(wsWithMiddleware, bookingWebsocket, supabaseClient)
 
 	return app
 }
