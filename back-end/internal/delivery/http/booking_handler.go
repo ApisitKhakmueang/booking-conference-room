@@ -45,6 +45,11 @@ func (u *BookingHandlers) CreateBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandlers) UpdateBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
@@ -56,12 +61,7 @@ func (u *BookingHandlers) UpdateBooking(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	userID, err := uuid.Parse(c.Locals("user_id").(string))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
-	}
-
-	if roomNumber == 0 {
+	if roomNumber <= 0 {
 		return c.Status(fiber.StatusBadRequest).SendString("Please send room number")
 	}
 
@@ -82,9 +82,13 @@ func (u *BookingHandlers) UpdateBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandlers) DeleteBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
+	userID, err := uuid.Parse(c.Locals("user_id").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
 	booking := new(domain.Booking)
 	bookingID, err := uuid.Parse(c.Params("bookingID"))
-	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
@@ -101,11 +105,15 @@ func (u *BookingHandlers) DeleteBooking(c *fiber.Ctx) error {
 
 func (u *BookingHandlers) CheckOutBooking(c *fiber.Ctx) error {
 	ctx := c.UserContext()
-	booking := new(domain.Booking)
-	bookingID, err := uuid.Parse(c.Params("bookingID"))
 	userID, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+	}
+
+	booking := new(domain.Booking)
+	bookingID, err := uuid.Parse(c.Params("bookingID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString(err.Error()) 
 	}
 
 	booking.ID = bookingID
