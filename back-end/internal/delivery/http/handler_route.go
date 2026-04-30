@@ -1,11 +1,8 @@
-package controller
+package http
 
-import (
-	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/delivery/http"
-	"github.com/gofiber/fiber/v2"
-)
+import "github.com/gofiber/fiber/v2"
 
-func InitialBookingRoute(router fiber.Router, handler *http.BookingHandlers) {
+func InitialBookingRoute(router fiber.Router, handler *BookingHandlers) {
 	// CRUD พื้นฐาน
 	router.Post("/room/:roomNumber", handler.CreateBooking)           // POST   /bookings/
 	router.Put("/:bookingID/room/:roomNumber", handler.UpdateBooking) // PUT    /bookings/:id
@@ -22,13 +19,13 @@ func InitialBookingRoute(router fiber.Router, handler *http.BookingHandlers) {
 	router.Get("/me/history/date/:date", handler.GetUserHistory) // GET /bookings/me/history
 }
 
-func InitialRoomRoute(router fiber.Router, handler *http.RoomHandler) {
+func InitialRoomRoute(router fiber.Router, handler *RoomHandler) {
 	router.Post("/", handler.CreateRoom)
 	router.Put("/:roomID", handler.UpdateRoom)
 	router.Delete("/:roomID", handler.DeleteRoom)
 }
 
-func InitialHelperRoute(router fiber.Router, bookingHandler *http.BookingHandlers, roomHandler *http.RoomHandler, configHandler *http.ConfigHandler) {
+func InitialHelperRoute(router fiber.Router, bookingHandler *BookingHandlers, roomHandler *RoomHandler, configHandler *ConfigHandler) {
 	// มาตรฐานมักจะใช้เป็นพหูพจน์ (Plural)
 	router.Get("/config", configHandler.GetConfig)
 	router.Post("/room/:roomID/checkin", bookingHandler.CheckInBooking) // POST  /bookings/room/:id/checkin
@@ -37,7 +34,7 @@ func InitialHelperRoute(router fiber.Router, bookingHandler *http.BookingHandler
 	router.Get("/room/:roomID", roomHandler.GetRoomByID) // GET   /bookings/room/:id
 }
 
-func InitialAdminRoute(router fiber.Router, userHandler *http.UserHandler, configHandler *http.ConfigHandler) {
+func InitialAdminRoute(router fiber.Router, userHandler *UserHandler, configHandler *ConfigHandler) {
 	router.Put("/config", configHandler.UpdateConfig)
 	router.Get("/users", userHandler.GetPaginatedUsers)
 	router.Get("/users/:userID/overview", userHandler.GetUserOverview)
