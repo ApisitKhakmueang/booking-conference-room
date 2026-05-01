@@ -29,7 +29,7 @@ func (p *bookingPostgresRepo) CreateBookingDB(ctx context.Context, booking *doma
 	}
 
 	// 2. ดึงข้อมูลซ้ำอีกรอบเพื่อเอา Relation (Room, User) ติดมาด้วย
-	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking, booking.ID).Error; err != nil {
+	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking).Error; err != nil {
 		return nil, err
 	}
 
@@ -40,7 +40,8 @@ func (p *bookingPostgresRepo) UpdateBookingDB(ctx context.Context, booking *doma
 	// 1. สั่ง Update
 	result := p.db.WithContext(ctx).
 		Clauses(clause.Returning{}).
-		Where("id = ? AND user_id = ?", booking.ID, booking.UserID).
+		Where("user_id = ?", booking.UserID).
+		Select("StartTime", "EndTime", "Title", "UpdatedAt").
 		Updates(booking)
 
 	if result.Error != nil {
@@ -48,7 +49,7 @@ func (p *bookingPostgresRepo) UpdateBookingDB(ctx context.Context, booking *doma
 	}
 
 	// 2. ดึงข้อมูลซ้ำเพื่อดึง Relation มาแปะ
-	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking, booking.ID).Error; err != nil {
+	if err := p.db.WithContext(ctx).Scopes(preloadBookingRelations).First(booking).Error; err != nil {
 		return nil, err
 	}
 
