@@ -48,5 +48,6 @@ type BookingPostgresRepo interface {
 	GetRoomID(ctx context.Context, booking *Booking, roomNumber uint) error
 	GetBookingByID(ctx context.Context, id uuid.UUID) (*Booking, error)
 	CheckDayOff(ctx context.Context, date time.Time) error
+	GetRoomDB(ctx context.Context) ([]Room, error)
 	GetRoomNumberDB(ctx context.Context, bookingID uuid.UUID) (uint, error)
 }

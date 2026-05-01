@@ -354,6 +354,36 @@ func (_m *BookingPostgresRepo) GetConfigDB(ctx context.Context) (*domain.Config,
 	return r0, r1
 }
 
+// GetRoomDB provides a mock function with given fields: ctx
+func (_m *BookingPostgresRepo) GetRoomDB(ctx context.Context) ([]domain.Room, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoomDB")
+	}
+
+	var r0 []domain.Room
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]domain.Room, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []domain.Room); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Room)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRoomID provides a mock function with given fields: ctx, booking, roomNumber
 func (_m *BookingPostgresRepo) GetRoomID(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
 	ret := _m.Called(ctx, booking, roomNumber)
