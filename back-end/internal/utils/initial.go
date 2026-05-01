@@ -17,7 +17,6 @@ import (
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/repository/redis"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/usecase"
 	"github.com/ApisitKhakmueang/BookingConferenceRoom/internal/utils/middleware"
-	"github.com/hibiken/asynq"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -190,7 +189,7 @@ func InitialCalendarService() (*calendar.Service, error) {
 	return calendar.NewService(ctx, option.WithCredentialsJSON([]byte(jsonCreds)))
 }
 
-func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub, redisAddr string, asynqClient *asynq.Client) *domain.AllUsecase {
+func InitialCleanArch(rdb *redis.Client, db *gorm.DB, googleCalendarService *calendar.Service, bookingWsHub *Websocket.Hub, redisAddr string, asynqClient domain.AsynqQueue) *domain.AllUsecase {
 	// Postgres Repositorys
 	bookingPostgres := postgresRepo.NewBookingPostgresRepo(db)
 	configPostgres := postgresRepo.NewConfigPostgresRepo(db)
