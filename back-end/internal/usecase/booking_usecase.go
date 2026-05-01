@@ -19,14 +19,14 @@ type bookingUsecases struct {
 	*BaseUsecase
 	cache					domain.BookingRedisRepo // เรียกผ่าน Interface
 	db						domain.BookingPostgresRepo // เรียกผ่าน Interface
-	asynqClient		*asynq.Client
+	asynqClient		domain.AsynqQueue
 }
 
 func NewBookingUsecases(
 	pub						domain.RealtimePublisher,
 	cache 				domain.BookingRedisRepo,
 	db 						domain.BookingPostgresRepo,
-	asynqClient		*asynq.Client) domain.BookingUsecases {
+	asynqClient		domain.AsynqQueue) domain.BookingUsecases {
 	return &bookingUsecases{
 		BaseUsecase: 	&BaseUsecase{publisher: pub},
 		cache:				cache,
@@ -269,10 +269,12 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 			return nil, err
 		}
 		
-		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
-			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
-		})
+		if len(bookings) > 0 {
+			u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+				// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
+				u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
+			})
+		}
 	}
 	
 	totalBookings := len(bookings)
@@ -349,9 +351,11 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 	})
 
 	// 5. ประกอบร่างเป็น Response และส่งกลับ
+	limit := min(len(popularRooms), 3)
+
 	response := domain.UpNextBookingResponse{
 		AttendanceHealth: health,
-		PopularRooms:     popularRooms[:3],
+		PopularRooms:     popularRooms[:limit],
 	}
 
 	return &response, nil
