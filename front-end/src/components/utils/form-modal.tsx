@@ -101,9 +101,14 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
         titleRef.current.value = "";
       }
     } catch(error: any) {
+      const errorMessage = 
+        error?.response?.data?.message || // กรณี Backend ส่ง error message กลับมา
+        error?.message ||                 // กรณี Network error หรือ Frontend พังเอง
+        'An unexpected error occurred';   // ข้อความสำรองกรณีหา error ไม่เจอจริงๆ
+
       Swal.fire({
         title: 'Error',
-        text: 'Scheduling conflict',
+        text: errorMessage,
         icon: 'error',
         timer: 2000
       })
