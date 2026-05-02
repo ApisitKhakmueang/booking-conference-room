@@ -281,7 +281,9 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 
 	// ⭐️ ป้องกันบั๊ก: ถ้าไม่มีการจองเลย ให้ส่งค่าว่างกลับไปทันที ไม่งั้นตอนหาร % โปรแกรมจะพัง (Divide by zero)
 	if totalBookings == 0 {
-		return &domain.UpNextBookingResponse{}, nil
+		return &domain.UpNextBookingResponse{
+			PopularRooms: []domain.PopularRoom{},
+		}, nil
 	}
 
 	var health domain.AttendanceHealth
