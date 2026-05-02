@@ -39,24 +39,6 @@ func (_m *ConfigRedisRepo) DeleteCache(ctx context.Context, prefix string) {
 	_m.Called(ctx, prefix)
 }
 
-// DeleteHolidayCache provides a mock function with given fields: ctx, date
-func (_m *ConfigRedisRepo) DeleteHolidayCache(ctx context.Context, date *domain.Date) error {
-	ret := _m.Called(ctx, date)
-
-	if len(ret) == 0 {
-		panic("no return value specified for DeleteHolidayCache")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *domain.Date) error); ok {
-		r0 = rf(ctx, date)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // FindHolidaySynced provides a mock function with given fields: ctx, date
 func (_m *ConfigRedisRepo) FindHolidaySynced(ctx context.Context, date *domain.Date) int64 {
 	ret := _m.Called(ctx, date)
