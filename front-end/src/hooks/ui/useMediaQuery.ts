@@ -7,14 +7,14 @@ export function useMediaQuery(query: string) {
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    
+
     // Set ค่าครั้งแรกทันทีที่ Mount
     if (media.matches !== matches) {
       setMatches(media.matches);
     }
 
     const listener = () => setMatches(media.matches);
-    
+
     // ใช้ addEventListener แบบ modern
     media.addEventListener('change', listener);
     return () => media.removeEventListener('change', listener);
@@ -26,17 +26,13 @@ export function useMediaQuery(query: string) {
 // --- 2. The Wrapper Hook (พระเอกของเรา) ---
 export function useResponsive() {
   // กำหนด Breakpoints ตรงนี้ที่เดียว (แก้ง่ายในอนาคต)
-  const isMobile  = useMediaQuery('(max-width: 425px)');
-  const isTablet  = useMediaQuery('(min-width: 426px) and (max-width: 767px)');
-  const isDesktop = useMediaQuery('(min-width: 768)');
+  const isMobile = useMediaQuery('(max-width: 425px)');
+  const isTablet = useMediaQuery('(min-width: 426px) and (max-width: 767px)');
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  // แถม: เช็คแบบ "ใหญ่กว่า Mobile ขึ้นไป" (สำหรับเคสที่ Tablet กับ Desktop หน้าตาเหมือนกัน)
-  const isTabletOrDesktop = useMediaQuery('(min-width: 768px)');
-
-  return { 
-    isMobile, 
-    isTablet, 
+  return {
+    isMobile,
+    isTablet,
     isDesktop,
-    isTabletOrDesktop 
   };
 }
