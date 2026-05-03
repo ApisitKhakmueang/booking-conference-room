@@ -68,7 +68,7 @@ describe('Responsive Hooks', () => {
       expect(result.current.isDesktop).toBe(false);
     });
 
-    it('3. Should return isDesktop and isTabletOrDesktop is true', () => {
+    it('3. Should return isDesktop is true', () => {
       // จำลองว่าหน้าจอเป็น Desktop
       mockScreenSize('(min-width: 768px)');
       
