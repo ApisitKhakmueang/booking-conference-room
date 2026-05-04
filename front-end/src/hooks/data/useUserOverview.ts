@@ -18,7 +18,12 @@ export function useUserOverview(userID: string | undefined) {
 
       onError: (err) => {
         if (err.response?.status === 404) {
-          console.warn("User overview not found");
+          Swal.fire({
+            title: 'Not Found',
+            text: "User overview not found",
+            icon: 'warning',
+            confirmButtonColor: '#8370ff',
+          });
         } else {
           Swal.fire({
             title: 'Connection Error',
