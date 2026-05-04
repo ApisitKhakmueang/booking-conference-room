@@ -20,8 +20,12 @@ export function usePaginatedUsers(page: number, limit: number, search?: string) 
       // 🌟 3. จัดการ Error แบบเดียวกับไฟล์อื่นๆ
       onError: (err) => {
         if (err.response?.status === 404) {
-          // ถ้ากรณีค้นหาแล้วไม่เจอ อาจจะไม่ต้องเด้ง Error แต่ปล่อยให้ตารางว่าง
-          console.warn("Users not found");
+          Swal.fire({
+            title: 'Not Found',
+            text: "Users not found",
+            icon: 'warning',
+            confirmButtonColor: '#8370ff',
+          });
         } else {
           Swal.fire({
             title: 'Connection Error',

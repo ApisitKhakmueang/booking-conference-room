@@ -19,7 +19,7 @@ export function useRoomData() {
       onError: (err) => {
         if (err.response?.status === 404) {
           Swal.fire({
-            title: 'Room Not Found',
+            title: 'Not Found',
             text: "Not found this room",
             icon: 'warning',
             confirmButtonColor: '#8370ff',

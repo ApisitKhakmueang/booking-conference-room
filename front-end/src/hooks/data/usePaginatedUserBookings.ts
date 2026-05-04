@@ -26,8 +26,12 @@ export function usePaginatedUserBookings(
 
       onError: (err) => {
         if (err.response?.status === 404) {
-          // ถ้า Filter แล้วไม่เจอข้อมูล อาจจะไม่ต้องแจ้ง Error Pop-up แต่ปล่อยให้ UI แสดงผลว่า "No content"
-          console.warn("Bookings not found for this filter");
+          Swal.fire({
+            title: 'Not Found',
+            text: "Bookings not found for this filter",
+            icon: 'warning',
+            confirmButtonColor: '#8370ff',
+          });
         } else {
           Swal.fire({
             title: 'Connection Error',
