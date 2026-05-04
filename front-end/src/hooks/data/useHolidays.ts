@@ -28,7 +28,7 @@ export function useHolidays(startYear: string, endYear: string) {
         // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
         if (error.response?.status === 404) {
           Swal.fire({
-            title: 'Room Not Found',
+            title: 'Holidays Not Found',
             text: "Not found holidays",
             icon: 'warning',
             confirmButtonColor: '#8370ff', // สีม่วงเข้มให้เข้าธีมเว็บ
