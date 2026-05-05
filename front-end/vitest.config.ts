@@ -1,8 +1,15 @@
 import { defineConfig } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths' // 🌟 1. Import plugin เข้ามา
+import react from '@vitejs/plugin-react'
+import { fileURLToPath, URL } from 'url' // 🌟 1. Import ตัวช่วยจัดการ Path
 
 export default defineConfig({
-  plugins: [tsconfigPaths()], // 🌟 2. เรียกใช้งาน Plugin ตรงนี้
+  plugins: [react()], // 🌟 2. เรียกใช้งาน Plugin ตรงนี้
+  resolve: {
+    // 🌟 2. สอนให้ Vitest รู้จักว่า @ คือโฟลเดอร์ src
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
   test: {
     globals: true, // 🌟 สำคัญมาก ต้องเปิดเป็น true
     environment: 'jsdom',
