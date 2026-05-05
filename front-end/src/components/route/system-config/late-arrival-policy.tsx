@@ -8,8 +8,7 @@ export default function LateArrivalPolicy({ config, setConfig, isOpenEdit }: Con
     }
   };
 
-  const handleNumberChange = () => 
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // 🌟 จัดการค่าและอัปเดต formData ที่นี่
     let val = parseInt(e.target.value);
     
