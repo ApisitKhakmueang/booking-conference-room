@@ -55,6 +55,7 @@ export default function UserCard({ currentUsers, toggleStatus, updatingIDs }: Us
               </span>
               <div className="flex items-center gap-3">
                 <button 
+                  aria-label="Toggle user status"
                   onClick={(e) => { e.stopPropagation(); toggleStatus(user.id, user.status as 'active' | 'inactive'); }} 
                   disabled={isUpdating}
                   className={`w-10 h-6 rounded-full flex items-center p-1 transition-all duration-300 ${statusStyle.toggleBg} ${isUpdating ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
@@ -71,6 +72,7 @@ export default function UserCard({ currentUsers, toggleStatus, updatingIDs }: Us
             {/* บนมือถือจะลอยอยู่มุมขวาบน แต่จอคอมจะอยู่ในคอลัมน์ขวาสุดอย่างสวยงาม */}
             <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto flex justify-end md:w-[10%]">
               <button 
+                aria-label="View user details"
                 onClick={(e) => { e.stopPropagation(); goToDetail(user.id); }}
                 className="text-light-secondary dark:text-secondary bg-transparent hover:text-dark-purple dark:hover:text-white transition-colors p-2 rounded-lg cursor-pointer md:pr-6">
                 <Eye className="w-5 h-5" />

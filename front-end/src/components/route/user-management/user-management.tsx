@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 import { usePaginatedUsers } from '@/hooks/data/usePaginatedUsers';
 import { adminService } from '@/service/booking.service';
 
-export default function UserTable() {
+export default function UserManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 5;
