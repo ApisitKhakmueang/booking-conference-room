@@ -48,17 +48,40 @@ describe('Card', () => {
     const { container } = render(<Card className="test-class">Body</Card>);
     expect(container.querySelector('.test-class')).toBeInTheDocument();
   });
+
+  it('7. Should pass through standard HTML attributes', () => {
+    // ทดสอบการส่ง ID และ data-testid
+    render(
+      <Card id="main-card" data-testid="test-card" aria-label="card-container">
+        Body
+      </Card>
+    );
+    const card = screen.getByTestId('test-card');
+    
+    expect(card).toHaveAttribute('id', 'main-card');
+    expect(card).toHaveAttribute('aria-label', 'card-container');
+  });
+
+  it('8. Should forward ref to the DOM element', () => {
+    const ref = React.createRef<HTMLDivElement>();
+    render(<Card ref={ref}>Ref Card</Card>);
+    
+    // ตรวจสอบว่า ref มีค่าและเป็น HTML Element จริงๆ
+    expect(ref.current).not.toBeNull();
+    expect(ref.current?.tagName).toBe('DIV');
+    expect(ref.current).toHaveAttribute('data-slot', 'card');
+  });
 });
 
 // ─── CardHeader ───────────────────────────────────────────────────────────────
 
 describe('CardHeader', () => {
-  it('7. Should render with data-slot="card-header"', () => {
+  it('9. Should render with data-slot="card-header"', () => {
     const { container } = render(<CardHeader>Header</CardHeader>);
     expect(container.querySelector('[data-slot="card-header"]')).toBeInTheDocument();
   });
 
-  it('8. Should render children inside CardHeader', () => {
+  it('10. Should render children inside CardHeader', () => {
     render(<CardHeader>My Header</CardHeader>);
     expect(screen.getByText('My Header')).toBeInTheDocument();
   });
@@ -67,12 +90,12 @@ describe('CardHeader', () => {
 // ─── CardTitle ────────────────────────────────────────────────────────────────
 
 describe('CardTitle', () => {
-  it('9. Should render with data-slot="card-title"', () => {
+  it('11. Should render with data-slot="card-title"', () => {
     const { container } = render(<CardTitle>Title</CardTitle>);
     expect(container.querySelector('[data-slot="card-title"]')).toBeInTheDocument();
   });
 
-  it('10. Should render title text', () => {
+  it('12. Should render title text', () => {
     render(<CardTitle>Room A</CardTitle>);
     expect(screen.getByText('Room A')).toBeInTheDocument();
   });
@@ -81,12 +104,12 @@ describe('CardTitle', () => {
 // ─── CardDescription ─────────────────────────────────────────────────────────
 
 describe('CardDescription', () => {
-  it('11. Should render with data-slot="card-description"', () => {
+  it('13. Should render with data-slot="card-description"', () => {
     const { container } = render(<CardDescription>Description</CardDescription>);
     expect(container.querySelector('[data-slot="card-description"]')).toBeInTheDocument();
   });
 
-  it('12. Should render description text', () => {
+  it('14. Should render description text', () => {
     render(<CardDescription>Some description text</CardDescription>);
     expect(screen.getByText('Some description text')).toBeInTheDocument();
   });
@@ -95,7 +118,7 @@ describe('CardDescription', () => {
 // ─── CardAction ───────────────────────────────────────────────────────────────
 
 describe('CardAction', () => {
-  it('13. Should render with data-slot="card-action"', () => {
+  it('15. Should render with data-slot="card-action"', () => {
     const { container } = render(<CardAction>Action</CardAction>);
     expect(container.querySelector('[data-slot="card-action"]')).toBeInTheDocument();
   });
@@ -104,12 +127,12 @@ describe('CardAction', () => {
 // ─── CardContent ──────────────────────────────────────────────────────────────
 
 describe('CardContent', () => {
-  it('14. Should render with data-slot="card-content"', () => {
+  it('16. Should render with data-slot="card-content"', () => {
     const { container } = render(<CardContent>Content</CardContent>);
     expect(container.querySelector('[data-slot="card-content"]')).toBeInTheDocument();
   });
 
-  it('15. Should render children inside CardContent', () => {
+  it('17. Should render children inside CardContent', () => {
     render(<CardContent>Booking info here</CardContent>);
     expect(screen.getByText('Booking info here')).toBeInTheDocument();
   });
@@ -118,12 +141,12 @@ describe('CardContent', () => {
 // ─── CardFooter ───────────────────────────────────────────────────────────────
 
 describe('CardFooter', () => {
-  it('16. Should render with data-slot="card-footer"', () => {
+  it('18. Should render with data-slot="card-footer"', () => {
     const { container } = render(<CardFooter>Footer</CardFooter>);
     expect(container.querySelector('[data-slot="card-footer"]')).toBeInTheDocument();
   });
 
-  it('17. Should render children inside CardFooter', () => {
+  it('19. Should render children inside CardFooter', () => {
     render(<CardFooter>Footer content</CardFooter>);
     expect(screen.getByText('Footer content')).toBeInTheDocument();
   });
@@ -132,7 +155,7 @@ describe('CardFooter', () => {
 // ─── Composition ─────────────────────────────────────────────────────────────
 
 describe('Card composition', () => {
-  it('18. Should render a fully composed Card with all sub-components', () => {
+  it('20. Should render a fully composed Card with all sub-components', () => {
     render(
       <Card>
         <CardHeader>
@@ -150,5 +173,21 @@ describe('Card composition', () => {
     expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
     expect(screen.getByText('Room details go here')).toBeInTheDocument();
     expect(screen.getByText('Last updated today')).toBeInTheDocument();
+  });
+});
+
+describe('Card Sub-components Customization', () => {
+  it('21. Should merge custom className for sub-components', () => {
+    const { container } = render(
+      <Card>
+        <CardHeader className="custom-header">Header</CardHeader>
+        <CardContent className="custom-content">Content</CardContent>
+        <CardFooter className="custom-footer">Footer</CardFooter>
+      </Card>
+    );
+
+    expect(container.querySelector('.custom-header')).toBeInTheDocument();
+    expect(container.querySelector('.custom-content')).toBeInTheDocument();
+    expect(container.querySelector('.custom-footer')).toBeInTheDocument();
   });
 });

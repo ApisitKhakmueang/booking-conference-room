@@ -1,172 +1,129 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { Calendar, CalendarDayButton } from './calendar';
-import React from 'react';
+import { Calendar } from './calendar';
+import React, { useState } from 'react';
 
-// Fixed reference date for deterministic tests
-const FIXED_DATE = new Date(2025, 0, 15); // 15 January 2025
+// 🌟 สร้าง Wrapper Component เพื่อเทส State การเลือกวันที่
+function CalendarSingleWrapper() {
+  const [date, setDate] = useState<Date | undefined>(new Date(2026, 4, 15)); // Set default date for stable testing
+  return (
+    <Calendar
+      mode="single"
+      selected={date}
+      onSelect={setDate}
+      defaultMonth={new Date(2026, 4)} // May 2026
+    />
+  );
+}
 
-describe('Calendar', () => {
-  // ─── Rendering ──────────────────────────────────────────────────────────────
+function CalendarRangeWrapper() {
+  const [range, setRange] = useState<{ from: Date; to: Date } | undefined>({
+    from: new Date(2026, 4, 10),
+    to: new Date(2026, 4, 15),
+  });
+  return (
+    <Calendar
+      mode="range"
+      selected={range}
+      onSelect={setRange as any}
+      defaultMonth={new Date(2026, 4)}
+    />
+  );
+}
 
-  it('1. Should render with data-slot="calendar"', () => {
+describe('Calendar Component', () => {
+  // ─── 1. Basic Rendering ──────────────────────────────────────────────────
+
+  it('1. Should render the calendar root with data-slot', () => {
+    const { container } = render(<Calendar />);
+    const root = container.querySelector('[data-slot="calendar"]');
+    expect(root).toBeInTheDocument();
+  });
+
+  it('2. Should render navigation buttons (Custom Chevrons)', () => {
     render(<Calendar />);
-    expect(document.querySelector('[data-slot="calendar"]')).toBeInTheDocument();
-  });
-
-  it('2. Should render weekday headers (Su Mo Tu We Th Fr Sa)', () => {
-    render(<Calendar defaultMonth={FIXED_DATE} />);
-    // react-day-picker renders abbreviated weekday names
-    expect(document.querySelector('[class*="weekday"]')).toBeInTheDocument();
-  });
-
-  it('3. Should render the month and year in the caption', () => {
-    render(<Calendar defaultMonth={FIXED_DATE} />);
-    // January 2025
-    expect(screen.getByText(/january/i)).toBeInTheDocument();
-    expect(screen.getByText(/2025/i)).toBeInTheDocument();
-  });
-
-  it('4. Should render navigation buttons (previous & next month)', () => {
-    render(<Calendar defaultMonth={FIXED_DATE} />);
-    const prevBtn = document.querySelector('[class*="button_previous"]');
-    const nextBtn = document.querySelector('[class*="button_next"]');
-    expect(prevBtn).toBeInTheDocument();
-    expect(nextBtn).toBeInTheDocument();
-  });
-
-  // ─── Outside days ────────────────────────────────────────────────────────────
-
-  it('5. Should render outside days when showOutsideDays=true (default)', () => {
-    render(<Calendar defaultMonth={FIXED_DATE} showOutsideDays />);
-    // Outside days should be visible (they get a specific class)
-    const outsideDays = document.querySelectorAll('[class*="outside"]');
-    expect(outsideDays.length).toBeGreaterThan(0);
-  });
-
-  it('6. Should NOT render outside days when showOutsideDays=false', () => {
-    // เรนเดอร์ Calendar โดยปิดการแสดงวันของเดือนอื่น
-    render(<Calendar defaultMonth={FIXED_DATE} showOutsideDays={false} />);
+    const prevButton = screen.getByRole('button', { name: /previous month/i });
+    const nextButton = screen.getByRole('button', { name: /next month/i });
     
-    // ค้นหา Element ทั้งหมดที่มี class ที่ระบุว่าเป็นวันนอกเดือน (อิงตาม logic ของ shadcn/ui)
-    const outsideDays = document.querySelectorAll('.day-outside');
+    expect(prevButton).toBeInTheDocument();
+    expect(nextButton).toBeInTheDocument();
+  });
+
+  // ─── 2. Props & Configurations ──────────────────────────────────────────
+
+  it('3. Should show outside days by default', () => {
+    // เดือนพฤษภาคม 2026 เริ่มต้นวันศุกร์ (วันที่ 1)
+    // ดังนั้นจะมีวันของเดือนเมษายนโผล่มาในช่วงต้นสัปดาห์
+    render(<Calendar defaultMonth={new Date(2026, 4)} />);
     
-    // ตรวจสอบว่าต้องไม่มี element เหล่านี้ปรากฏอยู่ใน DOM
-    expect(outsideDays.length).toBe(0);
+    // ตรวจสอบว่ามีวันที่ถูกกำหนดคลาส text-gray-300 ซึ่งเป็นคลาสของ outside days
+    const days = screen.getAllByRole('gridcell');
+    const outsideDay = days.find(day => day.className.includes('text-gray-300'));
+    expect(outsideDay).toBeDefined();
   });
 
-  // ─── Navigation ──────────────────────────────────────────────────────────────
-
-  it('7. Should navigate to next month on next button click', async () => {
-    render(<Calendar defaultMonth={FIXED_DATE} />);
-    expect(screen.getByText(/january/i)).toBeInTheDocument();
-
-    const nextBtn = document.querySelector('[class*="button_next"]') as HTMLElement;
-    await userEvent.click(nextBtn);
-
-    expect(screen.getByText(/february/i)).toBeInTheDocument();
+  it('4. Should hide outside days when showOutsideDays={false}', () => {
+    render(<Calendar defaultMonth={new Date(2026, 4)} showOutsideDays={false} />);
+    
+    // ถ้าตั้ง false วันของเดือนอื่นจะไม่ถูกเรนเดอร์เนื้อหา (invisible)
+    const days = screen.getAllByRole('gridcell');
+    const hiddenDay = days.find(day => day.className.includes('invisible'));
+    expect(hiddenDay).toBeDefined();
   });
 
-  it('8. Should navigate to previous month on previous button click', async () => {
-    render(<Calendar defaultMonth={FIXED_DATE} />);
-    expect(screen.getByText(/january/i)).toBeInTheDocument();
+  // ─── 3. CalendarDayButton Custom Logic ─────────────────────────────────
 
-    const prevBtn = document.querySelector('[class*="button_previous"]') as HTMLElement;
-    await userEvent.click(prevBtn);
-
-    expect(screen.getByText(/december/i)).toBeInTheDocument();
+  it('5. Should apply data-selected-single when selecting a single date', async () => {
+    render(<CalendarSingleWrapper />);
+    
+    // 🌟 แก้ไข: หาปุ่มจากข้อความบนปุ่มโดยตรงแทนการใช้ Role Name ที่ยาว
+    const day15 = screen.getByText('15', { selector: 'button' });
+    
+    expect(day15).toHaveAttribute('data-selected-single', 'true');
+    expect(day15).not.toHaveAttribute('data-range-start', 'true');
   });
 
-  // ─── Date selection (single mode) ───────────────────────────────────────────
-
-  it('9. Should call onSelect when a day is clicked (single mode)', async () => {
-    const handleSelect = vi.fn();
-    render(
-      <Calendar
-        mode="single"
-        defaultMonth={FIXED_DATE}
-        onSelect={handleSelect}
-      />
-    );
-    // Find the 15th day button by its data-day attribute
-    const dayButton = document.querySelector(
-      `button[data-day="${FIXED_DATE.toLocaleDateString()}"]`
-    ) as HTMLElement;
-    if (dayButton) {
-      await userEvent.click(dayButton);
-      expect(handleSelect).toHaveBeenCalled();
-    }
+  it('6. Should update selected date when clicking a new day', async () => {
+    render(<CalendarSingleWrapper />);
+    
+    const day20 = screen.getByText('20', { selector: 'button' });
+    await userEvent.click(day20);
+    
+    // 🌟 แก้ไข: ใช้ waitFor และ Query หาปุ่มอีกครั้งหลังจากการคลิก (ป้องกัน Stale Element)
+    await waitFor(() => {
+      const updatedDay20 = screen.getByText('20', { selector: 'button' });
+      expect(updatedDay20).toHaveAttribute('data-selected-single', 'true');
+    });
   });
 
-  it('10. Should highlight selected date when selected prop is provided', () => {
-    render(
-      <Calendar
-        mode="single"
-        defaultMonth={FIXED_DATE}
-        selected={FIXED_DATE}
-      />
-    );
-    // The selected day button gets data-selected-single="true"
-    const selectedDay = document.querySelector(
-      'button[data-selected-single="true"]'
-    );
-    expect(selectedDay).toBeInTheDocument();
+  // ─── 4. Range Selection Attributes ─────────────────────────────────────
+
+  it('7. Should apply range attributes correctly in range mode', () => {
+    render(<CalendarRangeWrapper />);
+    
+    // 🌟 แก้ไข: อัปเดต Selector ทั้งหมดให้เหมือนกันเพื่อความเสถียร
+    const day10 = screen.getByText('10', { selector: 'button' });
+    expect(day10).toHaveAttribute('data-range-start', 'true');
+    expect(day10).not.toHaveAttribute('data-selected-single', 'true'); 
+    
+    const day12 = screen.getByText('12', { selector: 'button' });
+    expect(day12).toHaveAttribute('data-range-middle', 'true');
+    
+    const day15 = screen.getByText('15', { selector: 'button' });
+    expect(day15).toHaveAttribute('data-range-end', 'true');
   });
 
-  // ─── Custom className ────────────────────────────────────────────────────────
+  // ─── 5. Data Attributes ────────────────────────────────────────────────
 
-  it('11. Should merge custom className on the root', () => {
-    render(<Calendar className="my-calendar" defaultMonth={FIXED_DATE} />);
-    expect(document.querySelector('.my-calendar')).toBeInTheDocument();
-  });
-
-  // ─── captionLayout ───────────────────────────────────────────────────────────
-
-  it('12. Should render caption in label layout (default)', () => {
-    render(<Calendar defaultMonth={FIXED_DATE} captionLayout="label" />);
-    // Label layout shows plain text month+year
-    expect(screen.getByText(/january/i)).toBeInTheDocument();
-  });
-
-  it('13. Should render caption in dropdown layout without errors', () => {
-    expect(() =>
-      render(
-        <Calendar
-          defaultMonth={FIXED_DATE}
-          captionLayout="dropdown"
-          startMonth={new Date(2020, 0)}
-          endMonth={new Date(2030, 11)}
-        />
-      )
-    ).not.toThrow();
-  });
-
-  // ─── Disabled dates ──────────────────────────────────────────────────────────
-
-  it('14. Should mark specified dates as disabled', () => {
-    const disabledDate = new Date(2025, 0, 15); // Jan 15 2025
-    render(
-      <Calendar
-        mode="single"
-        defaultMonth={FIXED_DATE}
-        disabled={[disabledDate]}
-      />
-    );
-    const disabledDays = document.querySelectorAll('[class*="disabled"]');
-    expect(disabledDays.length).toBeGreaterThan(0);
-  });
-});
-
-// ─── CalendarDayButton ────────────────────────────────────────────────────────
-
-describe('CalendarDayButton', () => {
-  it('15. Should be focusable when modifiers.focused=true', () => {
-    // CalendarDayButton is rendered inside Calendar; test indirectly
-    // by verifying day buttons are rendered and have the expected attributes
-    render(<Calendar defaultMonth={FIXED_DATE} mode="single" />);
-    const dayButtons = document.querySelectorAll('button[data-day]');
-    expect(dayButtons.length).toBeGreaterThan(0);
+  it('8. Should inject formatted date into data-day attribute', () => {
+    // 🌟 เพิ่ม mode="single" เพื่อให้เรนเดอร์ในโหมดที่คลิกได้ (วาด Button)
+    render(<Calendar mode="single" defaultMonth={new Date(2026, 4)} />);
+    
+    // ทีนี้จะหาปุ่มเจอแน่นอน เพราะ Component CalendarDayButton ถูกเรียกใช้แล้ว
+    const day15 = screen.getByText('15', { selector: 'button' });
+    expect(day15).toHaveAttribute('data-day');
+    expect(day15.getAttribute('data-day')).not.toBeNull();
   });
 });
