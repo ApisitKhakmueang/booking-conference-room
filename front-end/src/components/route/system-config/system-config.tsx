@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 import { configService } from '@/service/booking.service';
 import LateArrivalPolicy from './late-arrival-policy';
 
-export default function OperationalControls() {
+export default function SystemConfig() {
   const { config: fetchedConfig, isLoadingConfig, reloadConfig } = useSystemConfig();
   const [isOpenEdit, setIsOpenEdit] = useState(false)
   const [config, setConfig] = useState({
