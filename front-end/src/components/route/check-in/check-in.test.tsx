@@ -1,0 +1,87 @@
+// @vitest-environment jsdom
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import CheckIn from './check-in';
+import { roomService } from '@/service/booking.service';
+import useBookingStatusByRoomIDWS from '@/hooks/data/useBookingStatusByRoomIDWS';
+import { useSystemConfig } from '@/hooks/data/useSystemConfig';
+import { mapBookingEvents } from '@/lib/map-resp-event';
+
+// Mock Dependencies
+vi.mock('@/service/booking.service', () => ({ roomService: { fetchRoomByID: vi.fn() } }));
+vi.mock('@/hooks/data/useBookingStatusByRoomIDWS', () => ({ default: vi.fn() }));
+vi.mock('@/hooks/data/useSystemConfig', () => ({ useSystemConfig: vi.fn() }));
+vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
+
+// 🌟 1. Mock ฟังก์ชันแปลงข้อมูล เพื่อตัดปัญหาเรื่อง Format เวลาผิด
+vi.mock('@/lib/map-resp-event', () => ({ mapBookingEvents: vi.fn() }));
+
+describe('CheckIn Page', () => {
+  const mockRoom = { id: 'r1', name: 'Boardroom 1', capacity: 5 };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useSystemConfig as any).mockReturnValue({ config: {} });
+    (roomService.fetchRoomByID as any).mockResolvedValue(mockRoom);
+    (mapBookingEvents as any).mockReturnValue(undefined); // รีเซ็ตค่าเริ่มต้น
+  });
+
+  // 🌟 2. ใส่ async ให้ข้อ 1
+  it('1. Should show skeleton when data is loading', async () => {
+    (useBookingStatusByRoomIDWS as any).mockReturnValue({ booking: null, isLoadingBooking: true });
+    
+    const { container } = render(<CheckIn roomID="r1" />);
+    // เช็ค Skeleton ทันทีตอนเรนเดอร์
+    expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
+
+    // 🌟 3. สั่งให้เทสรอจนกว่า API ดึงชื่อห้องเสร็จ เพื่อเคลียร์ Warning เรื่อง act()
+    await waitFor(() => expect(screen.getByText('Boardroom 1')).toBeInTheDocument());
+  });
+
+  it('2. Should display "Room Available" state correctly', async () => {
+    (useBookingStatusByRoomIDWS as any).mockReturnValue({ booking: null, isLoadingBooking: false });
+
+    render(<CheckIn roomID="r1" />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Boardroom 1')).toBeInTheDocument();
+      expect(screen.getByText('Available')).toBeInTheDocument();
+      expect(screen.getByText('Room Available')).toBeInTheDocument(); 
+    });
+  });
+
+  it('3. Should display "Occupied" state and BookingCard when busy', async () => {
+    const mockRawBooking = [{ id: 'b1' }]; // ข้อมูลดิบสมมติ
+    (useBookingStatusByRoomIDWS as any).mockReturnValue({ booking: mockRawBooking, isLoadingBooking: false });
+
+    // 🌟 4. จำลองข้อมูลที่แปลงสำเร็จแล้วให้ตรงกับที่ BookingCard ต้องการเป๊ะๆ
+    (mapBookingEvents as any).mockReturnValue({
+      id: 'b1',
+      title: 'CEO Meeting',
+      status: 'Confirmed', // สถานะต้องเป็น Confirmed ตัว C ใหญ่ ตามเงื่อนไขในไฟล์ check-in.tsx
+      date: '2026-05-06T00:00:00Z',
+      startTime: '2026-05-06T10:00:00Z',
+      endTime: '2026-05-06T11:00:00Z',
+      duration: '1 hr',
+      user: { fullName: 'Boss' }
+    });
+
+    render(<CheckIn roomID="r1" />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Occupied')).toBeInTheDocument();
+      expect(screen.getByText('CEO Meeting')).toBeInTheDocument(); 
+    });
+  });
+
+  // 🌟 5. ใส่ async ให้ข้อ 4
+  it('4. Should show "Updating..." indicator during WebSocket sync', async () => {
+    (useBookingStatusByRoomIDWS as any).mockReturnValue({ booking: null, isLoadingBooking: true });
+    
+    render(<CheckIn roomID="r1" />);
+    expect(screen.getByText('Updating...')).toBeInTheDocument();
+
+    // 🌟 6. สั่งให้เทสรอจนกว่า API ดึงชื่อห้องเสร็จ เพื่อเคลียร์ Warning เรื่อง act()
+    await waitFor(() => expect(screen.getByText('Boardroom 1')).toBeInTheDocument());
+  });
+});
