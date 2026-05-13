@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useAuthStore } from '@/stores/auth.store'
+import { Session } from '@supabase/supabase-js';
 
 export default function useAuth() {
   // 🌟 1. ใช้ useMemo เพื่อป้องกันไม่ให้สร้าง Client ใหม่ทุกครั้งที่ Component (NavigationLayout) re-render
@@ -11,7 +12,7 @@ export default function useAuth() {
 
   useEffect(() => {
     // ฟังก์ชันตัวช่วย: ดึงข้อมูลเบื้องต้นจาก Token ทันที
-    const getFastUserData = (session: any) => {
+    const getFastUserData = (session: Session | null) => {
       if (!session?.user) return null;
       const u = session.user;
       return {
@@ -25,7 +26,7 @@ export default function useAuth() {
     };
 
     // ฟังก์ชันตัวช่วย: ดึงข้อมูลจาก Database
-    const updateLocalUserData = async (session: any) => {
+    const updateLocalUserData = async (session: Session | null) => {
       if (!session?.user) return;
       const u = session.user;
 
