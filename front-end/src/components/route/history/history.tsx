@@ -22,9 +22,6 @@ export default function History() {
   const [activeTab, setActiveTab] = useState("ALL");
   const { config } = useSystemConfig();
 
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
-
   const filteredEvents = useMemo(() => {
     if (!events) return undefined;
     
@@ -76,10 +73,10 @@ export default function History() {
     return nextDate > today;
   }, [currentDate]);
 
+  const currentMonthStr = format(currentDate, 'yyyy-MM');
   const fetchUserBookings = useCallback(async () => {
-    const formattedDate = format(currentDate, 'yyyy-MM');
     try {
-      const data = await bookingService.fetchUserHistory(formattedDate);
+      const data = await bookingService.fetchUserHistory(currentMonthStr);
       const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
     } catch (error) {
@@ -105,9 +102,10 @@ export default function History() {
         confirmButtonColor: '#8370ff',
       });
     }
-  }, [currentMonth, currentYear, config, currentDate]);
+  }, [currentMonthStr, config]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUserBookings();
   }, [fetchUserBookings]); // อย่าลืมใส่ dependency
 
