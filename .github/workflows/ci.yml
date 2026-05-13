@@ -1,0 +1,98 @@
+name: CI Pipeline
+
+# กำหนดให้ทำงานเมื่อมีการ Push โค้ดเข้าสาขา main หรือเปิด Pull Request
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # ----------------------------------------
+  # Job 1: ตรวจสอบฝั่ง Backend (Go)
+  # ----------------------------------------
+  backend-ci:
+    name: Backend CI (Go)
+    runs-on: ubuntu-latest
+    
+    # กำหนดให้ทุกคำสั่งใน Job นี้ รันในโฟลเดอร์ back-end
+    defaults:
+      run:
+        working-directory: ./back-end
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25' # เปลี่ยนเป็นเวอร์ชันที่คุณใช้ เช่น 1.21 หรือ 1.22
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Verify Code (Vet)
+        run: go vet ./...
+
+      - name: Run Unit Tests
+        # คำสั่งรันเทสต์ของ Go
+        run: go test -v ./... 
+
+  # ----------------------------------------
+  # Job 2: ตรวจสอบฝั่ง Frontend (Next.js)
+  # ----------------------------------------
+  frontend-ci:
+    name: Frontend CI (Next.js)
+    runs-on: ubuntu-latest
+    
+    # กำหนดให้ทุกคำสั่งใน Job นี้ รันในโฟลเดอร์ front-end
+    defaults:
+      run:
+        working-directory: ./front-end
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # เปลี่ยนเป็นเวอร์ชันที่คุณใช้
+          cache: 'npm'       # ช่วยให้ติดตั้ง package เร็วขึ้นในรอบถัดไป
+          cache-dependency-path: ./front-end/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci # ใช้ npm ci จะเร็วกว่าและชัวร์กว่า npm install ในระบบ CI
+
+      - name: Run Linting
+        run: npm run lint
+
+      - name: Run Unit Tests (Vitest)
+        # สั่งรันเทสต์ (ระบบจะหา vitest ตามที่คุณคอนฟิกไว้)
+        run: npm run test 
+
+      - name: Build Next.js
+        # ทดลองบิลด์ว่าโค้ด Next.js สมบูรณ์พร้อมขึ้นโปรดักชันไหม
+        run: npm run build
+
+  # ----------------------------------------
+  # Job 3: ตรวจสอบการ Build Docker (เสริมความชัวร์)
+  # ----------------------------------------
+  docker-build-check:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    # ให้รอ Job backend-ci และ frontend-ci ผ่านก่อน ค่อยลองรัน Docker
+    needs: [backend-ci, frontend-ci] 
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Compose
+        # ทดสอบว่าไฟล์ docker-compose.yml และ dockerfile ไม่มี Syntax Error
+        run: docker-compose build
+        env:
+          # ใส่ค่าดัมมี่เข้าไปเพื่อให้ docker-compose บิลด์ผ่านโดยไม่แจ้งเตือน
+          NEXT_PUBLIC_BACKEND_HTTP: "http://dummy-api/api/v1"
+          NEXT_PUBLIC_BACKEND_WEBSOCKET: "ws://dummy-api/ws"
