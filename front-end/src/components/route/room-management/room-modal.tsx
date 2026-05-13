@@ -35,7 +35,7 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
     }
 
     // 🌟 ใช้ Destructuring แยก status ออกมา และเก็บส่วนที่เหลือไว้ใน payload
-    const { status: _status, ...payloadWithoutStatus } = formData;
+    const { ...payloadWithoutStatus } = formData;
 
     // 🌟 เลือกว่าจะส่งข้อมูลชุดไหนไปที่ API
     const body = typeOperate === 'add' ? payloadWithoutStatus : formData;
