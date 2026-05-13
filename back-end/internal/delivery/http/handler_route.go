@@ -32,6 +32,9 @@ func InitialHelperRoute(router fiber.Router, bookingHandler *BookingHandlers, ro
 	router.Get("/holidays/startDate/:startDate/endDate/:endDate", configHandler.GetHoliday)
 	router.Get("/rooms/details", roomHandler.GetRoom)
 	router.Get("/room/:roomID", roomHandler.GetRoomByID) // GET   /bookings/room/:id
+	router.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
 }
 
 func InitialAdminRoute(router fiber.Router, userHandler *UserHandler, configHandler *ConfigHandler) {
