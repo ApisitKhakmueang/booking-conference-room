@@ -21,7 +21,7 @@ export default function History() {
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   const filteredEvents = useMemo(() => {
     if (!events) return undefined;
@@ -80,11 +80,12 @@ export default function History() {
       const data = await bookingService.fetchUserHistory(formattedDate);
       const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
       // console.error("Error fetching room data:", error);
 
       // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
-      if (error.response?.status === 404) {
+      if (err.response?.status === 404) {
         Swal.fire({
           title: 'Room Not Found',
           text: "Not found the evnts",

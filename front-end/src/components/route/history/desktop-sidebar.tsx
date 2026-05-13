@@ -14,7 +14,7 @@ export default function DesktopSidebar({
   selectedRooms,
   setSelectedRooms 
 }: DesktopSidebarHistoryProps) {
-  const { room: rawRoom, isLoading, isError } = useRoomData();
+  const { room: rawRoom } = useRoomData();
     
   const rooms = useMemo(() => {
     if (!rawRoom) return [];

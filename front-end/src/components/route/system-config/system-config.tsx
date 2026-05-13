@@ -72,7 +72,7 @@ export default function SystemConfig() {
 
         reloadConfig();
       }
-    } catch(error:any) {
+    } catch {
       Swal.fire({
         title: 'Error',
         text: 'Failed to update configuration.',

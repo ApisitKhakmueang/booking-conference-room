@@ -26,7 +26,7 @@ export default function Schedule() {
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
   const [now, setNow] = useState(new Date());
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   // 🌟 2. สั่งให้นาฬิกาเดินทุกๆ 1 นาที
   useEffect(() => {
@@ -130,11 +130,12 @@ export default function Schedule() {
       const data = await bookingService.fetchUserBookings(formattedDate);
       const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
       // console.error("Error fetching room data:", error);
 
       // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
-      if (error.response?.status === 404) {
+      if (err.response?.status === 404) {
         Swal.fire({
           title: 'Room Not Found',
           text: "Not found the events",

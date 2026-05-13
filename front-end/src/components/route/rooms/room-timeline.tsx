@@ -45,7 +45,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
   
   // 🌟 1. เพิ่ม State สำหรับเก็บ ID ของกล่องที่กำลังถูกคลิกให้ขยาย
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
   
   const { startTimeHour, totalTimeHours } = useMemo(() => {
     const startHour = parseInt(config?.startTime.split(":")[0] || "8", 10);

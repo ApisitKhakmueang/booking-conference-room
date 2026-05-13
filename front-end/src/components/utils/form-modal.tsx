@@ -16,6 +16,7 @@ import { Calendar } from '../ui/calendar';
 import { bookingService } from '@/service/booking.service';
 import { validateBookingForm } from "@/lib/validation";
 import { useSystemConfig } from "@/hooks/data/useSystemConfig";
+import { AxiosError } from "axios";
 
 export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: FormModalProps) {
   const defaultFormData = {
@@ -30,7 +31,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
   const [selectedRoom, setSelectedRoom] = useState<ArrangeRoom | undefined>(rooms[0]);
   const [formData, setFormData] = useState(defaultFormData)
   const [calendarMonth, setCurrentMonth] = useState(currentDate);
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault()
@@ -100,18 +101,20 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       if (titleRef.current) {
         titleRef.current.value = "";
       }
-    } catch(error: any) {
-      const errorMessage = 
-        error?.response?.data?.message || // กรณี Backend ส่ง error message กลับมา
-        error?.message ||                 // กรณี Network error หรือ Frontend พังเอง
-        'An unexpected error occurred';   // ข้อความสำรองกรณีหา error ไม่เจอจริงๆ
-
-      Swal.fire({
-        title: 'Error',
-        text: errorMessage,
-        icon: 'error',
-        timer: 2000
-      })
+    } catch(error) {
+      if (error instanceof AxiosError) {
+        const errorMessage = 
+          error?.response?.data?.message || // กรณี Backend ส่ง error message กลับมา
+          error?.message ||                 // กรณี Network error หรือ Frontend พังเอง
+          'An unexpected error occurred';   // ข้อความสำรองกรณีหา error ไม่เจอจริงๆ
+  
+        Swal.fire({
+          title: 'Error',
+          text: errorMessage,
+          icon: 'error',
+          timer: 2000
+        })
+      }
     } finally {
       setIsAddModalOpen(false);
     }

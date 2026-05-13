@@ -65,7 +65,7 @@ export function TimeSelect({
   className,
   placeholder = "Select time..."
 }: TimeSelectProps) {
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   const timeSlots = generateTimeSlots(intervalMinutes, config);
 

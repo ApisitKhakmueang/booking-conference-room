@@ -3,11 +3,6 @@ import { BookingEventResponse } from "@/utils/interface/response";
 import { Users } from "lucide-react";
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 
-interface EndInTextProps {
-  id: string
-  endInText: string
-}
-
 export default function BookingCard({ booking }: { booking: BookingEventResponse }) {
   const start = formatTimeWithSuffix(booking.startTime)
   const end = formatTimeWithSuffix(booking.endTime)

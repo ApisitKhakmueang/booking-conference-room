@@ -15,7 +15,7 @@ import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 export default function CheckIn({ roomID }: { roomID: string }) {
   const [roomData, setRoomData] = useState<RoomResponse | null>(null);
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   const fetchRoomData = async () => {
     try {

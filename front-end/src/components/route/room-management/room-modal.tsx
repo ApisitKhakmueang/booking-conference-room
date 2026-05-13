@@ -63,8 +63,9 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
       }
       
       setFormData(defaultFormData);
-    } catch (error:any) {
-      if (error.response?.status === 409) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 409) {
         Swal.fire({
           title: 'Error',
           text: "Room number already exists.",
@@ -96,7 +97,7 @@ export default function RoomModal({ typeOperate, isModalOpen, setIsModalOpen, se
       let val = parseInt(e.target.value);
       
       if (isNaN(val)) {
-        setFormData({ ...formData, [field]: '' as any });
+        setFormData({ ...formData, [field]: 0 });
         return;
       }
 

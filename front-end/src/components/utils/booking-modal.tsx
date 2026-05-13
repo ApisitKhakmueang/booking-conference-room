@@ -5,7 +5,7 @@ import { useRoomData } from "@/hooks/data/useRoomData";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function BookingModal({ isAddModalOpen, setIsAddModalOpen, typeOperate, currentDate, setCurrentDate, selectedEvent, onSuccess, preselectedRoomNumber }: BookingModalProps) {
-  const { room: rawRoom, isLoading, isError } = useRoomData();
+  const { room: rawRoom } = useRoomData();
   
   const rooms = useMemo(() => {
     // ดักไว้ก่อนว่าถ้าไม่มีข้อมูล ให้ return array เปล่าๆ ออกไป

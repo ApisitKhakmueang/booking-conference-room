@@ -10,31 +10,6 @@ import { Holiday, BookingEventResponse } from '@/utils/interface/response';
 import { MonthProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
 
-const TODAY = new Date(); 
-const EVENTS = [
-  { 
-    id: 1, 
-    title: 'Marketing Sync', 
-    start: setMinutes(setHours(TODAY, 9), 0), // วันนี้ 09:00
-    end: setMinutes(setHours(TODAY, 10), 30), // ถึง 10:30
-    color: 'bg-purple-900/60 border-purple-500 text-purple-100' 
-  },
-  { 
-    id: 2, 
-    title: 'Client Meeting', 
-    start: setMinutes(setHours(addDays(TODAY, 1), 13), 0), // พรุ่งนี้ 13:00
-    end: setMinutes(setHours(addDays(TODAY, 1), 14), 0),   // ถึง 14:00
-    color: 'bg-blue-900/60 border-blue-500 text-blue-100' 
-  },
-    { 
-    id: 3, 
-    title: 'Lunch', 
-    start: setMinutes(setHours(TODAY, 12), 0), // วันนี้ 12:00
-    end: setMinutes(setHours(TODAY, 13), 0),   // ถึง 13:00
-    color: 'bg-orange-900/60 border-orange-500 text-orange-100' 
-  },
-];
-
 // --- Component: Month View (แบบเดิม) ---
 export default function MonthView({ currentDate, bookings, holiday, isSyncing, setView, setCurrentDate, currentUser }: MonthProps) {
   const days = useMemo(() => {

@@ -6,7 +6,7 @@ import { DisplayRooms } from "@/lib/booking-status";
 import { useRoomData } from "@/hooks/data/useRoomData";
 
 export default function OverviewCurrentlyActive() {
-  const { room: rawRoom, isLoading, isError } = useRoomData();
+  const { room: rawRoom } = useRoomData();
 
   const { bookings, isLoadingBooking } = useBookingStatusWS();
   const rooms = useMemo(() => {

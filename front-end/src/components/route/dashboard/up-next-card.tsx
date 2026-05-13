@@ -17,7 +17,7 @@ import Swal from 'sweetalert2';
 export default function UpNextCard({ handleEditClick }: { handleEditClick: (event: BookingEvent) => void }) {
   const [event, setEvent] = useState<BookingEvent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   const fetchUpNextBooking = async () => {
     setIsLoading(true);
@@ -31,8 +31,9 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
       } else {
         setEvent(null);
       }
-    } catch (error: any) {
-      if (error.response?.status === 500) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 500) {
         Swal.fire({
           title: 'Error',
           text: "Date format is invalid or missing",
@@ -95,7 +96,7 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
         <div className="relative z-10 flex flex-col items-center justify-center py-6 text-center">
           <Info className="w-8 h-8 text-gray-300 dark:text-white/20 mb-3" />
           <h2 className="text-xl font-bold text-light-main dark:text-gray-400">No Upcoming Meetings</h2>
-          <p className="text-sm text-light-secondary dark:text-gray-500 mt-1">You don't have any bookings left for today.</p>
+          <p className="text-sm text-light-secondary dark:text-gray-500 mt-1">You don&apos;t have any bookings left for today.</p>
         </div>
       ) 
       
