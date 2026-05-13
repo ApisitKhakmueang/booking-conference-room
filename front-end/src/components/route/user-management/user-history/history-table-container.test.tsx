@@ -17,10 +17,10 @@ describe('HistoryTableContainer', () => {
   });
 
   it('1. Should show Skeletons when isLoadingBookings is true', () => {
-    (usePaginatedUserBookings as any).mockReturnValue({
+    vi.mocked(usePaginatedUserBookings).mockReturnValue({
       bookingsData: null,
       isLoadingBookings: true,
-    });
+    }as unknown as ReturnType<typeof usePaginatedUserBookings>);
 
     const { container } = render(<HistoryTableContainer userID={mockUserID} />);
     // ตรวจสอบว่ามีการแสดง Skeleton[cite: 15]
@@ -28,10 +28,10 @@ describe('HistoryTableContainer', () => {
   });
 
   it('2. Should show "No bookings found" when data is empty', () => {
-    (usePaginatedUserBookings as any).mockReturnValue({
+    vi.mocked(usePaginatedUserBookings).mockReturnValue({
       bookingsData: { data: [], meta: { totalItems: 0 } },
       isLoadingBookings: false,
-    });
+    }as unknown as ReturnType<typeof usePaginatedUserBookings>);
 
     render(<HistoryTableContainer userID={mockUserID} />);
     // ตรวจสอบหน้าว่าง[cite: 15]
@@ -43,10 +43,10 @@ describe('HistoryTableContainer', () => {
       { id: '1', startTime: '2026-05-06T10:00:00Z', endTime: '2026-05-06T11:00:00Z', status: 'confirm' }
     ];
 
-    (usePaginatedUserBookings as any).mockReturnValue({
+    vi.mocked(usePaginatedUserBookings).mockReturnValue({
       bookingsData: { data: mockBookings, meta: { totalPages: 1, totalItems: 1 } },
       isLoadingBookings: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUserBookings>);
 
     render(<HistoryTableContainer userID={mockUserID} />);
     // ต้องแสดงคำว่า CONFIRMED จากข้อมูลที่จำลองไว้[cite: 12, 15]

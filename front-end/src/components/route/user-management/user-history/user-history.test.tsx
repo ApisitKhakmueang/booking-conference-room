@@ -24,11 +24,11 @@ describe('UserHistory Main Page', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ back: mockBack });
+    vi.mocked(useRouter).mockReturnValue({ back: mockBack } as unknown as ReturnType<typeof useRouter>);
   });
 
   it('1. Should call router.back() when Back button is clicked', () => {
-    (useUserOverview as any).mockReturnValue({ overviewData: null, isLoadingOverview: true });
+    vi.mocked(useUserOverview).mockReturnValue({ overviewData: null, isLoadingOverview: true } as unknown as ReturnType<typeof useUserOverview>);
     
     render(<UserHistory userID="123" />);
     
@@ -40,7 +40,7 @@ describe('UserHistory Main Page', () => {
   });
 
   it('2. Should render Skeletons when isLoadingOverview is true', () => {
-    (useUserOverview as any).mockReturnValue({ overviewData: null, isLoadingOverview: true });
+    vi.mocked(useUserOverview).mockReturnValue({ overviewData: null, isLoadingOverview: true } as unknown as ReturnType<typeof useUserOverview>);
     
     const { container } = render(<UserHistory userID="123" />);
     // จะต้องมีคลาส animate-pulse ของ ProfileHeaderSkeleton และ SummaryCardSkeleton แสดงอยู่[cite: 16, 18, 19]
@@ -53,7 +53,7 @@ describe('UserHistory Main Page', () => {
       statistics: { upcoming: 5, completed: 10 }
     };
 
-    (useUserOverview as any).mockReturnValue({ overviewData: mockOverview, isLoadingOverview: false });
+    vi.mocked(useUserOverview).mockReturnValue({ overviewData: mockOverview, isLoadingOverview: false } as unknown as ReturnType<typeof useUserOverview>);
     
     render(<UserHistory userID="123" />);
     

@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import HistoryCard from './history-card';
+import { UserBookingHistoryRes } from '@/utils/interface/response';
 
 describe('HistoryCard Component', () => {
   const mockBooking = {
@@ -10,7 +11,7 @@ describe('HistoryCard Component', () => {
     endTime: '2026-05-06T11:30:00Z', // ห่างกัน 1h 30m
     status: 'confirm',
     Room: { name: 'Meeting Room A', location: 'Floor 1' }
-  } as any;
+  } as unknown as UserBookingHistoryRes;
 
   it('1. Should render date, time, and duration correctly', () => {
     render(<HistoryCard booking={mockBooking} />);
