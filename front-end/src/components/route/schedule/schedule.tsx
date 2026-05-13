@@ -28,9 +28,6 @@ export default function Schedule() {
   const [now, setNow] = useState(new Date());
   const { config } = useSystemConfig();
 
-  const currentMonthValue = currentDate.getMonth();
-  const currentYearValue = currentDate.getFullYear();
-
   // 🌟 2. สั่งให้นาฬิกาเดินทุกๆ 1 นาที
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
@@ -127,10 +124,10 @@ export default function Schedule() {
     setIsAddModalOpen(true);
   };
 
+  const currentMonthStr = format(currentDate, 'yyyy-MM');
   const fetchUserBookings = useCallback(async () => {
-    const formattedDate = format(currentDate, 'yyyy-MM');
     try {
-      const data = await bookingService.fetchUserBookings(formattedDate);
+      const data = await bookingService.fetchUserBookings(currentMonthStr);
       const formattedEvents = mapBookingEvents(data, config);
       setEvents(formattedEvents);
     } catch (error) {
@@ -156,9 +153,10 @@ export default function Schedule() {
         confirmButtonColor: '#8370ff',
       });
     }
-  }, [currentMonthValue, currentYearValue]);
+  }, [currentMonthStr, config]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUserBookings();
   }, [fetchUserBookings]);
 
