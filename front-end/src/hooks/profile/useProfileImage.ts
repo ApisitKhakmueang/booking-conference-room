@@ -47,13 +47,6 @@ export function useProfileImage(initialAvatar?: string): UseProfileImageReturn {
     setProfileFile(null)
   }
 
-  // Update preview when initialAvatar changes
-  useEffect(() => {
-    if (initialAvatar) {
-      setPreviewProfile(initialAvatar)
-    }
-  }, [initialAvatar])
-
   // Cleanup blob URL on unmount
   useEffect(() => {
     return () => {
