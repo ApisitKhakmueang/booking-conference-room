@@ -1,4 +1,4 @@
-import { BookingEventResponse, ConfigResponse, Holiday, RoomResponse, UserResponse } from "./response";
+import { BookingEventResponse, ConfigResponse, ParsedBookingEvent, ParsedHoliday, RoomResponse, UserResponse } from "./response";
 
 export interface EachPageLayoutProps {
   pageName?: string;
@@ -169,8 +169,8 @@ export interface DesktopSidebarHistoryProps {
 type ViewType = 'month' | 'week' | 'day';
 export interface MonthProps { 
   currentDate: Date, 
-  bookings: BookingEventResponse[] | null, 
-  holiday: Holiday[] | null 
+  bookings: ParsedBookingEvent[] | null, 
+  holiday: ParsedHoliday[] | null 
   isSyncing: boolean
   setView: (view:ViewType) => void
   setCurrentDate: (date:Date) => void
@@ -180,9 +180,9 @@ export interface MonthProps {
 export interface TimeGridViewProps { 
   setCurrentDate: (date: Date) => void
   currentDate: Date, 
-  bookings: BookingEventResponse[] | null, 
+  bookings: ParsedBookingEvent[] | null, 
   view: 'week' | 'day', 
-  holiday: Holiday[] | null,
+  holiday: ParsedHoliday[] | null,
   isSyncing: boolean
   currentUser: UserProfile | null
 }

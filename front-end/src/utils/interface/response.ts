@@ -7,6 +7,11 @@ export interface Holiday {
   source: string;
 }
 
+export interface ParsedHoliday extends Omit<Holiday, 'date' | 'updatedAt'> {
+  date: Date;
+  updatedAt: Date | null;
+};
+
 export interface RoomResponse {
   id: string
   name: string
