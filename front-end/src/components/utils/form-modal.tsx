@@ -79,7 +79,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
         result = await bookingService.updateBooking(selectedEvent?.id, selectedRoom?.roomNumber, body); 
       }
       
-      if (result.status === 200) {
+      if (result.status === 201 || result.status === 200) {
         Swal.fire({
           title: 'Success',
           text: 'Create booking successfully !',
