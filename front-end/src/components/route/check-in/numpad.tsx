@@ -40,9 +40,10 @@ export default function Numpad({ roomID, booking }: NumpadProps) {
           timer: 2000
         })
       }
-    } catch (error:any) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
       // console.error("Error fetching room data:", error);
-      if (error.response?.status === 400) {
+      if (err.response?.status === 400) {
         Swal.fire({
           title: 'Error',
           text: "Enter wrong passcode or this passcode is already used",

@@ -21,9 +21,10 @@ export default function CheckIn({ roomID }: { roomID: string }) {
     try {
       const response = await roomService.fetchRoomByID(roomID);
       setRoomData(response);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
       // console.error("Error fetching room data:", error);
-      if (error.response?.status === 404) {
+      if (err.response?.status === 404) {
         Swal.fire({
           title: 'Room Not Found',
           text: "Not found this room",
