@@ -7,7 +7,6 @@ import useBookingStatusByRoomIDWS from '@/hooks/data/useBookingStatusByRoomIDWS'
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { mapBookingEvents } from '@/lib/map-resp-event';
 import { BookingEventResponse } from '@/utils/interface/response';
-import { BookingEvent } from '@/utils/interface/interface';
 
 // Mock Dependencies
 vi.mock('@/service/booking.service', () => ({ roomService: { fetchRoomByID: vi.fn() } }));

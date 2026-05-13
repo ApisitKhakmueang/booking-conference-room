@@ -2,10 +2,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import RoomsGrid from './room-grid';
+import React from 'react';
+import { RoomResponse, BookingEventResponse } from '@/utils/interface/response';
 
 // Mock Modals
 vi.mock('@/components/utils/booking-modal', () => ({
-  default: ({ isAddModalOpen }: any) => isAddModalOpen ? <div data-testid="mock-booking-modal" /> : null
+  // 🌟 1. แก้ any เป็นระบุ Type ให้ชัดเจน
+  default: ({ isAddModalOpen }: { isAddModalOpen: boolean }) => isAddModalOpen ? <div data-testid="mock-booking-modal" /> : null
 }));
 vi.mock('./occupy-modal', () => ({
   default: () => <div data-testid="mock-occupy-modal" />
@@ -16,11 +19,11 @@ describe('RoomsGrid Component', () => {
     { id: '1', name: 'Room A', roomNumber: 101, capacity: 10, status: 'available' },
     { id: '2', name: 'Room B', roomNumber: 102, capacity: 20, status: 'occupied' },
     { id: '3', name: 'Room C', roomNumber: 103, capacity: 5, status: 'maintenance' }
-  ] as any;
+  ] as unknown as RoomResponse[]; // 🌟 2. แก้ any เป็น Type จริง
 
   const mockBookings = [
     { id: 'b1', status: 'confirm', Room: { id: '2' } }
-  ] as any;
+  ] as unknown as BookingEventResponse[]; // 🌟 3. แก้ any เป็น Type จริง
 
   beforeEach(() => {
     vi.spyOn(window, 'alert').mockImplementation(() => {});
@@ -41,7 +44,6 @@ describe('RoomsGrid Component', () => {
     const availableRoom = screen.getByText('Room A');
     fireEvent.click(availableRoom);
     
-    // โชว์ฟอร์มจองห้อง[cite: 22]
     expect(screen.getByTestId('mock-booking-modal')).toBeInTheDocument();
   });
 
@@ -51,7 +53,6 @@ describe('RoomsGrid Component', () => {
     const occupiedRoom = screen.getByText('Room B');
     fireEvent.click(occupiedRoom);
     
-    // โชว์ฟอร์มแสดงรายละเอียดคนใช้ห้อง[cite: 22]
     expect(screen.getByTestId('mock-occupy-modal')).toBeInTheDocument();
   });
 
@@ -61,7 +62,6 @@ describe('RoomsGrid Component', () => {
     const maintenanceRoom = screen.getByText('Room C');
     fireEvent.click(maintenanceRoom);
     
-    // แจ้งเตือน Alert[cite: 22]
     expect(window.alert).toHaveBeenCalledWith('This room is currently under maintenance.');
   });
 });
