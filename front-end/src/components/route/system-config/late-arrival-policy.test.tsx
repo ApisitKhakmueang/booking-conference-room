@@ -2,9 +2,10 @@
 import { render, screen, fireEvent, createEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import LateArrivalPolicy from './late-arrival-policy';
+import { ConfigResponse } from '@/utils/interface/response';
 
 describe('LateArrivalPolicy Component', () => {
-  const mockConfig = { noShowThresholdMins: 15 } as any;
+  const mockConfig = { noShowThresholdMins: 15 } as unknown as ConfigResponse;
   const mockSetConfig = vi.fn();
 
   it('1. Should block specific keys (e, -, .)', () => {

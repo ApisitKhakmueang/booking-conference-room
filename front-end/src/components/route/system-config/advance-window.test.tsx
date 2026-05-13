@@ -2,9 +2,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import AdvancedWindow from './advance-window';
+import { ConfigResponse } from '@/utils/interface/response';
 
 describe('AdvancedWindow Component', () => {
-  const mockConfig = { maxAdvanceDays: 30 } as any;
+  const mockConfig = { maxAdvanceDays: 30 } as unknown as ConfigResponse;
   const mockSetConfig = vi.fn();
 
   it('1. Should render correctly with title and description', () => {

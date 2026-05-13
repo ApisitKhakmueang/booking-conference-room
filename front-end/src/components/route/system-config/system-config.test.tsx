@@ -33,11 +33,11 @@ describe('SystemConfig Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useSystemConfig as any).mockReturnValue({
+    vi.mocked(useSystemConfig).mockReturnValue({
       config: fetchedConfigMock,
       isLoadingConfig: false,
       reloadConfig: mockReloadConfig,
-    });
+    } as unknown as ReturnType<typeof useSystemConfig>);
   });
 
   it('1. Should load and convert maxBookingMins correctly (120 mins -> 2 hours)', () => {
@@ -92,7 +92,7 @@ describe('SystemConfig Component', () => {
   });
 
   it('5. Should multiply maxBookingMins by 60 and call API on Save', async () => {
-    (configService.updateConfig as any).mockResolvedValue({ status: 200 });
+    vi.mocked(configService.updateConfig).mockResolvedValue({ status: 200 } as unknown as Awaited<ReturnType<typeof configService.updateConfig>>);
     
     render(<SystemConfig />);
     await userEvent.click(screen.getByRole('button', { name: /Edit Configuration/i }));

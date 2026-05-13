@@ -2,7 +2,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MaxBookingMins from './max-booking-mins';
-import React from 'react';
+import { ConfigResponse } from '@/utils/interface/response';
 
 describe('MaxBookingMins Component', () => {
   const mockSetConfig = vi.fn();
@@ -13,7 +13,7 @@ describe('MaxBookingMins Component', () => {
   });
 
   it('1. Should cap max value to 5 during onChange', () => {
-    render(<MaxBookingMins config={{ maxBookingMins: 2 } as any} setConfig={mockSetConfig} isOpenEdit={true} />);
+    render(<MaxBookingMins config={{ maxBookingMins: 2 } as unknown as ConfigResponse} setConfig={mockSetConfig} isOpenEdit={true} />);
     const input = screen.getByRole('spinbutton');
     
     fireEvent.change(input, { target: { value: '6' } });
@@ -22,7 +22,7 @@ describe('MaxBookingMins Component', () => {
 
   it('2. Should force value to 1 and round to nearest 0.5 on blur', () => {
     // 🌟 กรณีที่ 1: จำลองว่า State ปัจจุบันคือ 0.5 (ค่าน้อยกว่า 1)
-    const { unmount } = render(<MaxBookingMins config={{ maxBookingMins: 0.5 } as any} setConfig={mockSetConfig} isOpenEdit={true} />);
+    const { unmount } = render(<MaxBookingMins config={{ maxBookingMins: 0.5 } as unknown as ConfigResponse} setConfig={mockSetConfig} isOpenEdit={true} />);
     const input1 = screen.getByRole('spinbutton');
     
     // สั่ง blur ทันที (ไม่ต้องส่ง target value เพราะมันจะอ่านจาก config)
@@ -33,7 +33,7 @@ describe('MaxBookingMins Component', () => {
     unmount();
 
     // 🌟 กรณีที่ 2: จำลองว่า State ปัจจุบันคือ 2.2 (เพื่อเทสการปัดเศษ)
-    render(<MaxBookingMins config={{ maxBookingMins: 2.2 } as any} setConfig={mockSetConfig} isOpenEdit={true} />);
+    render(<MaxBookingMins config={{ maxBookingMins: 2.2 } as unknown as ConfigResponse} setConfig={mockSetConfig} isOpenEdit={true} />);
     const input2 = screen.getByRole('spinbutton');
     
     fireEvent.blur(input2);
@@ -41,7 +41,7 @@ describe('MaxBookingMins Component', () => {
   });
 
   it('3. Slider should update config', () => {
-    render(<MaxBookingMins config={{ maxBookingMins: 2 } as any} setConfig={mockSetConfig} isOpenEdit={true} />);
+    render(<MaxBookingMins config={{ maxBookingMins: 2 } as unknown as ConfigResponse} setConfig={mockSetConfig} isOpenEdit={true} />);
     const slider = screen.getByRole('slider');
     
     fireEvent.change(slider, { target: { value: '4' } });

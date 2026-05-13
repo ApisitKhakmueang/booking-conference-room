@@ -2,9 +2,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import DailyOperationalHours from './daily-operational-hours';
+import { ConfigResponse } from '@/utils/interface/response';
 
 describe('DailyOperationalHours Component', () => {
-  const mockConfig = { startTime: '08:00', endTime: '20:00' } as any;
+  const mockConfig = { startTime: '08:00', endTime: '20:00' } as unknown as ConfigResponse;
   const mockSetConfig = vi.fn();
 
   it('1. Should render correctly and display initial times', () => {
