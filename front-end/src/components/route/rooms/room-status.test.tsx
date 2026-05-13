@@ -3,19 +3,22 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import RoomStatus from './room-status';
 import { BookingStatus } from '@/lib/booking-status';
+import { RoomResponse } from '@/utils/interface/response';
 
 vi.mock('@/lib/booking-status', () => ({
   BookingStatus: vi.fn(),
 }));
 
 describe('RoomStatus Component', () => {
-  const mockDisplayRooms = [] as any;
+  // 🌟 แก้ any เป็น Type จริง
+  const mockDisplayRooms = [] as unknown as RoomResponse[];
 
   it('1. Should show updating spinner when isLoadingBooking is true', () => {
-    (BookingStatus as any).mockReturnValue([]);
+    // 🌟 ใช้ vi.mocked แทน as any
+    vi.mocked(BookingStatus).mockReturnValue([] as unknown as ReturnType<typeof BookingStatus>);
     
     render(<RoomStatus displayRooms={mockDisplayRooms} isLoadingBooking={true} />);
-    // ต้องโชว์ข้อความ Updating[cite: 23]
+    // ต้องโชว์ข้อความ Updating
     expect(screen.getByText('Updating...')).toBeInTheDocument();
   });
 
@@ -24,7 +27,9 @@ describe('RoomStatus Component', () => {
       { name: 'Total', amount: 10, variant: 'purple' },
       { name: 'Available', amount: 8, variant: 'purple' }
     ];
-    (BookingStatus as any).mockReturnValue(mockStats);
+    
+    // 🌟 ใช้ vi.mocked แทน as any
+    vi.mocked(BookingStatus).mockReturnValue(mockStats as unknown as ReturnType<typeof BookingStatus>);
     
     render(<RoomStatus displayRooms={mockDisplayRooms} isLoadingBooking={false} />);
     

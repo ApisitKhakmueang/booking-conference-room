@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import RoomTimeline from './room-timeline';
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import useSWR from 'swr';
+import { RoomResponse, BookingEventResponse } from '@/utils/interface/response';
 
 // Mock Dependencies
 vi.mock('@/hooks/data/useSystemConfig', () => ({ useSystemConfig: vi.fn() }));
@@ -14,24 +15,24 @@ vi.mock('@/stores/auth.store', () => ({ useAuthStore: () => ({ user: { id: 'user
 describe('RoomTimeline Component', () => {
   const mockRooms = [
     { id: '1', name: 'Boardroom', capacity: 10 }
-  ] as any;
+  ] as unknown as RoomResponse[]; // 🌟 แก้ any เป็น Type จริง
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock Config เปิดทำการ 08:00 ถึง 20:00[cite: 24]
-    (useSystemConfig as any).mockReturnValue({
+    // 🌟 ใช้ vi.mocked และ ReturnType เพื่อหลอก Type แบบเนียนๆ
+    vi.mocked(useSystemConfig).mockReturnValue({
       config: { startTime: '08:00', endTime: '20:00' }
-    });
+    } as unknown as ReturnType<typeof useSystemConfig>);
   });
 
   it('1. Should render room names and time slots correctly', () => {
-    (useSWR as any).mockReturnValue({ data: [], isLoading: false });
+    // 🌟 ใช้ vi.mocked แทน as any
+    vi.mocked(useSWR).mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useSWR>);
 
     render(<RoomTimeline rooms={mockRooms} />);
 
     expect(screen.getByText('Boardroom')).toBeInTheDocument();
-    // ต้องมีหัวตารางเวลา (เช่น 08:00 AM)
     expect(screen.getByText(/08:00 AM/i)).toBeInTheDocument();
   });
 
@@ -48,11 +49,14 @@ describe('RoomTimeline Component', () => {
       }
     ];
 
-    (useSWR as any).mockReturnValue({ data: mockBookings, isLoading: false });
+    // 🌟 ใช้ vi.mocked และครอบ BookingEventResponse เข้าไป
+    vi.mocked(useSWR).mockReturnValue({ 
+      data: mockBookings as unknown as BookingEventResponse[], 
+      isLoading: false 
+    } as unknown as ReturnType<typeof useSWR>);
 
     render(<RoomTimeline rooms={mockRooms} />);
 
-    // ตรวจสอบว่ามีบล็อก Event ปรากฏขึ้น[cite: 24]
     expect(screen.getByText('Morning Sync')).toBeInTheDocument();
   });
 
@@ -68,19 +72,20 @@ describe('RoomTimeline Component', () => {
       }
     ];
 
-    (useSWR as any).mockReturnValue({ data: mockBookings, isLoading: false });
+    // 🌟 ใช้ vi.mocked แทน as any
+    vi.mocked(useSWR).mockReturnValue({ 
+      data: mockBookings as unknown as BookingEventResponse[], 
+      isLoading: false 
+    } as unknown as ReturnType<typeof useSWR>);
 
     render(<RoomTimeline rooms={mockRooms} />);
 
     const bookingBlock = screen.getByText('Morning Sync').closest('div');
 
-    // ตอนแรกยังไม่โดนขยาย (ไม่มีคลาส z-50)[cite: 24]
     expect(bookingBlock).not.toHaveClass('z-50');
 
-    // คลิกเพื่อขยาย
     fireEvent.click(bookingBlock!);
 
-    // หลังคลิก ต้องมีคลาส z-50 โผล่มา[cite: 24]
     expect(bookingBlock).toHaveClass('z-50');
   });
 });
