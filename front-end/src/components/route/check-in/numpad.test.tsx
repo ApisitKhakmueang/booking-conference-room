@@ -5,13 +5,14 @@ import Numpad from './numpad';
 import React from 'react';
 import { roomService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
+import { BookingEventResponse } from '@/utils/interface/response';
 
 vi.mock('@/service/booking.service', () => ({ roomService: { checkinBooking: vi.fn() } }));
 vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
 
 describe('Numpad Component', () => {
   const mockRoomID = 'room-123';
-  const mockBooking = { id: 'book-1' } as any;
+  const mockBooking = { id: 'book-1' } as unknown as BookingEventResponse;
 
   beforeEach(() => {
     vi.clearAllMocks();

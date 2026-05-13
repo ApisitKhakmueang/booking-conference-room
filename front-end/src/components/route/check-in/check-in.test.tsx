@@ -21,7 +21,7 @@ describe('CheckIn Page', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useSystemConfig).mockReturnValue({ config: {} } as any);
+    vi.mocked(useSystemConfig).mockReturnValue({ config: {} } as unknown as ReturnType<typeof useSystemConfig>);
     vi.mocked(roomService.fetchRoomByID).mockResolvedValue(mockRoom);
     vi.mocked(mapBookingEvents).mockReturnValue([]);
   });

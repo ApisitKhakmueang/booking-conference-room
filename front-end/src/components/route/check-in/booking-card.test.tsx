@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import BookingCard from './booking-card';
+import { BookingEvent } from '@/utils/interface/interface';
 
 describe('BookingCard Component', () => {
   const mockBooking = {
@@ -11,7 +12,7 @@ describe('BookingCard Component', () => {
     endTime: '2026-05-06T11:00:00+07:00',
     duration: '1 hr',
     user: { fullName: 'Apisit Dev' }
-  } as any;
+  } as unknown as BookingEvent;
 
   it('1. Should render booking details correctly', () => {
     render(<BookingCard booking={mockBooking} />);
