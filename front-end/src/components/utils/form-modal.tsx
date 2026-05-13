@@ -134,7 +134,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
       // อัปเดตค่า duration กลับเข้าไปใน formData
       setFormData((prev) => ({ ...prev, duration: newDuration }));
     }
-  }, [formData.startTime, formData.endTime]); // <--- โค้ดจะทำงานก็ต่อเมื่อ 2 ตัวนี้เปลี่ยน
+  }, [formData.startTime, formData.endTime, config?.maxBookingMins]); // <--- โค้ดจะทำงานก็ต่อเมื่อ 2 ตัวนี้เปลี่ยน
 
   useEffect(() => {
     // 🌟 1. ฟังก์ชันครอบจักรวาล: สกัดเอาเฉพาะ "HH:mm" ไม่ว่าข้อมูลจะมาหน้าตาแบบไหน
@@ -153,7 +153,7 @@ export default function FormModal({ setIsAddModalOpen, typeOperate, rooms, curre
           return `${h}:${m}`;
         }
         return timeStr;
-      } catch (e) {
+      } catch {
         return "";
       }
     };
