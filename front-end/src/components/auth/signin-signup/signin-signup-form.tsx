@@ -4,7 +4,6 @@ import Image from 'next/image'
 import SignIn_SignUp from './signin-signup'
 import ThemeButton from '@/components/utils/theme-button'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 export default function SignIn_SignupForm() {
   const pathname = usePathname()
@@ -14,7 +13,7 @@ export default function SignIn_SignupForm() {
   const subTitle = isSignIn ? 'Sign in to your account' : 'Create your account'
 
   return (
-    <main className={`flex min-h-screen bg-light-sidebar dark:bg-main-background dark:text-secondary overflow-auto`}>
+    <main className='flex min-h-screen bg-light-sidebar dark:bg-main-background dark:text-secondary overflow-auto'>
       <div className='relative flex flex-col xl:w-3/5 w-full h-screen'>
         <div className='flex justify-between items-center xs:p-5 p-3'>
           <Image 
@@ -40,11 +39,14 @@ export default function SignIn_SignupForm() {
         </div>
       </div>
 
-      <div className='lg:flex hidden w-full'>
-        <img 
-          className='object-cover flex flex-1'
-          src="/background/background.gif" 
-          alt="background" />
+      <div className='relative lg:flex hidden w-full'>
+        <Image
+          src="/background/background.gif"
+          alt="background"
+          fill
+          className="object-cover "
+          priority
+        />
       </div>
     </main>
   )

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation"
 import { SignInProps } from "@/utils/interface/interface";
 import { signInWithGoogle } from "@/lib/auth";
+import Image from "next/image";
 
 export default function Google({ isSignIn }: SignInProps) {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function Google({ isSignIn }: SignInProps) {
       </div>
 
       <Button type='button' variant="slate" onClick={handleSignInWithGoogle} className='flex items-center justify-center gap-2 p-3 bg-light-google hover:bg-light-card text-white dark:bg-card dark:border-none dark:text-main dark:hover:bg-hover'>
-        <img src='/logo/google-logo.svg' alt="google-logo" className='w-5 select-none'/>
+        <Image src="/logo/google-logo.svg" alt="google-logo" width={20} height={20} className="select-none" />
         Sign in with Google
       </Button>
 
