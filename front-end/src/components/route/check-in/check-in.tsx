@@ -48,6 +48,7 @@ export default function CheckIn({ roomID }: { roomID: string }) {
   }, [booking, config])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRoomData()
   }, [fetchRoomData])
 

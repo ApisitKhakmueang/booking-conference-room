@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { roomService } from "@/service/booking.service";
 import Swal from "sweetalert2";
-import { BookingEventResponse } from "@/utils/interface/response";
+import { ParsedBookingEvent } from "@/utils/interface/response";
 
 interface NumpadProps {
   roomID: string | undefined;
-  booking?: BookingEventResponse
+  booking?: ParsedBookingEvent
 }
 
 export default function Numpad({ roomID, booking }: NumpadProps) {
