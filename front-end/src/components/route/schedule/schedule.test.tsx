@@ -20,7 +20,7 @@ vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
 describe('Schedule Main Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useSystemConfig as any).mockReturnValue({ config: {}, isLoadingConfig: false });
+    vi.mocked(useSystemConfig).mockReturnValue({ config: {}, isLoadingConfig: false } as unknown as ReturnType<typeof useSystemConfig>);
     
     // 🌟 แก้ไขบรรทัดนี้: บังคับให้ Mock แค่ Date เท่านั้น เพื่อให้ waitFor ยังทำงานได้ปกติ
     vi.useFakeTimers({ toFake: ['Date'] }); 
@@ -33,7 +33,7 @@ describe('Schedule Main Page', () => {
 
   it('1. Should display Skeletons while loading data (events undefined)', () => {
     // ให้ API คืนค่าแบบค้างๆ (ยังไม่ resolve) เพื่อจำลองสถานะ Loading
-    (bookingService.fetchUserBookings as any).mockReturnValue(new Promise(() => {}));
+    vi.mocked(bookingService.fetchUserBookings).mockReturnValue(new Promise(() => {}));
     
     render(<Schedule />);
     
@@ -42,8 +42,8 @@ describe('Schedule Main Page', () => {
   });
 
   it('2. Should display "No Content" if API returns empty array', async () => {
-    (bookingService.fetchUserBookings as any).mockResolvedValue([]);
-    
+    vi.mocked(bookingService.fetchUserBookings).mockResolvedValue([]);
+
     render(<Schedule />);
     
     await waitFor(() => {
@@ -60,7 +60,7 @@ describe('Schedule Main Page', () => {
       { id: '3', startTime: '2026-05-06T14:00:00', endTime: '2026-05-06T15:00:00', title: 'Normal Event' }       // เริ่มบ่ายๆ
     ];
 
-    (bookingService.fetchUserBookings as any).mockResolvedValue(mockEvents);
+    vi.mocked(bookingService.fetchUserBookings).mockResolvedValue(mockEvents as unknown as Awaited<ReturnType<typeof bookingService.fetchUserBookings>>);
     
     render(<Schedule />);
 
@@ -73,7 +73,7 @@ describe('Schedule Main Page', () => {
   });
 
   it('4. Should change date when Prev/Next/Today buttons are clicked', async () => {
-    (bookingService.fetchUserBookings as any).mockResolvedValue([]);
+    vi.mocked(bookingService.fetchUserBookings).mockResolvedValue([]);
     render(<Schedule />);
     
     // เดิมหน้าจอต้องโชว์วันที่ 6 ตาม FakeTimer

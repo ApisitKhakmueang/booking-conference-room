@@ -2,6 +2,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { EventGroup } from './event-group';
+import { BookingEvent } from '@/utils/interface/interface';
 
 vi.mock('./event-card', () => ({
   default: () => <div data-testid="mock-event-card" />
@@ -10,7 +11,7 @@ vi.mock('./event-card', () => ({
 describe('EventGroup', () => {
   const defaultProps = {
     title: 'Upcoming',
-    groupEvents: [{ id: '1' }, { id: '2' }] as any,
+    groupEvents: [{ id: '1' }, { id: '2' }] as unknown as BookingEvent[],
     titleColor: 'text-amber-500',
     handleEditClick: vi.fn(),
     setIsAddModalOpen: vi.fn(),
