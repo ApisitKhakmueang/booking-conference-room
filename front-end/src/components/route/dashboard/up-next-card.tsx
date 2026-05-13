@@ -11,7 +11,7 @@ import {
   MapPin, Clock, Info
 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
 export default function UpNextCard({ handleEditClick }: { handleEditClick: (event: BookingEvent) => void }) {
@@ -19,7 +19,7 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
   const [isLoading, setIsLoading] = useState(true);
   const { config } = useSystemConfig();
 
-  const fetchUpNextBooking = async () => {
+  const fetchUpNextBooking = useCallback(async () => {
     setIsLoading(true);
     const now = format(new Date(), 'yyyy-MM-dd');
     try {
@@ -53,11 +53,11 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [config]); // 👈 ใส่ config เพื่อให้มันดึงค่าล่าสุดเสมอ
 
   useEffect(() => {
     fetchUpNextBooking();
-  }, []);
+  }, [fetchUpNextBooking]);
 
   return (
     // 🌟 1. พื้นหลังการ์ด: Light ใช้สีขาว (light-main-background) / Dark ใช้ Gradient เดิม
