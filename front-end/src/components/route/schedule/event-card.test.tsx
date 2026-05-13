@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CardEvents from './event-card';
 import Swal from 'sweetalert2';
 import { bookingService } from '@/service/booking.service';
+import { BookingEvent } from '@/utils/interface/interface';
+import { AxiosResponse } from 'axios';
 
 vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
 vi.mock('@/service/booking.service', () => ({ bookingService: { deleteBooking: vi.fn() } }));
@@ -34,7 +36,7 @@ describe('CardEvents', () => {
       duration: '1 hr',
       passcode: '1234',
       room: { name: 'Room Alpha' }
-    } as any;
+    } as unknown as BookingEvent; // 🌟 ลบ as any ออก
   };
 
   beforeEach(() => {
@@ -55,7 +57,6 @@ describe('CardEvents', () => {
     const event = getMockEvent();
     render(<CardEvents event={event} setIsAddModalOpen={mockSetIsAddModalOpen} setCurrentDate={mockSetCurrentDate} onDeleteSuccess={mockOnDeleteSuccess} />);
     
-    // หา div นอกสุด (หรือ text ข้างในแล้วคลิก)
     fireEvent.click(screen.getByText('Sprint Planning'));
     expect(mockSetIsAddModalOpen).toHaveBeenCalledWith(true);
   });
@@ -64,11 +65,9 @@ describe('CardEvents', () => {
     const pastEvent = getMockEvent(-2); // สร้างเวลาอดีต (-2 ชั่วโมง)
     render(<CardEvents event={pastEvent} setIsAddModalOpen={mockSetIsAddModalOpen} setCurrentDate={mockSetCurrentDate} onDeleteSuccess={mockOnDeleteSuccess} />);
     
-    // หาปุ่ม Delete (ปุ่มที่มี icon X)
     const deleteBtn = screen.getByRole('button');
     fireEvent.click(deleteBtn);
 
-    // เช็คว่า Swal แจ้งเตือน Error
     expect(Swal.fire).toHaveBeenCalledWith(expect.objectContaining({
       title: 'Error',
       icon: 'error'
@@ -78,8 +77,10 @@ describe('CardEvents', () => {
 
   it('4. Should call API when deletion is confirmed', async () => {
     const futureEvent = getMockEvent(2);
-    (Swal.fire as any).mockResolvedValue({ isConfirmed: true });
-    (bookingService.deleteBooking as any).mockResolvedValue({ status: 200 });
+    
+    // 🌟 ใช้ vi.mocked แทนการใช้ as any
+    vi.mocked(Swal.fire).mockResolvedValue({ isConfirmed: true } as unknown as Awaited<ReturnType<typeof Swal.fire>>);
+    vi.mocked(bookingService.deleteBooking).mockResolvedValue({ status: 200 } as unknown as AxiosResponse);
 
     render(<CardEvents event={futureEvent} setIsAddModalOpen={mockSetIsAddModalOpen} setCurrentDate={mockSetCurrentDate} onDeleteSuccess={mockOnDeleteSuccess} />);
     

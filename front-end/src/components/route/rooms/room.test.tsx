@@ -24,37 +24,36 @@ vi.mock('./room-timeline', () => ({
 describe('Room Main Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ push: vi.fn() });
+    // 🌟 ใช้ vi.mocked แทน
+    vi.mocked(useRouter).mockReturnValue({ push: vi.fn() } as unknown as ReturnType<typeof useRouter>);
   });
 
   it('1. Should show skeleton if rooms are not loaded yet', () => {
-    (useRoomData as any).mockReturnValue({ room: null }); // ยังไม่มีข้อมูล
+    // 🌟 ใช้ vi.mocked
+    vi.mocked(useRoomData).mockReturnValue({ room: null } as unknown as ReturnType<typeof useRoomData>); 
     
     render(<Room />);
-    // ต้องแสดง Skeleton แทน Grid[cite: 21]
     expect(screen.getByTestId('grid-skeleton')).toBeInTheDocument();
   });
 
   it('2. Should render Grid view by default when data is loaded', () => {
-    (useRoomData as any).mockReturnValue({ room: [{ id: '1', name: 'Room 1' }] });
+    // 🌟 ใช้ vi.mocked
+    vi.mocked(useRoomData).mockReturnValue({ room: [{ id: '1', name: 'Room 1' }] } as unknown as ReturnType<typeof useRoomData>);
     
     render(<Room />);
-    // ต้องแสดง Grid[cite: 21]
     expect(screen.getByTestId('grid-view')).toBeInTheDocument();
   });
 
   it('3. Should toggle to Timeline view when button is clicked', () => {
-    (useRoomData as any).mockReturnValue({ room: [{ id: '1', name: 'Room 1' }] });
+    // 🌟 ใช้ vi.mocked
+    vi.mocked(useRoomData).mockReturnValue({ room: [{ id: '1', name: 'Room 1' }] } as unknown as ReturnType<typeof useRoomData>);
     
     render(<Room />);
     
-    // กดปุ่มที่มีข้อความว่า Timeline View[cite: 21]
     const toggleBtn = screen.getByRole('button', { name: /Timeline View/i });
     fireEvent.click(toggleBtn);
     
-    // สลับหน้าจอเป็น Timeline[cite: 21]
     expect(screen.getByTestId('timeline-view')).toBeInTheDocument();
-    // ปุ่มต้องเปลี่ยนข้อความเป็น Grid View เพื่อให้กดกลับได้[cite: 21]
     expect(screen.getByRole('button', { name: /Grid View/i })).toBeInTheDocument();
   });
 });

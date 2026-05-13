@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { calculateDuration, formatTimeWithSuffix } from "./time";
-import { add, format, parseISO } from "date-fns";
 
 describe('time.ts', () => {
 
