@@ -6,6 +6,7 @@ import React from 'react';
 import { roomService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 import { BookingEventResponse } from '@/utils/interface/response';
+import { AxiosResponse } from 'axios';
 
 vi.mock('@/service/booking.service', () => ({ roomService: { checkinBooking: vi.fn() } }));
 vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
@@ -52,7 +53,7 @@ describe('Numpad Component', () => {
   });
 
   it('4. Should call API when 4 digits are entered correctly', async () => {
-    (roomService.checkinBooking as any).mockResolvedValue({ status: 200 });
+    vi.mocked(roomService.checkinBooking).mockResolvedValue({ status: 200 } as unknown as AxiosResponse);
 
     render(<Numpad roomID={mockRoomID} booking={mockBooking} />);
     

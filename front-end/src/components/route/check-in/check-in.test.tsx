@@ -6,6 +6,8 @@ import { roomService } from '@/service/booking.service';
 import useBookingStatusByRoomIDWS from '@/hooks/data/useBookingStatusByRoomIDWS';
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { mapBookingEvents } from '@/lib/map-resp-event';
+import { BookingEventResponse } from '@/utils/interface/response';
+import { BookingEvent } from '@/utils/interface/interface';
 
 // Mock Dependencies
 vi.mock('@/service/booking.service', () => ({ roomService: { fetchRoomByID: vi.fn() } }));
@@ -22,8 +24,10 @@ describe('CheckIn Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useSystemConfig).mockReturnValue({ config: {} } as unknown as ReturnType<typeof useSystemConfig>);
-    vi.mocked(roomService.fetchRoomByID).mockResolvedValue(mockRoom);
-    vi.mocked(mapBookingEvents).mockReturnValue([]);
+    vi.mocked(roomService.fetchRoomByID).mockResolvedValue(mockRoom as unknown as Awaited<ReturnType<typeof roomService.fetchRoomByID>>);
+    
+    // 🌟 เซ็ตเป็น undefined แทน [] เพื่อกันปัญหา Type ตีกันว่าเป็น Array
+    vi.mocked(mapBookingEvents).mockReturnValue(undefined as unknown as ReturnType<typeof mapBookingEvents>);
   });
 
   // 🌟 2. ใส่ async ให้ข้อ 1
@@ -52,7 +56,7 @@ describe('CheckIn Page', () => {
 
   it('3. Should display "Occupied" state and BookingCard when busy', async () => {
     const mockRawBooking = [{ id: 'b1' }]; // ข้อมูลดิบสมมติ
-    vi.mocked(useBookingStatusByRoomIDWS).mockReturnValue({ booking: mockRawBooking as any, isLoadingBooking: false });
+    vi.mocked(useBookingStatusByRoomIDWS).mockReturnValue({ booking: mockRawBooking as unknown as BookingEventResponse, isLoadingBooking: false });
 
     // ✅ แก้ไขตรงนี้
     vi.mocked(mapBookingEvents).mockReturnValue({
@@ -64,7 +68,7 @@ describe('CheckIn Page', () => {
       endTime: '2026-05-06T11:00:00Z',
       duration: '1 hr',
       user: { fullName: 'Boss' }
-    } as any);
+    } as unknown as ReturnType<typeof mapBookingEvents>);
 
     render(<CheckIn roomID="r1" />);
     
