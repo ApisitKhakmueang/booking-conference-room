@@ -3,24 +3,20 @@ import { useState, useEffect } from 'react';
 // --- 1. Base Hook (ตัวเดิมของคุณ) ---
 // ผมปรับปรุง dependency array นิดหน่อยเพื่อ performance ที่ดีขึ้น
 export function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia(query).matches
+  })
 
   useEffect(() => {
-    const media = window.matchMedia(query);
+    const media = window.matchMedia(query)
+    
+    const listener = (e: MediaQueryListEvent) => setMatches(e.matches)
+    media.addEventListener('change', listener)
+    return () => media.removeEventListener('change', listener)
+  }, [query])
 
-    // Set ค่าครั้งแรกทันทีที่ Mount
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-
-    const listener = () => setMatches(media.matches);
-
-    // ใช้ addEventListener แบบ modern
-    media.addEventListener('change', listener);
-    return () => media.removeEventListener('change', listener);
-  }, [query]); // ลบ 'matches' ออกจาก dependency เพื่อกันลูป (ถึงโค้ดคุณจะมี if กันไว้แล้วก็ตาม)
-
-  return matches;
+  return matches
 }
 
 // --- 2. The Wrapper Hook (พระเอกของเรา) ---

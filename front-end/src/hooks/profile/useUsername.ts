@@ -1,5 +1,5 @@
 import { UseUsernameProps } from "@/utils/interface/interface"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export function useUsername(initialUsername?: string): UseUsernameProps {
   const [ username, setUsername ] = useState<string>(initialUsername || '')
@@ -11,10 +11,6 @@ export function useUsername(initialUsername?: string): UseUsernameProps {
   const cancelUsername = () => {
     setUsername(initialUsername || '')
   }
-
-  useEffect(() => {
-    setUsername(initialUsername || '')
-  }, [initialUsername])
 
   return {
     username,
