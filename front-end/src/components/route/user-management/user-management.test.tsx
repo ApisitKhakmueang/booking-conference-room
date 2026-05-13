@@ -50,11 +50,11 @@ describe('UserManagement Component', () => {
 
   it('1. Should render UserCardSkeleton when isLoadingUsers is true', () => {
     // จำลองสถานะกำลังโหลด
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: null,
       reloadUsers: mockReloadUsers,
       isLoadingUsers: true,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
 
     const { container } = render(<UserManagement />);
     // ตรวจสอบคลาส animate-pulse ที่เราเขียนไว้ใน Skeleton
@@ -63,11 +63,11 @@ describe('UserManagement Component', () => {
 
   it('2. Should display "No users available" when user list is empty', () => {
     // จำลองสถานะโหลดเสร็จ แต่ไม่มีข้อมูล
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: { data: [], meta: { totalPages: 1, totalItems: 0 } },
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
 
     render(<UserManagement />);
     expect(screen.getByText(/no users available/i)).toBeInTheDocument();
@@ -75,11 +75,11 @@ describe('UserManagement Component', () => {
 
   it('3. Should render UserCards when data is available', () => {
     // จำลองสถานะมีข้อมูลปกติ
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: mockUsersData,
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
 
     render(<UserManagement />);
     expect(screen.getByText('Apisit Dev')).toBeInTheDocument();
@@ -89,11 +89,11 @@ describe('UserManagement Component', () => {
   // ─── 3. Interactions ──────────────────────────────────────────────────────
 
   it('4. Should pass search term to the custom hook when typing in search input', async () => {
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: mockUsersData,
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
 
     render(<UserManagement />);
     
@@ -105,11 +105,11 @@ describe('UserManagement Component', () => {
   });
 
   it('5. Should render UserPagination when totalPages > 1', () => {
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: mockUsersData, // มี 2 หน้า
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
 
     render(<UserManagement />);
     // เช็คว่ามีข้อความของ Pagination ปรากฏขึ้นมา
@@ -119,14 +119,14 @@ describe('UserManagement Component', () => {
   // ─── 4. Async Actions & Error Handling ────────────────────────────────────
 
   it('6. Should call adminService and reloadUsers on successful status toggle', async () => {
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: mockUsersData,
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
-    
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
+
     // จำลองการยิง API สำเร็จ
-    (adminService.updateUserStatus as any).mockResolvedValue({});
+    vi.mocked(adminService.updateUserStatus).mockResolvedValue('ok');
 
     render(<UserManagement />);
     
@@ -145,14 +145,14 @@ describe('UserManagement Component', () => {
   });
 
   it('7. Should show SweetAlert error when status toggle API fails', async () => {
-    (usePaginatedUsers as any).mockReturnValue({
+    vi.mocked(usePaginatedUsers).mockReturnValue({
       usersData: mockUsersData,
       reloadUsers: mockReloadUsers,
       isLoadingUsers: false,
-    });
+    } as unknown as ReturnType<typeof usePaginatedUsers>);
     
     // จำลองการยิง API พัง
-    (adminService.updateUserStatus as any).mockRejectedValue(new Error('Network Error'));
+    vi.mocked(adminService.updateUserStatus).mockRejectedValue(new Error('Network Error'));
 
     render(<UserManagement />);
     
