@@ -6,7 +6,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export function useProfileImage(initialAvatar?: string): UseProfileImageReturn {
   const [profileFile, setProfileFile] = useState<File | null>(null)
-  const [previewProfile, setPreviewProfile] = useState<any>(
+  const [previewProfile, setPreviewProfile] = useState<string>(
     initialAvatar || '/user/profile.jpg'
   )
   const [prevBlobUrl, setPrevBlobUrl] = useState<string | null>(null)

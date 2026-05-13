@@ -30,7 +30,7 @@ export const useEditProfile = () => {
       if (profileFile) {
         const fileName = `${user.id}/avatar.jpg`
         
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('avatars')
           .upload(fileName, profileFile, {
             upsert: true,
@@ -50,7 +50,7 @@ export const useEditProfile = () => {
       }
 
       // เตรียมข้อมูลที่จะอัปเดต
-      const updateData: Record<string, any> = {}
+      const updateData: { full_name?: string; avatar_url?: string } = {}
 
       // เพิ่ม username ถ้าเปลี่ยน
       if (username !== originalUsername) {
