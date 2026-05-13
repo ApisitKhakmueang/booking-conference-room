@@ -93,7 +93,7 @@ export default function Calendar() {
       setSelectedRoom(rooms[0]);
       setIsLoadingRoom(false)
     }
-  }, [rooms, selectedRoom]);
+  }, [rooms]);
 
 // --- 1. Logic การบังคับเปลี่ยน View (Auto-switch) ---
   useEffect(() => {

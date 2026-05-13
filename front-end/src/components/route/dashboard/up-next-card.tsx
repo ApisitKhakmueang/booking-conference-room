@@ -57,7 +57,7 @@ export default function UpNextCard({ handleEditClick }: { handleEditClick: (even
 
   useEffect(() => {
     fetchUpNextBooking();
-  }, [fetchUpNextBooking]);
+  }, []);
 
   return (
     // 🌟 1. พื้นหลังการ์ด: Light ใช้สีขาว (light-main-background) / Dark ใช้ Gradient เดิม

@@ -3,13 +3,13 @@ import AttendanceHealth from "./attendance-health"
 import PopularRanking from "./popular-ranking"
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { bookingService } from "@/service/booking.service";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 export default function PopularAndAttendance() {
   const [dashboardAnalytics, setDashboardAnalytics] = useState<DashboardAnalyticsResponse | undefined>(undefined)
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     const now = new Date()
     const start = format(startOfMonth(now), 'yyyy-MM-dd');
     const end = format(endOfMonth(now), 'yyyy-MM-dd');
@@ -35,11 +35,11 @@ export default function PopularAndAttendance() {
         confirmButtonColor: '#b495ff',
       });
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+  }, [fetchAnalytics]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">

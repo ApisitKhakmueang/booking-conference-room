@@ -79,7 +79,7 @@ export default function CardEvents({ event, setIsAddModalOpen, setCurrentDate, o
             }, 100); // 0.3 วินาที (เร็วพอที่ผู้ใช้จะไม่รู้สึกว่าช้า แต่มากพอให้ DB ลบเสร็จ)
           }
         }
-      } catch (error) {
+      } catch {
         Swal.fire('Error', 'Failed to delete booking', 'error');
       }
     }

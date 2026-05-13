@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import RealTimeClock from "./realtime-clock";
 import { roomService } from "@/service/booking.service";
 import { RoomResponse } from "@/utils/interface/response";
@@ -17,7 +17,7 @@ export default function CheckIn({ roomID }: { roomID: string }) {
   const { booking, isLoadingBooking } = useBookingStatusByRoomIDWS(roomData?.id)
   const { config } = useSystemConfig();
 
-  const fetchRoomData = async () => {
+  const fetchRoomData = useCallback(async () => {
     try {
       const response = await roomService.fetchRoomByID(roomID);
       setRoomData(response);
@@ -40,16 +40,16 @@ export default function CheckIn({ roomID }: { roomID: string }) {
         confirmButtonColor: '#8370ff',
       });
     }
-  }
+  }, [roomID])
 
   const mapEvent = useMemo(() => {
     if (!booking) return undefined
     return mapBookingEvents(booking, config)
-  }, [booking])
+  }, [booking, config])
 
   useEffect(() => {
     fetchRoomData()
-  }, [])
+  }, [fetchRoomData])
 
   const bookingUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/calendar`;
 

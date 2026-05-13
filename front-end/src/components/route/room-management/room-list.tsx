@@ -1,6 +1,5 @@
 import { useState } from "react";
 import RoomCard, { RoomCardSkeleton } from "./room-card";
-import Swal from "sweetalert2";
 import { RoomListProps } from "@/utils/interface/interface";
 import RoomPagination from "./room-pagination";
 

@@ -48,7 +48,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   useEffect(() => {
     const formattedEvents = mapBookingEvents(bookings || [], config);
     setEvents(formattedEvents);
-  }, [bookings]);
+  }, [bookings, config]);
 
   return (
     <div className="flex h-full overflow-hidden flex-col relative bg-white dark:bg-transparent rounded-b-lg">

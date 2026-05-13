@@ -22,6 +22,9 @@ export default function History() {
   const [activeTab, setActiveTab] = useState("ALL");
   const { config } = useSystemConfig();
 
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
   const filteredEvents = useMemo(() => {
     if (!events) return undefined;
     
@@ -102,7 +105,7 @@ export default function History() {
         confirmButtonColor: '#8370ff',
       });
     }
-  }, [currentDate.getMonth(), currentDate.getFullYear(), config, currentDate]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
+  }, [currentMonth, currentYear, config, currentDate]);
 
   useEffect(() => {
     fetchUserBookings();
@@ -152,7 +155,7 @@ export default function History() {
                 // ถ้าโหลดเสร็จแล้ว แต่ไม่มีข้อมูลการจองเลยในวันนั้น
                 <div className="flex flex-col items-center justify-center h-64">
                   <p className="text-lg font-medium">No Content</p>
-                  <p className="text-sm whitespace-nowrap">You don't have any bookings for this day.</p>
+                  <p className="text-sm whitespace-nowrap">You don&apos;t have any bookings for this day.</p>
                 </div>
               )}
             </main>

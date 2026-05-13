@@ -28,6 +28,9 @@ export default function Schedule() {
   const [now, setNow] = useState(new Date());
   const { config } = useSystemConfig();
 
+  const currentMonthValue = currentDate.getMonth();
+  const currentYearValue = currentDate.getFullYear();
+
   // 🌟 2. สั่งให้นาฬิกาเดินทุกๆ 1 นาที
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000);
@@ -153,7 +156,7 @@ export default function Schedule() {
         confirmButtonColor: '#8370ff',
       });
     }
-  }, [currentDate.getMonth(), currentDate.getFullYear()]);
+  }, [currentMonthValue, currentYearValue]);
 
   useEffect(() => {
     fetchUserBookings();
@@ -215,7 +218,7 @@ export default function Schedule() {
               ) : (
                 <div className="flex flex-col items-center justify-center h-full min-h-[60vh] opacity-70">
                   <p className="text-lg font-medium">No Content</p>
-                  <p className="text-sm text-center">You don't have any bookings matching the criteria.</p>
+                  <p className="text-sm text-center">You don&apos;t have any bookings matching the criteria.</p>
                 </div>
               )}
             </main>

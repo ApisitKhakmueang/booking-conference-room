@@ -1,13 +1,11 @@
 import useTheme from "@/hooks/ui/useTheme";
 import { cn } from "@/lib/utils";
-import { useControlLayoutStore } from "@/stores/control-layout.store";
 import {
   Moon,
   Sun
 } from "lucide-react";
 
 export default function ThemeButton({ className }: { className?: string}) {
-  const isOpenNav = useControlLayoutStore((state) => state.isOpenNav)
   const { toggle } = useTheme();
 
   return (

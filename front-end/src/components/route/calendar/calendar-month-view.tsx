@@ -72,7 +72,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
   const handleClickDay = useCallback((date: Date) => {
     setCurrentDate(date)
     setView('day')
-  }, [])
+  }, [setCurrentDate, setView])
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-transparent rounded-b-lg">
@@ -132,7 +132,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
               </div>
               
               <div className="space-y-1.5">
-                {visibleItems.map((item: any, index: number) => {
+                {visibleItems.map((item: Holiday | BookingEventResponse, index: number) => {
                   
                   const isHoliday = 'name' in item;
                   
