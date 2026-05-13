@@ -1,11 +1,11 @@
-import { BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent } from '@/utils/interface/response';
 import { useState, useEffect, useMemo } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useAuthStore } from '@/stores/auth.store';
 import { formatBookingEvent } from '@/lib/form';
 
 export default function useBookingStatusWS() {
-  const [bookings, setBookings] = useState<BookingEventResponse[]>([]);
+  const [bookings, setBookings] = useState<ParsedBookingEvent[]>([]);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
   const sessionToken = useAuthStore((state) => state.sessionToken);
 
@@ -13,7 +13,7 @@ export default function useBookingStatusWS() {
     return sessionToken ? `${process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET}/booking/status` : null;
   }, [sessionToken]);
 
-  const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
+  const { sendMessage, lastJsonMessage } = useWebSocket(
     wsUrl, 
     {
       onOpen: () => {

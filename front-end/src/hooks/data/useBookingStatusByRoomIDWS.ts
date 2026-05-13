@@ -1,4 +1,4 @@
-import { BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent } from '@/utils/interface/response';
 import { useState, useEffect, useMemo } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useAuthStore } from '@/stores/auth.store';
@@ -6,7 +6,7 @@ import { formatBookingEvent } from '@/lib/form';
 
 // 🌟 1. แก้ไขรับค่าเป็น String ธรรมดา ไม่ต้องใส่ { }
 export default function useBookingStatusByRoomIDWS(roomID: string | undefined) {
-  const [booking, setBooking] = useState<BookingEventResponse | undefined>(undefined);
+  const [booking, setBooking] = useState<ParsedBookingEvent | undefined>(undefined);
   const [isLoadingBooking, setIsLoadingBooking] = useState<boolean>(true);
   const sessionToken = useAuthStore((state) => state.sessionToken);
 
@@ -14,7 +14,7 @@ export default function useBookingStatusByRoomIDWS(roomID: string | undefined) {
     return sessionToken && roomID ? `${process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET}/room/${roomID}` : null;
   }, [sessionToken, roomID]);
 
-  const { sendMessage, lastJsonMessage, readyState } = useWebSocket(
+  const { lastJsonMessage } = useWebSocket(
     wsUrl, 
     {
       shouldReconnect: () => true,

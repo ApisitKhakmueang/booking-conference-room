@@ -1,6 +1,6 @@
 import { add, format, parseISO, startOfDay } from "date-fns"; // 🌟 แน่ใจว่า import startOfDay มาแล้ว
 import { BodyBooking } from "../utils/interface/form";
-import { BookingEventResponse } from "../utils/interface/response";
+import { BookingEventResponse, ParsedBookingEvent } from "../utils/interface/response";
 
 export const bodyBooking = (formData: BodyBooking) => {
   const start = formData.startTime;
@@ -30,7 +30,7 @@ export const bodyBooking = (formData: BodyBooking) => {
   }
 }
 
-export const formatBookingEvent = (event: any): BookingEventResponse => {
+export const formatBookingEvent = (event: BookingEventResponse): ParsedBookingEvent => {
   return {
     ...event,
     startTime: parseISO(event.startTime),

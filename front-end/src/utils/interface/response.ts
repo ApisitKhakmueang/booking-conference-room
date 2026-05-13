@@ -36,6 +36,11 @@ export interface BookingEventResponse {
   Room: RoomResponse
 }
 
+export interface ParsedBookingEvent extends Omit<BookingEventResponse, 'startTime' | 'endTime'> {
+  startTime: Date;
+  endTime: Date;
+}
+
 export interface AttendanceHealthResponse {
   completed: number;
   cancelled: number;
