@@ -66,7 +66,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
             map.get(dateKey)!.push(evt);
           });
 
-        } catch (error) {
+        } catch {
           // Fallback: เผื่อกรณีข้อมูล startTime/endTime ผิดพลาด (เช่น end มาก่อน start)
           // ให้ยัดใส่วันเริ่มต้นแค่วันเดียวไปก่อน
           const dateKey = format(evt.startTime, 'yyyy-MM-dd');

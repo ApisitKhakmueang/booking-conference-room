@@ -33,7 +33,7 @@ type ViewType = 'month' | 'week' | 'day';
 export default function Calendar() {
   const currentUser = useAuthStore((state) => state.user);
 
-  const { room: rawRoom, isLoading, isError } = useRoomData();
+  const { room: rawRoom } = useRoomData();
   
   const rooms = useMemo(() => {
     // ดักไว้ก่อนว่าถ้าไม่มีข้อมูล ให้ return array เปล่าๆ ออกไป

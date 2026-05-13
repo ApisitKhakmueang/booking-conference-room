@@ -18,7 +18,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
   const [typeOperate, setTypeOperate] = useState<'add' | 'update'>('add');
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | undefined>(undefined);
   const [events, setEvents] = useState<BookingEvent[] | undefined>(undefined);
-  const { config, isLoadingConfig } = useSystemConfig();
+  const { config } = useSystemConfig();
 
   // 1. สร้าง Columns (ถ้า Week = 7 วัน, ถ้า Day = 1 วัน)
   const days = useMemo(() => {
