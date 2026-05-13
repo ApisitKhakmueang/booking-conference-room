@@ -12,7 +12,6 @@ import { bookingService } from "@/service/booking.service";
 import ActiveTab from "./active-tab";
 import MobileFilter from "./mobile-filter";
 import Swal from "sweetalert2";
-import { BookingEventResponse } from "@/utils/interface/response";
 import { useSystemConfig } from "@/hooks/data/useSystemConfig";
 
 export default function History() {
@@ -103,7 +102,7 @@ export default function History() {
         confirmButtonColor: '#8370ff',
       });
     }
-  }, [currentDate.getMonth(), currentDate.getFullYear()]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
+  }, [currentDate.getMonth(), currentDate.getFullYear(), config, currentDate]); // 🌟 เพิ่ม dependency ของเดือนและปี เพื่อให้ fetch ใหม่เมื่อเปลี่ยนเดือนหรือปี
 
   useEffect(() => {
     fetchUserBookings();
