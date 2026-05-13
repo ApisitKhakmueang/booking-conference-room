@@ -6,6 +6,7 @@ import { configService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 import { SWRConfig } from 'swr';
 import React from 'react';
+import { ConfigResponse } from '@/utils/interface/response';
 
 // 🌟 1. Mock Dependencies
 vi.mock('@/service/booking.service', () => ({
@@ -22,11 +23,13 @@ vi.mock('sweetalert2', () => ({
 
 // 🌟 2. สร้าง Wrapper สำหรับเคลียร์ Cache ของ SWR ในทุกๆ เทส
 const createSWRWrapper = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  // ✅ ตั้งชื่อให้มันว่า SWRWrapper แทนที่จะ return ฟังก์ชันเปล่าๆ ออกไปเลย
+  const SWRWrapper = ({ children }: { children: React.ReactNode }) => (
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
       {children}
     </SWRConfig>
   );
+  return SWRWrapper;
 };
 
 describe('useSystemConfig', () => {
@@ -43,7 +46,7 @@ describe('useSystemConfig', () => {
       maxBookingMins: 120,
       noShowThresholdMins: 15,
     };
-    vi.mocked(configService.fetchConfig).mockResolvedValue(mockResponse as any);
+    vi.mocked(configService.fetchConfig).mockResolvedValue(mockResponse as unknown as ConfigResponse);
 
     const { result } = renderHook(
       () => useSystemConfig(),

@@ -6,6 +6,7 @@ import { adminService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 import { SWRConfig } from 'swr';
 import React from 'react';
+import { UserOverviewResponse } from '@/utils/interface/response';
 
 // 🌟 1. Mock Dependencies
 vi.mock('@/service/booking.service', () => ({
@@ -22,11 +23,13 @@ vi.mock('sweetalert2', () => ({
 
 // 🌟 2. สร้าง Wrapper สำหรับเคลียร์ Cache ของ SWR ในทุกๆ เทส
 const createSWRWrapper = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  // ✅ ตั้งชื่อให้มันว่า SWRWrapper แทนที่จะ return ฟังก์ชันเปล่าๆ ออกไปเลย
+  const SWRWrapper = ({ children }: { children: React.ReactNode }) => (
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
       {children}
     </SWRConfig>
   );
+  return SWRWrapper;
 };
 
 describe('useUserOverview', () => {
@@ -40,7 +43,7 @@ describe('useUserOverview', () => {
       user: 'user data',
       statistics: 'stat data',
     };
-    vi.mocked(adminService.fetchUserOverview).mockResolvedValue(mockResponse as any);
+    vi.mocked(adminService.fetchUserOverview).mockResolvedValue(mockResponse as unknown as UserOverviewResponse);
 
     const { result } = renderHook(
       () => useUserOverview('101'),

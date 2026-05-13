@@ -6,6 +6,7 @@ import { adminService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 import { SWRConfig } from 'swr';
 import React from 'react';
+import { PaginatedBookingResponse } from '@/utils/interface/response';
 
 // 🌟 1. Mock Dependencies
 vi.mock('@/service/booking.service', () => ({
@@ -22,11 +23,13 @@ vi.mock('sweetalert2', () => ({
 
 // 🌟 2. สร้าง Wrapper สำหรับเคลียร์ Cache ของ SWR ในทุกๆ เทส
 const createSWRWrapper = () => {
-  return ({ children }: { children: React.ReactNode }) => (
+  // ✅ ตั้งชื่อให้มันว่า SWRWrapper แทนที่จะ return ฟังก์ชันเปล่าๆ ออกไปเลย
+  const SWRWrapper = ({ children }: { children: React.ReactNode }) => (
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
       {children}
     </SWRConfig>
   );
+  return SWRWrapper;
 };
 
 describe('usePaginatedUserBookings', () => {
@@ -41,7 +44,7 @@ describe('usePaginatedUserBookings', () => {
       data: [{ id: 'b1', status: 'confirm' }],
       meta: 'meta data'
     };
-    vi.mocked(adminService.fetchPaginatedUserBookings).mockResolvedValue(mockResponse as any);
+    vi.mocked(adminService.fetchPaginatedUserBookings).mockResolvedValue(mockResponse as unknown as PaginatedBookingResponse);
 
     const { result } = renderHook(
       () => usePaginatedUserBookings('user1', 1, 10, 'all', 2026, 5),

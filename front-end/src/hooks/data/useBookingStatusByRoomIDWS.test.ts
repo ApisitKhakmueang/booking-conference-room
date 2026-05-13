@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import useBookingStatusByRoomIDWS from './useBookingStatusByRoomIDWS';
-import useWebSocket from 'react-use-websocket';
 
 // 🌟 1. Mock Dependencies (สิ่งแวดล้อมที่ Hook ต้องใช้)
 // 1.1 Mock useAuthStore เพื่อจำลองว่ามี Token แล้ว
@@ -16,12 +15,27 @@ vi.mock('@/lib/form', () => ({
 }));
 
 // 1.3 Mock useWebSocket ของจริงทิ้งไป
-vi.mock('react-use-websocket');
+// 🌟 สร้างตัวแปรกลางไว้ดักจับฟังก์ชัน onMessage
+let capturedOnMessage: ((event: { data: string }) => void) | null = null;
+
+// 1.3 Mock useWebSocket แบบใหม่ (ดักจับ onMessage)
+vi.mock('react-use-websocket', () => ({
+  default: vi.fn((url, options) => {
+    // แอบขโมยฟังก์ชัน onMessage ที่ Hook ส่งมา เก็บไว้ในตัวแปรของเรา
+    if (options && options.onMessage) {
+      capturedOnMessage = options.onMessage; 
+    }
+    return {
+      sendMessage: vi.fn(),
+      readyState: 1, // OPEN
+    };
+  }),
+}));
 
 describe('useBookingStatusWS', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // ป้องกันปัญหาเรื่อง setInterval 30 วิ ใน Hook ทำเทสค้าง
+    capturedOnMessage = null; // 🌟 เคลียร์ค่าตัวจับ onMessage ทุกครั้งก่อนเริ่มเทสต์ใหม่
     vi.useFakeTimers(); 
   });
 
@@ -30,24 +44,26 @@ describe('useBookingStatusWS', () => {
   });
 
   // สร้างฟังก์ชันผู้ช่วยสำหรับจำลองข้อความที่ส่งมาจาก Backend
-  const mockWebSocketMessage = (message: any) => {
-    vi.mocked(useWebSocket).mockReturnValue({
-      lastJsonMessage: message,
-      sendMessage: vi.fn(),
-      readyState: 1, // OPEN
-    } as any);
+  const mockWebSocketMessage = (message: Record<string, unknown> | null) => {
+    if (capturedOnMessage && message) {
+      // ใช้ act() ครอบ เพื่อให้ React อัปเดต State ทันทีที่ยิง Event
+      act(() => {
+        // จำลอง Event ของ WebSocket โดยต้องแปลง Object เป็น String ก่อนส่ง
+        capturedOnMessage!({ data: JSON.stringify(message) });
+      });
+    }
   };
 
   it('1. Should get initial data and set isLoadingBooking to false', () => {
     // จัดฉาก: จำลองว่าเปิดมาปุ๊บ ได้รับข้อความ initial_data เลย
+    const { result } = renderHook(() => 
+      useBookingStatusByRoomIDWS('101')
+    );
+
     mockWebSocketMessage({
       type: 'initial_data',
       data: [{ id: 'b1', title: 'Meeting A' }, { id: 'b2', title: 'Meeting B' }]
     });
-
-    const { result } = renderHook(() => 
-      useBookingStatusByRoomIDWS('101')
-    );
 
     // ตรวจสอบ: ต้องมีข้อมูล 2 ตัว, ถูก format แล้ว, และ loading ต้องเป็น false
     expect(result.current.isLoadingBooking).toBe(false);
@@ -56,13 +72,13 @@ describe('useBookingStatusWS', () => {
 
   it('2. Should add new booking when received booking_start', () => {
     // Step 1: จำลองว่ามีข้อมูลตั้งต้น 1 ตัว
+    const { result, rerender } = renderHook(() => 
+      useBookingStatusByRoomIDWS('101')
+    );
     mockWebSocketMessage({
       type: 'initial_data',
       data: [{ id: 'b1' }]
     });
-    const { result, rerender } = renderHook(() => 
-      useBookingStatusByRoomIDWS('101')
-    );
 
     // Step 2: มีคนจองห้องเข้ามาใหม่ (ส่งข้อความ booking_start)
     mockWebSocketMessage({
@@ -78,11 +94,11 @@ describe('useBookingStatusWS', () => {
   });
 
   it('3. Should delete booking when received booking_end or booking_noshow', () => {
+    const { result, rerender } = renderHook(() => useBookingStatusByRoomIDWS('101'));
     mockWebSocketMessage({
       type: 'initial_data',
       data: [{ id: 'b1' }]
     });
-    const { result, rerender } = renderHook(() => useBookingStatusByRoomIDWS('101'));
 
     // ลบรายการที่ 1 ออก
     mockWebSocketMessage({
