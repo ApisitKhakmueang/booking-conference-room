@@ -1,5 +1,6 @@
 import { UserCardProps } from "@/utils/interface/interface";
 import { Eye } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function UserCard({ currentUsers, toggleStatus, updatingIDs }: UserCardProps) {
@@ -25,8 +26,8 @@ export default function UserCard({ currentUsers, toggleStatus, updatingIDs }: Us
             
             {/* 1. Member Name & Avatar (w-[35%]) */}
             <div className="flex items-center gap-4 w-full md:w-[35%] pr-8 md:pr-0">
-              <div className="relative">
-                <img src={user.avatarUrl || "https://via.placeholder.com/150"} alt={user.fullName} className="w-10 h-10 rounded-full object-cover bg-gray-200 dark:bg-gray-800" />
+              <div className="relative w-10 h-10">
+                <Image src={user.avatarUrl || "https://via.placeholder.com/150"} alt={user.fullName} className="rounded-full object-cover bg-gray-200 dark:bg-gray-800" fill />
                 <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${statusStyle.dot}`}></div>
               </div>
               <div className="flex flex-col gap-1.5">

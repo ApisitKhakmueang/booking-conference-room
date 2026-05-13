@@ -43,7 +43,7 @@ export default function UserManagement() {
 
     try {
       await adminService.updateUserStatus(id, updateStatus); 
-    } catch (error) {
+    } catch {
       Swal.fire('Error', 'Failed to update status', 'error');
     } finally {
       setUpdatingIDs((prev) => prev.filter(updatingId => updatingId !== id)); 
