@@ -42,11 +42,11 @@ export const bookingService = {
   },
 
   // สร้างการจองใหม่
-  createBooking: async (roomNumber: number | undefined, body: any) => {
+  createBooking: async (roomNumber: number | undefined, body: Record<string, unknown>) => {
     return await api.post(`${API_URL}/booking/room/${roomNumber}`, body);
   },
 
-  updateBooking: async (bookingID: string | undefined, roomNumber: number | undefined, body: any) => {
+  updateBooking: async (bookingID: string | undefined, roomNumber: number | undefined, body: Record<string, unknown>) => {
     return await api.put(`${API_URL}/booking/${bookingID}/room/${roomNumber}`, body)
   },
 
@@ -73,15 +73,15 @@ export const roomService = {
     return response.data;
   },
 
-  checkinBooking: async (roomID: string, body: any) => {
+  checkinBooking: async (roomID: string, body: Record<string, unknown>) => {
     return await api.post(`${API_URL}/room/${roomID}/checkin`, body)
   },
 
-  createRoom: async (body: any) => {
+  createRoom: async (body: Record<string, unknown>) => {
     return await api.post(`${API_URL}/admin/room`, body);
   },
 
-  updateRoom: async (roomID: string | undefined, body: any) => {
+  updateRoom: async (roomID: string | undefined, body: Record<string, unknown>) => {
     return await api.put(`${API_URL}/admin/room/${roomID}`, body)
   },
 
