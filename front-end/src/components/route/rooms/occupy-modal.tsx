@@ -67,7 +67,7 @@ export default function OccupyModal({ setIsOccupyModalOpen, selectedBooking }: O
             showConfirmButton: false
           });
         }
-      } catch (error) {
+      } catch {
         Swal.fire('Error', 'Failed to delete booking', 'error');
       }
     }

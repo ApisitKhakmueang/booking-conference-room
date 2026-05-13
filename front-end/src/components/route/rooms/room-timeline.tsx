@@ -65,7 +65,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
 
   const timeSlots = generateTimeSlots(startTimeHour, totalTimeHours);
 
-  const { data: bookings, error, isLoading } = useSWR(
+  const { data: bookings } = useSWR(
     ['bookings', todayStr], 
     ([, dateStr]) => bookingService.fetchAllBookingsByDate(dateStr), 
     {
@@ -140,7 +140,7 @@ export default function RoomTimeline({ rooms }: RoomTimelineProps) {
 
                   {bookings
                     ?.filter(booking => booking.Room.id === room.id && booking.status === 'confirm')
-                    .map((booking, _) => {
+                    .map((booking) => {
                       const { left, width } = calculatePosition(booking.startTime, booking.endTime, startTimeHour, totalTimeHours);
                       
                       const isMyBooking = booking.User?.id === user?.id;
