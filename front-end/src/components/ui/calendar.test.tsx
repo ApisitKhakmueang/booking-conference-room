@@ -19,15 +19,17 @@ function CalendarSingleWrapper() {
 }
 
 function CalendarRangeWrapper() {
-  const [range, setRange] = useState<{ from: Date; to: Date } | undefined>({
+  // 🌟 แก้ไข Type โดยบอกว่า "from ต้องมีเสมอ (แต่เป็น undefined ได้)" 
+  const [range, setRange] = useState<{ from: Date | undefined; to?: Date } | undefined>({
     from: new Date(2026, 4, 10),
     to: new Date(2026, 4, 15),
   });
+  
   return (
     <Calendar
       mode="range"
       selected={range}
-      onSelect={setRange as any}
+      onSelect={setRange} // 👈 คราวนี้ไม่ต้องมี as any แล้ว โค้ดจะหากันเจอเป๊ะๆ
       defaultMonth={new Date(2026, 4)}
     />
   );

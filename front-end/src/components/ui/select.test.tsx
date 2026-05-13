@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
 import {
   Select,
@@ -27,24 +26,56 @@ if (typeof window !== 'undefined') {
 // 🌟 Mock ทั้งชุดให้เป็น Standard HTML Elements แบบ 100%
 vi.mock('@radix-ui/react-select', () => {
   return {
-    Root: ({ children, open, defaultOpen }: any) => (
+    Root: ({ children, open, defaultOpen }: { children?: React.ReactNode; open?: boolean; defaultOpen?: boolean }) => (
       <div data-state={open || defaultOpen ? 'open' : 'closed'}>{children}</div>
     ),
-    Trigger: ({ children, ...props }: any) => (
-      <button {...props} type="button" role="combobox">{children}</button>
+    
+    // 🌟 เพิ่ม aria-controls และ aria-expanded ตามกฎ jsx-a11y/role-has-required-aria-props
+    Trigger: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+      <button 
+        {...props} 
+        type="button" 
+        role="combobox" 
+        aria-controls="radix-mock-content" 
+        aria-expanded={props['aria-expanded'] ?? false}
+      >
+        {children}
+      </button>
     ),
-    Value: ({ placeholder, children }: any) => <span>{children || placeholder}</span>,
-    Portal: ({ children }: any) => <>{children}</>,
-    // 🌟 บังคับเรนเดอร์เนื้อหาออกมาเสมอในตอนเทส
-    Content: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    Group: ({ children }: any) => <div>{children}</div>,
-    Label: ({ children }: any) => <div>{children}</div>,
-    Item: ({ children, value, onSelect }: any) => (
-      <div role="option" onClick={() => onSelect?.()} data-value={value}>{children}</div>
+    
+    Value: ({ placeholder, children }: { placeholder?: string; children?: React.ReactNode }) => (
+      <span>{children || placeholder}</span>
     ),
-    ItemText: ({ children }: any) => <>{children}</>,
+    
+    Portal: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    
+    // 🌟 บังคับเรนเดอร์เนื้อหาออกมาเสมอในตอนเทส พร้อมใส่ id ให้ตรงกับ aria-controls
+    Content: ({ children }: { children: React.ReactNode }) => (
+      <div id="radix-mock-content">{children}</div>
+    ),
+    
+    Group: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    
+    Label: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    
+    // 🌟 เพิ่ม aria-selected ตามกฎ jsx-a11y/role-has-required-aria-props
+    Item: ({ children, value, onSelect }: { children?: React.ReactNode; value?: string; onSelect?: () => void }) => (
+      <div 
+        role="option" 
+        aria-selected={false} 
+        onClick={() => onSelect?.()} 
+        data-value={value}
+      >
+        {children}
+      </div>
+    ),
+    
+    ItemText: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    
     Separator: () => <hr data-slot="select-separator" />,
-    Viewport: ({ children }: any) => <div>{children}</div>,
+    
+    Viewport: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    
     Icon: () => null,
     ScrollUpButton: () => null,
     ScrollDownButton: () => null,
