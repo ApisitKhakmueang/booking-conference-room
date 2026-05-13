@@ -21,11 +21,11 @@ export default function MaxBookingMins({ config, setConfig, isOpenEdit }: Config
             onChange={(e) => {
               let val = parseFloat(e.target.value); 
               if (val > 5) val = 5;
-              setConfig({...config, maxBookingMins: isNaN(val) ? ('' as any) : val});
+              setConfig({...config, maxBookingMins: isNaN(val) ? ('' as unknown as number) : val});
             }}
             onBlur={() => {
               // ถ้าลบจนว่าง หรือใส่น้อยกว่า 1 ตอนคลิกออกจะบังคับเป็น 1
-              let val = parseFloat(config.maxBookingMins as any);
+              let val = parseFloat(String(config.maxBookingMins));
               if (isNaN(val) || val < 1) val = 1;
               val = Math.round(val * 2) / 2;
               setConfig({...config, maxBookingMins: val});

@@ -14,7 +14,7 @@ export default function LateArrivalPolicy({ config, setConfig, isOpenEdit }: Con
     
     // ถ้าผู้ใช้กดลบจนช่องว่างเปล่า
     if (isNaN(val)) {
-      setConfig({ ...config, noShowThresholdMins: '' as any }); // อนุญาตให้ว่างชั่วคราวได้
+      setConfig({ ...config, noShowThresholdMins: '' as unknown as number }); // อนุญาตให้ว่างชั่วคราวได้
       return;
     }
 
