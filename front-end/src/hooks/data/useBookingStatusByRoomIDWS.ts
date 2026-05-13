@@ -14,9 +14,51 @@ export default function useBookingStatusByRoomIDWS(roomID: string | undefined) {
     return sessionToken && roomID ? `${process.env.NEXT_PUBLIC_BACKEND_WEBSOCKET}/room/${roomID}` : null;
   }, [sessionToken, roomID]);
 
-  const { lastJsonMessage } = useWebSocket(
+  useWebSocket(
     wsUrl, 
     {
+      onMessage: (event) => {
+        try {
+          const message = JSON.parse(event.data);
+
+          switch (message.type) {
+            case 'initial_data':
+              // 🌟 2. ดักจับกรณีส่งค่า null มา หรือไม่มีคนจอง
+              if (!message.data) {
+                setBooking(undefined);
+              } else {
+                // ดักจับกรณีเป็น Array (ถ้า backend ส่ง array มา ให้ดึงตัวแรกที่กำลังใช้อยู่)
+                // แต่ถ้าส่งมาเป็น Object อยู่แล้ว ก็ format ได้เลย
+                const rawData = Array.isArray(message.data) ? message.data[0] : message.data;
+                
+                if (rawData) {
+                  setBooking(formatBookingEvent(rawData));
+                } else {
+                  setBooking(undefined); // ถ้า array ว่างเปล่า []
+                }
+              }
+              setIsLoadingBooking(false);
+              break;
+
+            case 'booking_start':
+              // 🌟 3. ต้อง formatBookingEvent ให้เหมือน initial_data ด้วย
+              if (message.data && message.data.booking) {
+                setBooking(formatBookingEvent(message.data.booking));
+              }
+              break;
+
+            case 'booking_end':
+            case 'booking_noshow': // ยุบรวมเคสที่ผลลัพธ์เหมือนกันได้เลย
+              setBooking(undefined);
+              break;
+            
+            default:
+              console.warn("⚠️ Unknown message type:", message.type);
+          }
+        } catch (err) {
+          console.error("Failed to parse websocket message", err);
+        }
+      },
       shouldReconnect: () => true,
       reconnectAttempts: 20,
       reconnectInterval: 3000,
@@ -29,55 +71,12 @@ export default function useBookingStatusByRoomIDWS(roomID: string | undefined) {
       const now = new Date();
       setBooking((prev) => {
         if (!prev) return undefined;
-        const endTime = new Date(prev.endTime);
-        return endTime > now ? prev : undefined;
+        return prev.endTime > now ? prev : undefined;
       });
     }, 30000); // เช็คทุก 30 วินาที
 
     return () => clearInterval(interval);
   }, []);
-
-  // === จัดการข้อมูลจาก WebSocket ===
-  useEffect(() => {
-    if (lastJsonMessage !== null) {
-      const message = lastJsonMessage as any; 
-
-      switch (message.type) {
-        case 'initial_data':
-          // 🌟 2. ดักจับกรณีส่งค่า null มา หรือไม่มีคนจอง
-          if (!message.data) {
-            setBooking(undefined);
-          } else {
-            // ดักจับกรณีเป็น Array (ถ้า backend ส่ง array มา ให้ดึงตัวแรกที่กำลังใช้อยู่)
-            // แต่ถ้าส่งมาเป็น Object อยู่แล้ว ก็ format ได้เลย
-            const rawData = Array.isArray(message.data) ? message.data[0] : message.data;
-            
-            if (rawData) {
-              setBooking(formatBookingEvent(rawData));
-            } else {
-              setBooking(undefined); // ถ้า array ว่างเปล่า []
-            }
-          }
-          setIsLoadingBooking(false);
-          break;
-
-        case 'booking_start':
-          // 🌟 3. ต้อง formatBookingEvent ให้เหมือน initial_data ด้วย
-          if (message.data && message.data.booking) {
-            setBooking(formatBookingEvent(message.data.booking));
-          }
-          break;
-
-        case 'booking_end':
-        case 'booking_noshow': // ยุบรวมเคสที่ผลลัพธ์เหมือนกันได้เลย
-          setBooking(undefined);
-          break;
-        
-        default:
-          console.warn("⚠️ Unknown message type:", message.type);
-      }
-    }
-  }, [lastJsonMessage]);
 
   return { booking, isLoadingBooking };
 }

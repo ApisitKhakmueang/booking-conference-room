@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { parseISO } from 'date-fns';
-import { Holiday } from '@/utils/interface/response';
+import { Holiday, ParsedHoliday } from '@/utils/interface/response';
 import { helperService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
 
 export function useHolidays(startYear: string, endYear: string) {
-  const [holiday, setHoliday] = useState<Holiday[] | null>(null);
+  const [holiday, setHoliday] = useState<ParsedHoliday[] | null>(null);
   const [isLoadingHoliday, setIsLoadingHoliday] = useState(true);
 
   useEffect(() => {
@@ -15,7 +14,7 @@ export function useHolidays(startYear: string, endYear: string) {
       try {
         const data = await helperService.fetchHolidays(startYear, endYear);
         
-        const formattedHolidays = data.map((h: any) => ({
+        const formattedHolidays: ParsedHoliday[] = data.map((h: Holiday) => ({
           ...h,
           date: parseISO(h.date),
           updatedAt: h.updatedAt ? parseISO(h.updatedAt) : null 
