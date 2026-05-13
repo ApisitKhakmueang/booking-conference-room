@@ -1,24 +1,52 @@
+# ============================================
+# Back-end Dockerfile (Go + Fiber)
+# Multi-stage build for minimal production image
+# ============================================
+
 # Stage 1: Builder
 FROM golang:1.25-alpine AS builder
+
 WORKDIR /app
 
-# Copy ไฟล์ module dependency (อยู่ที่ root เหมือนเดิม)
-COPY go.mod go.sum ./
-RUN go mod download
+# Install git & ca-certs (needed for some Go modules & HTTPS calls)
+RUN apk add --no-cache git ca-certificates tzdata
 
-# Copy Source Code ทั้งหมด (รวมถึงโฟลเดอร์ api/ ด้วย)
+# Copy dependency files first for better layer caching
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+# Copy the rest of the source code
 COPY . .
 
-# --- จุดที่ต้องแก้ (บรรทัดนี้) ---
-# เดิม: RUN go build -o main .
-# ใหม่: ระบุ path ไปยังโฟลเดอร์ที่เก็บ main.go (คือ ./api)
-RUN go build -o main ./api
+# Build the binary with optimizations
+# CGO_ENABLED=0 for a fully static binary
+# -ldflags="-s -w" strips debug info for smaller binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o main ./api
 
-# Stage 2: Runner (ส่วนนี้เหมือนเดิมไม่ต้องแก้)
-FROM alpine:latest
-WORKDIR /root/
-# Copy binary ที่ build เสร็จแล้ว (มันจะวางอยู่ที่ /app/main จากขั้นตอนบน)
+# Stage 2: Runner (distroless-like minimal image)
+FROM alpine:3.21
+
+WORKDIR /app
+
+# Install ca-certificates for HTTPS and tzdata for timezone support
+RUN apk add --no-cache ca-certificates tzdata
+
+# Create a non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Copy the compiled binary from the builder stage
 COPY --from=builder /app/main .
 
+# Change ownership to non-root user
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
 EXPOSE 8080
+
+# Health check (optional, adjust path if you have a health endpoint)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/v1/health || exit 1
+
 CMD ["./main"]

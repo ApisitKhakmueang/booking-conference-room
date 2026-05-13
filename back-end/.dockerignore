@@ -1,0 +1,30 @@
+# Dependencies & build artifacts
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test files
+*_test.go
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker
+dockerfile
+.dockerignore
+
+# Environment (injected via docker-compose or --env-file)
+.env
+
+# Air (live-reload tool)
+.air.toml

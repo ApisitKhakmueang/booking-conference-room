@@ -1,0 +1,67 @@
+# ============================================
+# Front-end Dockerfile (Next.js 16)
+# Multi-stage build for optimized production image
+# ============================================
+
+# Stage 1: Dependencies
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package.json package-lock.json ./
+
+# Install production + dev dependencies (need dev for build step)
+RUN npm ci
+
+# Stage 2: Builder
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy all source files
+COPY . .
+
+# Set Next.js telemetry to disabled during build
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build the Next.js application
+RUN npm run build
+
+# Stage 3: Runner (production)
+FROM node:22-alpine AS runner
+
+WORKDIR /app
+
+# Set to production
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create a non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy the public folder
+COPY --from=builder /app/public ./public
+
+# Copy the standalone build output (Next.js output: 'standalone')
+# If standalone output is NOT enabled, we copy .next and node_modules instead
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/next.config.ts ./next.config.ts
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+CMD ["npm", "start"]

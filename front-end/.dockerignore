@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Next.js build output (rebuilt in Docker)
+.next/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker
+dockerfile
+.dockerignore
+
+# Environment (injected via docker-compose or --env-file)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Test files
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+vitest.config.ts
+vitest.setup.ts
+
+# Misc
+README.md
