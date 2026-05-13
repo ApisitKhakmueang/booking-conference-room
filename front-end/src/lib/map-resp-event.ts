@@ -1,5 +1,5 @@
 import { ArrangeRoom, BookingEvent, BookingStatus } from "@/utils/interface/interface";
-import { BookingEventResponse, ConfigResponse } from "@/utils/interface/response";
+import { BookingEventResponse, ConfigResponse, ParsedBookingEvent } from "@/utils/interface/response";
 
 const statusMap: Record<string, string> = {
   'confirm': 'Confirmed',
@@ -7,10 +7,12 @@ const statusMap: Record<string, string> = {
   'no_show' : 'No Show',
   'complete': 'Completed', 
 };
+  
+type EventInput = BookingEventResponse | ParsedBookingEvent;
 
 // 🌟 1. แยกฟังก์ชันสำหรับแปลง "ค่าเดี่ยว (Single Object)" ออกมาก่อน
 export const formatSingleBookingEvent = (
-  resp: BookingEventResponse, 
+  resp: EventInput, 
   config?: ConfigResponse // หรือใส่ Interface ของ Config ที่คุณมี
 ): BookingEvent => {
   const startDate = new Date(resp.startTime);
@@ -68,9 +70,9 @@ export const formatSingleBookingEvent = (
     id: resp.id,
     title: resp.title,
     passcode: resp.passcode,
-    date: resp.startTime,
-    startTime: resp.startTime,
-    endTime: resp.endTime,
+    date: resp.startTime as unknown as string,
+    startTime: resp.startTime as unknown as string,
+    endTime: resp.endTime as unknown as string,
     duration: durationStr,
     room: mappedRoom,
     status: formattedStatus as BookingStatus,
@@ -79,12 +81,12 @@ export const formatSingleBookingEvent = (
 };
 
 // 🌟 2. สร้าง Overload Types ให้ TypeScript รู้ว่า "ถ้าโยน Array มา จะได้ Array กลับไป"
-export function mapBookingEvents(data: BookingEventResponse, config?: ConfigResponse): BookingEvent;
-export function mapBookingEvents(data: BookingEventResponse[], config?: ConfigResponse): BookingEvent[];
+export function mapBookingEvents(data: EventInput, config?: ConfigResponse): BookingEvent;
+export function mapBookingEvents(data: EventInput[], config?: ConfigResponse): BookingEvent[];
 
 // 🌟 3. ฟังก์ชันหลักที่รับได้ทั้ง Array และ Object
 export function mapBookingEvents(
-  data: BookingEventResponse | BookingEventResponse[],
+  data: EventInput | EventInput[],
   config?: ConfigResponse
 ): BookingEvent | BookingEvent[] {
   if (Array.isArray(data)) {
