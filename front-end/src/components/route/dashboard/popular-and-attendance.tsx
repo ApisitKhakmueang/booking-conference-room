@@ -16,8 +16,9 @@ export default function PopularAndAttendance() {
     try {
       const response = await bookingService.fetchAnalyticBooking(start, end)
       setDashboardAnalytics(response)
-    } catch (error: any) {
-      if (error.response?.status === 400) {
+    } catch (error) {
+      const err = error as { response?: { status?: number } };
+      if (err.response?.status === 400) {
         Swal.fire({
           title: 'Error',
           text: "Send wrong date or missing date",
