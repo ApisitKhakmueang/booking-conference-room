@@ -22,11 +22,12 @@ export function useHolidays(startYear: string, endYear: string) {
         }));
         
         setHoliday(formattedHolidays);
-      } catch (error: any) {
+      } catch (error) {
+        const err = error as { response?: { status?: number } };
         // console.error("Error fetching room data:", error);
 
         // 🌟 ดักเคส: ถ้า API ตอบกลับมาว่าหาห้องไม่เจอ (404)
-        if (error.response?.status === 404) {
+        if (err.response?.status === 404) {
           Swal.fire({
             title: 'Holidays Not Found',
             text: "Not found holidays",
