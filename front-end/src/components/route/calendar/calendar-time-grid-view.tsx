@@ -47,6 +47,7 @@ export default function TimeGridView({ setCurrentDate, currentDate, bookings, vi
 
   useEffect(() => {
     const formattedEvents = mapBookingEvents(bookings || [], config);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEvents(formattedEvents);
   }, [bookings, config]);
 

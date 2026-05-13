@@ -6,7 +6,7 @@ import {
   startOfDay,
   endOfDay
 } from 'date-fns';
-import { Holiday, BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent, ParsedHoliday } from '@/utils/interface/response';
 import { MonthProps } from '@/utils/interface/interface';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
   }, [currentDate]);
 
   const groupedEvents = useMemo(() => {
-    const map = new Map<string, BookingEventResponse[]>();
+    const map = new Map<string, ParsedBookingEvent[]>();
     
     if (bookings) {
       bookings.forEach(evt => {
@@ -56,11 +56,11 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
   }, [bookings]);
 
   const groupedHolidays = useMemo(() => {
-    const map = new Map<string, Holiday[]>();
+    const map = new Map<string, ParsedHoliday[]>();
     if (holiday) {
       holiday.forEach(evt => {
         // ถ้าระบบวันหยุดมีแค่ evt.date (วันเดียว) ก็ใช้แบบเดิมได้เลย
-        // แต่ถ้ามี evt.startDate และ evt.endDate ให้ใช้ eachDayOfInterval เหมือน BookingEventResponse ครับ
+        // แต่ถ้ามี evt.startDate และ evt.endDate ให้ใช้ eachDayOfInterval เหมือน ParsedBookingEvent ครับ
         const dateKey = format(evt.date, 'yyyy-MM-dd'); 
         if (!map.has(dateKey)) map.set(dateKey, []);
         map.get(dateKey)!.push(evt);
@@ -132,7 +132,7 @@ export default function MonthView({ currentDate, bookings, holiday, isSyncing, s
               </div>
               
               <div className="space-y-1.5">
-                {visibleItems.map((item: Holiday | BookingEventResponse, index: number) => {
+                {visibleItems.map((item: ParsedHoliday | ParsedBookingEvent, index: number) => {
                   
                   const isHoliday = 'name' in item;
                   

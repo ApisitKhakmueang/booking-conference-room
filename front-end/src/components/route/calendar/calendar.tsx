@@ -90,23 +90,20 @@ export default function Calendar() {
 
   useEffect(() => {
     if (rooms.length > 0 && !selectedRoom) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedRoom(rooms[0]);
       setIsLoadingRoom(false)
     }
-  }, [rooms]);
+  }, [rooms, selectedRoom]);
 
 // --- 1. Logic การบังคับเปลี่ยน View (Auto-switch) ---
   useEffect(() => {
     if (isMobile) {
-      // กรณี Mobile: บังคับเป็น Day เท่านั้น
-      // เช็คก่อนว่า "ถ้าไม่ใช่ Day ค่อยเปลี่ยน" (เพื่อกัน Loop และ Re-render ไม่จำเป็น)
       if (view !== 'day') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setView('day');
       }
     } else if (isTablet) {
-      // กรณี Tablet: รองรับ Week และ Day
-      // ดังนั้นถ้า User ดู Month อยู่ ต้องดีดกลับมาเป็น Week
-      // (แต่ถ้าดู Day อยู่แล้ว ก็ปล่อยไว้ได้ หรือถ้าอยากบังคับ Week เสมอก็แก้เงื่อนไขตรงนี้)
       if (view === 'month') {
         setView('week');
       }
