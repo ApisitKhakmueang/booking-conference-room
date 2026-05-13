@@ -14,16 +14,19 @@ services:
     restart: unless-stopped
 
   frontend-service:
-    build: ./front-end
+    build: 
+      context: ./front-end
+      # ส่งค่าเข้าไปให้ Next.js เห็น "ตอนกำลัง Build"
+      args:
+        # สมมติว่าคุณต้องการเทสต์ในเครื่อง ให้ Browser ยิงไปที่ localhost
+        - NEXT_PUBLIC_BACKEND_HTTP=http://backend-service:8080/api/v1
+        - NEXT_PUBLIC_BACKEND_WEBSOCKET=ws://backend-service:8080/ws
     ports:
       - "3000:3000"
     depends_on:
       - backend-service
     env_file:
       - ./front-end/.env.local
-    environment:
-      - NEXT_PUBLIC_BACKEND_HTTP=http://backend-service:8080/api/v1
-      - NEXT_PUBLIC_BACKEND_WEBSOCKET=ws://backend-service:8080/ws
     restart: unless-stopped
 
   redis-service:
