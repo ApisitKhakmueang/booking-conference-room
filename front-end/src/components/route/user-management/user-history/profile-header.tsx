@@ -1,11 +1,12 @@
 import { UserResponse } from "@/utils/interface/response";
+import Image from "next/image";
 
 export default function ProfileHeader({ user }: { user?: UserResponse }) {
   const isUserActive = user?.status === 'active';
 
   return (
     <div className="flex items-center gap-5">
-      <img src={user?.avatarUrl} className="w-16 h-16 rounded-2xl object-cover ring-2 ring-gray-100 dark:ring-white/5" alt="profile" />
+      <Image src={user?.avatarUrl || '/default-avatar.png'} className="rounded-2xl object-cover ring-2 ring-gray-100 dark:ring-white/5" alt="profile" width={64} height={64} />
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-light-main dark:text-main leading-tight">{user?.fullName}</h1>
         <p className="text-sm font-medium text-light-secondary dark:text-secondary">{user?.email}</p>

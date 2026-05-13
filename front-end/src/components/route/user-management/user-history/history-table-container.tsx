@@ -17,6 +17,7 @@ export default function HistoryTableContainer({ userID }: { userID: string }) {
 
   // 🌟 รีเซ็ตหน้ากลับเป็นหน้า 1 เสมอเวลาเปลี่ยนตัวกรอง
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [currentStatus, currentDate]);
 
