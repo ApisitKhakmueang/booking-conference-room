@@ -91,14 +91,14 @@ jobs:
         with:
           context: ./back-end
           push: true
-          tags: ghcr.io/${{ github.repository }}/booking-backend:latest
+          tags: ghcr.io/${{ env.REPO_LC }}/booking-backend:latest
 
       - name: Build and push Frontend Image
         uses: docker/build-push-action@v5
         with:
           context: ./front-end
           push: true
-          tags: ghcr.io/${{ github.repository }}/booking-frontend:latest
+          tags: ghcr.io/${{ env.REPO_LC }}/booking-frontend:latest
 
   # ----------------------------------------
   # Job 4: สั่งเครื่อง AWS EC2 ให้ดึง Image ใหม่ไปรัน
