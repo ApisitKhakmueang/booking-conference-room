@@ -1,7 +1,7 @@
 'use client'
 
 import { MonitorCheck, MonitorX, ToolCase, UserRound } from 'lucide-react';
-import { BookingEventResponse, RoomResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent, RoomResponse } from '@/utils/interface/response';
 import BookingModal from '@/components/utils/booking-modal';
 import { useState } from 'react';
 import OccupyModal from './occupy-modal';
@@ -30,13 +30,13 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: RoomResponse[], bookings: BookingEventResponse[] }) {
+export default function RoomsGrid({ displayRooms, bookings }: { displayRooms: RoomResponse[], bookings: ParsedBookingEvent[] }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<number | null>(null)
 
   const [isOccupyModalOpen, setIsOccupyModalOpen] = useState(false)
-  const [selectedBooking, setSelectedBooking] = useState<BookingEventResponse | null>(null)
+  const [selectedBooking, setSelectedBooking] = useState<ParsedBookingEvent | null>(null)
 
   return (
     <>

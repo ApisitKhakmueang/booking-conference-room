@@ -189,7 +189,7 @@ export interface TimeGridViewProps {
 
 export interface OccupyModalProps { 
   setIsOccupyModalOpen: (val: boolean) => void, 
-  selectedBooking: BookingEventResponse
+  selectedBooking: ParsedBookingEvent
 }
 
 export interface ConfigProps {
