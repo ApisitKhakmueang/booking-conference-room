@@ -1,4 +1,4 @@
-import { BookingEventResponse, ConfigResponse, ParsedBookingEvent, ParsedHoliday, RoomResponse, UserResponse } from "./response";
+import { ConfigResponse, ParsedBookingEvent, ParsedHoliday, RoomResponse, UserResponse } from "./response";
 
 export interface EachPageLayoutProps {
   pageName?: string;
