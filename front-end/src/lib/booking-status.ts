@@ -1,5 +1,5 @@
 import { CardProps } from "@/components/ui/card";
-import { BookingEventResponse, RoomResponse } from "@/utils/interface/response";
+import { ParsedBookingEvent, RoomResponse } from "@/utils/interface/response";
 
 export function BookingStatus(rooms: RoomResponse[]) {
   const total = rooms.length
@@ -16,7 +16,7 @@ export function BookingStatus(rooms: RoomResponse[]) {
   return result;
 }
 
-export function DisplayRooms(rooms: RoomResponse[] | undefined, bookings: BookingEventResponse[]) {
+export function DisplayRooms(rooms: RoomResponse[] | undefined, bookings: ParsedBookingEvent[]) {
   if (!rooms || rooms.length === 0) return [];
 
   return rooms.map((room) => {
