@@ -175,6 +175,7 @@ func InitialFiber(usecase *domain.AllUsecase, bookingWsHub *Websocket.Hub) *fibe
 	wsGroup := app.Group("/ws")
 	wsWithMiddleware := wsGroup.Group("/booking", middleware.WebsocketMiddleware)
 	Websocket.InitialWSRoute(wsWithMiddleware, bookingWebsocket, supabaseClient)
+	Websocket.InitialWSRouteRoom(wsGroup, bookingWebsocket)
 
 	return app
 }
