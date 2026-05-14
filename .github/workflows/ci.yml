@@ -45,6 +45,9 @@ jobs:
   frontend-ci:
     name: Frontend CI (Next.js)
     runs-on: ubuntu-latest
+
+    env:
+      TZ: Asia/Bangkok
     
     # กำหนดให้ทุกคำสั่งใน Job นี้ รันในโฟลเดอร์ front-end
     defaults:
