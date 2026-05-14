@@ -2,7 +2,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import RoomsGrid from './room-grid';
-import React from 'react';
 import { RoomResponse, BookingEventResponse } from '@/utils/interface/response';
 
 // Mock Modals

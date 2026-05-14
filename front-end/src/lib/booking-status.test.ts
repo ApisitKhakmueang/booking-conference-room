@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { BookingStatus, DisplayRooms } from './booking-status';
-import { RoomResponse, BookingEventResponse } from '@/utils/interface/response';
+import { RoomResponse, ParsedBookingEvent } from '@/utils/interface/response';
 
 describe('booking-status.ts', () => {
   
@@ -11,13 +11,13 @@ describe('booking-status.ts', () => {
     { id: '3', name: 'Room C', roomNumber: 103, location: 'Thailand', capacity: 20, status: 'maintenance' },
   ];
 
-  const mockBookings: BookingEventResponse[] = [
+  const mockBookings: ParsedBookingEvent[] = [
     // 🟢 เคสที่ 1: การจองที่ได้รับการยืนยันแล้ว (Confirm)
     { 
       id: 'b1', 
       title: 'Monthly Team Meeting',
-      startTime: '2026-05-02T09:00:00Z', // เริ่ม 9 โมงเช้า (UTC)
-      endTime: '2026-05-02T11:00:00Z',   // จบ 11 โมงเช้า
+      startTime: new Date('2026-05-02T09:00:00Z'), // เริ่ม 9 โมงเช้า (UTC)
+      endTime: new Date('2026-05-02T11:00:00Z'),   // จบ 11 โมงเช้า
       passcode: '1234',
       status: 'confirm', 
       User: {
@@ -42,8 +42,8 @@ describe('booking-status.ts', () => {
     { 
       id: 'b2', 
       title: 'Client Pitching',
-      startTime: '2026-05-02T13:00:00Z',
-      endTime: '2026-05-02T15:00:00Z',
+      startTime: new Date('2026-05-02T13:00:00Z'),
+      endTime: new Date('2026-05-02T15:00:00Z'),
       passcode: '5678',
       status: 'pending', 
       User: {
@@ -67,8 +67,8 @@ describe('booking-status.ts', () => {
     { 
       id: 'b3', 
       title: 'System Design Interview',
-      startTime: '2026-05-03T10:00:00Z',
-      endTime: '2026-05-03T11:30:00Z',
+      startTime: new Date('2026-05-03T10:00:00Z'),
+      endTime: new Date('2026-05-03T11:30:00Z'),
       passcode: '9999',
       status: 'cancelled', 
       User: {

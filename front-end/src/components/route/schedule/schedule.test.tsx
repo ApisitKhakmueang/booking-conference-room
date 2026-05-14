@@ -55,9 +55,9 @@ describe('Schedule Main Page', () => {
   it('3. Should classify and render events based on live status', async () => {
     // สมมติเวลาปัจจุบันคือ 10:00
     const mockEvents = [
-      { id: '1', startTime: '2026-05-06T09:30:00', endTime: '2026-05-06T10:30:00', title: 'In Progress Event' }, // คร่อมเวลา 10:00 พอดี
-      { id: '2', startTime: '2026-05-06T10:10:00', endTime: '2026-05-06T11:00:00', title: 'Upcoming Event' },    // เริ่มในอีก 10 นาที (<=15m)
-      { id: '3', startTime: '2026-05-06T14:00:00', endTime: '2026-05-06T15:00:00', title: 'Normal Event' }       // เริ่มบ่ายๆ
+      { id: '1', startTime: new Date('2026-05-06T09:30:00'), endTime: new Date('2026-05-06T10:30:00'), title: 'In Progress Event' }, // คร่อมเวลา 10:00 พอดี
+      { id: '2', startTime: new Date('2026-05-06T10:10:00'), endTime: new Date('2026-05-06T11:00:00'), title: 'Upcoming Event' },    // เริ่มในอีก 10 นาที (<=15m)
+      { id: '3', startTime: new Date('2026-05-06T14:00:00'), endTime: new Date('2026-05-06T15:00:00'), title: 'Normal Event' }       // เริ่มบ่ายๆ
     ];
 
     vi.mocked(bookingService.fetchUserBookings).mockResolvedValue(mockEvents as unknown as Awaited<ReturnType<typeof bookingService.fetchUserBookings>>);

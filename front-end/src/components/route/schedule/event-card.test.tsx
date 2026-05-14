@@ -29,9 +29,9 @@ describe('CardEvents', () => {
     return {
       id: 'book1',
       title: 'Sprint Planning',
-      date: d.toISOString(),
-      startTime: start.toISOString(), // 🌟 ส่งเป็น ISO String เต็มๆ
-      endTime: end.toISOString(),     // 🌟 ส่งเป็น ISO String เต็มๆ
+      date: d,
+      startTime: start, // 🌟 ส่งเป็น ISO String เต็มๆ
+      endTime: end,     // 🌟 ส่งเป็น ISO String เต็มๆ
       status: 'approved',
       duration: '1 hr',
       passcode: '1234',

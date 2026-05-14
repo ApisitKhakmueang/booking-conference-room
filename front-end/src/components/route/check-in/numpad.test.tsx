@@ -2,10 +2,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Numpad from './numpad';
-import React from 'react';
 import { roomService } from '@/service/booking.service';
 import Swal from 'sweetalert2';
-import { BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent } from '@/utils/interface/response';
 import { AxiosResponse } from 'axios';
 
 vi.mock('@/service/booking.service', () => ({ roomService: { checkinBooking: vi.fn() } }));
@@ -13,7 +12,7 @@ vi.mock('sweetalert2', () => ({ default: { fire: vi.fn() } }));
 
 describe('Numpad Component', () => {
   const mockRoomID = 'room-123';
-  const mockBooking = { id: 'book-1' } as unknown as BookingEventResponse;
+  const mockBooking = { id: 'book-1' } as unknown as ParsedBookingEvent;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -6,7 +6,7 @@ import { roomService } from '@/service/booking.service';
 import useBookingStatusByRoomIDWS from '@/hooks/data/useBookingStatusByRoomIDWS';
 import { useSystemConfig } from '@/hooks/data/useSystemConfig';
 import { mapBookingEvents } from '@/lib/map-resp-event';
-import { BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent } from '@/utils/interface/response';
 
 // Mock Dependencies
 vi.mock('@/service/booking.service', () => ({ roomService: { fetchRoomByID: vi.fn() } }));
@@ -55,16 +55,16 @@ describe('CheckIn Page', () => {
 
   it('3. Should display "Occupied" state and BookingCard when busy', async () => {
     const mockRawBooking = [{ id: 'b1' }]; // ข้อมูลดิบสมมติ
-    vi.mocked(useBookingStatusByRoomIDWS).mockReturnValue({ booking: mockRawBooking as unknown as BookingEventResponse, isLoadingBooking: false });
+    vi.mocked(useBookingStatusByRoomIDWS).mockReturnValue({ booking: mockRawBooking as unknown as ParsedBookingEvent, isLoadingBooking: false });
 
     // ✅ แก้ไขตรงนี้
     vi.mocked(mapBookingEvents).mockReturnValue({
       id: 'b1',
       title: 'CEO Meeting',
       status: 'Confirmed', 
-      date: '2026-05-06T00:00:00Z',
-      startTime: '2026-05-06T10:00:00Z',
-      endTime: '2026-05-06T11:00:00Z',
+      date: new Date('2026-05-06T00:00:00Z'),
+      startTime: new Date('2026-05-06T10:00:00Z'),
+      endTime: new Date('2026-05-06T11:00:00Z'),
       duration: '1 hr',
       user: { fullName: 'Boss' }
     } as unknown as ReturnType<typeof mapBookingEvents>);

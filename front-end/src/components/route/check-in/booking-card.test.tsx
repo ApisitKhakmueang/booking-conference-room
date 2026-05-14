@@ -7,9 +7,9 @@ import { BookingEvent } from '@/utils/interface/interface';
 describe('BookingCard Component', () => {
   const mockBooking = {
     title: 'Project Update Meeting',
-    date: '2026-05-06T00:00:00+07:00',
-    startTime: '2026-05-06T10:00:00+07:00',
-    endTime: '2026-05-06T11:00:00+07:00',
+    date: new Date('2026-05-06T00:00:00+07:00'),
+    startTime: new Date('2026-05-06T10:00:00+07:00'),
+    endTime: new Date('2026-05-06T11:00:00+07:00'),
     duration: '1 hr',
     user: { fullName: 'Apisit Dev' }
   } as unknown as BookingEvent;
