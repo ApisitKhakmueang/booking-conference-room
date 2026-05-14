@@ -12,7 +12,15 @@ describe('time.ts', () => {
       });
     });
 
-    it('2. Should return correct formatTimeWithSuffix with PM', () => {
+    it('2. Should return correct formatTimeWithSuffix with string', () => {
+      const result = formatTimeWithSuffix('2022-01-01T10:00:00+07:00');
+      expect(result).toEqual({
+        time: '10:00',
+        suffix: 'AM'
+      });
+    });
+
+    it('3. Should return correct formatTimeWithSuffix with PM', () => {
       const result = formatTimeWithSuffix(new Date('2022-01-01T14:00:00+07:00'));
       expect(result).toEqual({
         time: '02:00',
@@ -20,7 +28,7 @@ describe('time.ts', () => {
       });
     });
 
-    it('3. Should return correct formatTimeWithSuffix with midnight', () => {
+    it('4. Should return correct formatTimeWithSuffix with midnight', () => {
       const result = formatTimeWithSuffix(new Date('2022-01-01T00:00:00+07:00'));
       expect(result).toEqual({
         time: '12:00',
@@ -28,7 +36,7 @@ describe('time.ts', () => {
       });
     });
 
-    it('4. Should return correct formatTimeWithSuffix with noon', () => {
+    it('5. Should return correct formatTimeWithSuffix with noon', () => {
       const result = formatTimeWithSuffix(new Date('2022-01-01T12:00:00+07:00'));
       expect(result).toEqual({
         time: '12:00',
