@@ -17,25 +17,25 @@ import (
 
 type bookingUsecases struct {
 	*BaseUsecase
-	cache					domain.BookingRedisRepo // เรียกผ่าน Interface
-	db						domain.BookingPostgresRepo // เรียกผ่าน Interface
-	asynqClient		domain.AsynqQueue
+	cache       	domain.BookingRedisRepo    // เรียกผ่าน Interface
+	db          	domain.BookingPostgresRepo // เรียกผ่าน Interface
+	asynqClient 	domain.AsynqQueue
 }
 
 func NewBookingUsecases(
-	pub						domain.RealtimePublisher,
+	pub 					domain.RealtimePublisher,
 	cache 				domain.BookingRedisRepo,
 	db 						domain.BookingPostgresRepo,
-	asynqClient		domain.AsynqQueue) domain.BookingUsecases {
+	asynqClient 	domain.AsynqQueue) domain.BookingUsecases {
 	return &bookingUsecases{
-		BaseUsecase: 	&BaseUsecase{publisher: pub},
-		cache:				cache,
-		db:   				db,
-		asynqClient: 	asynqClient,
+		BaseUsecase: &BaseUsecase{publisher: pub},
+		cache:       cache,
+		db:          db,
+		asynqClient: asynqClient,
 	}
 }
 
-func (u *bookingUsecases) CreateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
+func (u *bookingUsecases) CreateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
 	configTime, err := u.db.GetConfigDB(ctx)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (u *bookingUsecases) CreateBooking(ctx context.Context,booking *domain.Book
 
 		// 2. ส่งไปเช็คในฟังก์ชันข้างบน
 		// "เฮ้ DB! ห้อง 1 เวลา 10:00-11:00 รหัส 1234 ว่างไหม?"
-		if u.db.IsPasscodeAvailable(ctx,booking, passcode) {
+		if u.db.IsPasscodeAvailable(ctx, booking, passcode) {
 			finalPasscode = passcode // เย้! ว่าง -> เก็บค่าไว้
 			break                    // หยุดวนลูป
 		}
@@ -86,7 +86,7 @@ func (u *bookingUsecases) CreateBooking(ctx context.Context,booking *domain.Book
 	return nil
 }
 
-func (u *bookingUsecases) UpdateBooking(ctx context.Context,booking *domain.Booking, roomNumber uint) error {
+func (u *bookingUsecases) UpdateBooking(ctx context.Context, booking *domain.Booking, roomNumber uint) error {
 	configTime, err := u.db.GetConfigDB(ctx)
 	if err != nil {
 		return err
@@ -105,14 +105,14 @@ func (u *bookingUsecases) UpdateBooking(ctx context.Context,booking *domain.Book
 	if err != nil {
 		return err
 	}
-	
+
 	prefixPrevRoomNumber := fmt.Sprintf("booking:%d", prevRoomNumber)
 	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
 	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
 	u.cache.DeleteCache(ctx, prefixPrevRoomNumber)
 	u.cache.DeleteCache(ctx, prefixRoomNumber)
 	u.cache.DeleteCache(ctx, prefixUser)
-		
+
 	u.PublishEvent("booking_updated", roomNumber, booking)
 
 	go func(b *domain.Booking, noShowThresoldMins int) {
@@ -122,17 +122,16 @@ func (u *bookingUsecases) UpdateBooking(ctx context.Context,booking *domain.Book
 	return nil
 }
 
-func (u *bookingUsecases) DeleteBooking(ctx context.Context,booking *domain.Booking) error {
+func (u *bookingUsecases) DeleteBooking(ctx context.Context, booking *domain.Booking) error {
 	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
 	if err != nil {
 		return err
 	}
 
-	deletedBooking, err := u.db.DeleteBookingDB(ctx, booking);
+	deletedBooking, err := u.db.DeleteBookingDB(ctx, booking)
 	if err != nil {
 		return err
 	}
-
 
 	prefixRoomNumber := fmt.Sprintf("booking:%d", booking.Room.RoomNumber)
 	prefixUser := fmt.Sprintf("booking:user:%s", booking.UserID)
@@ -147,13 +146,13 @@ func (u *bookingUsecases) DeleteBooking(ctx context.Context,booking *domain.Book
 	return nil
 }
 
-func (u *bookingUsecases) CheckOutBooking(ctx context.Context,booking *domain.Booking) error {
+func (u *bookingUsecases) CheckOutBooking(ctx context.Context, booking *domain.Booking) error {
 	completedBooking, err := u.GetBookingByID(ctx, booking.ID)
 	if err != nil {
 		return err
 	}
 
-	deletedBooking, err := u.db.CheckOutBookingDB(ctx, booking);
+	deletedBooking, err := u.db.CheckOutBookingDB(ctx, booking)
 	if err != nil {
 		return err
 	}
@@ -190,12 +189,12 @@ func (u *bookingUsecases) GetBookingByDay(ctx context.Context, DateStr string) (
 	var date domain.Date
 	date.StartStr = startTime.Format(layout)
 	date.EndStr = endTime.Format(layout)
-	
+
 	bookings, err := u.db.GetBookingByDayDB(ctx, &date)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return bookings, nil
 }
 
@@ -215,19 +214,19 @@ func (u *bookingUsecases) GetUpNextBooking(ctx context.Context, date string) (*d
 	return booking, nil
 }
 
-func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
+func (u *bookingUsecases) GetBooking(ctx context.Context, date *domain.Date, roomNumber uint) ([]domain.Booking, error) {
 	var response []domain.Booking
 	instBooking := new(domain.Booking)
 	if err := u.db.GetRoomID(ctx, instBooking, roomNumber); err != nil {
 		return nil, err
 	}
-	
+
 	cacheKey := fmt.Sprintf("booking:%d:%s:%s", roomNumber, date.StartStr, date.EndStr)
 
 	var bookings []domain.Booking
 	err := u.cache.GetCache(ctx, cacheKey, &bookings)
-	
-	if err != nil { 
+
+	if err != nil {
 		// 3.1 ดึงจาก Postgres
 		bookings, err = u.db.GetBookingDB(ctx, date, instBooking.RoomID)
 		if err != nil {
@@ -259,24 +258,20 @@ func (u *bookingUsecases) GetBooking(ctx context.Context,date *domain.Date, room
 func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.Date) (*domain.UpNextBookingResponse, error) {
 	cacheKey := fmt.Sprintf("booking:analytic:%s:%s", date.StartStr, date.EndStr)
 
-	var bookings []domain.Booking
-	err := u.cache.GetCache(ctx, cacheKey, &bookings)
+	var response domain.UpNextBookingResponse
+	err := u.cache.GetCache(ctx, cacheKey, &response)
 
-	if err != nil { 
-		// 3.1 ดึงจาก Postgres
-		bookings, err = u.db.GetAnalyticBookingDB(ctx, date)
-		if err != nil {
-			return nil, err
-		}
-		
-		if len(bookings) > 0 {
-			u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
-				// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
-				u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
-			})
-		}
+	if err == nil {
+		return &response, nil
 	}
-	
+
+	// 3.1 ดึงจาก Postgres
+	var bookings []domain.Booking
+	bookings, err = u.db.GetAnalyticBookingDB(ctx, date)
+	if err != nil {
+		return nil, err
+	}
+
 	totalBookings := len(bookings)
 
 	// ⭐️ ป้องกันบั๊ก: ถ้าไม่มีการจองเลย ให้ส่งค่าว่างกลับไปทันที ไม่งั้นตอนหาร % โปรแกรมจะพัง (Divide by zero)
@@ -287,21 +282,21 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 	}
 
 	var health domain.AttendanceHealth
-	
+
 	// ใช้ Struct ชั่วคราวเพื่อเก็บข้อมูลห้องพร้อมยอด Count
 	type roomStat struct {
-		ID 					uuid.UUID
-		RoomNumber 	uint
-		Name       	string
-		Count      	int
+		ID         uuid.UUID
+		RoomNumber uint
+		Name       string
+		Count      int
 	}
-	
+
 	// ใช้ RoomNumber (int) เป็น Key ของ Map
 	mapPopularRooms := make(map[uint]*roomStat)
 
 	// 1. วนลูปเพื่อนับจำนวนต่างๆ (Loop ครั้งเดียวได้ครบทุกอย่าง)
 	for _, booking := range bookings {
-		
+
 		// --- คำนวณ Attendance Health ---
 		if booking.Status != nil {
 			switch *booking.Status {
@@ -354,11 +349,14 @@ func (u *bookingUsecases) GetAnalyticBooking(ctx context.Context, date *domain.D
 
 	// 5. ประกอบร่างเป็น Response และส่งกลับ
 	limit := min(len(popularRooms), 3)
-
-	response := domain.UpNextBookingResponse{
+	response = domain.UpNextBookingResponse{
 		AttendanceHealth: health,
 		PopularRooms:     popularRooms[:limit],
 	}
+
+	u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
+		u.cache.SetCache(bgCtx, cacheKey, response, 7*24*time.Hour)
+	})
 
 	return &response, nil
 }
@@ -383,19 +381,19 @@ func (u *bookingUsecases) GetBookingStatusByRoomID(ctx context.Context, roomID u
 	return booking, nil
 }
 
-func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
+func (u *bookingUsecases) GetUserBooking(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("booking:user:%s:date:%s", userID, date)
 
 	var bookings []domain.Booking
 	err := u.cache.GetCache(ctx, cacheKey, &bookings)
-	
-	if err != nil { 
+
+	if err != nil {
 		// 3.1 ดึงจาก Postgres
 		bookings, err = u.db.GetUserBookingDB(ctx, userID, date)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
 			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
@@ -405,19 +403,19 @@ func (u *bookingUsecases) GetUserBooking(ctx context.Context,userID uuid.UUID, d
 	return bookings, nil
 }
 
-func (u *bookingUsecases) GetUserHistory(ctx context.Context,userID uuid.UUID, date string) ([]domain.Booking, error) {
+func (u *bookingUsecases) GetUserHistory(ctx context.Context, userID uuid.UUID, date string) ([]domain.Booking, error) {
 	cacheKey := fmt.Sprintf("history:user:%s:date:%s", userID, date)
 
 	var bookings []domain.Booking
 	err := u.cache.GetCache(ctx, cacheKey, &bookings)
-	
-	if err != nil { 
+
+	if err != nil {
 		// 3.1 ดึงจาก Postgres
 		bookings, err = u.db.GetUserHistoryDB(ctx, userID, date)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		u.RunInBackground(5*time.Second, func(bgCtx context.Context) {
 			// 🌟 ใส่แค่คำสั่งที่คุณต้องการให้ทำหลังบ้านจริงๆ
 			u.cache.SetCache(bgCtx, cacheKey, bookings, 7*24*time.Hour)
@@ -536,8 +534,8 @@ func (u *bookingUsecases) GetBookingByID(ctx context.Context, id uuid.UUID) (*do
 
 func (u *bookingUsecases) PublishStatus(event string, completedBooking *domain.Booking) {
 	payload := map[string]interface{}{
-		"status":		true,
-		"booking":	completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
+		"status":  true,
+		"booking": completedBooking, // ข้อมูล Booking ที่เพิ่งสร้างเสร็จ (มี ID แล้ว)
 	}
 
 	go func() {
