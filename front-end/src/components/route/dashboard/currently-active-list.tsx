@@ -1,9 +1,9 @@
-import { BookingEventResponse } from '@/utils/interface/response';
+import { ParsedBookingEvent } from '@/utils/interface/response';
 import { Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BookingCard from './booking-card';
 
-export default function CurrentlyActiveList({ bookings, isLoadingBooking }: { bookings: BookingEventResponse[], isLoadingBooking: boolean }) {
+export default function CurrentlyActiveList({ bookings, isLoadingBooking }: { bookings: ParsedBookingEvent[], isLoadingBooking: boolean }) {
   const router = useRouter()
 
   return (
