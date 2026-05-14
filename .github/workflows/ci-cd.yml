@@ -86,6 +86,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }} # ใช้ Token อัตโนมัติของ GitHub
 
+      - name: Set lowercase repository name
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
       - name: Build and push Backend Image
         uses: docker/build-push-action@v5
         with:
