@@ -1,22 +1,39 @@
 import { formatTimeWithSuffix } from "@/lib/time";
-import { BookingEventResponse } from "@/utils/interface/response";
+import { ParsedBookingEvent } from "@/utils/interface/response";
 import { Users } from "lucide-react";
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { useEffect, useState } from "react";
 
-export default function BookingCard({ booking }: { booking: BookingEventResponse }) {
+export default function BookingCard({ booking }: { booking: ParsedBookingEvent }) {
   const start = formatTimeWithSuffix(booking.startTime)
   const end = formatTimeWithSuffix(booking.endTime)
 
-  const getEndsInText = (endTime: string) => {
+  // 🌟 1. สร้าง State สำหรับเก็บเวลาปัจจุบัน
+  const [now, setNow] = useState(new Date());
+
+  // 🌟 2. สั่งให้เวลาอัปเดตทุกๆ 1 นาที เพื่อให้ Countdown ทำงาน
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 🌟 3. รับค่าเป็น Date หรือ String ก็ได้เพื่อความปลอดภัย
+  const getEndsInText = (endTime: Date | string) => {
     if (!endTime) return '';
-    const mins = differenceInMinutes(endTime, new Date());
     
-    if (mins < 0) return 'Ending...';
+    // แปลงให้เป็น Date Object ชัวร์ๆ ก่อนคำนวณ
+    const endObj = typeof endTime === 'string' ? new Date(endTime) : endTime;
+    const mins = differenceInMinutes(endObj, now); // ใช้ state 'now' แทน new Date()
+    
+    if (mins <= 0) return 'Ending...'; // รวบกรณี 0 นาทีเข้ามาด้วย
+    
     if (mins >= 60) {
       const hrs = Math.floor(mins / 60);
       const remainingMins = mins % 60;
-      return `Ends in ${hrs}h ${remainingMins}m`;
+      // ถ้านาทีที่เหลือเป็น 0 ไม่ต้องโชว์ 0m (เช่น โชว์แค่ "Ends in 1h")
+      return remainingMins > 0 ? `Ends in ${hrs}h ${remainingMins}m` : `Ends in ${hrs}h`;
     }
+    
     return `Ends in ${mins}m`;
   };
 
