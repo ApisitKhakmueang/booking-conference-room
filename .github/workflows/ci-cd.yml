@@ -1,0 +1,125 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# 🌟 1. ย้าย env มาไว้ตรงนี้ เพื่อให้มีผลกับทุก Job (แก้ปัญหา Timezone และแจ้งเตือน Node 24)
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  TZ: Asia/Bangkok
+
+jobs:
+  # ----------------------------------------
+  # Job 1: ตรวจสอบฝั่ง Backend (Go)
+  # ----------------------------------------
+  backend-ci:
+    name: Backend CI (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./back-end
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Install dependencies
+        run: go mod download
+      - name: Verify Code (Vet)
+        run: go vet ./...
+      - name: Run Unit Tests
+        run: go test -v ./... 
+
+  # ----------------------------------------
+  # Job 2: ตรวจสอบฝั่ง Frontend (Next.js)
+  # ----------------------------------------
+  frontend-ci:
+    name: Frontend CI (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front-end
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: ./front-end/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Linting
+        run: npm run lint
+      - name: Run Unit Tests (Vitest)
+        run: npm run test 
+      - name: Build Next.js
+        run: npm run build
+
+  # ----------------------------------------
+  # Job 3: สร้าง Docker Image และอัปโหลดขึ้น GitHub (GHCR)
+  # ----------------------------------------
+  build-and-push-docker:
+    name: Build & Push to GHCR
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci] # รอให้เทสต์ผ่านก่อน
+    
+    # 🌟 ต้องขออนุญาตให้ Action นี้เขียนข้อมูลลง Package ของ GitHub ได้
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # ใช้ Token อัตโนมัติของ GitHub
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./back-end
+          push: true
+          tags: ghcr.io/${{ github.repository }}/booking-backend:latest
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./front-end
+          push: true
+          tags: ghcr.io/${{ github.repository }}/booking-frontend:latest
+
+  # ----------------------------------------
+  # Job 4: สั่งเครื่อง AWS EC2 ให้ดึง Image ใหม่ไปรัน
+  # ----------------------------------------
+  # deploy-to-ec2:
+  #   name: Deploy to AWS EC2
+  #   runs-on: ubuntu-latest
+  #   needs: [build-and-push-docker] # รอให้อัปโหลด Image เสร็จก่อน
+    
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: ${{ secrets.EC2_HOST }}
+  #         username: ${{ secrets.EC2_USERNAME }}
+  #         key: ${{ secrets.EC2_SSH_KEY }}
+  #         script: |
+  #           cd ~/booking-conference-room
+  #           # 1. โหลด Image ล่าสุดลงมา (ระบบจะถามหาจาก ghcr.io)
+  #           docker compose pull
+  #           # 2. ปิดของเก่า เปิดของใหม่
+  #           docker compose up -d
+  #           # 3. ลบขยะ Image เก่าทิ้งประหยัดพื้นที่ EC2
+  #           docker image prune -f
