@@ -42,9 +42,11 @@ func (u *workerUsecase) UpdateBookingEndStatus(ctx context.Context, bookingID uu
 	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
 	prefixUser := fmt.Sprintf("booking:user:%s", updateBooking.UserID)
 	prefixHistory := fmt.Sprintf("history:user:%s", updateBooking.UserID)
+	prefixAnalytic := "booking:analytic"
 	u.cache.DeleteCache(ctx, prefixRoomNumber)
 	u.cache.DeleteCache(ctx, prefixUser)
 	u.cache.DeleteCache(ctx, prefixHistory)
+	u.cache.DeleteCache(ctx, prefixAnalytic)
 
 	u.PublishEvent("booking_end", roomNumber, updateBooking)
 	u.PublishStatus("booking_end", updateBooking)
@@ -67,9 +69,11 @@ func (u *workerUsecase) UpdateBookingNoshowStatus(ctx context.Context, bookingID
 	prefixRoomNumber := fmt.Sprintf("booking:%d", roomNumber)
 	prefixUser := fmt.Sprintf("booking:user:%s", updateBooking.UserID)
 	prefixHistory := fmt.Sprintf("history:user:%s", updateBooking.UserID)
+	prefixAnalytic := "booking:analytic"
 	u.cache.DeleteCache(ctx, prefixRoomNumber)
 	u.cache.DeleteCache(ctx, prefixUser)
 	u.cache.DeleteCache(ctx, prefixHistory)
+	u.cache.DeleteCache(ctx, prefixAnalytic)
 
 	u.PublishEvent("booking_noshow", roomNumber, updateBooking)
 	u.PublishStatus("booking_noshow", updateBooking)
