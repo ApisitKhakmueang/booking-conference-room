@@ -94,7 +94,7 @@ jobs:
 
       - name: Build Docker Compose
         # ทดสอบว่าไฟล์ docker-compose.yml และ dockerfile ไม่มี Syntax Error
-        run: docker-compose build
+        run: docker compose build
         env:
           # ใส่ค่าดัมมี่เข้าไปเพื่อให้ docker-compose บิลด์ผ่านโดยไม่แจ้งเตือน
           NEXT_PUBLIC_BACKEND_HTTP: "http://dummy-api/api/v1"
