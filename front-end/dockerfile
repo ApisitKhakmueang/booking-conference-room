@@ -25,12 +25,18 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy all source files
 COPY . .
 
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_BACKEND_HTTP
 ARG NEXT_PUBLIC_BACKEND_WEBSOCKET
+ARG NEXT_PUBLIC_SITE_URL
 
-# แปลง ARG ให้กลายเป็น ENV เพื่อให้ Next.js ดึงไปใช้ตอนบิลด์ได้
+# 🌟 2. แปลงค่าที่รับมา ให้กลายเป็น Environment Variables ให้ Next.js มองเห็น
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_BACKEND_HTTP=$NEXT_PUBLIC_BACKEND_HTTP
 ENV NEXT_PUBLIC_BACKEND_WEBSOCKET=$NEXT_PUBLIC_BACKEND_WEBSOCKET
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 # Set Next.js telemetry to disabled during build
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -71,4 +77,4 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
-CMD ["node", "start"]
+CMD ["npm", "start"]
