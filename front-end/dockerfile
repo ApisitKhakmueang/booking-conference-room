@@ -60,6 +60,12 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Copy the public folder
 COPY --from=builder /app/public ./public
 
+# 🌟 2. ดึงไฟล์ของโหมด standalone ทั้งหมดออกมาวางกองไว้ข้างนอกสุด
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+# 🌟 3. ดึงไฟล์ static (พวกไฟล์ CSS ของ Tailwind และ JS) มาวางให้ถูกที่
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 # Copy the standalone build output (Next.js output: 'standalone')
 # If standalone output is NOT enabled, we copy .next and node_modules instead
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
