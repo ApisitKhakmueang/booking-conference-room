@@ -134,7 +134,9 @@ func InitialFiber(usecase *domain.AllUsecase, bookingWsHub *Websocket.Hub) *fibe
 
 	supabaseClient := InitialSupabase()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+    ReadBufferSize: 128 * 1024,
+	})
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
 		// ถ้าไม่มี Env ให้ใช้ localhost เป็นค่าเริ่มต้น
