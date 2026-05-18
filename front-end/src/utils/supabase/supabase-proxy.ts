@@ -50,11 +50,11 @@ export async function updateSession(request: NextRequest) {
   const userStatus = user?.app_metadata?.status;
   const userRole = user?.app_metadata?.role
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+
   // redirect root
   if (request.nextUrl.pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign-in";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/auth/sign-in", siteUrl));
   }
 
   // not login + no user
@@ -62,9 +62,7 @@ export async function updateSession(request: NextRequest) {
     !user &&
     !request.nextUrl.pathname.startsWith("/auth")
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign-in";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/auth/sign-in", siteUrl));
   }
 
   if (user && userStatus === 'inactive') {
@@ -73,9 +71,7 @@ export async function updateSession(request: NextRequest) {
       !request.nextUrl.pathname.startsWith("/suspended") && 
       !request.nextUrl.pathname.startsWith("/auth")
     ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/suspended"; // เตะไปหน้าแจ้งเตือนโดนแบน
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(new URL("/suspended", siteUrl));
     }
   }
 
@@ -89,9 +85,8 @@ export async function updateSession(request: NextRequest) {
     }
 
     // 🌟 ถ้าโดนแบนอยู่ แล้วพยายามมาหน้า auth ให้เตะไป suspended แทนที่จะเป็น dashboard
-    const url = request.nextUrl.clone();
-    url.pathname = userStatus === 'inactive' ? "/suspended" : "/dashboard";
-    return NextResponse.redirect(url);
+    const targetPath = userStatus === 'inactive' ? "/suspended" : "/dashboard";
+    return NextResponse.redirect(new URL(targetPath, siteUrl));
   }
 
   if ((
@@ -100,9 +95,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/system-config")
     ) && userRole === 'user'
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/dashboard", siteUrl));
   }
 
 
