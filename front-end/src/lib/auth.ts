@@ -26,8 +26,7 @@ export async function signInWithGoogle() {
   const supabase = await createClient()
   
   // บน Server ไม่มี window.location ต้องดึง origin จาก headers ของ request แทน
-  const headersList = await headers()
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || headersList.get('origin')
+  const origin = process.env.NEXT_PUBLIC_SITE_URL
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
