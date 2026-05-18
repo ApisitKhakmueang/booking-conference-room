@@ -2,14 +2,21 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
+
+// 🌟 สร้างฟังก์ชันเช็คสภาพแวดล้อม (เพิ่มไว้บนสุดของไฟล์)
+const getSiteUrl = () => {
+  // ถ้ากำลังรันโค้ดด้วย npm run dev บนเครื่องตัวเอง
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000';
+  }
+  // ถ้ากำลังรันบน Docker (EC2) หรือ Vercel
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://guyae-booking.duckdns.org';
+}
 
 // 🌟 1. สมัครสมาชิก
 export async function signUp(email: string, password: string) {
   const supabase = await createClient()
   const { error } = await supabase.auth.signUp({ email, password })
-  
-  // แปลง error เป็น string เพื่อให้ส่งกลับไปฝั่ง Client ได้อย่างปลอดภัย
   return { error: error?.message || null }
 }
 
@@ -17,7 +24,6 @@ export async function signUp(email: string, password: string) {
 export async function signIn(email: string, password: string) {
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
-  
   return { error: error?.message || null }
 }
 
@@ -25,8 +31,8 @@ export async function signIn(email: string, password: string) {
 export async function signInWithGoogle() {
   const supabase = await createClient()
   
-  // บน Server ไม่มี window.location ต้องดึง origin จาก headers ของ request แทน
-  const origin = process.env.NEXT_PUBLIC_SITE_URL
+  // เรียกใช้ฟังก์ชันที่เราสร้างไว้ จะได้โดเมนที่เป๊ะ 100% เสมอ
+  const origin = getSiteUrl()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
@@ -39,7 +45,6 @@ export async function signInWithGoogle() {
     return { error: error.message }
   }
 
-  // 💡 จุดสำคัญ: บน Server การเรียก OAuth จะได้ URL กลับมา เราต้องสั่ง Redirect เอง
   if (data.url) {
     redirect(data.url)
   }
@@ -48,13 +53,13 @@ export async function signInWithGoogle() {
 // 🌟 4. ลืมรหัสผ่าน
 export async function forgotPassword(email: string) {
   const supabase = await createClient()
-  const headersList = await headers()
-  const origin = headersList.get('origin') || process.env.NEXT_PUBLIC_SITE_URL
+  
+  // อัปเดตตรงนี้ให้ใช้ getSiteUrl() เหมือนกันครับ
+  const origin = getSiteUrl()
 
   const { error } = await supabase.auth.resetPasswordForEmail(
     email,
     {
-      // 🌟 เพิ่ม ?next=/auth/update-password ต่อท้าย URL
       redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
     }
   )
