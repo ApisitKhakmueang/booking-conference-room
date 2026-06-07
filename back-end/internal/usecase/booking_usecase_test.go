@@ -29,8 +29,8 @@ func TestCreateBooking(t *testing.T) {
 
 		userID := uuid.New()
 		roomID := uuid.New()
-		startTime := time.Date(2026, time.May, 22, 14, 0, 0, 0, location)
-		endTime := time.Date(2026, time.May, 22, 15, 0, 0, 0, location)
+		startTime := time.Date(2026, time.June, 22, 14, 0, 0, 0, location)
+		endTime := time.Date(2026, time.June, 22, 15, 0, 0, 0, location)
 
 		booking := &domain.Booking{
 			UserID:    userID,
@@ -217,8 +217,8 @@ func TestUpdateBooking(t *testing.T) {
 		userID := uuid.New()
 		bookingID := uuid.New()
 		roomID := uuid.New()
-		startTime := time.Date(2026, time.May, 22, 16, 0, 0, 0, location)
-		endTime := time.Date(2026, time.May, 22, 17, 0, 0, 0, location)
+		startTime := time.Date(2026, time.June, 22, 16, 0, 0, 0, location)
+		endTime := time.Date(2026, time.June, 22, 17, 0, 0, 0, location)
 
 		config := &domain.Config{
 			StartTime:           	"08:00", // เวลาเปิด
