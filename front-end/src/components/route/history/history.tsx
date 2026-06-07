@@ -110,7 +110,7 @@ export default function History() {
   }, [fetchUserBookings]); // อย่าลืมใส่ dependency
 
   return (
-    <div className="bg-light-main-background dark:bg-main-background flex">
+    <div className="bg-light-main-background dark:bg-main-background flex w-full min-h-[calc(100vh-160px)]">
       <div className="flex-1 flex">
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
@@ -151,7 +151,7 @@ export default function History() {
                 ))
               ) : (
                 // ถ้าโหลดเสร็จแล้ว แต่ไม่มีข้อมูลการจองเลยในวันนั้น
-                <div className="flex flex-col items-center justify-center h-64">
+                <div className="flex flex-col items-center justify-center min-h-[380px] w-full text-light-secondary dark:text-gray-400">
                   <p className="text-lg font-medium">No Content</p>
                   <p className="text-sm whitespace-nowrap">You don&apos;t have any bookings for this day.</p>
                 </div>
